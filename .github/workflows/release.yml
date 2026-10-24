@@ -23,7 +23,7 @@ concurrency:
 jobs:
   prepare:
     if: github.repository == 'diegoag64/jev-devtools' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: read
@@ -60,7 +60,8 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run check:playground
-      - run: npx playwright install --with-deps chromium --only-shell
+      # Use the runner image's system libraries; keep Playwright's pinned browser.
+      - run: npx playwright install chromium --only-shell
       - run: npm run verify:drawer
       - run: git diff --check
       - name: Pack the release candidate once
