@@ -36,23 +36,6 @@ const credentialKeys = new Set([
   "privatekey",
   "secretkey",
 ]);
-const additionalKeys = new Set([
-  "email",
-  "emailaddress",
-  "phone",
-  "phonenumber",
-  "mobile",
-  "mobilenumber",
-  "address",
-  "postaladdress",
-  "streetaddress",
-  "mailingaddress",
-  "ssn",
-  "socialsecuritynumber",
-  "creditcard",
-  "creditcardnumber",
-  "cardnumber",
-]);
 const safeMessage = (value: string) =>
   value.replace(/Bearer\s+\S+/gi, "Bearer [redacted]").slice(0, 500);
 export type CaptureOptions = {
@@ -66,17 +49,12 @@ export function capture(
   value: unknown,
   warnings: Set<string>,
   redact?: CaptureOptions["redact"],
-  redactAdditionalSensitiveData = true,
 ): Json {
   const seen = new WeakSet<object>();
   let budget = 96_000;
   const visit = (input: unknown, path: string[], depth: number): Json => {
     const key = (path.at(-1) ?? "").replace(/[-_]/g, "").toLowerCase();
-    if (
-      credentialKeys.has(key) ||
-      (redactAdditionalSensitiveData && additionalKeys.has(key))
-    )
-      return "[redacted]";
+    if (credentialKeys.has(key)) return "[redacted]";
     if (redact) input = redact(path, input);
     budget -= 8 + (path.at(-1)?.length ?? 0);
     if (budget <= 0 || depth > 12) {
@@ -159,24 +137,16 @@ export class JevRecorder {
   private flowContext = new AsyncLocalStorage<{
     link: NonNullable<Trace["flow"]>;
     onTrace: (id: string) => void;
-    redactAdditionalSensitiveData: boolean;
   }>();
   withFlow<T>(
     link: NonNullable<Trace["flow"]>,
     onTrace: (id: string) => void,
     callback: () => T,
-    redactAdditionalSensitiveData = true,
   ): T {
-    return this.flowContext.run(
-      { link, onTrace, redactAdditionalSensitiveData },
-      callback,
-    );
+    return this.flowContext.run({ link, onTrace }, callback);
   }
   private limit: number;
-  constructor(
-    private options: CaptureOptions = {},
-    private additionalRedaction: (session: string) => boolean = () => true,
-  ) {
+  constructor(private options: CaptureOptions = {}) {
     this.limit = Math.max(1, Math.min(200, options.limit ?? 50));
   }
   snapshot(session: string) {
@@ -288,19 +258,12 @@ export class JevRecorder {
           const id = randomUUID(),
             started = performance.now(),
             warnings = new Set<string>();
-          const metadata = typeof meta === "function" ? meta() : meta;
-          // Pin a request (or its owning flow) before dispatch, including the
-          // eventual response. A UI toggle never rewrites in-flight captures.
-          const redactAdditional =
-            this.flowContext.getStore()?.redactAdditionalSensitiveData ??
-            this.additionalRedaction(metadata.session);
           let captured: Trace["request"];
           try {
             captured = capture(
               { ...request, model: request.model ?? client.defaultModel },
               warnings,
               this.options.redact,
-              redactAdditional,
             ) as Trace["request"];
           } catch {
             captured = {
@@ -313,7 +276,7 @@ export class JevRecorder {
           this.traces.set(id, {
             version: 1,
             id,
-            ...metadata,
+            ...(typeof meta === "function" ? meta() : meta),
             flow: this.flowContext.getStore()?.link,
             startedAt: Date.now(),
             status: "pending",
@@ -366,7 +329,6 @@ export class JevRecorder {
                     data,
                     warnings,
                     this.options.redact,
-                    redactAdditional,
                   ) as Trace["result"];
                 } catch {
                   // Capture failures are not SDK failures, and redactor errors

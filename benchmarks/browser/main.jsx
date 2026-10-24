@@ -1,4 +1,4 @@
-import React, { Profiler } from "react";
+import React, { Profiler, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { JevDevtools } from "jev-devtools";
 const root = createRoot(document.getElementById("root"));
@@ -145,12 +145,28 @@ function choiceReady(s, count) {
       ))
   );
 }
+// Exercise the public prop without unmounting or reconnecting the inspector.
+// The control belongs to this verification host, not the package drawer.
+function InspectorFixture(props) {
+  const [redact, setRedact] = useState(undefined);
+  useEffect(() => {
+    const control = $("display-redaction");
+    control.value = "default";
+    const change = () =>
+      setRedact(
+        control.value === "default" ? undefined : control.value === "on",
+      );
+    control.addEventListener("change", change);
+    return () => control.removeEventListener("change", change);
+  }, []);
+  return <JevDevtools {...props} redactAdditionalSensitiveData={redact} />;
+}
 async function load(id, closed = false) {
   current = id;
   const spec = cases.find((s) => s.id === id);
   const start = performance.now();
   const inspector = (
-    <JevDevtools
+    <InspectorFixture
       key={++generation}
       enabled
       endpoint={"/api/" + id}

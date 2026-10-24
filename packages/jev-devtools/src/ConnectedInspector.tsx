@@ -1,4 +1,5 @@
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createDisplayRedactor } from "./display-redaction.js";
 import { JevPanel } from "./JevDevtools.js";
 import { JevDrawer } from "./JevDrawer.js";
 import type { Trace } from "./protocol.js";
@@ -10,12 +11,7 @@ import {
   type FlowHistory,
 } from "./flow-stream.js";
 const RetainedPanel = memo(JevPanel);
-type Snapshot = {
-  traces: Trace[];
-  connection: string;
-  flows: FlowHistory;
-  redactAdditionalSensitiveData?: boolean;
-};
+type Snapshot = { traces: Trace[]; connection: string; flows: FlowHistory };
 function endpointUrl(endpoint: string) {
   const url = new URL(endpoint, window.location.origin);
   if (
@@ -33,6 +29,7 @@ function endpointUrl(endpoint: string) {
 export default function ConnectedInspector({
   endpoint = "/api/jev-devtools",
   defaultOpen = true,
+  redactAdditionalSensitiveData = true,
 }: Omit<JevDevtoolsProps, "enabled">) {
   const [open, setOpen] = useState(defaultOpen);
   const [visited, setVisited] = useState(defaultOpen);
@@ -43,6 +40,24 @@ export default function ConnectedInspector({
     flows: emptyFlows,
   });
   const [snapshot, setSnapshot] = useState(latest.current);
+  const [redactor] = useState(createDisplayRedactor);
+  const traces = useMemo(
+    () =>
+      redactAdditionalSensitiveData
+        ? snapshot.traces.map(redactor.trace)
+        : snapshot.traces,
+    [snapshot.traces, redactor, redactAdditionalSensitiveData],
+  );
+  const flows = useMemo(
+    () =>
+      redactAdditionalSensitiveData
+        ? {
+            runs: snapshot.flows.runs.map(redactor.run),
+            definitions: snapshot.flows.definitions.map(redactor.definition),
+          }
+        : snapshot.flows,
+    [snapshot.flows, redactor, redactAdditionalSensitiveData],
+  );
   const toggle = (value: boolean) => {
     visible.current = value;
     setOpen(value);
@@ -63,20 +78,13 @@ export default function ConnectedInspector({
       if (
         next.traces === latest.current.traces &&
         next.connection === latest.current.connection &&
-        next.flows === latest.current.flows &&
-        next.redactAdditionalSensitiveData ===
-          latest.current.redactAdditionalSensitiveData
+        next.flows === latest.current.flows
       )
         return;
       latest.current = next;
       if (visible.current) setSnapshot(latest.current);
     };
-    update({
-      traces: [],
-      connection: "connecting",
-      flows: emptyFlows,
-      redactAdditionalSensitiveData: undefined,
-    });
+    update({ traces: [], connection: "connecting", flows: emptyFlows });
     void (async () => {
       try {
         const url = endpointUrl(endpoint);
@@ -94,10 +102,6 @@ export default function ConnectedInspector({
         if (config.version !== 1 || !config.enabled)
           throw new Error("Unsupported inspector endpoint");
         if (!alive) return;
-        if (typeof config.redactAdditionalSensitiveData === "boolean")
-          update({
-            redactAdditionalSensitiveData: config.redactAdditionalSensitiveData,
-          });
         if (config.flows)
           disconnectFlows = connectFlowStream(url, (flows) =>
             update({ flows }),
@@ -106,8 +110,6 @@ export default function ConnectedInspector({
           url,
           (traces) => update({ traces }),
           (connection) => update({ connection }),
-          (redactAdditionalSensitiveData) =>
-            update({ redactAdditionalSensitiveData }),
         );
       } catch (error) {
         if (alive)
@@ -124,21 +126,6 @@ export default function ConnectedInspector({
       disconnectFlows();
     };
   }, [endpoint]);
-  const changeRedaction = useCallback(
-    async (value: boolean) => {
-      const response = await fetch(endpointUrl(endpoint) + "/settings", {
-        method: "PUT",
-        credentials: "same-origin",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ redactAdditionalSensitiveData: value }),
-      });
-      if (!response.ok)
-        throw new Error(`Cannot update redaction (${response.status})`);
-      // SSE is authoritative across viewers; a late HTTP response must not
-      // overwrite a more recent setting received on the ordered stream.
-    },
-    [endpoint],
-  );
   const clear = useCallback(async () => {
     const response = await fetch(endpointUrl(endpoint) + "/clear", {
       method: "DELETE",
@@ -151,9 +138,10 @@ export default function ConnectedInspector({
     <JevDrawer open={open} onOpenChange={toggle}>
       {visited && (
         <RetainedPanel
-          {...snapshot}
+          traces={traces}
+          flows={flows}
+          connection={snapshot.connection}
           onClear={clear}
-          onRedactionChange={changeRedaction}
         />
       )}
     </JevDrawer>

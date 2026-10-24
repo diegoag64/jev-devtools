@@ -3,6 +3,7 @@ import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { build } from "vite";
+import { defineJevFlow } from "jev-devtools/flow";
 import { scenarios, recordedFixture, fixture, invoke } from "./fixtures.mjs";
 const root = dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.BENCH_PORT || 4190);
@@ -20,6 +21,10 @@ const adapters = new Map();
 const counters = { sent: 0, bytes: 0 };
 const active = new Map();
 const datasets = new Map();
+const redactionFlow = defineJevFlow("display-redaction", (flow) => {
+  const copy = flow.task("email", { input: flow.input, run: (value) => value });
+  return flow.output("done", copy);
+});
 for (const spec of scenarios) {
   const { snapshot } = await recordedFixture(spec);
   const payload = JSON.stringify(snapshot);
@@ -129,7 +134,7 @@ const server = createServer(async (req, res) => {
       return res.end(JSON.stringify(counters));
     }
     const match = url.pathname.match(
-      /^\/api\/([a-z-]+)(\/events|\/clear|\/settings)?$/,
+      /^\/api\/([a-z-]+)(\/events|\/clear|\/flows\/events)?$/,
     );
     if (match && datasets.has(match[1])) {
       const dataset = datasets.get(match[1]);
@@ -187,17 +192,16 @@ const server = createServer(async (req, res) => {
         res.writeHead(403);
         return res.end();
       }
-      // Independent synthetic capture for the settings browser regression;
+      // Independent synthetic capture for the display-prop browser regression;
       // benchmark workloads and production APIs do not need a test-only hook.
-      const { client, request, requestId } = adapters.get("small");
-      await invoke(client, {
-        ...request,
-        state: {
-          email: "browser-personal@example.test",
-          client_secret: "browser-credential-sentinel",
-          customerId: "browser-public-customer",
-        },
-      });
+      const { adapter, client, request, requestId } = adapters.get("small");
+      const state = {
+        email: "browser-personal@example.test",
+        client_secret: "browser-credential-sentinel",
+        customerId: "browser-public-customer",
+      };
+      await invoke(client, { ...request, state });
+      await redactionFlow.run(state, { client, devtools: adapter });
       res.setHeader("content-type", "application/json");
       return res.end(JSON.stringify({ requestId: requestId() }));
     }

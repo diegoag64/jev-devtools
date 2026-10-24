@@ -144,9 +144,10 @@ export const RequestDetail = memo(function RequestDetail({
               {tab === "Context" && (
                 <>
                   <p className="muted">
-                    Captured before dispatch using the redaction settings at
-                    request start. Known credential fields are always redacted;
-                    captures are size limited.
+                    Captured before dispatch without changing SDK data. Known
+                    credential fields remain redacted; additional display
+                    masking follows the component prop. Captures are size
+                    limited.
                   </p>
                   {findImage(trace.request.state) && (
                     <img
@@ -213,15 +214,11 @@ export function JevPanel({
   flows = emptyFlows,
   connection,
   onClear,
-  redactAdditionalSensitiveData,
-  onRedactionChange,
 }: {
   traces: Trace[];
   flows?: FlowHistory;
   connection: string;
   onClear: () => Promise<unknown>;
-  redactAdditionalSensitiveData?: boolean;
-  onRedactionChange?: (value: boolean) => Promise<void>;
 }) {
   const [view, setView] = useState("requests");
   const [selectedRun, setSelectedRun] = useState<string>();
@@ -231,8 +228,6 @@ export function JevPanel({
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [error, setError] = useState("");
-  const [savingRedaction, setSavingRedaction] = useState(false);
-  const [redactionError, setRedactionError] = useState("");
   const filtered = useMemo(() => {
     const query = search.toLowerCase();
     return traces.filter(
@@ -259,38 +254,6 @@ export function JevPanel({
             Clear
           </button>
         </header>
-        {redactAdditionalSensitiveData !== undefined && onRedactionChange && (
-          <div className="capture-settings">
-            <label>
-              <input
-                type="checkbox"
-                checked={redactAdditionalSensitiveData}
-                disabled={savingRedaction || connection !== "connected"}
-                aria-describedby="jev-redaction-help"
-                onChange={(event) => {
-                  setSavingRedaction(true);
-                  setRedactionError("");
-                  void onRedactionChange(event.target.checked)
-                    .catch((e) =>
-                      setRedactionError(
-                        e instanceof Error
-                          ? e.message
-                          : "Cannot update redaction",
-                      ),
-                    )
-                    .finally(() => setSavingRedaction(false));
-                }}
-              />
-              Redact additional sensitive data
-            </label>
-            <p id="jev-redaction-help">
-              New requests and flow runs in this session. Credentials always
-              redacted.
-            </p>
-            {savingRedaction && <span role="status">Saving…</span>}
-            {redactionError && <p role="alert">{redactionError}</p>}
-          </div>
-        )}
         {(flows.runs.length > 0 || view === "flows") && (
           <nav className="detail-tabs" aria-label="History type">
             <button

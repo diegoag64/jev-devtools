@@ -2,32 +2,42 @@ import assert from "node:assert/strict";
 import { expect } from "playwright/test";
 import { mkdir } from "node:fs/promises";
 
-// Real server, SDK fixture, SSE and public drawer. Covers UI synchronization,
-// keyboard operation and rejected writes, not the server's alias inventory.
+// The host updates the public component prop without remounting. Verify that
+// every view uses the projection, while original captures and other viewers do not.
 export async function checkRedaction({ page, browser, url, load }) {
   await load("small");
-  const checkbox = page.getByRole("checkbox", {
-    name: "Redact additional sensitive data",
-  });
-  await expect(checkbox).toBeChecked();
-  await expect(checkbox).toBeEnabled();
-  const capture = async (visible) => {
-    const { requestId } = await page.evaluate(async () =>
-      (await fetch("/bench/redaction", { method: "POST" })).json(),
-    );
-    await expect(page.locator(".detail-meta code").last()).toHaveText(
-      requestId,
-    );
-    await page.getByRole("button", { name: "Context", exact: true }).click();
-    const data = page.locator(".detail-body");
-    await expect(data).toContainText("browser-public-customer");
-    await expect(data).not.toContainText("browser-credential-sentinel");
-    if (visible)
-      await expect(data).toContainText("browser-personal@example.test");
-    else await expect(data).not.toContainText("browser-personal@example.test");
-    return requestId;
+  const requests = [];
+  const observe = (request) => {
+    if (request.url().includes("/api/small")) requests.push(request.url());
   };
-  const protectedId = await capture(false);
+  page.on("request", observe);
+  const { requestId } = await page.evaluate(async () =>
+    (await fetch("/bench/redaction", { method: "POST" })).json(),
+  );
+  await expect(page.locator(".detail-meta code").last()).toHaveText(requestId);
+  const body = page.locator(".detail-body");
+  const personal = "browser-personal@example.test";
+  const credential = "browser-credential-sentinel";
+  const view = (name) =>
+    page.getByRole("button", { name, exact: true }).click();
+  const prop = (value) => page.selectOption("#display-redaction", value);
+  await view("Context");
+  await expect(body).toContainText("browser-public-customer");
+  await expect(body).not.toContainText(personal);
+  await expect(body).not.toContainText(credential);
+  await view("Raw");
+  await expect(body).not.toContainText(personal);
+  const beforePropChanges = requests.length;
+  await prop("off");
+  await expect(body).toContainText(personal);
+  await expect(body).not.toContainText(credential);
+  await expect(page.locator(".detail-meta code").last()).toHaveText(requestId);
+  await prop("on");
+  await expect(body).not.toContainText(personal);
+  await prop("off");
+  await view("Context");
+  await expect(body).toContainText(personal);
+
   const other = await browser.newPage({
     viewport: { width: 1440, height: 1000 },
   });
@@ -38,82 +48,75 @@ export async function checkRedaction({ page, browser, url, load }) {
     );
     await other.selectOption("#scenario", "small");
     await other.click("#load");
-    const otherCheckbox = other.getByRole("checkbox", {
-      name: "Redact additional sensitive data",
-    });
-    await expect(otherCheckbox).toBeChecked();
-    await expect(otherCheckbox).toBeEnabled();
-    await checkbox.focus();
-    await checkbox.press("Space");
-    await expect(checkbox).not.toBeChecked();
-    await expect(otherCheckbox).not.toBeChecked();
-    // A settings-only event must not discard the current trace or reveal history.
-    await expect(page.locator(".detail-meta code").last()).toHaveText(
-      protectedId,
-    );
-    await expect(page.locator(".detail-body")).not.toContainText(
-      "browser-personal@example.test",
-    );
-    await capture(true);
-    await other
-      .getByRole("button", { name: "Close Jev DevTools", exact: true })
-      .click();
-    await checkbox.click();
-    await expect(checkbox).toBeChecked();
-    await other
-      .getByRole("button", { name: "Open Jev DevTools", exact: true })
-      .click();
-    await expect(otherCheckbox).toBeChecked();
-    await capture(false);
-    await other.reload();
-    await other.waitForFunction(() =>
-      document.getElementById("status").textContent.startsWith("Ready"),
-    );
-    await other.selectOption("#scenario", "small");
-    await other.click("#load");
-    await expect(otherCheckbox).toBeChecked();
-    await expect(otherCheckbox).toBeEnabled();
+    await other.getByRole("button", { name: "Context", exact: true }).click();
+    await expect(other.locator(".detail-body")).not.toContainText(personal);
+    await expect(body).toContainText(personal);
+    await view("Close Jev DevTools");
+    await prop("default");
+    await view("Open Jev DevTools");
+    await expect(body).not.toContainText(personal);
+    await prop("off");
+    await expect(body).toContainText(personal);
+    await prop("on");
+    await expect(body).not.toContainText(personal);
 
-    await page.route("**/api/small/settings", (route) =>
-      route.fulfill({ status: 403, body: '{"error":"Unauthorized"}' }),
+    await view("Flows");
+    await view("Show details");
+    await page.getByText("Captured outcome value", { exact: true }).click();
+    const flow = page.locator(".flow-overview-stack");
+    await expect(flow).toContainText("browser-public-customer");
+    await expect(flow).not.toContainText(personal);
+    await prop("off");
+    await expect(flow).toContainText(personal);
+    await expect(flow).not.toContainText(credential);
+    await prop("on");
+    await expect(flow).not.toContainText(personal);
+    assert.equal(
+      requests.length,
+      beforePropChanges,
+      "prop changes must not write server settings or reconnect streams",
     );
-    await checkbox.click();
-    await expect(page.getByRole("alert")).toHaveText(
-      "Cannot update redaction (403)",
-    );
-    await expect(checkbox).toBeChecked();
-    await page.unroute("**/api/small/settings");
-    await checkbox.click();
-    await expect(checkbox).not.toBeChecked();
-    await expect(page.getByRole("alert")).toHaveCount(0);
-    await capture(true);
-    await checkbox.click();
-    await expect(checkbox).toBeChecked();
-    await capture(false);
-    await mkdir("benchmarks/results/redaction", { recursive: true });
-    await page.screenshot({ path: "benchmarks/results/redaction/desktop.png" });
-    await page.setViewportSize({ width: 390, height: 844 });
-    await expect(checkbox).toBeVisible();
-    await checkbox.focus();
-    await checkbox.press("Space");
-    await expect(checkbox).not.toBeChecked();
-    await expect(otherCheckbox).not.toBeChecked();
-    const box = await checkbox.boundingBox();
-    assert.ok(box && box.x >= 0 && box.x + box.width <= 390);
-    await page.screenshot({ path: "benchmarks/results/redaction/mobile.png" });
-    await page
-      .getByRole("button", { name: "Expand Jev drawer", exact: true })
-      .click();
-    await expect(page.locator(".detail-body")).toBeVisible();
-    await page.screenshot({
-      path: "benchmarks/results/redaction/mobile-expanded.png",
+    await expect(
+      page.getByRole("checkbox", { name: "Redact additional sensitive data" }),
+    ).toHaveCount(0);
+
+    // Inspect the same server capture independently: personal data is available
+    // on the wire regardless of display mode; credentials are never sent.
+    const wire = await page.evaluate(async () => {
+      const response = await fetch("/api/small/events");
+      const reader = response.body.getReader();
+      const first = await reader.read();
+      await reader.cancel();
+      return new TextDecoder().decode(first.value);
     });
-    await checkbox.click();
-    await expect(checkbox).toBeChecked();
+    assert.ok(wire.includes(personal));
+    assert.ok(!wire.includes(credential));
+    await mkdir("benchmarks/results/redaction", { recursive: true });
+    await page.screenshot({
+      path: "benchmarks/results/redaction/prop-flow-on.png",
+    });
+    await view("Requests");
+    await view("Raw");
+    await page.screenshot({
+      path: "benchmarks/results/redaction/prop-default.png",
+    });
+    await prop("off");
+    await expect(body).toContainText(personal);
+    await page.screenshot({
+      path: "benchmarks/results/redaction/prop-off.png",
+    });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await view("Expand Jev drawer");
+    await prop("on");
+    await expect(body).not.toContainText(personal);
+    await page.screenshot({
+      path: "benchmarks/results/redaction/prop-mobile.png",
+    });
     console.log(
-      "Redaction verified: default-on, new captures, permanent credential masking, shared viewers, hidden/reopened and reloaded drawer, keyboard, rejected writes, desktop and mobile.",
+      "Display redaction verified: default-on prop, existing Raw/Context/flow views update immediately, independent viewers, hidden/reopened drawer, no settings writes or reconnects, immutable wire captures and permanent credential protection.",
     );
   } finally {
+    page.off("request", observe);
     await other.close();
     await page.setViewportSize({ width: 1710, height: 961 });
   }

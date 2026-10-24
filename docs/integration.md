@@ -107,7 +107,7 @@ export const GET = (request: Request) => inspector.handleNodeRoute(request);
 export const DELETE = (request: Request) => inspector.handleNodeRoute(request);
 ```
 
-The adapter serves configuration at the base path, snapshots at `/events` via SSE, `DELETE /clear`, and `PUT /settings` for additional-data redaction. Custom route integrations must forward PUT and its JSON body; the Node middleware already does so. The React component manages subscriptions, reconnection, and cleanup. If your frontend and backend use different ports, proxy this path and the application's inference endpoint through the frontend origin. The browser does not support a cross-origin inspector endpoint. Middleware must receive the original path and matching Host; configure proxies accordingly.
+The adapter serves configuration at the base path, snapshots at `/events` via SSE, and `DELETE /clear`. Display redaction is a local component prop; it needs no settings route or write request. The React component manages subscriptions, reconnection, and cleanup. If your frontend and backend use different ports, proxy this path and the application's inference endpoint through the frontend origin. The browser does not support a cross-origin inspector endpoint. Middleware must receive the original path and matching Host; configure proxies accordingly.
 
 Both API routes and inspector endpoints must share the **same in-memory adapter instance/process**. This prototype doesn't aggregate traces across workers, serverless instances, or edge runtimes. Independently tested integrations are React + Vite and the Next.js App Router example (Route Handlers, Server Actions, and Server Components). See [Next.js setup and limitations](nextjs.md).
 
@@ -121,20 +121,31 @@ Host and Origin checks reject cross-origin browser requests. Other HTTP clients 
 
 ### Redaction policy
 
-Known credential fields are **always redacted** before storing or streaming captures. The drawer's **Redact additional sensitive data** checkbox is on by default. It controls the additional personal-data fields below across new request/response and runtime flow captures in the current server-derived session.
+Known credential fields are **always redacted from the inspection copy** before storing or streaming captures. SDK requests/responses and application runtime values are unchanged. Additional personal-data masking is a display-only component prop, on by default:
+
+```tsx
+// Default: mask supported personal fields in every DevTools view.
+<JevDevtools enabled={import.meta.env.DEV} />
+
+// Inspect those fields while credentials remain permanently redacted.
+<JevDevtools
+  enabled={import.meta.env.DEV}
+  redactAdditionalSensitiveData={false}
+/>
+```
+
+The prop applies to Context, Raw, Questions, request diagrams and flow data, including nested task/collection/loop captures and outcomes. Changing it immediately updates already-retained data as well as future updates without changing capture history, restarting a run, or reconnecting. Each mounted viewer controls its own display; other viewers and server-derived session isolation are unaffected. There is no drawer checkbox, settings endpoint, or extra Next.js route export.
+
+**Display masking is not removal from captured data.** Supported personal fields remain in server capture memory, SSE payloads and browser memory even while visually masked. Use the server-side `redact(path, value)` callback when a value must never reach the browser. Credentials and values removed by that callback cannot be revealed by setting this prop to `false`; older or truncated captures cannot recover absent data either.
 
 Matching uses the complete field name, ignores case, and removes hyphens and underscores. For example, `X-API-Key`, `x_api_key`, and `xApiKey` all match `xapikey`. A matching object's entire value is replaced with `[redacted]`, recursively through arrays and objects.
 
 | Policy | Normalized field names |
 | --- | --- |
 | Always protected credentials | `authorization`, `proxyauthorization`, `cookie`, `cookies`, `setcookie`, `apikey`, `xapikey`, `password`, `passwd`, `passphrase`, `secret`, `clientsecret`, `token`, `accesstoken`, `refreshtoken`, `sessiontoken`, `authtoken`, `xauthtoken`, `xaccesstoken`, `idtoken`, `bearertoken`, `privatekey`, `secretkey` |
-| Additional sensitive data, default on | `email`, `emailaddress`, `phone`, `phonenumber`, `mobile`, `mobilenumber`, `address`, `postaladdress`, `streetaddress`, `mailingaddress`, `ssn`, `socialsecuritynumber`, `creditcard`, `creditcardnumber`, `cardnumber` |
+| Display-only sensitive data, default on | `email`, `emailaddress`, `phone`, `phonenumber`, `mobile`, `mobilenumber`, `address`, `postaladdress`, `streetaddress`, `mailingaddress`, `ssn`, `socialsecuritynumber`, `creditcard`, `creditcardnumber`, `cardnumber` |
 
-Names such as `tokenCount`, `sessionId`, `apiKeyName`, and `secretary` remain inspectable. This explicit field-name policy does not detect arbitrary secrets in prose, URLs, image pixels, JSON encoded inside strings, unusual names, or structural labels. Actual HTTP request headers/options are never captured; header-like fields supplied inside captured bodies still follow the mandatory credential policy. Add application-specific `redact(path, value)` rules for other sensitive data. This callback remains active with the checkbox off, and cannot restore fields removed by the built-in policy. It applies to requests, responses, task data, flow outcomes, and condition literals; static definition metadata must remain public-safe.
-
-Each request pins the setting before dispatch, including its eventual response. Each flow run pins it at start for task/collection/loop data, outcomes, and linked Jev calls. Changing the checkbox never rewrites historical or in-flight captures: turning it off cannot recover already-redacted values, and turning it on does not erase values previously captured while off. Clear history if you want those removed. Runtime requests, results, and task execution are unchanged. Definition rule literals remain under the default policy and the custom callback; they are shared structural captures rather than runtime personal-data objects.
-
-All open viewers of a session synchronize through the existing trace stream, including after reconnect. With no `getSession`, local tabs share the setting. Other sessions remain independent. The authenticated, same-origin `PUT <endpoint>/settings` endpoint accepts `{ "redactAdditionalSensitiveData": false }` (or `true`); it requires an exact Origin header, as clear does. The setting lives in adapter memory, survives clear and browser reload, and resets on adapter disposal or server restart. Up to 200 sessions can disable additional redaction at once; further opt-outs return 409 until a session re-enables it. Use matching server/drawer versions for the checkbox; an older server has no control and an older drawer simply uses the server's default policy.
+Names such as `tokenCount`, `sessionId`, `apiKeyName`, and `secretary` remain inspectable. This explicit field-name policy does not detect arbitrary secrets in prose, URLs, image pixels, JSON encoded inside strings, unusual names, or structural labels. Actual HTTP request headers/options are never captured; header-like fields supplied inside captured bodies still follow the mandatory credential policy. Add application-specific `redact(path, value)` rules for other sensitive data. This callback remains active regardless of the component prop, and cannot restore fields removed by the built-in policy. It applies to requests, responses, task data, flow outcomes, and condition literals; static definition metadata must remain public-safe.
 
 Captures have depth, collection, image, and text budgets; omitted/truncated data is marked. Small PNG/JPEG byte arrays have inline previews; unsupported or large images retain references and sizes.
 

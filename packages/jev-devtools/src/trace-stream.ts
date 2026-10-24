@@ -5,7 +5,6 @@ export function connectTraceStream(
   url: string,
   onTraces: (traces: Trace[]) => void,
   onConnection: (status: string) => void,
-  onSettings?: (redactAdditionalSensitiveData: boolean) => void,
 ) {
   let alive = true,
     events: EventSource | undefined,
@@ -43,10 +42,10 @@ export function connectTraceStream(
     const receive = (kind: "snapshot" | "delta", event: Event) => {
       if (!alive || events !== source) return;
       try {
-        const data = JSON.parse((event as MessageEvent).data);
-        const next = store.apply(kind, data);
-        if (typeof data.redactAdditionalSensitiveData === "boolean")
-          onSettings?.(data.redactAdditionalSensitiveData);
+        const next = store.apply(
+          kind,
+          JSON.parse((event as MessageEvent).data),
+        );
         schedule(next);
         onConnection("connected");
       } catch {
@@ -59,16 +58,6 @@ export function connectTraceStream(
     };
     source.addEventListener("snapshot", (event) => receive("snapshot", event));
     source.addEventListener("delta", (event) => receive("delta", event));
-    source.addEventListener("settings", (event) => {
-      if (!alive || events !== source) return;
-      try {
-        const data = JSON.parse((event as MessageEvent).data);
-        if (typeof data.redactAdditionalSensitiveData === "boolean")
-          onSettings?.(data.redactAdditionalSensitiveData);
-      } catch {
-        /* A reconnect snapshot restores settings after a malformed event. */
-      }
-    });
     source.onerror = () => {
       if (alive && events === source) onConnection("reconnecting");
     };
