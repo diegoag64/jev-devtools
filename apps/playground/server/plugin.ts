@@ -1,3 +1,13 @@
+import {
+  hierarchyFlow,
+  hierarchyLimitFlow,
+} from "../../../cookbooks/hierarchical-classification/flow.js";
+import { hierarchySampleTransport } from "../../../cookbooks/hierarchical-classification/samples.js";
+import {
+  hierarchyCases,
+  isHierarchyCase,
+  type HierarchyCase,
+} from "../../../cookbooks/hierarchical-classification/cases.js";
 import { sdeFlow } from "../../../cookbooks/sde-cascade/flow.js";
 import { sdeSampleTransport } from "../../../cookbooks/sde-cascade/samples.js";
 import {
@@ -112,6 +122,7 @@ export function jevInspectorServer(
             cookbookCase?: string;
             ragCase?: string;
             sdeCase?: string;
+            hierarchyCase?: string;
           };
           try {
             let text = "";
@@ -151,6 +162,7 @@ export function jevInspectorServer(
               "flow-skills",
               "flow-rag",
               "flow-sde",
+              "flow-hierarchy",
               "flow-manual",
               "flow-other",
               "flow-parallel",
@@ -162,6 +174,9 @@ export function jevInspectorServer(
             typeof body.message !== "string" ||
             body.message.length > 8000 ||
             (body.scenario === "stress" && !validStress(body.stress)) ||
+            (body.scenario === "flow-hierarchy" &&
+              (!isHierarchyCase(body.hierarchyCase) ||
+                body.message !== hierarchyCases[body.hierarchyCase].message)) ||
             (body.scenario === "flow-sde" &&
               (!isSdeCase(body.sdeCase) ||
                 body.message !== sdeCases[body.sdeCase].message)) ||
@@ -222,35 +237,45 @@ export function jevInspectorServer(
                 {
                   apiKey: body.mode === "live" ? apiKey : "sample-only",
                   fetch:
-                    body.scenario === "flow-sde"
-                      ? sdeSampleTransport(body.sdeCase as SdeCase)
-                      : body.scenario === "flow-rag"
-                        ? ragSampleTransport(body.ragCase as RagCase)
-                        : body.scenario === "flow-skills"
-                          ? body.mode === "live"
-                            ? globalThis.fetch
-                            : skillSampleTransport(
-                                body.cookbookCase as keyof typeof skillCases,
-                              )
-                          : flowTransport(body.scenario!),
+                    body.scenario === "flow-hierarchy"
+                      ? hierarchySampleTransport(
+                          body.hierarchyCase as HierarchyCase,
+                        )
+                      : body.scenario === "flow-sde"
+                        ? sdeSampleTransport(body.sdeCase as SdeCase)
+                        : body.scenario === "flow-rag"
+                          ? ragSampleTransport(body.ragCase as RagCase)
+                          : body.scenario === "flow-skills"
+                            ? body.mode === "live"
+                              ? globalThis.fetch
+                              : skillSampleTransport(
+                                  body.cookbookCase as keyof typeof skillCases,
+                                )
+                            : flowTransport(body.scenario!),
                   logLevel: "off",
                   retry: { maxRetries: 0 },
                   timeout: 120_000,
                 },
                 {
                   label:
-                    body.scenario === "flow-sde"
-                      ? sdeFlow.definition.name
-                      : flow.definition.name,
+                    body.scenario === "flow-hierarchy"
+                      ? hierarchyFlow.definition.name
+                      : body.scenario === "flow-sde"
+                        ? sdeFlow.definition.name
+                        : flow.definition.name,
                   source: body.mode === "live" ? "live" : "sample",
                 },
               );
               const result =
-                body.scenario === "flow-sde"
-                  ? await sdeFlow.run(
+                body.scenario === "flow-hierarchy"
+                  ? await (
+                      body.hierarchyCase === "limit"
+                        ? hierarchyLimitFlow
+                        : hierarchyFlow
+                    ).run(
                       {
                         message: body.message,
-                        caseId: body.sdeCase as SdeCase,
+                        caseId: body.hierarchyCase as HierarchyCase,
                       },
                       {
                         client,
@@ -258,17 +283,29 @@ export function jevInspectorServer(
                         signal: controller.signal,
                       },
                     )
-                  : await flow.run(
-                      {
-                        message: body.message,
-                        caseId: body.ragCase as RagCase,
-                      },
-                      {
-                        client,
-                        devtools: inspector,
-                        signal: controller.signal,
-                      },
-                    );
+                  : body.scenario === "flow-sde"
+                    ? await sdeFlow.run(
+                        {
+                          message: body.message,
+                          caseId: body.sdeCase as SdeCase,
+                        },
+                        {
+                          client,
+                          devtools: inspector,
+                          signal: controller.signal,
+                        },
+                      )
+                    : await flow.run(
+                        {
+                          message: body.message,
+                          caseId: body.ragCase as RagCase,
+                        },
+                        {
+                          client,
+                          devtools: inspector,
+                          signal: controller.signal,
+                        },
+                      );
               send(res, 200, { ok: true, flow: result });
               return;
             }

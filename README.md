@@ -87,6 +87,8 @@ Try the [RAG passage cookbook](cookbooks/rag-passages/README.md) at `http://127.
 
 Try the [SDE cascade cookbook](cookbooks/sde-cascade/README.md) at `http://127.0.0.1:4182/?cookbook=sde-cascade` to inspect field verification, conditional escalation, a merge and the final record. Four no-key samples exercise both paths and the strict 70% threshold. This uses unreleased `flow.if()` from the local checkout.
 
+Try [hierarchical classification](cookbooks/hierarchical-classification/README.md) at `http://127.0.0.1:4182/?cookbook=hierarchical-classification` for beam versus greedy search with inspectable iterations, frontier requests, retained/pruned paths, and four sample cases. It uses the local, unreleased `flow.loop()` API.
+
 For optional live mode, copy `apps/playground/.env.example` to `apps/playground/.env.local`, set `TYPESAFE_API_KEY`, and restart. Keys stay on the server. Verification uses sample responses; live inference has not been verified.
 
 ## Set up with your coding agent

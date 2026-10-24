@@ -1,0 +1,7 @@
+{
+  "source": "https://docs.typesafe.ai/cookbooks/hierarchical_classification.md",
+  "reviewedOn": "2026-10-24",
+  "sourceSha256": "4ccaed424d833af2d923184b509181bc808f43400b5bc474658cd4bc6a062b17",
+  "transformation": "Port the executable beam/greedy algorithm, question text and c-index label mapping. Use an authored small taxonomy and synthetic distributions. Preserve separate concurrent requests per nontrivial frontier node, single-child bypass, geometric-mean decision-edge scoring, epsilon 1e-9, stable top-k pruning and completed-leaf retention. Run the two comparison searches concurrently. Reject incomplete depth-limited runs rather than returning partial classifications.",
+  "license": "MIT; LICENSE.typesafe retained"
+}
