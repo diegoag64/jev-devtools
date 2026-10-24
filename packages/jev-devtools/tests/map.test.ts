@@ -203,6 +203,61 @@ test("map failure or cancellation stops queued work, settles uncooperative callb
   }
 });
 
+test("a failed map inside a parallel lane preserves the original failure when siblings are cancelled", async () => {
+  const siblingStarted = deferred();
+  const failure = new TypeError("item failed");
+  const visited: number[] = [];
+  let continued = false;
+  const flow = defineJevFlow("parallel-map-failure", (f) => {
+    f.parallel("lanes", {
+      mapped: (lane) =>
+        lane.map(
+          "batch",
+          { items: [0, 1], input: null, maxItems: 2, concurrency: 1 },
+          (item) =>
+            item.task("fail", {
+              input: item.input.get("item"),
+              run: async (index) => {
+                visited.push(index);
+                await siblingStarted.promise;
+                throw failure;
+              },
+            }),
+        ),
+      waiting: (lane) =>
+        lane.task("wait", {
+          input: null,
+          run: () => {
+            siblingStarted.resolve();
+            return new Promise<null>(() => {});
+          },
+        }),
+    });
+    f.task("after", {
+      input: null,
+      run: () => {
+        continued = true;
+        return null;
+      },
+    });
+    return f.output("done");
+  });
+  const history = recording();
+  await assert.rejects(
+    flow.run(null, { client, devtools: history.observer }),
+    (error) => error === failure,
+  );
+  assert.deepEqual(visited, [0]);
+  assert.equal(continued, false);
+  const run = history.latest();
+  assert.equal(run.status, "error");
+  assert.equal(run.error, "TypeError");
+  assert.equal(run.steps.lanes.status, "error");
+  assert.equal(run.steps.batch.status, "error");
+  assert.equal(run.steps.wait.status, "cancelled");
+  assert.equal(run.steps.after.status, "blocked");
+});
+
 test("map validates its bounds and scopes before execution and enforces the expanded-step budget", async () => {
   for (const config of [
     { maxItems: 0 },

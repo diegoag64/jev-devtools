@@ -990,6 +990,13 @@ export function defineJevFlow<T>(
       options: FlowRunOptions,
     ): Promise<{ runId: string; outcome: string; value?: unknown }> {
       const controller = new AbortController();
+      // Preserve the initiating failure before aborting siblings: their cancellation
+      // can reach a surrounding parallel join before the failing map settles.
+      let siblingFailure: { error: unknown } | undefined;
+      const stopSiblings = (error: unknown) => {
+        if (!controller.signal.aborted) siblingFailure = { error };
+        controller.abort(error);
+      };
       const cancel = () => controller.abort(options.signal?.reason);
       if (options.signal?.aborted) cancel();
       else options.signal?.addEventListener("abort", cancel, { once: true });
@@ -1335,7 +1342,7 @@ export function defineJevFlow<T>(
                       failed = true;
                       firstError = error;
                     }
-                    controller.abort(error);
+                    stopSiblings(error);
                   }
                 }
               };
@@ -1391,10 +1398,10 @@ export function defineJevFlow<T>(
                     return await execute(lane);
                   } catch (e) {
                     if (!failed) {
-                      firstError = e;
+                      firstError = siblingFailure ? siblingFailure.error : e;
                       failed = true;
                     }
-                    controller.abort(e);
+                    stopSiblings(e);
                     throw e;
                   }
                 }),

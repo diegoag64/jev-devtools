@@ -20,6 +20,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 Flow API extensions and cookbook demos proposed in [#30](https://github.com/diegoag64/jev-devtools/pull/30); not published to npm.
 
+- Preserve the original failure when a map fails inside parallel work; cancelling sibling lanes no longer misreports the run as cancelled.
+
 - Keep all six cookbook sample transports compatible with Node 22.12, including the SDK’s uncompressed request fallback when Zstandard is unavailable.
 
 - Require conventional PR titles (`feat: …`, `fix: …`, etc.), with contributor/agent instructions and a lightweight metadata check that reruns on title edits.
