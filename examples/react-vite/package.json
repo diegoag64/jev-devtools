@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@typesafe-ai/sdk": "0.7.0",
-    "jev-devtools": "file:../../jev-devtools-0.4.0.tgz",
+    "jev-devtools": "file:../../jev-devtools-0.4.1.tgz",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },

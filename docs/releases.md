@@ -71,6 +71,14 @@ Read the run summary, npm metadata, and remote tag before taking action. After a
 
 The independent consumer checks accept `JEV_VERIFY_TARBALL=/absolute/path/to/archive.tgz` to check an inspected archive, or `JEV_VERIFY_VERSION=X.Y.Z` to check a fresh registry installation. Do not set both. Use the verification scripts from the release commit so later regression tests do not incorrectly reject an older release. With neither variable, the existing local pack-and-check behavior is unchanged.
 
+## Release 0.4.1 — pending publication
+
+This patch release candidate includes all changes merged after 0.4.0: drawer CSS isolation and cleanup, corrected published `FlowExpression` types, and the contributor/release workflow updates. See the [0.4.1 changelog](../CHANGELOG.md#041--pending-publication-experimental) for the complete changes and compatibility notes.
+
+Preparation sets the workspace, package, playground dependency, independent archive examples, README versions, and bundled flow recipe to 0.4.1. npm publication, `v0.4.1`, and the GitHub release remain pending. The exact release commit will be the reviewed merge commit after CI passes; local candidate archives are preparation evidence, not published artifacts.
+
+After approval and merge, follow the remote release workflow above: rehearse the merged commit, inspect the publishing run's candidate, and approve the `npm-release` deployment manually. Record the verified npm timestamp, archive checksum/integrity, exact tag commit, registry consumer results, and GitHub Latest status in a follow-up documentation PR. Until publication is verified, installation commands resolve the existing published 0.4.0 release.
+
 ## Release 0.4.0 — published October 24, 2026
 
 Version 0.4.0 includes server function tasks, runtime request factories, bounded collections, returning conditionals, strict numeric `.gt()` comparisons, and stateful loops, with inline inspection of function results, collection items, and loop iterations. Six cookbook applications demonstrate these APIs from the repository; cookbook code and fixtures are not included in npm. The bundled setup skill and flow recipe cover the complete 0.4.0 API. See the [0.4.0 changelog](../CHANGELOG.md#040--october-24-2026-experimental).
@@ -140,8 +148,8 @@ npm run verify:drawer
 git diff --check
 npm pack --dry-run --json -w jev-devtools
 npm run pack:devtools
-tar -tzf jev-devtools-0.4.0.tgz
-shasum -a 256 jev-devtools-0.4.0.tgz
+tar -tzf jev-devtools-0.4.1.tgz
+shasum -a 256 jev-devtools-0.4.1.tgz
 ```
 
 The archive must contain only `package.json`, the package README, MIT license, third-party notices, the setup skill and its four Markdown references under `skills/setup-jev-devtools`, and compiled JavaScript, declaration files, and scoped CSS under `lib/src`, `lib/server`, and `lib/flow`. It must not contain playground code, tests, fixtures, source TypeScript, demo media, environment files, or credentials. `verify:package` checks the actual pack file list before installing into an independent React app. `verify:nextjs` checks a separate packed installation with real development and production Next.js servers. Both use sample responses; neither makes live inference calls.
@@ -149,7 +157,7 @@ The archive must contain only `package.json`, the package README, MIT license, t
 Inspect the packed manifest too:
 
 ```sh
-tar -xOf jev-devtools-0.4.0.tgz package/package.json
+tar -xOf jev-devtools-0.4.1.tgz package/package.json
 ```
 
 Confirm the name/version, public access, Node engine, React peers, public exports (including the `/flow` entry point), and absence of `private: true`. Save the release commit SHA and archive checksum with the release evidence. Keep the archive unchanged between final inspection and publication. Do not publish from a dirty checkout or use a wildcard that could select an old archive.

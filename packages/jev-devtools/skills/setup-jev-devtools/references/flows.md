@@ -1,6 +1,6 @@
 # Build and inspect a Jev flow
 
-For `jev-devtools` **0.4.0**. Read the installed package version and `lib/flow/index.d.ts` first; online `main` may describe newer APIs. Use this recipe when the user asks to connect multiple Jev requests, inspect branches, run server function steps, or visualize parallel checks, collections, and loops. Adding the inspector alone does not require converting existing calls to flows.
+For `jev-devtools` **0.4.1**. Read the installed package version and `lib/flow/index.d.ts` first; online `main` may describe newer APIs. Use this recipe when the user asks to connect multiple Jev requests, inspect branches, run server function steps, or visualize parallel checks, collections, and loops. Adding the inspector alone does not require converting existing calls to flows.
 
 ## Plan the integration
 
@@ -9,7 +9,7 @@ For `jev-devtools` **0.4.0**. Read the installed package version and `lib/flow/i
 3. Import `defineJevFlow` (and `all`, `any`, `not` when needed) from **server-only** `jev-devtools/flow`. Define the graph once at module scope and call `run()` from the existing Node handler/action. In Next.js, mark the module `server-only` and keep the executing route/segment on the Node runtime. No new client provider or root component is needed.
 4. A named output returns data and does not execute an action. Existing business actions can remain in the application after the returned outcome; use `task()` when the user wants application-owned server work included in the flow. Preserve authorization, idempotency, input validation, and error handling. Cancellation cannot undo side effects.
 
-If importing question helpers as below, install `@typesafe-ai/sdk` as a direct dependency in the server workspace using its package manager. Version 0.4.0 requires SDK `>=0.7.0 <0.8.0` and is verified with 0.7.0; preserve a compatible existing version rather than silently changing SDK semantics. The flow also accepts ordinary SDK question objects.
+If importing question helpers as below, install `@typesafe-ai/sdk` as a direct dependency in the server workspace using its package manager. Version 0.4.1 requires SDK `>=0.7.0 <0.8.0` and is verified with 0.7.0; preserve a compatible existing version rather than silently changing SDK semantics. The flow also accepts ordinary SDK question objects.
 
 ## Complete example: parallel checks, one decision, two outcomes
 

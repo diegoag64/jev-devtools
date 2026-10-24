@@ -1,10 +1,10 @@
 # Jev DevTools
 
-[![npm version 0.4.0](https://img.shields.io/badge/npm-v0.4.0-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.4.0)
+[![npm version 0.4.1](https://img.shields.io/badge/npm-v0.4.1-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.4.1)
 
 A React drawer and Node adapter for inspecting TypeSafe Jev requests with animated diagrams. Includes request history, context, questions, typed answers, transport attempts, and raw snapshots.
 
-**[0.4.0 is available on npm](https://www.npmjs.com/package/jev-devtools/v/0.4.0).** **Experimental (pre-1.0).** React 18/19 and Node 22.12+ are supported. APIs may change before 1.0. Verification uses sample responses through the real TypeSafe SDK, not live inference.
+**Version 0.4.1 is prepared for release; publication is pending.** Check the release history for verified publication status. **Experimental (pre-1.0).** React 18/19 and Node 22.12+ are supported. APIs may change before 1.0. Verification uses sample responses through the real TypeSafe SDK, not live inference.
 
 [Changelog and release history](https://github.com/diegoag64/jev-devtools/blob/main/CHANGELOG.md) — published versions and unreleased work.
 
@@ -31,7 +31,7 @@ The [setup skill](https://github.com/diegoag64/jev-devtools/blob/main/packages/j
 
 ## Install
 
-Install from npm:
+The npm command installs the latest published release (0.4.0 at preparation time):
 
 ```sh
 npm install jev-devtools @typesafe-ai/sdk
@@ -44,7 +44,7 @@ To try local changes before a future release:
 npm ci
 npm run pack:devtools
 # From the consuming app:
-npm install /absolute/path/to/jev-devtools-0.4.0.tgz
+npm install /absolute/path/to/jev-devtools-0.4.1.tgz
 ```
 
 Mount once. The drawer loads its own styles; no CSS import is needed:

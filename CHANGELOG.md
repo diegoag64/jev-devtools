@@ -8,7 +8,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Manually approved OIDC releases; complete npm/GitHub release checklist; published flow declarations keep FlowExpression type checks; consistent PR descriptions and evidence guidance; CSS isolation and removal of unused package styles; verified 0.4.0 publication metadata. |
+| [Unreleased](#unreleased) | Not published | No additional changes. |
+| [0.4.1](#041--pending-publication-experimental) | Pending | Manually approved OIDC releases; complete npm/GitHub release checklist; published flow declarations keep FlowExpression type checks; consistent PR descriptions and evidence guidance; CSS isolation and removal of unused package styles; verified 0.4.0 publication metadata. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Flow API extensions, six cookbooks, React/Next.js setup documentation, SDK peer dependency, loopback-only inspector middleware without authorization, and Windows support for the package and Next.js verification scripts. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
 | [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Batched updates, changed-trace streaming, frame-coalesced rendering, less work while the drawer is closed, virtualized Questions, compact Choice diagrams, and reuse of unchanged inspector views. |
@@ -18,6 +19,20 @@ Dates below use UTC and were checked against npm's publication history. The hist
 | [0.1.0](#010--october-23-2026-experimental) | 2026-10-23 | First public package: React inspector, Jev diagrams, Node adapter, and Next.js integration. |
 
 ## Unreleased
+
+No additional changes.
+
+## 0.4.1 — pending publication (experimental)
+
+Patch release candidate containing all changes merged since 0.4.0. npm publication, the exact release tag, and the GitHub release are pending; no publication date or release commit is assigned yet. See the [release preparation record](docs/releases.md#release-041--pending-publication).
+
+### Compatibility and upgrade
+
+- React 18/19, Node 22.12+, SDK `>=0.7.0 <0.8.0`, public exports, and runtime flow behavior remain unchanged from 0.4.0.
+- Published `FlowExpression` types now preserve their value types. Code relying on unsafe union narrowing or optional/nullable numeric comparisons may stop compiling; supply correctly typed values before comparing them.
+- The drawer loads its own styles. Existing public CSS imports remain supported, but host styles and theme variables no longer affect internal flow styling. Document-level transforms and page JavaScript remain outside CSS isolation.
+
+### Changes
 
 - Add a manually dispatched GitHub Actions release workflow using npm trusted publishing, with a required GitHub environment approval, exact-archive checks, registry consumer verification, and GitHub release completion. Support checking an existing tarball or registry version in the consumer scripts. Package APIs and runtime behavior are unchanged; publishing needs the configured npm trust and GitHub environment protection. ([#60](https://github.com/diegoag64/jev-devtools/pull/60))
 
