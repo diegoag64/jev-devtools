@@ -19,7 +19,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-- Standardize PR descriptions around Problem, Change, Scope and compatibility, Verification, and CSS review, with matching contributor and agent guidance. Preserve existing required checks and CSS review requirements; no automated description check or package compatibility change.
+- Standardize PR descriptions around Problem, Change, Scope and compatibility, Verification, and CSS review, with matching contributor and agent guidance. Preserve existing required checks and CSS review requirements; no automated description check or package compatibility change. ([#58](https://github.com/diegoag64/jev-devtools/pull/58))
 
 - Remove confirmed unused legacy layout, dot animation, caption, mark and instruction styles, unused textarea selectors, and declarations superseded by current rules or inline geometry. Preserve the public CSS export and current component appearance. Flow cascade conflicts and the question-connector/suppression rules remain deferred to [#57](https://github.com/diegoag64/jev-devtools/issues/57). ([#36](https://github.com/diegoag64/jev-devtools/pull/36))
 
