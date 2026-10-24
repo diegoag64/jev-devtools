@@ -1,0 +1,7 @@
+{
+  "source": "https://docs.typesafe.ai/cookbooks/autoformat.md",
+  "reviewedOn": "2026-10-24",
+  "sourceSha256": "ecb5e8734128e640be5633de4aa5c1a59f15f31467517e5959627c665195a332",
+  "transformation": "Port the executable two-pass algorithm, prompts, criteria, whitespace normalization, punctuation thresholds, heading-question length gate, and group-level list rendering. Use authored short documents and synthetic responses. Explicitly bypass requests with zero questions. No original memo, cached responses or benchmark claims are reproduced. The source prose mentions explicit-marker rules, but the executable code does not implement them; this port follows the code and samples are unmarked.",
+  "license": "MIT; LICENSE.typesafe retained"
+}

@@ -1,0 +1,20 @@
+{
+  "TYPE_CRITERIA": {
+    "heading": "A short label or title that names the document or the section that follows it - not a full sentence of content",
+    "paragraph": "Running prose: one or more complete sentences of explanatory or narrative text",
+    "list_item": "One entry in a list of parallel items - an ingredient, a feature, a task, an attendee; reads as one of several sibling entries",
+    "quote": "Words attributed to a person or source - quoted speech, a citation, an excerpt someone else wrote",
+    "code": "Computer code, a shell command, terminal output, or a config snippet meant to be read verbatim",
+    "callout": "A warning, tip, or important note that interrupts the flow to flag something the reader must not miss"
+  },
+  "HLEVEL_CRITERIA": {
+    "title": "The title of the whole document",
+    "section": "A major section heading within the document",
+    "subsection": "A minor heading nested under a section"
+  },
+  "CALLOUT_CRITERIA": {
+    "note": "Neutral extra information the reader should be aware of",
+    "tip": "A helpful suggestion or shortcut that makes things easier",
+    "warning": "A caution about something that can go wrong or cause harm"
+  }
+}
