@@ -32,6 +32,45 @@ gh api repos/diegoag64/jev-devtools/releases/latest --jq '{tag: .tag_name, url: 
 
 Compare npm integrity to the inspected archive and the selected version's timestamp to the release record. For an annotated tag, compare the peeled `^{}` commit; for a lightweight tag, compare the ref's commit directly. Confirm `isDraft` is false and the prerelease flag matches the intended channel. Check npm's `latest` and GitHub's Latest independently; neither establishes the other. Historical releases need not be latest on either service.
 
+## Release remotely with GitHub Actions
+
+The manually dispatched [Release workflow](../.github/workflows/release.yml) uses npm OIDC trusted publishing. It publishes stable `X.Y.Z` versions to npm `latest` and GitHub Latest. Prereleases, backfills, and recovery of already-published versions use the manual checklist instead. Merging or pushing to `main` never publishes a package.
+
+1. Merge the approved release PR and wait for its `Verify` workflow on `main` to pass. The package manifest and changelog must contain the intended new version; its changelog section needs `### Compatibility and upgrade` and `### Changes` subsections. Those subsections become the GitHub notes, excluding the pending-publication preamble and other versions.
+2. Open **Actions → Release → Run workflow**, choose `main`, enter its full current commit SHA, and leave **dry_run** enabled for an initial rehearsal. The SHA must equal `main` at dispatch time so npm provenance describes the checked-out source. If `main` advances first, inspect the new commit before retrying. This workflow cannot release a commit that predates the workflow itself.
+3. Review the run summary and download `release-candidate`: it includes the package archive, `release.json` with SHA-256 and npm integrity, and the generated notes. The workflow runs all repository checks, including drawer and independent consumer checks, against the selected source and archive. It does not run performance benchmarks.
+4. To publish, dispatch again with **dry_run** disabled. This run builds and checks its own candidate, then pauses at **Approve npm VERSION**. Review this run's artifact and checksum; do not assume it is identical to the earlier rehearsal. Approve **npm-release** through GitHub's **Review deployments** UI. That approval is the release gate; npm does not ask for a separate 2FA code during the OIDC publish.
+5. The publish job verifies the approved artifact hashes, refuses existing versions/tags or a downgrade of `latest`, and publishes those bytes without rebuilding or running lifecycle scripts. It verifies registry integrity and provenance. A separate job without OIDC permission checks fresh registry consumers, creates the GitHub release at the selected commit, and verifies the remote tag and Latest designation.
+6. Download `release-evidence` and use `publication.json` to update this guide and the changelog through a PR. Publication success does not merge that documentation follow-up. Keep its status explicit under the completion rule above.
+
+From a remote terminal, the equivalent dispatch is:
+
+```sh
+gh workflow run release.yml --repo diegoag64/jev-devtools --ref main \
+  -f release_commit=FULL_REVIEWED_MAIN_SHA -F dry_run=true
+```
+
+Change `dry_run` to `false` only for an authorized release. A dry run has no OIDC permission and never requests the publication approval or creates an npm version, tag, or GitHub release. Artifacts expire after 30 days; store durable publication facts in the documentation PR. Workflow run summaries and evidence remain distinct from the immutable npm archive.
+
+### Approval and trust configuration
+
+GitHub environment `npm-release` requires approval from `diegoag64`, permits the `main` branch only, and disables administrator bypass. Self-review is allowed so Diego can approve a remotely initiated run. Do not approve the deployment automatically or remove the reviewer requirement. Environment protection is a GitHub setting, not something the workflow YAML can enforce by itself; recheck it if settings or repository visibility change.
+
+The npm trusted publisher is configured for repository `diegoag64/jev-devtools`, workflow filename `release.yml`, environment `npm-release`, with direct publishing enabled. No npm token is stored in GitHub. Initial trust setup requires npm sign-in and 2FA; subsequent workflow publishes use short-lived OIDC credentials. Configuration can be inspected with `npm trust list jev-devtools` (npm may request 2FA for this administrative operation). To recreate it after inspecting any existing configuration:
+
+```sh
+npm trust github jev-devtools --file release.yml \
+  --repo diegoag64/jev-devtools --env npm-release --allow-publish
+```
+
+Do not replace or revoke another publisher without reviewing it. Keep the environment name and filename synchronized across npm, GitHub settings, and the workflow. The workflow uses Node 24 and npm 11.19.0. It grants OIDC permission only to the approved publish job; GitHub release write permission belongs to the later completion job. See [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) and [GitHub deployment approvals](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments).
+
+### Recover a partial automated release
+
+Read the run summary, npm metadata, and remote tag before taking action. After any uncertain publish outcome, do not dispatch a new publication or rerun the publish job: the preflight intentionally refuses an existing npm version. Download `npm-publication` or `release-evidence` from the original run, compare its checksums with the approved candidate, and resume only the missing verification or GitHub steps under existing release authorization. If a tag/release already exists, inspect and verify it manually; never move its tag or blindly recreate it. Expired artifacts or mismatched checksums require investigation, not rebuilding and pretending the bytes are the original candidate.
+
+The independent consumer checks accept `JEV_VERIFY_TARBALL=/absolute/path/to/archive.tgz` to check an inspected archive, or `JEV_VERIFY_VERSION=X.Y.Z` to check a fresh registry installation. Do not set both. Use the verification scripts from the release commit so later regression tests do not incorrectly reject an older release. With neither variable, the existing local pack-and-check behavior is unchanged.
+
 ## Release 0.4.0 — published October 24, 2026
 
 Version 0.4.0 includes server function tasks, runtime request factories, bounded collections, returning conditionals, strict numeric `.gt()` comparisons, and stateful loops, with inline inspection of function results, collection items, and loop iterations. Six cookbook applications demonstrate these APIs from the repository; cookbook code and fixtures are not included in npm. The bundled setup skill and flow recipe cover the complete 0.4.0 API. See the [0.4.0 changelog](../CHANGELOG.md#040--october-24-2026-experimental).
@@ -171,4 +210,4 @@ For future automation, prefer [npm trusted publishing](https://docs.npmjs.com/tr
 
 [Granular tokens](https://docs.npmjs.com/about-access-tokens/) with bypass 2FA are a temporary alternative where package policy permits them. npm documents removal of their direct-publishing ability in January 2027. They are not a permanent authentication solution.
 
-This documentation does not configure a trusted publisher, change npm permissions, or install a release workflow. Implement automation in a separately reviewed PR, using current npm requirements and the same release completion checks.
+The [remote release workflow](#release-remotely-with-github-actions) implements this approach with explicit dispatch and environment approval. Keep its setup, verification, and recovery instructions aligned with current npm requirements and the release completion checks.

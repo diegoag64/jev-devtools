@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
+import { verificationPackage } from "./verification-package.mjs";
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const temp = await mkdtemp(join(tmpdir(), "jev-consumer-"));
 // Node won't spawn npm.cmd without a shell, so Windows runs npm's CLI script directly.
@@ -14,16 +15,10 @@ const npm = (args, options) =>
   process.platform === "win32"
     ? execFileSync(process.execPath, [npmCli, ...args], options)
     : execFileSync("npm", args, options);
-const packed = JSON.parse(
-  npm(["pack", "--json", "--pack-destination", temp], {
-    cwd: join(root, "packages/jev-devtools"),
-    encoding: "utf8",
-  }),
-);
-const tarball = join(temp, packed[0].filename);
+const { tarball, files, dependency } = verificationPackage(npm, root, temp);
 // Guard the shipped archive, not just the source manifest's intended allowlist.
 // A widened files list or stale build output must not ship fixtures or secrets.
-const shipped = new Set(packed[0].files.map(({ path }) => path));
+const shipped = new Set(files.map(({ path }) => path));
 const setupDocs = new Set([
   "skills/setup-jev-devtools/SKILL.md",
   "skills/setup-jev-devtools/references/react-node.md",
@@ -68,7 +63,7 @@ if (process.env.JEV_VERIFY_REACT) {
   pkg.dependencies.react = process.env.JEV_VERIFY_REACT;
   pkg.dependencies["react-dom"] = process.env.JEV_VERIFY_REACT;
 }
-pkg.dependencies["jev-devtools"] = `file:${tarball}`;
+pkg.dependencies["jev-devtools"] = dependency;
 await writeFile(join(consumer, "package.json"), JSON.stringify(pkg, null, 2));
 npm(
   [

@@ -7,6 +7,7 @@ import { execFileSync, spawn } from "node:child_process";
 import { createServer } from "node:net";
 import { once } from "node:events";
 import { setTimeout as delay } from "node:timers/promises";
+import { verificationPackage } from "./verification-package.mjs";
 
 // Exercise the installed package through Next's real route bundles, RSC renderer,
 // Server Action protocol, and server reloads. No browser or live inference needed.
@@ -20,12 +21,7 @@ const npm = (args, options) =>
   process.platform === "win32"
     ? execFileSync(process.execPath, [npmCli, ...args], options)
     : execFileSync("npm", args, options);
-const packed = JSON.parse(
-  npm(["pack", "--json", "--pack-destination", temp], {
-    cwd: join(root, "packages/jev-devtools"),
-    encoding: "utf8",
-  }),
-);
+const { dependency } = verificationPackage(npm, root, temp);
 const app = join(temp, "app");
 await cp(join(root, "examples/nextjs-app"), app, {
   recursive: true,
@@ -35,8 +31,7 @@ await cp(join(root, "examples/nextjs-app"), app, {
     !path.endsWith(".tsbuildinfo"),
 });
 const pkg = JSON.parse(await readFile(join(app, "package.json"), "utf8"));
-pkg.dependencies["jev-devtools"] =
-  `file:${join(temp, packed[0].filename)}`;
+pkg.dependencies["jev-devtools"] = dependency;
 await writeFile(join(app, "package.json"), JSON.stringify(pkg, null, 2));
 npm(["install", "--ignore-scripts", "--no-audit", "--no-fund"], {
   cwd: app,

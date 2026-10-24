@@ -1,0 +1,183 @@
+name: Release
+run-name: Release ${{ inputs.release_commit }}${{ inputs.dry_run && ' (dry run)' || '' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_commit:
+        description: Full SHA of the approved release commit on main
+        required: true
+        type: string
+      dry_run:
+        description: Verify and package only; do not request approval or publish
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.repository == 'diegoag64/jev-devtools' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      version: ${{ steps.package.outputs.version }}
+      sha256: ${{ steps.package.outputs.sha256 }}
+      notes_sha256: ${{ steps.package.outputs.notes_sha256 }}
+    env:
+      RELEASE_COMMIT: ${{ inputs.release_commit }}
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - name: Validate commit input
+        # npm provenance records the dispatch SHA. Keep the checkout identical.
+        run: node -e 'if (!/^[a-f0-9]{40}$/.test(process.env.RELEASE_COMMIT) || process.env.RELEASE_COMMIT !== process.env.GITHUB_SHA) throw new Error("Use the full SHA at main when dispatching; provenance must match the checkout")'
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_commit }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require merged commit and successful main CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git merge-base --is-ancestor "$RELEASE_COMMIT" origin/main
+          gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --commit "$RELEASE_COMMIT" --event push --limit 1 --json status,conclusion > "$RUNNER_TEMP/release-ci.json"
+          node -e 'const [run] = JSON.parse(require("fs").readFileSync(process.env.RUNNER_TEMP + "/release-ci.json")); if (run?.status !== "completed" || run?.conclusion !== "success") throw new Error("Release commit needs successful main CI")'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --global npm@11.19.0
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      - run: npm run check:playground
+      - run: npx playwright install --with-deps chromium --only-shell
+      - run: npm run verify:drawer
+      - run: git diff --check
+      - name: Pack the release candidate once
+        id: package
+        run: node scripts/release.mjs prepare
+      - name: Verify the exact candidate in independent consumers
+        env:
+          JEV_VERIFY_TARBALL: benchmarks/results/release/jev-devtools-${{ steps.package.outputs.version }}.tgz
+        run: |
+          npm run verify:package
+          npm run verify:nextjs
+          node scripts/release.mjs check-artifact
+      - name: Check publication eligibility
+        if: ${{ !inputs.dry_run }}
+        run: node scripts/release.mjs preflight
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-candidate
+          path: benchmarks/results/release/
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    if: ${{ !inputs.dry_run }}
+    needs: prepare
+    name: Approve npm ${{ needs.prepare.outputs.version }}
+    environment: npm-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      RELEASE_COMMIT: ${{ inputs.release_commit }}
+      RELEASE_SHA256: ${{ needs.prepare.outputs.sha256 }}
+      RELEASE_NOTES_SHA256: ${{ needs.prepare.outputs.notes_sha256 }}
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_commit }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --global npm@11.19.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-candidate
+          path: benchmarks/results/release/
+      - name: Recheck approved archive and publication eligibility
+        run: |
+          node scripts/release.mjs check-artifact
+          node scripts/release.mjs preflight
+      - name: Publish approved bytes with OIDC
+        env:
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+        run: npm publish "benchmarks/results/release/jev-devtools-$RELEASE_VERSION.tgz" --ignore-scripts --access public --tag latest --provenance --registry=https://registry.npmjs.org/
+      - name: Verify npm publication and provenance
+        run: node scripts/release.mjs verify-npm
+      - name: Record partial completion on failure
+        if: failure()
+        run: |
+          echo '## Release needs attention' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Check npm before retrying. It may already be published. Resume missing steps using docs/releases.md; never republish an existing version.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: npm-publication
+          path: benchmarks/results/release/
+          if-no-files-found: ignore
+          retention-days: 30
+
+  finish:
+    needs: [prepare, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      RELEASE_COMMIT: ${{ inputs.release_commit }}
+      RELEASE_SHA256: ${{ needs.prepare.outputs.sha256 }}
+      RELEASE_NOTES_SHA256: ${{ needs.prepare.outputs.notes_sha256 }}
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_commit }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --global npm@11.19.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-publication
+          path: benchmarks/results/release/
+      - run: node scripts/release.mjs check-artifact
+      - name: Verify fresh registry consumers
+        env:
+          JEV_VERIFY_VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          npm run verify:package
+          npm run verify:nextjs
+      - name: Publish GitHub release and verify tag and Latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/release.mjs github-release
+      - name: Record partial completion on failure
+        if: failure()
+        run: |
+          echo '## Release needs attention' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Check npm and GitHub before retrying. npm may already be published. Resume missing verification/tag/release steps using docs/releases.md; never republish an existing version or move its tag.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-evidence
+          path: benchmarks/results/release/
+          if-no-files-found: ignore
+          retention-days: 30

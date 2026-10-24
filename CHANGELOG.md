@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Complete npm/GitHub release checklist; published flow declarations keep FlowExpression type checks; consistent PR descriptions and evidence guidance; CSS isolation and removal of unused package styles; verified 0.4.0 publication metadata. |
+| [Unreleased](#unreleased) | Not published | Manually approved OIDC releases; complete npm/GitHub release checklist; published flow declarations keep FlowExpression type checks; consistent PR descriptions and evidence guidance; CSS isolation and removal of unused package styles; verified 0.4.0 publication metadata. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Flow API extensions, six cookbooks, React/Next.js setup documentation, SDK peer dependency, loopback-only inspector middleware without authorization, and Windows support for the package and Next.js verification scripts. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
 | [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Batched updates, changed-trace streaming, frame-coalesced rendering, less work while the drawer is closed, virtualized Questions, compact Choice diagrams, and reuse of unchanged inspector views. |
@@ -18,6 +18,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 | [0.1.0](#010--october-23-2026-experimental) | 2026-10-23 | First public package: React inspector, Jev diagrams, Node adapter, and Next.js integration. |
 
 ## Unreleased
+
+- Add a manually dispatched GitHub Actions release workflow using npm trusted publishing, with a required GitHub environment approval, exact-archive checks, registry consumer verification, and GitHub release completion. Support checking an existing tarball or registry version in the consumer scripts. Package APIs and runtime behavior are unchanged; publishing needs the configured npm trust and GitHub environment protection.
 
 - Require a version-independent release checklist covering npm, the exact release tag, GitHub publication and Latest status, and explicit partial-completion reporting. Record the recovered v0.4.0 GitHub release and explain authentication options for remote publishing. Documentation only; existing checks and package compatibility are unchanged. ([#59](https://github.com/diegoag64/jev-devtools/pull/59))
 
