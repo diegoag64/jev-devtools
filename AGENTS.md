@@ -15,6 +15,7 @@ These instructions apply to contributing to this repository. For installing the 
 - Preserve third-party notices and PR-based workflow documentation when moving code.
 - After changing the package version, run `npm run sync:readme-version` to update both README badges, exact-version npm links, and archive examples. CI checks and package creation reject stale README versions.
 - For user-visible changes, update `CHANGELOG.md` under Unreleased in the same PR, with behavior, compatibility notes, and a PR link when available. Keep the overview table aligned; do not describe open PRs as merged or unreleased work as published. Follow `docs/releases.md` when promoting entries to a release.
+- For every release, follow the [release checklist and completion rule](docs/releases.md#release-checklist). Verify npm publication, the tag at the exact published commit, and the GitHub release and intended Latest designation separately. Report partial completion and remaining steps explicitly; npm success alone does not complete a release.
 - Keep generated benchmark results, CPU profiles, screenshots, logs, and per-run reports out of Git under ignored `benchmarks/results/`. Keep scripts/fixtures tracked; report comparisons, provenance, and limitations in PR descriptions or discussions. Do not force-add artifacts or copy them into `docs/`.
 
 ## Package CSS maintenance

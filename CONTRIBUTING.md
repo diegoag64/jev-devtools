@@ -63,6 +63,8 @@ For user-visible changes, add a concise entry under **Unreleased** in [CHANGELOG
 
 Keep the overview table useful at a glance. Do not list an open PR as delivered work in another PR's changelog entry. At release time, follow the [release process](docs/releases.md): group the accumulated entries under the new version and verify its publication date before marking it published. npm versions and merged work must remain distinguishable.
 
+Use the [release checklist and completion rule](docs/releases.md#release-checklist) for every version, including the Git tag and GitHub release verification. Report any unfinished step explicitly, even after npm publication succeeds.
+
 ## Repository layout
 
 | Path | Purpose |

@@ -1,10 +1,44 @@
 # Packaging and releases
 
+## Release checklist
+
+Use this checklist for every version. npm publication, the Git tag, and the GitHub release are separate operations. The historical records below are evidence, not a substitute for this checklist. Carry forward authorization already given for this release; if an action is outside that authorization, identify it before proceeding.
+
+1. **Prepare and approve.** Use a release PR to set the version, synchronize README versions, and move the intended Unreleased entries into a pending release section. After authorized merging and green CI, record the exact release commit. Run the [archive checks](#prepare-and-inspect-an-archive) from a clean checkout of that commit, inspect the archive, and record its checksum. Prepare notes covering only that release and any upgrade requirements.
+2. **Publish the inspected archive.** With npm publication authorization, publish that exact archive with the intended dist-tag. Do not rebuild between inspection and publication. Check the registry first if a prior attempt has an uncertain outcome; an upload or processing message alone does not prove publication.
+3. **Verify npm.** Confirm the version is available, registry integrity matches the inspected archive, the intended dist-tag points to it, and the registry publication timestamp is recorded in UTC. Check fresh registry-installed React and Next.js consumers using samples. Record the exact-version npm link and observed results.
+4. **Create and verify the tag.** With release/tag authorization, create `vX.Y.Z` at the exact published commit. If the remote tag already exists, verify its resolved commit before reusing it; never move an existing release tag to make a check pass. Do not default to the current `main`, which may contain later work.
+5. **Publish and verify the GitHub release.** Publish the prepared notes for that tag, including the npm link, release commit, and compatibility notes. A tag or draft release alone is insufficient. For a normal latest release, explicitly mark it Latest and verify GitHub's latest-release endpoint returns it. For a prerelease or historical backfill, record the intended designation and preserve any newer latest release unless explicitly authorized otherwise. Verify the tag's resolved commit separately from the release's target metadata.
+6. **Record and report.** Update the changelog, its overview, and this release record through a PR using verified publication facts. Include both npm and GitHub release links, the exact commit, integrity/checksum evidence, and verification results. Keep later Unreleased work separate and identify any open follow-up documentation PR.
+
+### Completion and recovery
+
+Call the release complete only after npm publication and its intended dist-tag, the remote tag's exact commit, and the published GitHub release and intended Latest/prerelease designation have all been verified, and the release record has been updated. An open documentation PR remains a stated follow-up until merged.
+
+If npm succeeds but tagging, GitHub publication, verification, or record updates remain pending, report **partially completed release**. State what succeeded, what remains, and any missing authorization or failed check. Resume from the missing step; do not republish an existing npm version, move a published tag, or include newer commits. If a record-update PR is awaiting review, report publication as verified with that follow-up pending. Never silently omit a remaining step or describe npm success alone as completion of the whole release.
+
+### Read back the published state
+
+Replace `X.Y.Z` with the release version. These commands read public metadata; they do not publish:
+
+```sh
+release_version='X.Y.Z'
+npm view "jev-devtools@$release_version" version dist.integrity dist.tarball --json --registry=https://registry.npmjs.org/
+npm view jev-devtools dist-tags time --json --registry=https://registry.npmjs.org/
+git ls-remote --tags origin "refs/tags/v$release_version" "refs/tags/v$release_version^{}"
+gh release view "v$release_version" --repo diegoag64/jev-devtools --json tagName,targetCommitish,isDraft,isPrerelease,url,publishedAt
+gh api repos/diegoag64/jev-devtools/releases/latest --jq '{tag: .tag_name, url: .html_url}'
+```
+
+Compare npm integrity to the inspected archive and the selected version's timestamp to the release record. For an annotated tag, compare the peeled `^{}` commit; for a lightweight tag, compare the ref's commit directly. Confirm `isDraft` is false and the prerelease flag matches the intended channel. Check npm's `latest` and GitHub's Latest independently; neither establishes the other. Historical releases need not be latest on either service.
+
 ## Release 0.4.0 — published October 24, 2026
 
 Version 0.4.0 includes server function tasks, runtime request factories, bounded collections, returning conditionals, strict numeric `.gt()` comparisons, and stateful loops, with inline inspection of function results, collection items, and loop iterations. Six cookbook applications demonstrate these APIs from the repository; cookbook code and fixtures are not included in npm. The bundled setup skill and flow recipe cover the complete 0.4.0 API. See the [0.4.0 changelog](../CHANGELOG.md#040--october-24-2026-experimental).
 
 **[jev-devtools@0.4.0](https://www.npmjs.com/package/jev-devtools/v/0.4.0) was published on October 24, 2026 at 07:41:04 UTC**, from commit `bc7f1609a6e94bf8fd9be4351db6983e8d0442ea` after [PR #34](https://github.com/diegoag64/jev-devtools/pull/34) and all eight post-merge checks passed. npm's `latest` tag was verified as `0.4.0`.
+
+The missing [GitHub release v0.4.0](https://github.com/diegoag64/jev-devtools/releases/tag/v0.4.0) was created on October 24, 2026 at 16:50:08 UTC. Its remote tag was verified at the same published commit, and GitHub's latest-release endpoint returned `v0.4.0`. This completed the GitHub publication step without republishing npm or including later changes on `main`.
 
 The inspected and published archive was `jev-devtools-0.4.0.tgz` (66 files):
 
@@ -83,7 +117,7 @@ Confirm the name/version, public access, Node engine, React peers, public export
 
 ## First-publish checklist (historical)
 
-The first publish below is complete. These commands record that process; **do not republish 0.1.0**. For future versions, use the release workflow below with the new version and archive. Each merge, publish, and release tag still requires explicit authorization.
+The first publish below is complete. These commands record that process; **do not republish 0.1.0**. For future versions, use the [release checklist](#release-checklist) with the new version and archive. Each merge, publish, and release tag still requires explicit authorization.
 
 Before running a publish command:
 
@@ -108,7 +142,9 @@ npm publish ./jev-devtools-0.1.0.tgz --access public --tag latest --registry=htt
 
 Complete npm's authentication challenge if prompted. This command is documented for the maintainer; it is not run by preparation scripts or CI. npm name/version pairs cannot be overwritten after publication. See [npm's unscoped publishing guide](https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages/) and [publish command](https://docs.npmjs.com/cli/v11/commands/npm-publish/).
 
-## Confirm the published result
+## First-publish confirmation (historical)
+
+The following commands record the 0.1.0 confirmation procedure. Use [Read back the published state](#read-back-the-published-state) for the current release; the historical latest-tag expectation below is not a claim about today's registry.
 
 After npm reports success:
 
@@ -123,8 +159,16 @@ Then, with release/tag authorization, tag the exact published commit and create 
 
 ## Future releases
 
+Follow the [release checklist and completion rule](#release-checklist) for the entire release, including GitHub publication and verification. The version-preparation requirements below supplement that checklist.
+
 Maintain [CHANGELOG.md](../CHANGELOG.md) as the canonical release history. In the release PR, move the accumulated Unreleased entries into a new version section marked **Pending publication**, retain their PR links, and update the overview table. Leave an Unreleased section for later work. Do not infer a publication date from a merge date: after npm confirms success, verify the version's timestamp with `npm view jev-devtools time --json` and record the UTC date through a PR. Only then mark the version published and link its exact-version npm page. Keep unpublished changes out of older version sections; do not change prior release dates when editing their descriptions.
 
-Use a release PR for each version. Update the library version, the playground's exact workspace dependency, example archive paths, root lockfile, and changelog together. Run `npm run sync:readme-version` after setting the library version: it synchronizes both READMEs' static version badges, exact-version npm links, and archive examples from `packages/jev-devtools/package.json`. `npm run check` and the package's `prepack` hook reject mismatches. Exact-version links avoid relying on npm's default package-page version display; the badge deliberately describes the checked-out release rather than fetching a potentially newer `latest` tag. Run the full checks and inspect the packed artifact. After review and explicit approval, publish that artifact, verify the registry result, and tag the exact release commit. Never publish every push or every merge to `main`.
+Use a release PR for each version. Update the library version, the playground's exact workspace dependency, example archive paths, root lockfile, and changelog together. Run `npm run sync:readme-version` after setting the library version: it synchronizes both READMEs' static version badges, exact-version npm links, and archive examples from `packages/jev-devtools/package.json`. `npm run check` and the package's `prepack` hook reject mismatches. Exact-version links avoid relying on npm's default package-page version display; the badge deliberately describes the checked-out release rather than fetching a potentially newer `latest` tag. Run the full checks and inspect the packed artifact. After review and explicit approval, publish that artifact, verify the registry result, tag the exact release commit, and publish and verify its GitHub release. Never publish every push or every merge to `main`.
 
-A later, separately reviewed automation PR can add [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) through GitHub Actions OIDC. Configure the exact repository and workflow on the npm package, use a protected release environment with maintainer approval and narrowly scoped `id-token: write`, and require an approved release commit/tag. Use a supported Node/npm version and GitHub-hosted runner, and verify provenance. This avoids storing a long-lived publish token in GitHub. No trusted publisher, npm token, publishing permission, automatic release, or release workflow is configured by this preparation PR.
+### Authentication for remote releases
+
+For future automation, prefer [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) with GitHub Actions OIDC. Configure the exact repository, workflow, and optional environment on npm; use a GitHub-hosted runner and `id-token: write`. Direct publishing must be explicitly allowed; stage-only publishing still needs human 2FA approval. No long-lived npm token is needed. Keep maintainer approval in a protected release environment and verify provenance.
+
+[Granular tokens](https://docs.npmjs.com/about-access-tokens/) with bypass 2FA are a temporary alternative where package policy permits them. npm documents removal of their direct-publishing ability in January 2027. They are not a permanent authentication solution.
+
+This documentation does not configure a trusted publisher, change npm permissions, or install a release workflow. Implement automation in a separately reviewed PR, using current npm requirements and the same release completion checks.
