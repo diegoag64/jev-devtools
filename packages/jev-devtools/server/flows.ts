@@ -10,7 +10,6 @@ export class FlowRecorder {
   private runs = new Map<string, FlowRun>();
   private definitions = new Map<string, FlowDefinition>();
   private sessions = new Map<string, string>();
-  private definitionRevisions = new Map<string, number>();
   private revisions = new Map<string, number>();
   private revision = 0;
   private listeners = new Set<(sessions: Set<string>) => void>();
@@ -63,7 +62,6 @@ export class FlowRecorder {
       };
       redactRules(stored);
       this.definitions.set(definition.id, stored);
-      this.definitionRevisions.set(definition.id, ++this.revision);
     }
     this.runs.set(run.id, run);
     this.sessions.set(run.id, session);
@@ -178,7 +176,6 @@ export class FlowRecorder {
     for (const id of this.definitions.keys())
       if (!used.has(id)) {
         this.definitions.delete(id);
-        this.definitionRevisions.delete(id);
       }
   }
   clear(session: string) {
@@ -191,21 +188,24 @@ export class FlowRecorder {
   changes(
     session: string,
     cursor?: number,
-  ): { revision: number; data: FlowUpdate } {
+    knownDefinitions: ReadonlySet<string> = new Set(),
+  ): {
+    revision: number;
+    retainedDefinitionIds: Set<string>;
+    data: FlowUpdate;
+  } {
     const current = [...this.runs.values()]
       .filter((r) => this.sessions.get(r.id) === session)
       .reverse();
     const used = new Set(current.map((r) => r.definitionId));
     return {
       revision: this.revision,
+      retainedDefinitionIds: used,
       data: structuredClone({
         version: 1,
         definitions: [...used]
-          .filter(
-            (id) =>
-              cursor === undefined ||
-              this.definitionRevisions.get(id)! > cursor,
-          )
+          // Creation time says nothing about what this particular reader has.
+          .filter((id) => cursor === undefined || !knownDefinitions.has(id))
           .map((id) => this.definitions.get(id)!),
         upserts: current.filter(
           (r) => cursor === undefined || this.revisions.get(r.id)! > cursor,

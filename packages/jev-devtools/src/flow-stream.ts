@@ -31,6 +31,14 @@ export function connectFlowStream(
     definitions = new Map();
     const current = new EventSource(url + "/flows/events");
     source = current;
+    current.addEventListener("open", () => {
+      if (!alive || source !== current) return;
+      // Native reconnect reuses this EventSource. The server starts a fresh
+      // snapshot; neither cached definitions nor pending publications survive.
+      cancel();
+      runs = new Map();
+      definitions = new Map();
+    });
     current.addEventListener("flows", (event) => {
       if (!alive || source !== current) return;
       try {

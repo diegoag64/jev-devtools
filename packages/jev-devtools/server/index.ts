@@ -156,17 +156,27 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
             dirty = true,
             cursor: number | undefined,
             timer: ReturnType<typeof setImmediate> | undefined;
+          let knownDefinitions = new Set<string>();
           const flush = () => {
             timer = undefined;
             if (closed || !dirty || (controller.desiredSize ?? 0) <= 0) return;
-            dirty = false;
-            const update = flows.changes(session, cursor);
-            cursor = update.revision;
-            controller.enqueue(
-              encoder.encode(
-                `event: flows\ndata: ${JSON.stringify(update.data)}\n\n`,
-              ),
-            );
+            try {
+              const update = flows.changes(session, cursor, knownDefinitions);
+              controller.enqueue(
+                encoder.encode(
+                  `event: flows\ndata: ${JSON.stringify(update.data)}\n\n`,
+                ),
+              );
+              // Match the browser's pruning after this delivered order. A clear
+              // coalesced away under backpressure must not discard reader state.
+              knownDefinitions = update.retainedDefinitionIds;
+              cursor = update.revision;
+              dirty = false;
+            } catch {
+              // A failed delivery must not advance the cursor or escape into
+              // application execution; reconnect starts with a full snapshot.
+              stop();
+            }
           };
           const wake = () => {
             if (!closed && dirty && !timer) timer = setImmediate(flush);
@@ -184,6 +194,7 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
           stop = () => {
             if (closed) return;
             closed = true;
+            knownDefinitions.clear();
             unsubscribe();
             clearImmediate(timer);
             clearInterval(heartbeat);

@@ -61,6 +61,19 @@ Cases include shared-reference graphs with 13, 17, and 20 distinct objects, an a
 
 The report records revisions, the candidate source patch, environment, raw samples, elapsed time, completion heap delta, and capture counts. The heap delta measures allocation pressure at completion after a pre-run GC; it is neither peak nor retained memory. Results stay under ignored `benchmarks/results/`. This suite has no timing thresholds and does not run in CI.
 
+## Flow stream comparison
+
+```sh
+BENCH_OUTPUT=benchmarks/results/flow-streams-comparison \
+  node benchmarks/flow-streams.mjs BASE_COMMIT
+```
+
+This local-only comparison uses the real flow SSE endpoint with no network or inference calls. A 24-task flow runs with no readers, one fast reader, 16 fast readers with 200 retained definitions/runs, and four slow readers with the same retained history. Slow readers wait eight event-loop turns between reads to exercise backpressure; this is a synthetic consumption pattern, not a network bandwidth simulation. Each reader checks definition availability and the complete final result. Definitions must be delivered exactly once per reader in these workloads.
+
+Like the snapshot comparison, it builds the archived baseline and current package with shared installed dependencies and runs sequential fresh processes in alternating order: five rounds by default, one warmup and three measured samples per case/process. `BENCH_ROUNDS` accepts 1–20. Run without competing builds or benchmarks.
+
+The ignored report includes source provenance, raw samples, time through final delivery, time through flow completion (including connection setup), process CPU time, completion heap delta, raw SSE bytes, message counts, and definition counts. A separate normalized payload-byte count replaces timestamps/durations with zero to distinguish content changes from timing-dependent serialization. Heap deltas are allocation pressure, not peak or retained memory. Initial snapshots are included in measurements; seeding retained history is excluded. No timing thresholds run in CI.
+
 ## Report in the PR
 
 Include:
