@@ -19,7 +19,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-- Record verified npm publication metadata for 0.4.0, remove pending-publication instructions from installation docs, and link the published release. Documentation only; package behavior is unchanged.
+- Record verified npm publication metadata for 0.4.0, remove pending-publication instructions from installation docs, and link the published release. Documentation only; package behavior is unchanged. ([#35](https://github.com/diegoag64/jev-devtools/pull/35))
 
 ## 0.4.0 — October 24, 2026 (experimental)
 
