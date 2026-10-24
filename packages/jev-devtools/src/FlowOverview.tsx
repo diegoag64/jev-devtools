@@ -590,23 +590,31 @@ export const FlowOverview = memo(function FlowOverview({
       const card = points.get(node.id);
       if (!card) continue;
       const size = itemSizes[node.id] ?? { width: 2400, height: 800 };
-      let left = Math.max(40, card.x + card.width / 2 - size.width / 2);
-      // Keep simultaneously expanded collections separate without moving any
-      // original step, even when their preferred preview positions overlap.
-      for (const area of [...expansions.values()].sort((a, b) => a.x - b.x)) {
-        if (left < area.x + area.width + 96 && left + size.width + 96 > area.x)
-          left = area.x + area.width + 96;
+      const left = card.x + card.width / 2 - size.width / 2;
+      let top = expansionY;
+      // Center each preview on its collection. Stack overlapping previews
+      // vertically, leaving the original graph and all its coordinates alone.
+      for (const area of expansions.values()) {
+        if (
+          left - 80 < area.x + area.width + 80 &&
+          left + size.width + 80 > area.x - 80
+        )
+          top = Math.max(top, area.y + area.height + 96);
       }
-      expansions.set(node.id, { x: left, y: expansionY, ...size });
+      expansions.set(node.id, { x: left, y: top, ...size });
     }
+    // External arrows and centered previews can extend left of canvas zero.
+    const left = Math.min(0, ...[...expansions.values()].map((p) => p.x - 80));
+    const right = Math.max(
+      700,
+      x - 120,
+      ...[...expansions.values()].map((p) => p.x + p.width + 80),
+    );
     return {
       points,
       expansions,
-      width: Math.max(
-        700,
-        x - 120,
-        ...[...expansions.values()].map((p) => p.x + p.width + 40),
-      ),
+      left,
+      width: right - left,
       height: Math.max(
         400,
         ...[...points.values(), ...expansions.values()].map(
@@ -625,7 +633,10 @@ export const FlowOverview = memo(function FlowOverview({
     itemSizes,
   ]);
   const { viewport, canvas, zoom, zoomBy, fit, preserveCamera, focusArea } =
-    useDiagramViewport(layout.width, layout.height, run.id);
+    useDiagramViewport(layout.width, layout.height, run.id, {
+      x: layout.left,
+      y: 0,
+    });
   const onResize = useCallback(
     (id: string, height: number) => {
       preserveCamera();
@@ -1049,8 +1060,10 @@ const InlineItemFlow = memo(function InlineItemFlow({
 }) {
   const ref = useRef<HTMLElement>(null);
   const item = collection.items[index];
+  const [direction, setDirection] = useState(1);
   const cycleItem = (direction: number) => {
     if (collection.total <= 1) return;
+    setDirection(direction);
     onCollectionChange(node.id, {
       index: (index + direction + collection.total) % collection.total,
       open: true,
@@ -1087,42 +1100,46 @@ const InlineItemFlow = memo(function InlineItemFlow({
       aria-label={`Selected item flow for ${node.title ?? node.id}`}
       style={{ left: bounds.x, top: bounds.y }}
     >
-      <header className="flow-collection-heading">
-        <div>
-          <span className="eyebrow">Selected collection item</span>
-          <h3 aria-live="polite" aria-atomic="true">
-            {node.title ?? node.id} · Item {index + 1} of {collection.total}
-          </h3>
-          <small>{item?.status ?? "waiting"}</small>
-        </div>
-        <button
-          onClick={() => onCollectionChange(node.id, { index, open: false })}
+      <button
+        className="flow-item-arrow flow-item-previous"
+        aria-label="Previous collection item"
+        aria-controls={`${id}-item`}
+        title="Previous collection item"
+        disabled={collection.total <= 1}
+        onClick={() => cycleItem(-1)}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          Hide Flow
-        </button>
-      </header>
-      <div className="flow-item-navigation">
-        <button
-          className="flow-item-arrow"
-          aria-label="Previous collection item"
-          aria-controls={`${id}-item`}
-          title="Previous collection item"
-          disabled={collection.total <= 1}
-          onClick={() => cycleItem(-1)}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <path d="m14 6-6 6 6 6" />
+        </svg>
+      </button>
+      <div className="flow-item-frame">
+        <header className="flow-collection-heading">
+          <div>
+            <span className="eyebrow">Selected collection item</span>
+            <h3 aria-live="polite" aria-atomic="true">
+              {node.title ?? node.id} · Item {index + 1} of {collection.total}
+            </h3>
+            <small>{item?.status ?? "waiting"}</small>
+          </div>
+          <button
+            onClick={() => onCollectionChange(node.id, { index, open: false })}
           >
-            <path d="m14 6-6 6 6 6" />
-          </svg>
-        </button>
-        <div id={`${id}-item`} className="flow-item-content">
+            Hide Flow
+          </button>
+        </header>
+        <div
+          key={index}
+          id={`${id}-item`}
+          className={`flow-item-content ${direction < 0 ? "flow-item-backward" : "flow-item-forward"}`}
+        >
           {item?.run && node.itemDefinition ? (
             <FlowOverview
               key={item.run.id}
@@ -1139,27 +1156,27 @@ const InlineItemFlow = memo(function InlineItemFlow({
             </p>
           )}
         </div>
-        <button
-          className="flow-item-arrow"
-          aria-label="Next collection item"
-          aria-controls={`${id}-item`}
-          title="Next collection item"
-          disabled={collection.total <= 1}
-          onClick={() => cycleItem(1)}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m10 6 6 6-6 6" />
-          </svg>
-        </button>
       </div>
+      <button
+        className="flow-item-arrow flow-item-next"
+        aria-label="Next collection item"
+        aria-controls={`${id}-item`}
+        title="Next collection item"
+        disabled={collection.total <= 1}
+        onClick={() => cycleItem(1)}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m10 6 6 6-6 6" />
+        </svg>
+      </button>
     </article>
   );
 });

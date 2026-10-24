@@ -20,6 +20,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 Local experiment; not published or submitted as a PR.
 
+- Animate collection item changes with a short directional fade/slide, respecting reduced motion. Center previews beneath their collection, move navigation arrows outside the frame with subtle corner rounding, and include their bounds when fitting the canvas. The camera and original nodes stay fixed during navigation.
+
 - Add previous/next arrows beside expanded collection flows. Navigation wraps between the first and last items, stays synchronized with the selector, and preserves the original graph and camera.
 
 - Keep original flow nodes and the camera fixed when opening or switching collection previews. Place previews below the graph with connectors anchored to the center of each wrapper’s top edge.

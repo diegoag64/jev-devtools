@@ -17,16 +17,17 @@ export function useDiagramViewport(
   width: number,
   height: number,
   scene: string,
+  origin: Point = { x: 0, y: 0 },
 ) {
   const viewport = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLDivElement>(null);
   const camera = useRef<Camera>({ x: 0, y: 0, scale: 1 });
   const size = useRef({ width: 0, height: 0 });
   const fitted = useRef(true);
-  const bounds = useRef({ width, height });
+  const bounds = useRef({ width, height, ...origin });
   useLayoutEffect(() => {
-    bounds.current = { width, height };
-  }, [width, height]);
+    bounds.current = { width, height, x: origin.x, y: origin.y };
+  }, [width, height, origin.x, origin.y]);
   const frame = useRef<number | null>(null);
   const [zoom, setZoom] = useState(100);
   const paint = useCallback(() => {
@@ -57,7 +58,12 @@ export function useDiagramViewport(
   const fit = useCallback(() => {
     fitted.current = true;
     if (size.current.width <= 0 || size.current.height <= 0) return;
-    camera.current = fitCamera(size.current, bounds.current);
+    const fittedCamera = fitCamera(size.current, bounds.current);
+    camera.current = {
+      ...fittedCamera,
+      x: fittedCamera.x - bounds.current.x * fittedCamera.scale,
+      y: fittedCamera.y - bounds.current.y * fittedCamera.scale,
+    };
     paint();
   }, [paint]);
   const preserveCamera = useCallback(() => {
@@ -78,7 +84,7 @@ export function useDiagramViewport(
   );
   useEffect(() => {
     if (fitted.current) fit();
-  }, [width, height, fit]);
+  }, [width, height, origin.x, origin.y, fit]);
   const zoomBy = useCallback(
     (factor: number, point?: Point) => {
       fitted.current = false;
