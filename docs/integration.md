@@ -61,7 +61,9 @@ typography; importing `jev-devtools/styles.css` is optional.
 `.jev-devtools` and namespaces their animation, preventing collisions with host
 classes such as `.flow-step`. The drawer suppresses host pseudo-element
 decorations, explicitly resets text direction, and establishes defaults for its
-internal CSS variables. Generic app theme variables do not control its hint colors.
+internal CSS variables. The host reset lives in the shadow stylesheet, leaving
+`<jev-devtools-root>` free of inline reset declarations. Generic app theme
+variables do not control its hint colors.
 These changes preserve the component API and existing CSS imports.
 
 This is CSS encapsulation, not a separate browser document or a security boundary.

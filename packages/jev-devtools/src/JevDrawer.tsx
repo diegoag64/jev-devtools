@@ -58,10 +58,8 @@ export function JevDrawer({
   }, [open, root]);
   useEffect(() => {
     const host = document.createElement("jev-devtools-root");
-    // The host is the only element exposed to page selectors. The overlay itself
-    // lives in the shadow tree, with its own typography and component styles.
-    host.style.cssText =
-      "all: initial !important; direction: ltr !important; unicode-bidi: isolate !important; position: fixed !important; inset: 0 !important; pointer-events: none !important; z-index: 2147483000 !important;";
+    // The shadow stylesheet resets the exposed host through :host(), keeping
+    // page styles out without an expanded inline reset on the host element.
     const shadow = host.attachShadow({ mode: "open" });
     const style = document.createElement("style");
     style.textContent = inspectorStyles;

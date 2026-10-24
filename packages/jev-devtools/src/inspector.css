@@ -1,5 +1,17 @@
-/* Important shadow declarations beat page-authored host decorations, including
-   important ones. The qualified host selector is inert in the public CSS. */
+/* Important declarations in the inner shadow context beat page-authored host
+   styles, including important ones. Keep the reset here instead of expanding
+   the all shorthand into hundreds of inline properties on the host element.
+   These qualified host selectors are inert in the public document stylesheet. */
+:host(jev-devtools-root) {
+  all: initial !important;
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  position: fixed !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 2147483000 !important;
+}
+
 :host(jev-devtools-root)::before,
 :host(jev-devtools-root)::after {
   content: none !important;
