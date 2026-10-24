@@ -7,7 +7,7 @@ permissions:
   contents: read
 jobs:
   drawer:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -20,7 +20,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm install --no-save --package-lock=false react@${{ matrix.react }} react-dom@${{ matrix.react }}
-      - run: npx playwright install --with-deps chromium --only-shell
+      # Use the runner image's system libraries; keep Playwright's pinned browser.
+      - run: npx playwright install chromium --only-shell
       - run: npm run verify:drawer
 
   verify:
