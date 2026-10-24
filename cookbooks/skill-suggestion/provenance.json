@@ -1,0 +1,7 @@
+{
+  "source": "https://raw.githubusercontent.com/typesafe-ai/typesafe-public-examples/25e9d373f4853b3e7e300e55a194f50e54838f68/cookbooks/skill_suggestion/hermes_roster.json",
+  "sourceSha256": "b422c82903cd575c404980c6d6ab2ac843511aea34c2d9be2263a7e1f67a0a4f",
+  "transformation": "Keep name/category/description/description_full and the first 700 Unicode code points of body, as consumed by the official reranking step. Preserve roster order.",
+  "count": 182,
+  "rosterSha256": "a37ef7a6b177cfc3f241d84409f990c561769e49a2d4ebb51c3831cb02f937f0"
+}

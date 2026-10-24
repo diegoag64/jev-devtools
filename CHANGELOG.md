@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Local experiment: function steps, runtime Jev request construction, and captured function data. |
+| [Unreleased](#unreleased) | Not published | Local experiment: function steps, runtime requests, and the skill-suggestion cookbook. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
 | [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Batched updates, changed-trace streaming, frame-coalesced rendering, less work while the drawer is closed, virtualized Questions, compact Choice diagrams, and reuse of unchanged inspector views. |
 | [0.1.3](#013--october-23-2026-experimental) | 2026-10-23 | Isolated drawer styles, diagram pan/zoom, and version-specific npm links. |
@@ -19,6 +19,10 @@ Dates below use UTC and were checked against npm's publication history. The hist
 ## Unreleased
 
 Local experiment; not published or submitted as a PR.
+
+- Add the full skill-suggestion selection flow using the official 182-skill roster, exact request/fit gates, dynamic shortlist questions, and agent-hint formatting. Provide three labeled synthetic cases, an adaptive result UI, and optional explicit live mode; the external-agent benchmark is not run.
+- Expose `.answers` references on Jev steps so functions can consume answers with runtime-generated names.
+- Preserve up to 256 criteria/probability map entries in captures, allowing all 182 skills to remain inspectable. General collection, byte, and depth bounds still apply.
 
 - Add server-side `flow.task()` with typed resolved inputs/results, asynchronous callbacks, cooperative cancellation and optional timeouts. Late results cannot advance failed/cancelled flows; tasks do not retry automatically.
 - Add a synchronous request-factory overload to `flow.jev()` for questions/criteria built from preceding results while retaining SDK request capture and linkage. Existing static requests remain supported.

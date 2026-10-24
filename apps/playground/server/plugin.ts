@@ -12,6 +12,15 @@ import { makeRequest, sampleTransport } from "./scenarios.ts";
 import { sampleProfiles, type SampleProfile } from "../src/sample-profiles.js";
 import { validStress, type StressOptions } from "../src/stress-options.js";
 import type { Scenario } from "./scenarios.ts";
+import {
+  createSkillSuggestionFlow,
+  defaultModel,
+} from "../../../cookbooks/skill-suggestion/flow.js";
+import { skillSampleTransport } from "../../../cookbooks/skill-suggestion/samples.js";
+import {
+  isSkillCase,
+  skillCases,
+} from "../../../cookbooks/skill-suggestion/cases.js";
 
 const send = (res: ServerResponse, status: number, data: unknown) => {
   res
@@ -23,7 +32,11 @@ const send = (res: ServerResponse, status: number, data: unknown) => {
 };
 const validSession = (value: unknown): value is string =>
   typeof value === "string" && /^[a-f0-9-]{36}$/.test(value);
-export function jevInspectorServer(apiKey?: string): Plugin {
+export function jevInspectorServer(
+  apiKey?: string,
+  cookbookModel = defaultModel,
+): Plugin {
+  const cookbook = createSkillSuggestionFlow(cookbookModel);
   const inspector = createJevDevtools({
     enabled: true,
     origin: "http://127.0.0.1:4182",
@@ -82,6 +95,7 @@ export function jevInspectorServer(apiKey?: string): Plugin {
             runId?: string;
             profile?: SampleProfile;
             stress?: StressOptions;
+            cookbookCase?: string;
           };
           try {
             let text = "";
@@ -118,6 +132,7 @@ export function jevInspectorServer(apiKey?: string): Plugin {
               "stress",
               "flow-approve",
               "flow-functions",
+              "flow-skills",
               "flow-manual",
               "flow-other",
               "flow-parallel",
@@ -129,6 +144,10 @@ export function jevInspectorServer(apiKey?: string): Plugin {
             typeof body.message !== "string" ||
             body.message.length > 8000 ||
             (body.scenario === "stress" && !validStress(body.stress)) ||
+            (body.scenario === "flow-skills" &&
+              (!isSkillCase(body.cookbookCase) ||
+                (body.mode === "sample" &&
+                  body.message !== skillCases[body.cookbookCase].message))) ||
             (body.profile !== undefined &&
               (typeof body.profile !== "string" ||
                 !Object.hasOwn(sampleProfiles, body.profile)))
@@ -147,7 +166,8 @@ export function jevInspectorServer(apiKey?: string): Plugin {
           if (
             body.mode === "live" &&
             (["retry", "error", "stress"].includes(body.scenario!) ||
-              body.scenario!.startsWith("flow-"))
+              (body.scenario!.startsWith("flow-") &&
+                body.scenario !== "flow-skills"))
           ) {
             send(res, 400, {
               error:
@@ -165,19 +185,32 @@ export function jevInspectorServer(apiKey?: string): Plugin {
           try {
             if (body.scenario!.startsWith("flow-")) {
               const flow =
-                body.scenario === "flow-functions"
-                  ? skillShortlistFlow
-                  : body.scenario === "flow-parallel"
-                    ? parallelFlow
-                    : refundFlow;
+                body.scenario === "flow-skills"
+                  ? cookbook
+                  : body.scenario === "flow-functions"
+                    ? skillShortlistFlow
+                    : body.scenario === "flow-parallel"
+                      ? parallelFlow
+                      : refundFlow;
               const client = inspector.createClient(
                 {
-                  apiKey: "sample-only",
-                  fetch: flowTransport(body.scenario!),
+                  apiKey: body.mode === "live" ? apiKey : "sample-only",
+                  fetch:
+                    body.scenario === "flow-skills"
+                      ? body.mode === "live"
+                        ? globalThis.fetch
+                        : skillSampleTransport(
+                            body.cookbookCase as keyof typeof skillCases,
+                          )
+                      : flowTransport(body.scenario!),
                   logLevel: "off",
                   retry: { maxRetries: 0 },
+                  timeout: 120_000,
                 },
-                { label: flow.definition.name, source: "sample" },
+                {
+                  label: flow.definition.name,
+                  source: body.mode === "live" ? "live" : "sample",
+                },
               );
               const result = await flow.run(
                 { message: body.message },

@@ -168,3 +168,54 @@ test("captures an image reference and Box response through SDK multipart seriali
   assert.ok(photo.bytes > 0);
   assert.equal(trace.result?.answers.mug.box?.left, 0.35);
 });
+
+test("large Choice captures retain every supported category and probability", async () => {
+  const names = Array.from({ length: 182 }, (_, i) => `category-${i}`);
+  const probabilities = Object.fromEntries(
+    names.map((name, i) => [name, i === 181 ? 1 : 0]),
+  );
+  const recorder = new JevRecorder();
+  const client = recorder.instrument(
+    new TypeSafeClient({
+      apiKey: "sample-only",
+      logLevel: "off",
+      retry: { maxRetries: 0 },
+      fetch: recorder.transport(async () =>
+        Response.json({
+          model: "fixture",
+          answers: {
+            selected: {
+              type: "choice",
+              choice: "category-181",
+              probabilities,
+              confidence: 1,
+            },
+          },
+        }),
+      ),
+    }),
+    meta,
+  );
+  await client.systemOne({
+    state: "Select the final category",
+    questions: {
+      selected: choice(
+        "Select?",
+        Object.fromEntries(names.map((name) => [name, `Description ${name}`])),
+      ),
+    },
+  });
+  const [trace] = await settled(recorder);
+  assert.equal(
+    Object.keys(trace.result!.answers!.selected.probabilities!).length,
+    182,
+  );
+  assert.equal(
+    trace.result!.answers!.selected.probabilities!["category-181"],
+    1,
+  );
+  assert.equal(
+    Object.keys(trace.request.questions.selected.criteria!).length,
+    182,
+  );
+});

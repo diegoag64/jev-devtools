@@ -10,7 +10,10 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       tailwindcss(),
-      jevInspectorServer(process.env.TYPESAFE_API_KEY || env.TYPESAFE_API_KEY),
+      jevInspectorServer(
+        process.env.TYPESAFE_API_KEY || env.TYPESAFE_API_KEY,
+        process.env.TYPESAFE_COOKBOOK_MODEL || env.TYPESAFE_COOKBOOK_MODEL,
+      ),
     ],
     server: { host: "127.0.0.1", port: 4182, strictPort: true },
     build: { outDir: "dist" },

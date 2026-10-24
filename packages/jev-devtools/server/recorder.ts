@@ -86,11 +86,16 @@ export function capture(
         .map((v, i) => visit(v, [...path, String(i)], depth + 1));
     }
     const entries = Object.entries(input);
-    if (entries.length > 150)
+    // Choice maps need room for the full roster; retain the overall byte/depth
+    // budget and the smaller general-purpose object/array limit.
+    const entryLimit = ["criteria", "probabilities"].includes(path.at(-1) ?? "")
+      ? 256
+      : 150;
+    if (entries.length > entryLimit)
       warnings.add("Long collection truncated in capture.");
     return Object.fromEntries(
       entries
-        .slice(0, 150)
+        .slice(0, entryLimit)
         .map(([key, v]) => [key, visit(v, [...path, key], depth + 1)]),
     );
   };

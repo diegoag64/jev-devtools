@@ -1,19 +1,19 @@
 # TypeSafe cookbook showcases — research preview
 
-Local experiment, researched **2026-10-23** against Jev DevTools **0.3.0**. This directory is a proposed catalog, **not a runnable cookbook collection yet**. The follow-up local function-step experiment is documented in [the flow guide](../docs/flows.md#function-steps-and-runtime-requests-unreleased-experiment); the 20 cookbook ports below are still proposals.
+Local experiment, researched **2026-10-23** against Jev DevTools **0.3.0**. This directory catalogs all 20 recipes. **[Skill suggestion](skill-suggestion/README.md) is now runnable locally**; the other cookbook ports remain proposals. The follow-up local function-step experiment is documented in [the flow guide](../docs/flows.md#function-steps-and-runtime-requests-unreleased-experiment); the catalog below records the original baseline assessment.
 
 The goal is to adapt the [official TypeSafe cookbooks](https://docs.typesafe.ai/cookbooks) into small applications where you can inspect the real requests, connected flow, branching conditions, and useful final result. These would be community-maintained TypeScript adaptations of official recipes, not official TypeSafe integrations.
 
-Start with the [research and implementation plan](RESEARCH.md). It covers fidelity, API gaps, fixtures, UI, and verification. [Source snapshots](sources.json) record the reviewed pages and their content hashes; downloaded pages and datasets are not vendored here.
+Start with the [research and implementation plan](RESEARCH.md). It covers fidelity, API gaps, fixtures, UI, and verification. [Source snapshots](sources.json) record the reviewed pages and their content hashes; research downloads are not vendored here. The runnable skill-suggestion example includes its attributed, pinned roster.
 
 ## All 20 published cookbooks
 
-“Core now” means the recipe's Jev assessment and routing can use the current flow API. It does **not** mean the entire original notebook, evaluation, or downstream action is captured. “App boundary” means some work should remain explicitly outside the diagram. “Extension” means a faithful, fully connected version needs additional execution/capture support.
+“Core now” means the recipe's Jev assessment and routing could use the published 0.3.0 flow API at the research baseline. It does **not** mean the entire original notebook, evaluation, or downstream action is captured. “App boundary” means some work should remain explicitly outside the diagram. “Extension” means a faithful, fully connected version needs additional execution/capture support.
 
-| Official cookbook | Proposed local experience | Fit with the current API |
+| Official cookbook | Proposed local experience | Fit with published 0.3.0 |
 | --- | --- | --- |
 | [Function calling](https://docs.typesafe.ai/cookbooks/function_calling) | Inspect a proposed function and its selected arguments. | **App boundary:** one multi-question request; argument assembly, minimum confidence, defaults, and function execution belong to application code. |
-| [Skill suggestion](https://docs.typesafe.ai/cookbooks/skill_suggestion) | See a large skill list narrow to a shortlist, then a suggestion or abstention. | **Extension:** arithmetic gate, runtime top-k, and later questions built from selected skills. |
+| [Skill suggestion](https://docs.typesafe.ai/cookbooks/skill_suggestion) | See a large skill list narrow to a shortlist, then a suggestion or abstention. | **Extension, now implemented locally:** arithmetic gate, runtime top-k, and later questions built from selected skills. [Run it](skill-suggestion/README.md). |
 | [Guardrails for LLMs](https://docs.typesafe.ai/cookbooks/llm_guardrails) | Compare strict/permissive routing on the same assessment. | **Core now:** Noul hazards + Score; preserve action precedence. An external LLM between input/output checks is outside capture. |
 | [Double-checking citations](https://docs.typesafe.ai/cookbooks/citation_check) | Highlight a quote and show verification or review. | **Core now + app boundary:** deterministic quote matching first; missing quotes bypass Jev. |
 | [Classifying RAG passages](https://docs.typesafe.ai/cookbooks/classifying_rag_passages) | Follow candidate passages into include, conflict, or exclude buckets. | **Core now + app boundary:** fixed parallel lanes and per-passage policies; retrieval and final generation stay outside. |
@@ -50,4 +50,4 @@ These cookbooks mainly exercise Choice, Noul, and Score. The reviewed examples d
 
 ## What exists today
 
-The existing playground includes a synthetic **Functions + dynamic questions** scenario demonstrating the follow-up API experiment. It is not a cookbook port. The [flow API](../docs/flows.md) guide explains how to run it; this catalog has no executable entries or new route yet. The proposed collection will reuse that playground and the same root drawer, with server-only flow definitions and an explicit replay/live distinction. See [the staged plan](RESEARCH.md#staged-implementation) before implementing.
+The existing playground includes a synthetic **Functions + dynamic questions** scenario demonstrating the follow-up API experiment. It is not a cookbook port. The [flow API](../docs/flows.md) guide explains how to run it; the full skill-suggestion selection flow is available at `http://127.0.0.1:4182/?cookbook=skill-suggestion`. It supports synthetic cases and optional live Jev calls; no separate gallery route is required. The remaining collection can reuse that playground and the same root drawer, with server-only flow definitions and an explicit replay/live distinction. See [the staged plan](RESEARCH.md#staged-implementation) before implementing.

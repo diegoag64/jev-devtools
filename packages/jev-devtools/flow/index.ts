@@ -101,6 +101,8 @@ export const not = (condition: FlowExpression<boolean>) =>
   operation("not", [condition]);
 export type FlowOutcome = { outcome: string; value?: unknown };
 type AnswerRefs<Q extends Questions> = {
+  /** All answers, including question names created by a runtime request factory. */
+  readonly answers: FlowExpression<{ [K in keyof Q]: ResultFor<Q[K]> }>;
   answer<K extends keyof Q & string>(
     name: K,
   ): { [F in keyof ResultFor<Q[K]>]: FlowExpression<ResultFor<Q[K]>[F]> };
@@ -489,6 +491,10 @@ export function defineJevFlow<T>(
           step.answerNames = new Set();
         } else step.request = frozen as Request<Questions>;
         return {
+          answers: new FlowExpression(
+            { op: "get", from: { op: "ref", id }, key: "answers" },
+            owner,
+          ) as never,
           answer(question: string) {
             if (!dynamic && !Object.hasOwn(step.request!.questions, question))
               throw new Error(`Unknown question: ${question}`);

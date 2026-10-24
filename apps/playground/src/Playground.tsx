@@ -14,9 +14,16 @@ import { ArrowRight, LoaderCircle } from "lucide-react";
 import "./controls.css";
 import "jev-devtools/styles.css";
 import "./style.css";
+import {
+  skillCases,
+  type SkillCase,
+} from "../../../cookbooks/skill-suggestion/cases.js";
+import { SkillCookbookResult } from "./SkillCookbookResult.js";
 
 import { defaultStress, type StressOptions } from "./stress-options";
 const sandbox = new URLSearchParams(location.search).has("sandbox");
+const cookbookRequested =
+  new URLSearchParams(location.search).get("cookbook") === "skill-suggestion";
 const savedSession = sessionStorage.getItem("jev-inspector-session");
 const session = savedSession || crypto.randomUUID();
 sessionStorage.setItem("jev-inspector-session", session);
@@ -41,6 +48,7 @@ async function post(path: string, body: unknown = {}) {
   return data;
 }
 function App() {
+  const [cookbookCase, setCookbookCase] = useState<SkillCase>("deck");
   const [stress, setStress] = useState<StressOptions>(defaultStress);
   const [flowResult, setFlowResult] = useState<{
     outcome: string;
@@ -59,11 +67,15 @@ function App() {
     setOutcome({ id: "idle", status: "idle", scenario, mode, message });
     setFeedback("Ready to capture a request.");
   };
-  const [scenario, setScenario] = useState(sandbox ? "stress" : "triage"),
+  const [scenario, setScenario] = useState(
+      cookbookRequested ? "flow-skills" : sandbox ? "stress" : "triage",
+    ),
     [mode, setMode] = useState("sample"),
     [live, setLive] = useState(false);
   const [message, setMessage] = useState(
-    "I was charged twice and checkout is blocked. I need a human to help me today.",
+    cookbookRequested
+      ? skillCases.deck.message
+      : "I was charged twice and checkout is blocked. I need a human to help me today.",
   );
   const [runId, setRunId] = useState<string>(),
     [feedback, setFeedback] = useState("Ready to capture a request.");
@@ -89,6 +101,7 @@ function App() {
         message,
         profile,
         stress,
+        cookbookCase,
       });
       if (data.flow) setFlowResult(data.flow);
       setOutcome({
@@ -118,13 +131,38 @@ function App() {
   return (
     <>
       <main className="playground dark">
-        {scenario.startsWith("flow-") && (
+        {scenario === "flow-skills" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · 182 skills
+            </span>
+            <h1>Skill suggestion</h1>
+            <p>
+              Rank the full roster, check whether a skill is needed, then
+              re-assess the top three. Follow every function, request, and
+              decision in Jev DevTools.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/skill_suggestion"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Official recipe ↗
+            </a>
+            <p className="sample-note">
+              {mode === "sample"
+                ? "Official selection logic and roster, with authored synthetic responses. These are not the published measurements."
+                : "Live Jev inference: one request, or two if the first gate passes. No agent or skill is executed."}
+            </p>
+          </div>
+        )}
+        {scenario.startsWith("flow-") && scenario !== "flow-skills" && (
           <p>
             Sample-only flow. Run a sample, open Jev DevTools, and choose Flows.
             Select a node to inspect its captured request.
           </p>
         )}
-        {flowResult && (
+        {flowResult && scenario !== "flow-skills" && (
           <div role="status">
             <strong>Outcome: {flowResult.outcome}</strong>
             <pre>{JSON.stringify(flowResult.value, null, 2)}</pre>
@@ -142,6 +180,8 @@ function App() {
                 onChange={(e) => {
                   setScenario(e.target.value);
                   resetOutcome();
+                  if (e.target.value === "flow-skills")
+                    setMessage(skillCases[cookbookCase].message);
                   if (
                     ["retry", "error", "stress"].includes(e.target.value) ||
                     e.target.value.startsWith("flow-")
@@ -153,6 +193,7 @@ function App() {
                   "flow-approve": "Flow · Approve",
                   "flow-functions":
                     "Flow · Functions + dynamic questions (synthetic)",
+                  "flow-skills": "Cookbook · Skill suggestion (182 skills)",
                   "flow-manual": "Flow · Manual review",
                   "flow-other": "Flow · Other",
                   "flow-parallel": "Flow · Parallel checks + join",
@@ -189,6 +230,8 @@ function App() {
                 disabled={!!runId}
                 onChange={(e) => {
                   setMode(e.target.value);
+                  if (scenario === "flow-skills" && e.target.value === "sample")
+                    setMessage(skillCases[cookbookCase].message);
                   resetOutcome();
                 }}
               >
@@ -198,13 +241,37 @@ function App() {
                   disabled={
                     !live ||
                     ["retry", "error", "stress"].includes(scenario) ||
-                    scenario.startsWith("flow-")
+                    (scenario.startsWith("flow-") && scenario !== "flow-skills")
                   }
                 >
                   Live{!live ? " · no server key" : ""}
                 </NativeSelectOption>
               </NativeSelect>
             </div>
+            {scenario === "flow-skills" && (
+              <div className="form-field">
+                <Label htmlFor="cookbook-case">
+                  {mode === "sample" ? "Synthetic case" : "Starting example"}
+                </Label>
+                <NativeSelect
+                  id="cookbook-case"
+                  value={cookbookCase}
+                  disabled={!!runId}
+                  onChange={(e) => {
+                    const next = e.target.value as SkillCase;
+                    setCookbookCase(next);
+                    setMessage(skillCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(skillCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
             {mode === "sample" &&
               !scenario.startsWith("flow-") &&
               scenario !== "image" &&
@@ -326,6 +393,7 @@ function App() {
             <div className="form-field context-field">
               <Label htmlFor="context">Context</Label>
               <Textarea
+                readOnly={scenario === "flow-skills" && mode === "sample"}
                 id="context"
                 className="min-h-32 resize-y"
                 disabled={!!runId}
@@ -371,11 +439,16 @@ function App() {
             <span role="status">{feedback}</span>
           </div>
           <p id="sample-note" className="sample-note">
-            {mode === "sample"
-              ? "Fixed sample answers, including when you edit context. No external API calls."
-              : "Live inference uses your server key and may incur API charges."}
+            {scenario === "flow-skills" && mode === "sample"
+              ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
+              : mode === "sample"
+                ? "Fixed sample answers, including when you edit context. No external API calls."
+                : "Live inference uses your server key and may incur API charges."}
           </p>
         </section>
+        {scenario === "flow-skills" && flowResult && (
+          <SkillCookbookResult result={flowResult} mode={mode} />
+        )}
         {!scenario.startsWith("flow-") && outcome.status !== "idle" && (
           <ScenarioResult run={outcome} />
         )}

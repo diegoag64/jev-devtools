@@ -14,7 +14,7 @@ Follow the context, explore each question, and see the answers come together.
 [![MIT license](https://img.shields.io/badge/License-MIT-E551BA?labelColor=0D0A0F)](LICENSE)
 [![Status: experimental](https://img.shields.io/badge/Status-experimental-E551BA?labelColor=0D0A0F)](#install-in-another-react-app)
 
-[Demo](#see-it-in-motion) · [Quick start](#run-the-playground) · [Install](#install-in-another-react-app) · [AI setup](#set-up-with-your-coding-agent) · [Next.js](docs/nextjs.md) · [Flows](docs/flows.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
+[Demo](#see-it-in-motion) · [Quick start](#run-the-playground) · [Install](#install-in-another-react-app) · [AI setup](#set-up-with-your-coding-agent) · [Next.js](docs/nextjs.md) · [Flows](docs/flows.md) · [Cookbooks](cookbooks/README.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -80,6 +80,8 @@ Open http://127.0.0.1:4182/. Sample mode needs no API key. Run a scenario to see
 With `npm run dev` running, open [the Choice sandbox](http://127.0.0.1:4182/?sandbox=1). It starts with **150 choices**. Click **Run sample**, open **Jev DevTools**, then select the latest **Sandbox** request. Expand the drawer for a larger canvas. In Flow, click **Show More** to add three categories at a time, or **Show fewer** to reset the overview. New branches animate in without moving your camera; click **Fit** when you want to reframe the expanded diagram. Use **All probabilities** to open the full distribution; search or page through the exact captured values.
 
 Controls cover 3/6/7/150 choices, tied probabilities, zero-probability alternatives, long labels, roughly 80 KB of context, and a synthetic returned choice outside the top categories. Sandbox requests always use deterministic local responses—even if a server key is configured. No inference calls are made. Other scenarios remain available in the Scenario selector.
+
+The local [skill-suggestion cookbook](cookbooks/skill-suggestion/README.md) runs the official 182-skill selection flow with three clearly labeled synthetic cases. Open `http://127.0.0.1:4182/?cookbook=skill-suggestion` and inspect the connected requests, function steps, and branches in **Jev DevTools → Flows**. This experiment requires the current checkout; its API additions are not in npm 0.3.0.
 
 For optional live mode, copy `apps/playground/.env.example` to `apps/playground/.env.local`, set `TYPESAFE_API_KEY`, and restart. Keys stay on the server. Verification uses sample responses; live inference has not been verified.
 
