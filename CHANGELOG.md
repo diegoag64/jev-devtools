@@ -18,7 +18,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-Unreleased flow API extensions and cookbook demos; not published to npm.
+Flow API extensions and cookbook demos proposed in [#30](https://github.com/diegoag64/jev-devtools/pull/30); not published to npm.
 
 - Format function and merge-card outputs as typed, collapsible properties instead of cut-off JSON strings. Nested objects and arrays expand on demand; long values and additional properties remain accessible without growing the canvas indefinitely.
 
