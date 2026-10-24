@@ -15,6 +15,18 @@ For drawer changes, run `npx playwright install chromium --only-shell` once, the
 
 For opt-in performance measurements, run `npm run bench:server`, `npm run bench:browser`, or `npm run bench:compare -- BASE_COMMIT` locally. Follow the [local benchmark guide](docs/performance.md). Run server and browser benchmarks separately to avoid CPU contention. Never run performance benchmarks in GitHub Actions; hosted CI is for correctness and integration checks. Keep scripts and fixtures tracked, but save all generated results, profiles, screenshots, logs, and per-run reports under ignored `benchmarks/results/`. Put before/after results, commit SHAs, commands, environment, variability, and tradeoffs in the PR description or discussion. Do not force-add artifacts or copy them into `docs/`.
 
+## PR titles
+
+Use `type: description`, with a lowercase type and one space after the colon. Describe the actual change; update the title if the scope changes.
+
+- `feat: add flow loops`
+- `fix: preserve diagram zoom when switching items`
+- `docs: explain the memory cookbook`
+
+Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, and `revert`. An optional scope and breaking-change marker are supported: `fix(viewer): restore focus` or `feat!: change the flow API`. The description must be nonempty, on one line, with no leading or trailing whitespace.
+
+The **PR title** workflow checks drafts and ready PRs on creation, title edits, new commits and reopening. It only validates metadata; it does not install dependencies or run benchmarks. The **Conventional PR titles** repository ruleset requires this check before merging to `main`.
+
 ## Keep the changelog current
 
 For user-visible changes, add a concise entry under **Unreleased** in [CHANGELOG.md](CHANGELOG.md) in the same PR. Describe the behavior and any compatibility change, and link the PR once its number is known. Include meaningful documentation and tooling improvements; skip internal refactors with no observable effect. Entries on feature branches describe proposed changes; the changelog on `main` describes merged work.
