@@ -1,4 +1,9 @@
 import {
+  sdeCases,
+  type SdeCase,
+} from "../../../cookbooks/sde-cascade/cases.js";
+import { SdeCookbookResult } from "./SdeCookbookResult.js";
+import {
   ragCases,
   type RagCase,
 } from "../../../cookbooks/rag-passages/cases.js";
@@ -31,6 +36,8 @@ const cookbookRequested =
   new URLSearchParams(location.search).get("cookbook") === "skill-suggestion";
 const ragRequested =
   new URLSearchParams(location.search).get("cookbook") === "rag-passages";
+const sdeRequested =
+  new URLSearchParams(location.search).get("cookbook") === "sde-cascade";
 const savedSession = sessionStorage.getItem("jev-inspector-session");
 const session = savedSession || crypto.randomUUID();
 sessionStorage.setItem("jev-inspector-session", session);
@@ -55,6 +62,7 @@ async function post(path: string, body: unknown = {}) {
   return data;
 }
 function App() {
+  const [sdeCase, setSdeCase] = useState<SdeCase>("fabricated");
   const [ragCase, setRagCase] = useState<RagCase>("premise");
   const [cookbookCase, setCookbookCase] = useState<SkillCase>("deck");
   const [stress, setStress] = useState<StressOptions>(defaultStress);
@@ -76,22 +84,26 @@ function App() {
     setFeedback("Ready to capture a request.");
   };
   const [scenario, setScenario] = useState(
-      ragRequested
-        ? "flow-rag"
-        : cookbookRequested
-          ? "flow-skills"
-          : sandbox
-            ? "stress"
-            : "triage",
+      sdeRequested
+        ? "flow-sde"
+        : ragRequested
+          ? "flow-rag"
+          : cookbookRequested
+            ? "flow-skills"
+            : sandbox
+              ? "stress"
+              : "triage",
     ),
     [mode, setMode] = useState("sample"),
     [live, setLive] = useState(false);
   const [message, setMessage] = useState(
-    ragRequested
-      ? ragCases.premise.message
-      : cookbookRequested
-        ? skillCases.deck.message
-        : "I was charged twice and checkout is blocked. I need a human to help me today.",
+    sdeRequested
+      ? sdeCases.fabricated.message
+      : ragRequested
+        ? ragCases.premise.message
+        : cookbookRequested
+          ? skillCases.deck.message
+          : "I was charged twice and checkout is blocked. I need a human to help me today.",
   );
   const [runId, setRunId] = useState<string>(),
     [feedback, setFeedback] = useState("Ready to capture a request.");
@@ -119,6 +131,7 @@ function App() {
         stress,
         cookbookCase,
         ragCase,
+        sdeCase,
       });
       if (data.flow) setFlowResult(data.flow);
       setOutcome({
@@ -148,6 +161,30 @@ function App() {
   return (
     <>
       <main className="playground dark">
+        {scenario === "flow-sde" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · returning flow.if()
+            </span>
+            <h1>Verify, escalate, rejoin.</h1>
+            <p>
+              A cheap extractor proposes a record. Jev checks each field. If any
+              field flag exceeds 70%, a stronger extractor takes over; both
+              paths meet at the final comparison.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/sde_cascade"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official SDE cascade cookbook ↗
+            </a>
+            <p>
+              Local adaptation · authored synthetic documents, extractor results
+              and probabilities. No model calls or API key required.
+            </p>
+          </div>
+        )}
         {scenario === "flow-rag" && (
           <div className="cookbook-intro">
             <span className="cookbook-eyebrow">
@@ -198,18 +235,19 @@ function App() {
           </div>
         )}
         {scenario.startsWith("flow-") &&
-          !["flow-skills", "flow-rag"].includes(scenario) && (
+          !["flow-skills", "flow-rag", "flow-sde"].includes(scenario) && (
             <p>
               Sample-only flow. Run a sample, open Jev DevTools, and choose
               Flows. Select a node to inspect its captured request.
             </p>
           )}
-        {flowResult && !["flow-skills", "flow-rag"].includes(scenario) && (
-          <div role="status">
-            <strong>Outcome: {flowResult.outcome}</strong>
-            <pre>{JSON.stringify(flowResult.value, null, 2)}</pre>
-          </div>
-        )}
+        {flowResult &&
+          !["flow-skills", "flow-rag", "flow-sde"].includes(scenario) && (
+            <div role="status">
+              <strong>Outcome: {flowResult.outcome}</strong>
+              <pre>{JSON.stringify(flowResult.value, null, 2)}</pre>
+            </div>
+          )}
         <section className="run-form" aria-label="Request playground">
           <div className="form-row">
             <div className="form-field scenario-field">
@@ -222,6 +260,8 @@ function App() {
                 onChange={(e) => {
                   setScenario(e.target.value);
                   resetOutcome();
+                  if (e.target.value === "flow-sde")
+                    setMessage(sdeCases[sdeCase].message);
                   if (e.target.value === "flow-rag")
                     setMessage(ragCases[ragCase].message);
                   if (e.target.value === "flow-skills")
@@ -238,6 +278,7 @@ function App() {
                   "flow-functions":
                     "Flow · Functions + dynamic questions (synthetic)",
                   "flow-skills": "Cookbook · Skill suggestion (182 skills)",
+                  "flow-sde": "Cookbook · SDE cascade",
                   "flow-rag": "Cookbook · RAG passages (12 items)",
                   "flow-manual": "Flow · Manual review",
                   "flow-other": "Flow · Other",
@@ -293,6 +334,28 @@ function App() {
                 </NativeSelectOption>
               </NativeSelect>
             </div>
+            {scenario === "flow-sde" && (
+              <div className="form-field">
+                <Label htmlFor="sde-case">SDE sample</Label>
+                <NativeSelect
+                  id="sde-case"
+                  value={sdeCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as SdeCase;
+                    setSdeCase(next);
+                    setMessage(sdeCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(sdeCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
             {scenario === "flow-rag" && (
               <div className="form-field">
                 <Label htmlFor="rag-case">RAG sample</Label>
@@ -461,7 +524,7 @@ function App() {
               <Label htmlFor="context">Context</Label>
               <Textarea
                 readOnly={
-                  ["flow-skills", "flow-rag"].includes(scenario) &&
+                  ["flow-skills", "flow-rag", "flow-sde"].includes(scenario) &&
                   mode === "sample"
                 }
                 id="context"
@@ -509,15 +572,20 @@ function App() {
             <span role="status">{feedback}</span>
           </div>
           <p id="sample-note" className="sample-note">
-            {scenario === "flow-rag"
-              ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
-              : scenario === "flow-skills" && mode === "sample"
-                ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
-                : mode === "sample"
-                  ? "Fixed sample answers, including when you edit context. No external API calls."
-                  : "Live inference uses your server key and may incur API charges."}
+            {scenario === "flow-sde"
+              ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
+              : scenario === "flow-rag"
+                ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
+                : scenario === "flow-skills" && mode === "sample"
+                  ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
+                  : mode === "sample"
+                    ? "Fixed sample answers, including when you edit context. No external API calls."
+                    : "Live inference uses your server key and may incur API charges."}
           </p>
         </section>
+        {scenario === "flow-sde" && flowResult && (
+          <SdeCookbookResult result={flowResult} />
+        )}
         {scenario === "flow-rag" && flowResult && (
           <RagCookbookResult result={flowResult} />
         )}

@@ -1,3 +1,10 @@
+import { sdeFlow } from "../../../cookbooks/sde-cascade/flow.js";
+import { sdeSampleTransport } from "../../../cookbooks/sde-cascade/samples.js";
+import {
+  sdeCases,
+  isSdeCase,
+  type SdeCase,
+} from "../../../cookbooks/sde-cascade/cases.js";
 import { ragFlow } from "../../../cookbooks/rag-passages/flow.js";
 import { ragSampleTransport } from "../../../cookbooks/rag-passages/samples.js";
 import {
@@ -104,6 +111,7 @@ export function jevInspectorServer(
             stress?: StressOptions;
             cookbookCase?: string;
             ragCase?: string;
+            sdeCase?: string;
           };
           try {
             let text = "";
@@ -142,6 +150,7 @@ export function jevInspectorServer(
               "flow-functions",
               "flow-skills",
               "flow-rag",
+              "flow-sde",
               "flow-manual",
               "flow-other",
               "flow-parallel",
@@ -153,6 +162,9 @@ export function jevInspectorServer(
             typeof body.message !== "string" ||
             body.message.length > 8000 ||
             (body.scenario === "stress" && !validStress(body.stress)) ||
+            (body.scenario === "flow-sde" &&
+              (!isSdeCase(body.sdeCase) ||
+                body.message !== sdeCases[body.sdeCase].message)) ||
             (body.scenario === "flow-rag" &&
               (!isRagCase(body.ragCase) ||
                 body.message !== ragCases[body.ragCase].message)) ||
@@ -210,28 +222,53 @@ export function jevInspectorServer(
                 {
                   apiKey: body.mode === "live" ? apiKey : "sample-only",
                   fetch:
-                    body.scenario === "flow-rag"
-                      ? ragSampleTransport(body.ragCase as RagCase)
-                      : body.scenario === "flow-skills"
-                        ? body.mode === "live"
-                          ? globalThis.fetch
-                          : skillSampleTransport(
-                              body.cookbookCase as keyof typeof skillCases,
-                            )
-                        : flowTransport(body.scenario!),
+                    body.scenario === "flow-sde"
+                      ? sdeSampleTransport(body.sdeCase as SdeCase)
+                      : body.scenario === "flow-rag"
+                        ? ragSampleTransport(body.ragCase as RagCase)
+                        : body.scenario === "flow-skills"
+                          ? body.mode === "live"
+                            ? globalThis.fetch
+                            : skillSampleTransport(
+                                body.cookbookCase as keyof typeof skillCases,
+                              )
+                          : flowTransport(body.scenario!),
                   logLevel: "off",
                   retry: { maxRetries: 0 },
                   timeout: 120_000,
                 },
                 {
-                  label: flow.definition.name,
+                  label:
+                    body.scenario === "flow-sde"
+                      ? sdeFlow.definition.name
+                      : flow.definition.name,
                   source: body.mode === "live" ? "live" : "sample",
                 },
               );
-              const result = await flow.run(
-                { message: body.message, caseId: body.ragCase as RagCase },
-                { client, devtools: inspector, signal: controller.signal },
-              );
+              const result =
+                body.scenario === "flow-sde"
+                  ? await sdeFlow.run(
+                      {
+                        message: body.message,
+                        caseId: body.sdeCase as SdeCase,
+                      },
+                      {
+                        client,
+                        devtools: inspector,
+                        signal: controller.signal,
+                      },
+                    )
+                  : await flow.run(
+                      {
+                        message: body.message,
+                        caseId: body.ragCase as RagCase,
+                      },
+                      {
+                        client,
+                        devtools: inspector,
+                        signal: controller.signal,
+                      },
+                    );
               send(res, 200, { ok: true, flow: result });
               return;
             }

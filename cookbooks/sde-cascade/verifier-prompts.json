@@ -1,0 +1,64 @@
+{
+  "EXTRACT_SYSTEM": "You extract structured data from documents. Return only values supported by the text. Follow any value format specified by the schema or its field descriptions.",
+  "MAIN_QUESTIONS": {
+    "name_desc_mismatch": [
+      "Does the `extracted_field` fail to match the field at `path` or the `description` in the `field_spec`? If the `description` is empty, judge against the `path` alone.",
+      {
+        "true": "the `extracted_field` does not match the field name or its `description`",
+        "false": "the `extracted_field` matches the field name and `description`"
+      }
+    ],
+    "type_mismatch": [
+      "Does the `extracted_field` violate the `type` declared in the `field_spec`?",
+      {
+        "true": "the `extracted_field` violates the declared `type`",
+        "false": "the `extracted_field` conforms to the declared `type`"
+      }
+    ],
+    "unreasonable": [
+      "Is the `extracted_field` one that a reasonable person would not have extracted for this `field_spec`?",
+      {
+        "true": "a reasonable person would not have extracted this value",
+        "false": "the extraction is reasonable"
+      }
+    ],
+    "hallucinated": [
+      "Is the `extracted_field` unsupported by, or absent from, the source text?",
+      {
+        "true": "the `extracted_field` is a hallucination -- not supported by, or absent from, the source text",
+        "false": "the `extracted_field` is supported by the source text"
+      }
+    ],
+    "off_target": [
+      "Does the source text fail to genuinely report the thing the `field_spec` describes, so the value was pulled from incidental text?",
+      {
+        "true": "the source does not genuinely provide this field -- the value was pulled from incidental text",
+        "false": "the source genuinely reports this field"
+      }
+    ],
+    "incomplete": [
+      "Does the `extracted_field` fail to capture a value the source supports (note whether the `field_spec` is `required`)?",
+      {
+        "true": "the field is wrongly empty, null, or missing a value the source supports",
+        "false": "the field captures the value the source supports"
+      }
+    ],
+    "format_violation": [
+      "Does the `extracted_field` violate the format or constraints implied by the `description`, the schema `type`, and the extraction instructions (e.g. date format, units, enum membership)?",
+      {
+        "true": "the `extracted_field` violates the implied format or constraints",
+        "false": "the `extracted_field` satisfies the format and constraints"
+      }
+    ]
+  },
+  "ABSENCE_QUESTION": "The `extracted_field` is empty, null, or an empty collection. Does the source text contain the information the `field_spec` describes, making the empty result wrong?",
+  "ABSENCE_CRITERIA": {
+    "true": "a value was wrongly omitted",
+    "false": "returning nothing is correct"
+  },
+  "OVERALL_JUDGE": "Is this extracted record an incorrect extraction -- some value unsupported by the source or not conforming to the schema, required information missing or wrong, or some field hallucinated -- so it should be escalated to a smarter model?",
+  "OVERALL_JUDGE_CRITERIA": {
+    "true": "the record is an incorrect extraction",
+    "false": "the record is a correct extraction"
+  }
+}

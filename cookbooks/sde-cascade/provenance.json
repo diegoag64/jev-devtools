@@ -1,0 +1,7 @@
+{
+  "source": "https://docs.typesafe.ai/cookbooks/sde_cascade.md",
+  "reviewedOn": "2026-10-24",
+  "sourceSha256": "c69d71fae569ea92e55ce6e687eea895f5550b3b733c669b2839ab8d5df21407",
+  "transformation": "Copy the extraction system message and verifier question/criteria strings. Port question construction and strict per-field >0.70 policy to TypeScript. Documents, extractions and response probabilities are authored synthetic fixtures; no upstream evaluation cache or dataset is included.",
+  "license": "MIT; see LICENSE.typesafe"
+}

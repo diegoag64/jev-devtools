@@ -30,3 +30,5 @@ Use the installed `lib/flow/index.d.ts` as the version-matched API contract. Def
 
 - [Repository workflow](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/AGENTS.md): For package contributors, not installation into a consumer app.
 - [Release process](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/docs/releases.md)
+
+Local experiment (not npm 0.3.0): returning `flow.if()` paths, strict `.gt()`, bounded `flow.map()` and server function tasks. Read the checkout’s `docs/flows.md` and `cookbooks/sde-cascade/README.md` for sample-only cascade execution. Confirm installed declarations before generating code with these APIs.

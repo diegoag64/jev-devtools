@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Local experiment: function steps, runtime requests, bounded collections, and skill/RAG cookbooks. |
+| [Unreleased](#unreleased) | Not published | Local experiment: function steps, runtime requests, bounded collections, returning conditionals, and skill/RAG/SDE cookbooks. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
 | [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Batched updates, changed-trace streaming, frame-coalesced rendering, less work while the drawer is closed, virtualized Questions, compact Choice diagrams, and reuse of unchanged inspector views. |
 | [0.1.3](#013--october-23-2026-experimental) | 2026-10-23 | Isolated drawer styles, diagram pan/zoom, and version-specific npm links. |
@@ -19,6 +19,9 @@ Dates below use UTC and were checked against npm's publication history. The hist
 ## Unreleased
 
 Local experiment; not published or submitted as a PR.
+
+- Add `flow.if()` for typed value-returning paths that rejoin shared work, strict numeric `.gt()`, and a visible Selected result merge with captured values and only the chosen incoming edge highlighted. Branch-local references remain scoped; failures/cancellation prevent continuation. New `if`/`merge` records require the matching updated server and drawer; published `flow.branch()` semantics are unchanged.
+- Add a sample-only SDE cascade cookbook with dynamic per-field verification, conditional stronger extraction, before/after records, every flag accessible, and four no-key cases covering both routes and the strict 70% boundary. The overall judge is excluded from escalation; extraction and probabilities are labeled synthetic fixtures.
 
 - Animate collection item changes with a short directional fade/slide, respecting reduced motion. Center previews beneath their collection, move navigation arrows outside the frame with subtle corner rounding, and include their bounds when fitting the canvas. The camera and original nodes stay fixed during navigation.
 
