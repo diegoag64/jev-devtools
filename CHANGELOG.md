@@ -19,7 +19,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-- Require a version-independent release checklist covering npm, the exact release tag, GitHub publication and Latest status, and explicit partial-completion reporting. Record the recovered v0.4.0 GitHub release and explain authentication options for remote publishing. Documentation only; existing checks and package compatibility are unchanged.
+- Require a version-independent release checklist covering npm, the exact release tag, GitHub publication and Latest status, and explicit partial-completion reporting. Record the recovered v0.4.0 GitHub release and explain authentication options for remote publishing. Documentation only; existing checks and package compatibility are unchanged. ([#59](https://github.com/diegoag64/jev-devtools/pull/59))
 
 - Fix published `FlowExpression` declarations so they reject unsafe union narrowing and optional or nullable numeric comparisons, with packed-consumer type coverage. Runtime behavior is unchanged. Fixes [#39](https://github.com/diegoag64/jev-devtools/issues/39). ([#56](https://github.com/diegoag64/jev-devtools/pull/56))
 
