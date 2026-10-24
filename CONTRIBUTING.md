@@ -43,6 +43,20 @@ Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `buil
 
 The **PR title** workflow checks drafts and ready PRs on creation, title edits, new commits and reopening. It only validates metadata; it does not install dependencies or run benchmarks. The **Conventional PR titles** repository ruleset requires this check before merging to `main`.
 
+## PR descriptions
+
+Use the [PR template](.github/pull_request_template.md) whenever creating or updating a PR, including through CLI or API tools. Keep its five headings in order. Write in plain language for a reviewer who has not seen the conversation, and keep the detail proportional to the change: a small fix can use a sentence or two per section. Update the description to reflect the final implementation whenever scope changes.
+
+1. **Problem:** Explain the problem or need and who it affects. For a bug, describe actual versus expected behavior, with reproduction steps and environment details where relevant. Link related issues; use closing keywords only for issues fully resolved by the PR.
+2. **Change:** Explain how the implementation addresses the problem and the resulting behavior. Use a concrete before/after example when useful. Include tradeoffs or rejected alternatives only when they help the reviewer understand the chosen approach.
+3. **Scope and compatibility:** Identify affected components and explain why changes across them belong together when that is not obvious. Describe effects on public APIs, package exports, CSS integration, supported versions, or packaging, including any migration needed. State when there is no compatibility impact, and identify meaningful limits or follow-up work.
+4. **Verification:** Describe checks and observed results for the affected behavior, along with the required repository checks. Include relevant commands, environment details, and evidence; explicitly state what was not checked and why. A checkbox or "tests pass" alone is insufficient. Distinguish sample verification from live inference. Focused evidence supplements the required checks; it does not replace them.
+5. **CSS review:** Preserve the template's checklist and provide the evidence required by [Package CSS review](#package-css-review) when package CSS or its consumers change. Otherwise replace the checklist with "Not applicable." Keep the heading.
+
+For visible UI changes, include before/after captures when browser access is available, and a short recording when motion or interaction is needed to show the result. Disclose unavailable browser verification. Link or embed evidence in the PR; keep generated screenshots, recordings, logs, and reports out of Git under ignored `benchmarks/results/`. Performance claims need the comparisons, provenance, variability, and limitations described in the [local benchmark guide](docs/performance.md); benchmarks remain local only.
+
+These are authoring and review requirements. There is no automated PR-description format check.
+
 ## Keep the changelog current
 
 For user-visible changes, add a concise entry under **Unreleased** in [CHANGELOG.md](CHANGELOG.md) in the same PR. Describe the behavior and any compatibility change, and link the PR once its number is known. Include meaningful documentation and tooling improvements; skip internal refactors with no observable effect. Entries on feature branches describe proposed changes; the changelog on `main` describes merged work.

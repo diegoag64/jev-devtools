@@ -1,10 +1,24 @@
+<!-- Follow CONTRIBUTING.md#pr-descriptions. Keep these headings in order and scale the detail to the change. -->
+
+## Problem
+
+<!-- Explain the problem or need and its impact. For a bug, describe actual versus expected behavior and include reproduction steps or environment where relevant. Link related issues; use closing keywords only when fully resolved. -->
+
 ## Change
 
-<!-- Explain the problem and resulting behavior. Link related issues; use closing keywords only when fully resolved. -->
+<!-- Explain how the change addresses the problem and what happens afterward. Include a concrete before/after example when useful. Explain important tradeoffs or rejected alternatives only when they help review the chosen approach. -->
+
+## Scope and compatibility
+
+<!-- Identify affected components and explain their relationship when needed. Describe public API, package exports, CSS integration, supported-version, or packaging changes and any migration needed. State when there is no compatibility impact; note meaningful limits or follow-up work. -->
 
 ## Verification
 
-<!-- List checks run, relevant browser evidence, and any gaps. See CONTRIBUTING.md for required commands. -->
+<!-- Describe the checks run and observed results for the changed behavior, plus the required commands in CONTRIBUTING.md. Include relevant environment details and explicitly state anything not checked. "Tests pass" alone is insufficient.
+
+For visible UI changes, include before/after captures when browser access is available; use a short recording when motion or interaction matters. Link or embed evidence in the PR. Keep generated artifacts out of Git under ignored benchmarks/results/.
+
+For performance claims, follow docs/performance.md and report before/after measurements, revisions, commands, environment, variability, and tradeoffs. Benchmarks run locally only. Distinguish sample verification from live inference. -->
 
 ## CSS review
 
