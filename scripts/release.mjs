@@ -99,10 +99,12 @@ if (command === "prepare") {
   console.log(`New release ${meta.version}; npm latest is ${latest.version}`);
 } else if (command === "verify-npm") {
   const meta = artifact();
-  // Registry replication may lag a successful publish. Bound the wait and leave
-  // a clear partial-release failure rather than retrying the publish itself.
+  // npm can accept an upload before its processing and registry propagation finish.
+  // Allow nearly ten minutes within the publish job's twenty-minute timeout.
+  // Exhaustion remains a partial release; never retry the upload here.
+  const maxAttempts = 120;
   let verified;
-  for (let attempt = 0; attempt < 12; attempt++) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const published = await registry(`/${meta.version}`, true);
     if (published) {
       assert.equal(published.dist.integrity, meta.integrity, "Published archive differs from approved archive");
@@ -110,7 +112,7 @@ if (command === "prepare") {
       const latest = await registry("/latest");
       if (latest.version === meta.version) { verified = published; break; }
     }
-    if (attempt < 11) await new Promise((resolve) => setTimeout(resolve, 5000));
+    if (attempt < maxAttempts - 1) await new Promise((resolve) => setTimeout(resolve, 5000));
   }
   assert.ok(verified, "npm version/latest verification is pending; do not republish");
   const record = await registry("");
