@@ -18,7 +18,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-Local experiment; not published or submitted as a PR.
+Unreleased flow API extensions and cookbook demos; not published to npm.
 
 - Format function and merge-card outputs as typed, collapsible properties instead of cut-off JSON strings. Nested objects and arrays expand on demand; long values and additional properties remain accessible without growing the canvas indefinitely.
 
@@ -57,7 +57,7 @@ Local experiment; not published or submitted as a PR.
 - Add server-side `flow.task()` with typed resolved inputs/results, asynchronous callbacks, cooperative cancellation and optional timeouts. Late results cannot advance failed/cancelled flows; tasks do not retry automatically.
 - Add a synchronous request-factory overload to `flow.jev()` for questions/criteria built from preceding results while retaining SDK request capture and linkage. Existing static requests remain supported.
 - Display function cards, captured input/output property views, duration/status, capture warnings, and task-derived condition values. Task data is bounded/redacted independently of runtime values; exception messages and callback code are not sent to the browser.
-- Add a clearly labeled synthetic shortlist playground flow and human/AI API guidance. Mapping, iteration, and distributed execution are not included.
+- Add a clearly labeled synthetic shortlist playground flow and human/AI API guidance. The map and loop additions are described above; distributed execution is not included.
 
 ## 0.3.0 — October 24, 2026 (experimental)
 
