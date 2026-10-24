@@ -29,8 +29,8 @@ export function RagCookbookResult({ result }: { result: { value?: unknown } }) {
       </div>
       <p>
         Open Jev DevTools → Flows, select “Classify retrieved passages”, then
-        choose an item and “View item flow” to inspect its four answers and
-        routing function. Item numbers below match the collection.
+        choose an item in the card and “View Flow” to reveal its four answers
+        and routing function. Item numbers below match the collection.
       </p>
       <div className="rag-filters" aria-label="Filter passages">
         {Object.entries({ all: "All passages", ...names }).map(

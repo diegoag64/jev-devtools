@@ -5,14 +5,18 @@ export function FlowDetailsPanel({
   children,
   selection,
   onLayoutChange,
+  inline = false,
 }: {
   children: ReactNode;
   selection?: string;
   onLayoutChange: () => void;
+  inline?: boolean;
 }) {
   const id = useId();
   const panel = useRef<HTMLDivElement>(null);
-  const drag = useRef<{ y: number; height: number } | null>(null);
+  const drag = useRef<{ y: number; height: number; scale: number } | null>(
+    null,
+  );
   const [open, setOpen] = useState(false);
   const [height, setHeight] = useState(240);
   const [max, setMax] = useState(0);
@@ -23,7 +27,11 @@ export function FlowDetailsPanel({
     const workspace = panel.current?.parentElement;
     if (!workspace) return;
     const measure = () => {
-      const available = workspace.clientHeight;
+      // Inline panels grow the canvas instead of taking space from a fixed viewport.
+      // Exclude the panel itself so resizing cannot grow its own upper bound.
+      const available =
+        workspace.clientHeight -
+        (inline ? panel.current?.offsetHeight ?? 0 : 0);
       // Leave room for the bar/divider and a usable canvas, including short drawers.
       setMax(Math.max(0, available - Math.min(140, available * 0.45) - 44));
     };
@@ -31,7 +39,7 @@ export function FlowDetailsPanel({
     const observer = new ResizeObserver(measure);
     observer.observe(workspace);
     return () => observer.disconnect();
-  }, []);
+  }, [inline]);
 
   const resize = (next: number) => {
     onLayoutChange();
@@ -39,7 +47,7 @@ export function FlowDetailsPanel({
   };
 
   return (
-    <div className="flow-details-panel" ref={panel}>
+    <div className="flow-details-panel" ref={panel} data-diagram-scroll>
       {open && (
         <div
           className="flow-details-resize"
@@ -57,11 +65,21 @@ export function FlowDetailsPanel({
             event.preventDefault();
             event.currentTarget.focus({ preventScroll: true });
             event.currentTarget.setPointerCapture(event.pointerId);
-            drag.current = { y: event.clientY, height: visibleHeight };
+            drag.current = {
+              y: event.clientY,
+              height: visibleHeight,
+              // Inline item details share the outer canvas zoom.
+              scale:
+                event.currentTarget.getBoundingClientRect().height /
+                  event.currentTarget.offsetHeight || 1,
+            };
           }}
           onPointerMove={(event) => {
             if (drag.current)
-              resize(drag.current.height + drag.current.y - event.clientY);
+              resize(
+                drag.current.height +
+                  (drag.current.y - event.clientY) / drag.current.scale,
+              );
           }}
           onPointerUp={(event) => {
             drag.current = null;

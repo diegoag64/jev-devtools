@@ -20,6 +20,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 Local experiment; not published or submitted as a PR.
 
+- Inspect collection items inline: choose an item and View Flow inside the collection card to expand its connected diagram underneath. Cycle items without leaving the parent canvas, with shared pan/zoom, collapsible item flows, and explicit queued/empty states.
+
 - Size flow cards and request headings to their text instead of clipping titles and descriptions. Recalculate spacing and connectors when content grows or shrinks, while preserving the camera.
 
 - Add typed `flow.map()` with bounded concurrency, stable input-order results, isolated item programs, fail-fast cancellation, empty-list support and explicit item/execution limits. Collection cards show progress and let users inspect every started item’s full request/function diagram.

@@ -15,7 +15,7 @@ Open [RAG passages](http://127.0.0.1:4182/?cookbook=rag-passages), choose a case
 - **Answerable:** twelve candidates; four sources reach the evidence block. Other passages show injection, relevance and insufficient-evidence exclusions.
 - **Empty retrieval:** zero candidates; the collection completes without Jev calls and the answer reports insufficient evidence.
 
-Open **Jev DevTools → Flows**, select **Classify retrieved passages**, choose a **Collection item**, and click **View item flow**. Every item has its actual Jev request, four answer options, routing function and result. **Back to collection** restores the parent diagram and camera. The collection shows completed/running/queued counts; at most four passages execute at a time. **Cancel** stops active and queued work. The result cards use the same item numbers and expose all scores, reasons and passage text.
+Open **Jev DevTools → Flows**, select **Classify retrieved passages**, choose a **Collection item** inside its card, and click **View Flow**. Its connected diagram appears below the collection on the same canvas, with the actual Jev request, four answer options, routing function and result. Change the item selector to switch that diagram in place; **Hide Flow** collapses it. The parent flow stays visible and shares pan/zoom with the item diagram. The collection shows completed/running/queued counts; at most four passages execute at a time. **Cancel** stops active and queued work. The result cards use the same item numbers and expose all scores, reasons and passage text.
 
 ## Fidelity and sample boundaries
 

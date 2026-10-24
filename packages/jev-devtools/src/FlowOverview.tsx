@@ -20,6 +20,8 @@ import { FlowDetailsPanel } from "./FlowDetailsPanel.js";
 import { DiagramContent } from "./DiagramContent.js";
 type Lane = { name: string; status: string };
 type Bounds = { x: number; y: number; width: number; height: number };
+type Size = Pick<Bounds, "width" | "height">;
+type CollectionView = { index: number; open: boolean };
 // Measure in canvas coordinates: screen rectangles also include the camera zoom.
 function useNodeHeight<T extends HTMLElement>(
   id: string,
@@ -32,7 +34,7 @@ function useNodeHeight<T extends HTMLElement>(
     let previous = 0;
     const measure = () => {
       const height = element.offsetHeight;
-      // Opening a collection item hides its parent flow without unmounting it.
+      // A closed drawer can hide the flow without unmounting it.
       if (height > 0 && height !== previous) {
         previous = height;
         onResize(id, height);
@@ -114,6 +116,9 @@ const Card = memo(function Card({
   data,
   durationMs,
   collection,
+  collectionView,
+  onCollectionChange,
+  expansionId,
 }: {
   node: FlowNode;
   status: string;
@@ -127,8 +132,11 @@ const Card = memo(function Card({
   data?: FlowStep["data"];
   durationMs?: number;
   collection?: FlowStep["collection"];
+  collectionView?: CollectionView;
+  onCollectionChange: (id: string, view: CollectionView) => void;
+  expansionId: string;
 }) {
-  const ref = useNodeHeight<HTMLButtonElement>(node.id, onResize);
+  const ref = useNodeHeight<HTMLElement>(node.id, onResize);
   const join = node.kind === "parallel";
   const finished = lanes.filter((lane) => lane.status === "completed").length;
   const route = [...node.path]
@@ -141,8 +149,13 @@ const Card = memo(function Card({
         ? "Returned outcome"
         : status;
 
+  const itemIndex = Math.min(
+    collectionView?.index ?? 0,
+    Math.max(0, (collection?.total ?? 0) - 1),
+  );
+  const expanded = collectionView?.open ?? false;
   return (
-    <button
+    <article
       ref={ref}
       className={`flow-step ${node.kind === "task" ? "flow-task" : ""} ${selected ? "selected" : ""}`}
       data-status={status}
@@ -151,215 +164,261 @@ const Card = memo(function Card({
         top: bounds.y,
         width: bounds.width,
       }}
-      aria-label={`Step ${node.id}, ${node.kind}, ${status}`}
-      aria-pressed={selected}
-      onClick={() => onSelect(node.id)}
+      aria-label={`${node.kind === "map" ? "Collection" : "Step"} ${node.title ?? node.id}`}
     >
-      <span className="flow-card-heading">
-        <span className="flow-kind-icon" aria-hidden="true">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            {join ? (
-              <path d="M4 5h4l5 7h7M4 19h4l5-7m4-3 3 3-3 3" />
-            ) : node.kind === "map" ? (
-              <>
-                <rect x="8" y="3" width="12" height="5" rx="1" />
-                <rect x="8" y="10" width="12" height="5" rx="1" />
-                <rect x="8" y="17" width="12" height="5" rx="1" />
-                <path d="M2 5.5h3m-3 7h3m-3 7h3" />
-              </>
-            ) : node.kind === "task" ? (
-              <path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18" />
-            ) : node.kind === "output" ? (
-              <>
-                <rect x="4" y="4" width="16" height="16" rx="4" />
-                <path d="m8 12 3 3 5-6" />
-              </>
-            ) : (
-              <path d="m12 3 9 9-9 9-9-9zM8 12h8" />
-            )}
-          </svg>
+      <button
+        className="flow-card-body"
+        aria-label={`Step ${node.id}, ${node.kind}, ${status}`}
+        aria-pressed={selected}
+        onClick={() => onSelect(node.id)}
+      >
+        <span className="flow-card-heading">
+          <span className="flow-kind-icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              {join ? (
+                <path d="M4 5h4l5 7h7M4 19h4l5-7m4-3 3 3-3 3" />
+              ) : node.kind === "map" ? (
+                <>
+                  <rect x="8" y="3" width="12" height="5" rx="1" />
+                  <rect x="8" y="10" width="12" height="5" rx="1" />
+                  <rect x="8" y="17" width="12" height="5" rx="1" />
+                  <path d="M2 5.5h3m-3 7h3m-3 7h3" />
+                </>
+              ) : node.kind === "task" ? (
+                <path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18" />
+              ) : node.kind === "output" ? (
+                <>
+                  <rect x="4" y="4" width="16" height="16" rx="4" />
+                  <path d="m8 12 3 3 5-6" />
+                </>
+              ) : (
+                <path d="m12 3 9 9-9 9-9-9zM8 12h8" />
+              )}
+            </svg>
+          </span>
+          <span className="eyebrow">
+            {join
+              ? "Parallel checks"
+              : node.kind === "branch"
+                ? "Condition"
+                : node.kind === "task"
+                  ? "Function"
+                  : node.kind === "map"
+                    ? "Collection"
+                    : node.kind}
+          </span>
+          {node.kind === "output" && (
+            <span className="flow-status">{stateLabel}</span>
+          )}
         </span>
-        <span className="eyebrow">
-          {join
-            ? "Parallel checks"
-            : node.kind === "branch"
-              ? "Condition"
-              : node.kind === "task"
-                ? "Function"
-                : node.kind === "map"
-                  ? "Collection"
-                  : node.kind}
-        </span>
-        {node.kind === "output" && (
-          <span className="flow-status">{stateLabel}</span>
+        <strong>
+          {node.title ?? (join ? joinTitle(lanes.length) : node.id)}
+        </strong>
+        {node.description && (
+          <span className="flow-step-description">{node.description}</span>
         )}
-      </span>
-      <strong>
-        {node.title ?? (join ? joinTitle(lanes.length) : node.id)}
-      </strong>
-      {node.description && (
-        <span className="flow-step-description">{node.description}</span>
-      )}
-      {node.kind === "map" && (
-        <span className="flow-map-progress">
-          <strong>
-            {collection
-              ? `${collection.items.filter((item) => item.status === "completed").length} of ${collection.total} complete`
-              : "Waiting for collection"}
-          </strong>
-          {collection && (
-            <span>
-              {
-                collection.items.filter((item) => item.status === "running")
-                  .length
-              }{" "}
-              running ·{" "}
-              {
-                collection.items.filter((item) => item.status === "waiting")
-                  .length
-              }{" "}
-              queued · up to {collection.concurrency} concurrent
+        {node.kind === "map" && (
+          <span className="flow-map-progress">
+            <strong>
+              {collection
+                ? `${collection.items.filter((item) => item.status === "completed").length} of ${collection.total} complete`
+                : "Waiting for collection"}
+            </strong>
+            {collection && (
+              <span>
+                {
+                  collection.items.filter((item) => item.status === "running")
+                    .length
+                }{" "}
+                running ·{" "}
+                {
+                  collection.items.filter((item) => item.status === "waiting")
+                    .length
+                }{" "}
+                queued · up to {collection.concurrency} concurrent
+              </span>
+            )}
+            <small>Explore an item's connected flow below</small>
+          </span>
+        )}
+        {node.kind === "task" && (
+          <span className="flow-task-preview">
+            <span className="flow-condition-label">Returned value</span>
+            <code>
+              {data &&
+              typeof data === "object" &&
+              !Array.isArray(data) &&
+              Object.hasOwn(data, "output")
+                ? JSON.stringify(data.output, null, 2).slice(0, 280)
+                : status === "running"
+                  ? "Running application code…"
+                  : "No output captured"}
+            </code>
+            <small>
+              {durationMs === undefined
+                ? "Select to inspect inputs and output"
+                : `${Math.round(durationMs)} ms · select to inspect`}
+            </small>
+          </span>
+        )}
+        {node.kind === "branch" &&
+          (node.conditionRule !== undefined || node.condition) && (
+            <span className="flow-condition-rule">
+              {inputs && inputs.length > 0 && (
+                <span className="flow-condition-incoming">
+                  <span className="flow-condition-label">
+                    {inputs.length === 1 ? "Incoming value" : "Incoming values"}
+                  </span>
+                  {inputs.slice(0, 3).map((input) => (
+                    <span
+                      className="flow-condition-input"
+                      key={input.reference}
+                    >
+                      <span>{input.name}</span>
+                      <b>{input.value}</b>
+                    </span>
+                  ))}
+                  {inputs.length > 3 && (
+                    <small>
+                      {inputs.length - 3} more inputs · select to inspect
+                    </small>
+                  )}
+                </span>
+              )}
+              <span className="flow-condition-label">Requirement</span>
+              <code>
+                {node.conditionRule !== undefined
+                  ? conditionRequirement(node.conditionRule, inputs ?? [])
+                  : node.condition}
+              </code>
             </span>
           )}
-          <small>Select to explore each item's full diagram</small>
-        </span>
-      )}
-      {node.kind === "task" && (
-        <span className="flow-task-preview">
-          <span className="flow-condition-label">Returned value</span>
-          <code>
-            {data &&
-            typeof data === "object" &&
-            !Array.isArray(data) &&
-            Object.hasOwn(data, "output")
-              ? JSON.stringify(data.output, null, 2).slice(0, 280)
-              : status === "running"
-                ? "Running application code…"
-                : "No output captured"}
-          </code>
+        {join && (
+          <>
+            <span className="flow-join-summary">
+              {joinTitle(lanes.length)}{" "}
+              <span>
+                {finished}/{lanes.length}
+              </span>
+            </span>
+            <span className="flow-lanes">
+              {lanes.slice(0, 4).map((lane) => (
+                <span
+                  className="flow-lane"
+                  key={lane.name}
+                  data-status={lane.status}
+                >
+                  <span>
+                    <span aria-hidden="true">
+                      {lane.status === "completed"
+                        ? "✓"
+                        : lane.status === "error"
+                          ? "!"
+                          : "○"}
+                    </span>{" "}
+                    {lane.name}
+                  </span>
+                  <small>{lane.status}</small>
+                </span>
+              ))}
+              {lanes.length > 4 && (
+                <small>
+                  {lanes.length - 4} more · select to see all checks
+                </small>
+              )}
+            </span>
+          </>
+        )}
+        <span className="flow-card-footer">
+          <code>{node.id}</code>
           <small>
-            {durationMs === undefined
-              ? "Select to inspect inputs and output"
-              : `${Math.round(durationMs)} ms · select to inspect`}
+            {join
+              ? status === "completed"
+                ? "All finished · continue"
+                : stateLabel
+              : node.kind === "output"
+                ? route?.endsWith(":then")
+                  ? "Then route"
+                  : route?.endsWith(":else")
+                    ? "Else route"
+                    : "Final outcome"
+                : decision !== undefined
+                  ? decision
+                    ? "Condition met · then"
+                    : "Condition not met · else"
+                  : stateLabel}
           </small>
         </span>
-      )}
-      {node.kind === "branch" &&
-        (node.conditionRule !== undefined || node.condition) && (
-          <span className="flow-condition-rule">
-            {inputs && inputs.length > 0 && (
-              <span className="flow-condition-incoming">
-                <span className="flow-condition-label">
-                  {inputs.length === 1 ? "Incoming value" : "Incoming values"}
-                </span>
-                {inputs.slice(0, 3).map((input) => (
-                  <span className="flow-condition-input" key={input.reference}>
-                    <span>{input.name}</span>
-                    <b>{input.value}</b>
-                  </span>
-                ))}
-                {inputs.length > 3 && (
-                  <small>
-                    {inputs.length - 3} more inputs · select to inspect
-                  </small>
-                )}
-              </span>
-            )}
-            <span className="flow-condition-label">Requirement</span>
-            <code>
-              {node.conditionRule !== undefined
-                ? conditionRequirement(node.conditionRule, inputs ?? [])
-                : node.condition}
-            </code>
-          </span>
+        {node.kind === "jev" && (
+          <small>
+            {status === "untaken"
+              ? "This request was not run."
+              : "Request details are not captured yet or no longer retained."}
+          </small>
         )}
-      {join && (
-        <>
-          <span className="flow-join-summary">
-            {joinTitle(lanes.length)}{" "}
-            <span>
-              {finished}/{lanes.length}
-            </span>
-          </span>
-          <span className="flow-lanes">
-            {lanes.slice(0, 4).map((lane) => (
-              <span
-                className="flow-lane"
-                key={lane.name}
-                data-status={lane.status}
-              >
-                <span>
-                  <span aria-hidden="true">
-                    {lane.status === "completed"
-                      ? "✓"
-                      : lane.status === "error"
-                        ? "!"
-                        : "○"}
-                  </span>{" "}
-                  {lane.name}
-                </span>
-                <small>{lane.status}</small>
-              </span>
-            ))}
-            {lanes.length > 4 && (
-              <small>{lanes.length - 4} more · select to see all checks</small>
-            )}
-          </span>
-        </>
+      </button>
+      {node.kind === "map" && (
+        <div className="flow-collection-controls" data-diagram-scroll>
+          <label>
+            Collection item
+            <select
+              aria-label={`Collection item for ${node.title ?? node.id}`}
+              value={itemIndex}
+              disabled={!collection?.total}
+              onChange={(event) =>
+                onCollectionChange(node.id, {
+                  index: Number(event.target.value),
+                  open: expanded,
+                })
+              }
+            >
+              {!collection?.total && <option value={0}>No items</option>}
+              {collection?.items.map((item) => (
+                <option key={item.index} value={item.index}>
+                  Item {item.index + 1} · {item.status}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            disabled={!collection?.total || !node.itemDefinition}
+            aria-expanded={expanded}
+            aria-controls={expanded ? expansionId : undefined}
+            onClick={() =>
+              onCollectionChange(node.id, { index: itemIndex, open: !expanded })
+            }
+          >
+            {expanded ? "Hide Flow" : "View Flow"}
+          </button>
+        </div>
       )}
-      <span className="flow-card-footer">
-        <code>{node.id}</code>
-        <small>
-          {join
-            ? status === "completed"
-              ? "All finished · continue"
-              : stateLabel
-            : node.kind === "output"
-              ? route?.endsWith(":then")
-                ? "Then route"
-                : route?.endsWith(":else")
-                  ? "Else route"
-                  : "Final outcome"
-              : decision !== undefined
-                ? decision
-                  ? "Condition met · then"
-                  : "Condition not met · else"
-                : stateLabel}
-        </small>
-      </span>
-      {node.kind === "jev" && (
-        <small>
-          {status === "untaken"
-            ? "This request was not run."
-            : "Request details are not captured yet or no longer retained."}
-        </small>
-      )}
-    </button>
+    </article>
   );
 });
 export const FlowOverview = memo(function FlowOverview({
   definition,
   run,
   traces,
+  inline = false,
 }: {
   definition: FlowDefinition;
   run: FlowRun;
   traces: Trace[];
+  inline?: boolean;
 }) {
   const [selected, setSelected] = useState(
     () => definition.nodes.find((n) => n.kind === "jev")?.id ?? "",
   );
   const [details, setDetails] = useState(false);
-  const [itemIndex, setItemIndex] = useState(0);
-  const [openedItem, setOpenedItem] = useState<{
-    map: string;
-    index: number;
-  }>();
+  const [collectionViews, setCollectionViews] = useState<
+    Record<string, CollectionView>
+  >({});
+  const [itemSizes, setItemSizes] = useState<Record<string, Size>>({});
   const [heights, setHeights] = useState<Record<string, number>>({});
   const tracesById = useMemo(
     () => new Map(traces.map((trace) => [trace.id, trace])),
@@ -475,6 +534,7 @@ export const FlowOverview = memo(function FlowOverview({
       remaining = remaining.filter((node) => !ids.has(node.id));
     }
     const points = new Map<string, Bounds>();
+    const expansions = new Map<string, Bounds>();
     let x = 40;
     for (let column = 0; column <= Math.max(0, ...columns.values()); column++) {
       const nodes = definition.nodes.filter(
@@ -511,20 +571,40 @@ export const FlowOverview = memo(function FlowOverview({
           : h / 2 + 40;
         const y = Math.max(bottom, center - h / 2);
         points.set(node.id, { x, y, width: w, height: h });
-        bottom = y + h + 100;
-        width = Math.max(width, w);
+        const expanded =
+          collectionViews[node.id]?.open &&
+          node.itemDefinition &&
+          run.steps[node.id]?.collection?.total;
+        const size = expanded
+          ? itemSizes[node.id] ?? { width: 2400, height: 800 }
+          : undefined;
+        if (size) expansions.set(node.id, { x, y: y + h + 96, ...size });
+        bottom = y + h + (size ? size.height + 96 : 0) + 100;
+        width = Math.max(width, w, size?.width ?? 0);
       }
       x += width + 160;
     }
     return {
       points,
+      expansions,
       width: Math.max(700, x - 120),
       height: Math.max(
         400,
-        ...[...points.values()].map((p) => p.y + p.height + 40),
+        ...[...points.values(), ...expansions.values()].map(
+          (p) => p.y + p.height + 40,
+        ),
       ),
     };
-  }, [definition, run.steps, tracesById, heights, links, inputsByStep]);
+  }, [
+    definition,
+    run.steps,
+    tracesById,
+    heights,
+    links,
+    inputsByStep,
+    collectionViews,
+    itemSizes,
+  ]);
   const { viewport, canvas, zoom, zoomBy, fit, preserveCamera, focusArea } =
     useDiagramViewport(layout.width, layout.height, run.id);
   const onResize = useCallback(
@@ -536,72 +616,113 @@ export const FlowOverview = memo(function FlowOverview({
     },
     [preserveCamera],
   );
+  const pendingCollectionFocus = useRef<string | null>(null);
+  const changeCollection = useCallback(
+    (id: string, view: CollectionView) => {
+      preserveCamera();
+      setSelected(id);
+      if (!inline && view.open && !collectionViews[id]?.open)
+        pendingCollectionFocus.current = id;
+      else pendingCollectionFocus.current = null;
+      setCollectionViews((previous) => ({ ...previous, [id]: view }));
+    },
+    [preserveCamera, collectionViews, inline],
+  );
+  const resizeItem = useCallback(
+    (id: string, size: Size) => {
+      preserveCamera();
+      setItemSizes((previous) =>
+        previous[id]?.width === size.width &&
+        previous[id]?.height === size.height
+          ? previous
+          : { ...previous, [id]: size },
+      );
+    },
+    [preserveCamera],
+  );
+  useEffect(() => {
+    const id = pendingCollectionFocus.current;
+    if (!id || !itemSizes[id]) return;
+    const card = layout.points.get(id),
+      item = layout.expansions.get(id);
+    if (!card || !item) return;
+    pendingCollectionFocus.current = null;
+    // Opening explicitly reveals both the collection and its linked item;
+    // cycling items afterwards leaves the camera where the user put it.
+    focusArea({
+      x: card.x,
+      y: card.y,
+      width: Math.max(card.width, item.width),
+      height: item.y + item.height - card.y,
+    });
+  }, [layout, itemSizes, focusArea]);
   const started = useRef(false);
   useEffect(() => {
-    if (started.current) return;
+    if (inline || started.current) return;
     const first = layout.points.get(selected);
     if (first) {
       started.current = true;
       focusArea(first);
     }
-  }, [layout, selected, focusArea]);
+  }, [layout, selected, focusArea, inline]);
   const selectStep = (id: string) => {
     setSelected(id);
     const bounds = layout.points.get(id);
-    if (bounds) focusArea(bounds);
+    if (bounds && !inline) focusArea(bounds);
   };
   const node = definition.nodes.find((n) => n.id === selected);
   const step = node ? run.steps[node.id] : undefined;
   const trace = step?.traceId
     ? traces.find((t) => t.id === step.traceId)
     : undefined;
-  const selectedItem = Math.min(
-    itemIndex,
-    Math.max(0, (step?.collection?.total ?? 1) - 1),
-  );
-  const itemNode = definition.nodes.find((n) => n.id === openedItem?.map);
-  const itemRun = openedItem
-    ? run.steps[openedItem.map]?.collection?.items[openedItem.index]?.run
-    : undefined;
   return (
-    <div className="flow-overview-stack">
+    <div
+      className={`flow-overview-stack ${inline ? "flow-inline-overview" : ""}`}
+      style={inline ? { width: layout.width } : undefined}
+    >
       <section
         className="request-detail whole-flow"
-        aria-label="Whole flow"
-        style={itemRun ? { display: "none" } : undefined}
+        aria-label={inline ? "Collection item flow" : "Whole flow"}
       >
-        <header className="detail-header">
-          <div>
-            <span className="eyebrow">Flow run · {run.status}</span>
-            <h2>{run.name}</h2>
-          </div>
-          <div>
-            {run.outcome ? (
-              <strong>Outcome: {run.outcome}</strong>
-            ) : (
-              run.error ?? "Execution paths"
-            )}
-            <small className="muted">
-              {run.durationMs !== undefined
-                ? ` · ${Math.round(run.durationMs)} ms`
-                : ""}
-            </small>
-          </div>
-        </header>
+        {!inline && (
+          <header className="detail-header">
+            <div>
+              <span className="eyebrow">Flow run · {run.status}</span>
+              <h2>{run.name}</h2>
+            </div>
+            <div>
+              {run.outcome ? (
+                <strong>Outcome: {run.outcome}</strong>
+              ) : (
+                run.error ?? "Execution paths"
+              )}
+              <small className="muted">
+                {run.durationMs !== undefined
+                  ? ` · ${Math.round(run.durationMs)} ms`
+                  : ""}
+              </small>
+            </div>
+          </header>
+        )}
         <div className="lab-flow-toolbar">
-          <div>
-            <button aria-label="Zoom flow out" onClick={() => zoomBy(1 / 1.2)}>
-              −
-            </button>
-            <output aria-label="Flow zoom">{zoom}%</output>
-            <button aria-label="Zoom flow in" onClick={() => zoomBy(1.2)}>
-              +
-            </button>
-            <button onClick={fit}>Fit flow</button>
-            <button disabled={!selected} onClick={() => selectStep(selected)}>
-              Focus step
-            </button>
-          </div>
+          {!inline && (
+            <div>
+              <button
+                aria-label="Zoom flow out"
+                onClick={() => zoomBy(1 / 1.2)}
+              >
+                −
+              </button>
+              <output aria-label="Flow zoom">{zoom}%</output>
+              <button aria-label="Zoom flow in" onClick={() => zoomBy(1.2)}>
+                +
+              </button>
+              <button onClick={fit}>Fit flow</button>
+              <button disabled={!selected} onClick={() => selectStep(selected)}>
+                Focus step
+              </button>
+            </div>
+          )}
           <label>
             Step
             <select
@@ -619,45 +740,21 @@ export const FlowOverview = memo(function FlowOverview({
             </select>
           </label>
         </div>
-        {node?.kind === "map" && (
-          <div className="flow-map-toolbar">
-            <label>
-              Collection item{" "}
-              <select
-                aria-label="Collection item"
-                value={selectedItem}
-                onChange={(event) => setItemIndex(Number(event.target.value))}
-              >
-                {!step?.collection?.total && (
-                  <option value={0}>No items</option>
-                )}
-                {step?.collection?.items.map((item) => (
-                  <option key={item.index} value={item.index}>
-                    Item {item.index + 1} · {item.status}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button
-              disabled={!step?.collection?.items[selectedItem]?.run}
-              onClick={() =>
-                setOpenedItem({ map: node.id, index: selectedItem })
-              }
-            >
-              View item flow
-            </button>
-          </div>
-        )}
         <div className="flow-workspace">
           <div
-            className="flow-overview-viewport diagram-viewport"
-            ref={viewport}
-            tabIndex={0}
-            aria-label="Flow canvas"
+            className={
+              inline
+                ? "flow-inline-surface"
+                : "flow-overview-viewport diagram-viewport"
+            }
+            ref={inline ? undefined : viewport}
+            style={inline ? { height: layout.height } : undefined}
+            tabIndex={inline ? undefined : 0}
+            aria-label={inline ? "Item flow canvas" : "Flow canvas"}
             role="region"
           >
             <div
-              ref={canvas}
+              ref={inline ? undefined : canvas}
               className="flow-overview-canvas"
               style={{ width: layout.width, height: layout.height }}
             >
@@ -701,6 +798,25 @@ export const FlowOverview = memo(function FlowOverview({
                     );
                   }),
                 )}
+                {[...layout.expansions].map(([id, area]) => {
+                  const card = layout.points.get(id)!;
+                  const x = card.x + card.width / 2;
+                  return (
+                    <g key={id} className="flow-collection-link">
+                      <path
+                        d={`M${x},${card.y + card.height} V${area.y}`}
+                        fill="none"
+                        stroke="#E551BA"
+                        strokeWidth="2"
+                        strokeDasharray="6 5"
+                        markerEnd={`url(#arrow-${run.id})`}
+                      />
+                      <text x={x + 14} y={area.y - 40}>
+                        Selected item {(collectionViews[id]?.index ?? 0) + 1}
+                      </text>
+                    </g>
+                  );
+                })}
               </svg>
               {definition.nodes.map((n) => {
                 const p = layout.points.get(n.id);
@@ -733,12 +849,39 @@ export const FlowOverview = memo(function FlowOverview({
                     durationMs={run.steps[n.id]?.durationMs}
                     lanes={parallelLanes.get(n.id) ?? []}
                     collection={run.steps[n.id]?.collection}
+                    collectionView={collectionViews[n.id]}
+                    onCollectionChange={changeCollection}
+                    expansionId={`collection-${run.id}-${n.id}`}
+                  />
+                );
+              })}
+              {[...layout.expansions].map(([id, bounds]) => {
+                const collectionNode = definition.nodes.find(
+                  (n) => n.id === id,
+                )!;
+                const collection = run.steps[id].collection!;
+                const index = Math.min(
+                  collectionViews[id].index,
+                  collection.total - 1,
+                );
+                return (
+                  <InlineItemFlow
+                    key={id}
+                    id={`collection-${run.id}-${id}`}
+                    node={collectionNode}
+                    collection={collection}
+                    index={index}
+                    bounds={bounds}
+                    traces={traces}
+                    onResize={resizeItem}
+                    onCollectionChange={changeCollection}
                   />
                 );
               })}
             </div>
           </div>
           <FlowDetailsPanel
+            inline={inline}
             selection={node?.title ?? node?.id}
             onLayoutChange={preserveCamera}
           >
@@ -878,25 +1021,91 @@ export const FlowOverview = memo(function FlowOverview({
           </FlowDetailsPanel>
         </div>
       </section>
-      {itemRun && itemNode?.itemDefinition && (
-        <>
-          <div className="flow-map-toolbar">
-            <button onClick={() => setOpenedItem(undefined)}>
-              Back to collection
-            </button>
-            <strong>
-              {itemNode.title ?? itemNode.id} · Item {openedItem!.index + 1} of{" "}
-              {run.steps[itemNode.id].collection!.total}
-            </strong>
-          </div>
-          <FlowOverview
-            key={itemRun.id}
-            definition={itemNode.itemDefinition}
-            run={itemRun}
-            traces={traces}
-          />
-        </>
-      )}
     </div>
+  );
+});
+
+const InlineItemFlow = memo(function InlineItemFlow({
+  id,
+  node,
+  collection,
+  index,
+  bounds,
+  traces,
+  onResize,
+  onCollectionChange,
+}: {
+  id: string;
+  node: FlowNode;
+  collection: NonNullable<FlowStep["collection"]>;
+  index: number;
+  bounds: Bounds;
+  traces: Trace[];
+  onResize: (id: string, size: Size) => void;
+  onCollectionChange: (id: string, view: CollectionView) => void;
+}) {
+  const ref = useRef<HTMLElement>(null);
+  const item = collection.items[index];
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    let width = 0,
+      height = 0;
+    const measure = () => {
+      const nextWidth = element.offsetWidth,
+        nextHeight = element.offsetHeight;
+      if (
+        nextWidth > 0 &&
+        nextHeight > 0 &&
+        (width !== nextWidth || height !== nextHeight)
+      ) {
+        width = nextWidth;
+        height = nextHeight;
+        onResize(node.id, { width, height });
+      }
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [node.id, onResize]);
+  return (
+    <article
+      ref={ref}
+      id={id}
+      className="flow-collection-expansion"
+      aria-label={`Selected item flow for ${node.title ?? node.id}`}
+      style={{ left: bounds.x, top: bounds.y }}
+    >
+      <header className="flow-collection-heading">
+        <div>
+          <span className="eyebrow">Selected collection item</span>
+          <h3>
+            {node.title ?? node.id} · Item {index + 1} of {collection.total}
+          </h3>
+          <small>{item?.status ?? "waiting"}</small>
+        </div>
+        <button
+          onClick={() => onCollectionChange(node.id, { index, open: false })}
+        >
+          Hide Flow
+        </button>
+      </header>
+      {item?.run && node.itemDefinition ? (
+        <FlowOverview
+          key={item.run.id}
+          definition={node.itemDefinition}
+          run={item.run}
+          traces={traces}
+          inline
+        />
+      ) : (
+        <p className="flow-item-placeholder">
+          {item?.status === "waiting"
+            ? "This item is queued. Its flow will appear here when it starts."
+            : "This item has no captured execution. It may have been cancelled or blocked before starting."}
+        </p>
+      )}
+    </article>
   );
 });
