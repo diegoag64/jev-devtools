@@ -1,0 +1,7 @@
+{
+  "source": "https://docs.typesafe.ai/cookbooks/basic_memory.md",
+  "reviewedOn": "2026-10-24",
+  "sourceSha256": "39ba57d1b6ac472954d67900cb6ce976f663f255c3985098ccad687ab0c5905c",
+  "transformation": "Adapt the official five earlier tickets, two customers, six later ticket states, route/gate prompts, chosen-option description conversion and inclusive 0.5 append policy. Replay earlier tickets followed by the final plain-versus-memory comparisons in a bounded sequential loop with run-local JSON state. Omit intermediate repeated probes and upstream caching/evaluation. Responses are authored synthetic fixtures, not published measurements. Boundary and transient-only scenarios are additional demonstrations.",
+  "license": "MIT; LICENSE.typesafe retained"
+}
