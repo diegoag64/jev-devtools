@@ -61,7 +61,7 @@ export function JevDrawer({
     // The host is the only element exposed to page selectors. The overlay itself
     // lives in the shadow tree, with its own typography and component styles.
     host.style.cssText =
-      "all: initial !important; position: fixed !important; inset: 0 !important; pointer-events: none !important; z-index: 2147483000 !important;";
+      "all: initial !important; direction: ltr !important; unicode-bidi: isolate !important; position: fixed !important; inset: 0 !important; pointer-events: none !important; z-index: 2147483000 !important;";
     const shadow = host.attachShadow({ mode: "open" });
     const style = document.createElement("style");
     style.textContent = inspectorStyles;

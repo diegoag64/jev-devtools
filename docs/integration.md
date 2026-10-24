@@ -49,6 +49,26 @@ For the complete Next.js App Router setup, see [the Next.js guide](nextjs.md), i
 | `endpoint` | `/api/jev-devtools` | Same-origin path to the server adapter |
 | `defaultOpen` | `true` | Start expanded or as the small Jev launcher |
 
+### CSS isolation
+
+The component portals its host directly under `document.body`, even when mounted
+inside a React `<main>` or `<section>`. Global page selectors such as `section`,
+`main > *`, and `button` cannot reach the shadow tree, so no page-specific padding
+override is needed. The drawer supplies its own styles and resets inherited
+typography; importing `jev-devtools/styles.css` is optional.
+
+**Unreleased:** the public stylesheet also scopes connected-flow selectors to
+`.jev-devtools` and namespaces their animation, preventing collisions with host
+classes such as `.flow-step`. The drawer suppresses host pseudo-element
+decorations, explicitly resets text direction, and establishes defaults for its
+internal CSS variables. Generic app theme variables do not control its hint colors.
+These changes preserve the component API and existing CSS imports.
+
+This is CSS encapsulation, not a separate browser document or a security boundary.
+Page JavaScript can still alter the open shadow tree or remove its host, and
+transforms, filters, or clipping on `html`/`body` can affect a fixed overlay. Avoid
+those styles on the document ancestors; apply app effects to an app wrapper instead.
+
 ## Server setup
 
 Create one adapter and one instrumented client per server process. Replace your existing TypeSafe client construction with `inspector.createClient(...)`; continue calling `jev.systemOne(...)` normally. API keys stay on the server.

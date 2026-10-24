@@ -1,6 +1,7 @@
 import { checkSelection } from "./check-selection.mjs";
 import { checkChoice } from "./check-choice.mjs";
 import { checkQuestions } from "./check-questions.mjs";
+import { checkStyleIsolation } from "./check-style-isolation.mjs";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
@@ -133,6 +134,7 @@ try {
       };
     });
 
+  await checkStyleIsolation({ page, load, close, open, settle });
   await load("max-history");
   await page.locator(".request-row").nth(3).click();
   await page.getByLabel("Search requests", { exact: true }).fill("Sample");

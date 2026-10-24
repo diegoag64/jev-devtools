@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Verified 0.4.0 publication metadata and current installation docs. |
+| [Unreleased](#unreleased) | Not published | CSS isolation for public flow styles and the drawer; verified 0.4.0 publication metadata. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Flow API extensions, six cookbooks, React/Next.js setup documentation, SDK peer dependency, loopback-only inspector middleware without authorization, and Windows support for the package and Next.js verification scripts. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
 | [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Batched updates, changed-trace streaming, frame-coalesced rendering, less work while the drawer is closed, virtualized Questions, compact Choice diagrams, and reuse of unchanged inspector views. |
@@ -18,6 +18,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 | [0.1.0](#010--october-23-2026-experimental) | 2026-10-23 | First public package: React inspector, Jev diagrams, Node adapter, and Next.js integration. |
 
 ## Unreleased
+
+- Scope connected-flow styles to the DevTools boundary and namespace their animation so the optional public stylesheet does not restyle host content. Suppress page-authored host decorations, reset text direction and internal CSS-variable defaults, and keep flow hint colors independent of app theme variables. Existing component APIs and CSS imports remain compatible; document-level transforms and page JavaScript remain outside CSS isolation.
 
 - Record verified npm publication metadata for 0.4.0, remove pending-publication instructions from installation docs, and link the published release. Documentation only; package behavior is unchanged. ([#35](https://github.com/diegoag64/jev-devtools/pull/35))
 

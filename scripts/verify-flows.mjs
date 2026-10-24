@@ -67,6 +67,7 @@ try {
   await page
     .getByRole("button", { name: "Step review, jev, completed", exact: true })
     .click();
+  await page.getByRole("button", { name: "Show details", exact: true }).click();
   await page
     .getByRole("button", { name: "Inspect request", exact: true })
     .click();
@@ -75,6 +76,7 @@ try {
   await page
     .getByRole("button", { name: "Hide request details", exact: true })
     .click();
+  await page.getByRole("button", { name: "Hide details", exact: true }).click();
   await page
     .getByRole("button", { name: "Step other, output, untaken", exact: true })
     .waitFor();
@@ -110,9 +112,8 @@ try {
   // Explicit row selection also persists across subsequent updates.
   const rows = page.locator(".request-row");
   await rows.last().click();
-  await page
-    .getByRole("button", { name: "Step review, jev, completed", exact: true })
-    .click();
+  // The retained camera may put the heading outside the canvas viewport.
+  await page.selectOption('[aria-label="Flow step"]', "review");
   await canvas.focus();
   await page.keyboard.press("ArrowRight");
   await page.waitForTimeout(100);
@@ -215,6 +216,7 @@ try {
   await untaken.getByText("Needs a closer look", { exact: true }).waitFor();
   await untaken.getByText("Not taken", { exact: true }).waitFor();
   await page.selectOption('[aria-label="Flow step"]', "ready-output");
+  await page.getByRole("button", { name: "Show details", exact: true }).click();
   await page
     .locator(".flow-selection")
     .getByText(
@@ -227,6 +229,7 @@ try {
   await page
     .getByText("This marker waits for their results", { exact: false })
     .waitFor();
+  await page.getByRole("button", { name: "Hide details", exact: true }).click();
   await page.selectOption('[aria-label="Flow step"]', "combined");
   await page
     .getByRole("article", { name: "Request combined", exact: true })

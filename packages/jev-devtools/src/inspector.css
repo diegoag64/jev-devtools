@@ -1,5 +1,19 @@
+/* Important shadow declarations beat page-authored host decorations, including
+   important ones. The qualified host selector is inert in the public CSS. */
+:host(jev-devtools-root)::before,
+:host(jev-devtools-root)::after {
+  content: none !important;
+  display: none !important;
+}
+
 .jev-devtools {
   all: initial;
+  /* all does not reset custom properties. Establish our own inherited defaults;
+     cameras and probability cards can still set local values below this root. */
+  --diagram-grid-opacity: 1;
+  --diagram-grid-weight: 1;
+  --lab-noul-probability: 1;
+  --flow-item-offset: 0px;
   display: block;
   direction: ltr;
   unicode-bidi: isolate;
@@ -1271,29 +1285,30 @@
   }
 }
 
-/* Connected requests share one camera and one opt-in full request detail. */
-.whole-flow {
+/* Connected requests share one camera and one opt-in full request detail.
+   :where scopes these selectors without changing their existing specificity. */
+:where(.jev-devtools) .whole-flow {
   min-width: 0;
   overflow: hidden;
 }
-.whole-flow > .detail-header,
-.whole-flow > .lab-flow-toolbar {
+:where(.jev-devtools) .whole-flow > .detail-header,
+:where(.jev-devtools) .whole-flow > .lab-flow-toolbar {
   flex-shrink: 0;
 }
-.flow-workspace {
+:where(.jev-devtools) .flow-workspace {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
   overflow: hidden;
 }
-.flow-details-panel {
+:where(.jev-devtools) .flow-details-panel {
   flex: none;
   min-width: 0;
   background: #130f17;
   border-top: 1px solid #342a38;
 }
-.flow-details-bar {
+:where(.jev-devtools) .flow-details-bar {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1305,19 +1320,19 @@
   padding: 4px 8px;
   font-size: 11px;
 }
-.flow-details-bar > span {
+:where(.jev-devtools) .flow-details-bar > span {
   color: #b5a6bc;
   font-size: 11px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.flow-details-body {
+:where(.jev-devtools) .flow-details-body {
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
 }
-.flow-details-resize {
+:where(.jev-devtools) .flow-details-resize {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1326,19 +1341,19 @@
   touch-action: none;
   user-select: none;
 }
-.flow-details-resize span {
+:where(.jev-devtools) .flow-details-resize span {
   width: 40px;
   height: 2px;
   border-radius: 2px;
   background: #6c5874;
 }
-.flow-details-resize:hover,
-.flow-details-resize:focus-visible {
+:where(.jev-devtools) .flow-details-resize:hover,
+:where(.jev-devtools) .flow-details-resize:focus-visible {
   background: #392239;
   outline: 1px solid #e551ba;
   outline-offset: -1px;
 }
-.flow-overview-viewport {
+:where(.jev-devtools) .flow-overview-viewport {
   position: relative;
   min-height: 0;
   flex: 1 1 0;
@@ -1352,21 +1367,21 @@
   );
   background-size: 20px 20px;
 }
-.flow-overview-viewport[data-panning] {
+:where(.jev-devtools) .flow-overview-viewport[data-panning] {
   cursor: grabbing;
 }
-.flow-overview-canvas {
+:where(.jev-devtools) .flow-overview-canvas {
   position: absolute;
   transform-origin: 0 0;
 }
-.flow-connections {
+:where(.jev-devtools) .flow-connections {
   position: absolute;
   inset: 0;
   overflow: visible;
   color: #c0b8c4;
   pointer-events: none;
 }
-.flow-step {
+:where(.jev-devtools) .flow-step {
   position: absolute;
   width: 220px;
   min-height: 172px;
@@ -1381,15 +1396,15 @@
   background: #151017;
   color: inherit;
 }
-.flow-step strong {
+:where(.jev-devtools) .flow-step strong {
   white-space: normal;
   width: 100%;
 }
-.flow-step-description {
+:where(.jev-devtools) .flow-step-description {
   overflow-wrap: anywhere;
   font-size: 12px;
 }
-.flow-step.flow-request {
+:where(.jev-devtools) .flow-step.flow-request {
   display: block;
   padding: 0;
   background: #0d0a0f;
@@ -1397,7 +1412,7 @@
   content-visibility: auto;
   contain-intrinsic-size: auto 640px;
 }
-.flow-request-heading {
+:where(.jev-devtools) .flow-request-heading {
   width: 100%;
   min-height: 64px;
   gap: 20px;
@@ -1412,7 +1427,7 @@
   background: transparent;
   color: inherit;
 }
-.flow-request-heading .eyebrow {
+:where(.jev-devtools) .flow-request-heading .eyebrow {
   display: block;
   margin-bottom: 4px;
 }
@@ -1433,64 +1448,64 @@
 .jev-devtools .lab-flow-embedded .lab-choice-browser {
   height: 520px;
 }
-.flow-step.selected {
+:where(.jev-devtools) .flow-step.selected {
   outline: 2px solid #e551ba;
   outline-offset: 3px;
 }
-.flow-step[data-status="completed"] {
+:where(.jev-devtools) .flow-step[data-status="completed"] {
   border-color: #e551ba;
 }
-.flow-step[data-status="running"] {
+:where(.jev-devtools) .flow-step[data-status="running"] {
   border-color: #e551ba;
   background: #2b1728;
 }
-.flow-step[data-status="untaken"],
-.flow-step[data-status="blocked"] {
+:where(.jev-devtools) .flow-step[data-status="untaken"],
+:where(.jev-devtools) .flow-step[data-status="blocked"] {
   color: #948797;
   border-color: #403746;
   background: #151017;
 }
-.flow-step[data-status="error"] {
+:where(.jev-devtools) .flow-step[data-status="error"] {
   border-color: #f17c78;
 }
-.flow-step[data-status="cancelled"] {
+:where(.jev-devtools) .flow-step[data-status="cancelled"] {
   border-style: dashed;
 }
-.flow-selection {
+:where(.jev-devtools) .flow-selection {
   padding: 12px 20px;
   border-top: 1px solid #342a38;
 }
-.flow-selection p {
+:where(.jev-devtools) .flow-selection p {
   margin: 6px 0;
   overflow-wrap: anywhere;
 }
-.flow-request-detail {
+:where(.jev-devtools) .flow-request-detail {
   min-height: 450px;
   border-top: 1px solid #534357;
 }
-.flow-request-detail > .request-detail {
+:where(.jev-devtools) .flow-request-detail > .request-detail {
   min-height: 450px;
 }
 
-.flow-card-heading,
-.flow-card-footer,
-.flow-join-summary,
-.flow-lane {
+:where(.jev-devtools) .flow-card-heading,
+:where(.jev-devtools) .flow-card-footer,
+:where(.jev-devtools) .flow-join-summary,
+:where(.jev-devtools) .flow-lane {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   width: 100%;
 }
-.flow-card-heading {
+:where(.jev-devtools) .flow-card-heading {
   justify-content: flex-start;
 }
-.flow-task .flow-kind-icon {
+:where(.jev-devtools) .flow-task .flow-kind-icon {
   border: 1px solid currentColor;
   border-radius: 6px;
   padding: 4px;
 }
-.flow-task-preview {
+:where(.jev-devtools) .flow-task-preview {
   display: grid;
   gap: 8px;
   min-width: 0;
@@ -1502,39 +1517,39 @@
   border-radius: 4px;
   background: #100c13;
 }
-.flow-task-preview small {
-  color: var(--muted);
+:where(.jev-devtools) .flow-task-preview small {
+  color: #a89bac;
   font-size: 11px;
 }
-.flow-task-details {
+:where(.jev-devtools) .flow-task-details {
   display: grid;
   gap: 12px;
 }
-.flow-task-details details {
+:where(.jev-devtools) .flow-task-details details {
   min-width: 0;
 }
-.flow-task-details summary {
+:where(.jev-devtools) .flow-task-details summary {
   cursor: pointer;
   margin-bottom: 8px;
 }
-.flow-task-details .diagram-content {
+:where(.jev-devtools) .flow-task-details .diagram-content {
   max-height: 320px;
   overflow: auto;
 }
-.flow-kind-icon {
+:where(.jev-devtools) .flow-kind-icon {
   width: 26px;
   height: 26px;
   color: #e551ba;
   flex-shrink: 0;
 }
-.flow-kind-icon svg {
+:where(.jev-devtools) .flow-kind-icon svg {
   width: 100%;
   height: 100%;
 }
-.flow-card-heading .eyebrow {
+:where(.jev-devtools) .flow-card-heading .eyebrow {
   font-size: 10px;
 }
-.flow-status {
+:where(.jev-devtools) .flow-status {
   margin-left: auto;
   font-size: 10px;
   border-radius: 20px;
@@ -1542,81 +1557,81 @@
   background: #342031;
   color: #f0b7e0;
 }
-.flow-step[data-status="untaken"] .flow-status {
+:where(.jev-devtools) .flow-step[data-status="untaken"] .flow-status {
   background: #241e28;
   color: #948797;
 }
-.flow-step[data-status="untaken"] .flow-kind-icon {
+:where(.jev-devtools) .flow-step[data-status="untaken"] .flow-kind-icon {
   color: #948797;
 }
-.flow-card-body > strong {
+:where(.jev-devtools) .flow-card-body > strong {
   white-space: normal;
   font-size: 18px;
   line-height: 1.25;
   overflow-wrap: anywhere;
 }
-.flow-step-description {
+:where(.jev-devtools) .flow-step-description {
   line-height: 1.5;
   color: #b9aebf;
   white-space: pre-wrap;
 }
-.flow-card-footer {
+:where(.jev-devtools) .flow-card-footer {
   margin-top: auto;
   padding-top: 10px;
   border-top: 1px solid #342a38;
   font-size: 10px;
   color: #a092a7;
 }
-.flow-card-footer code {
+:where(.jev-devtools) .flow-card-footer code {
   max-width: 45%;
   white-space: normal;
   overflow-wrap: anywhere;
 }
-.flow-card-footer small {
+:where(.jev-devtools) .flow-card-footer small {
   text-align: right;
 }
-.flow-join-summary {
+:where(.jev-devtools) .flow-join-summary {
   margin-top: 4px;
   font-size: 11px;
   color: #c9b9cd;
 }
-.flow-join-summary > span {
+:where(.jev-devtools) .flow-join-summary > span {
   color: #ef9ed9;
   font-variant-numeric: tabular-nums;
 }
-.flow-lanes {
+:where(.jev-devtools) .flow-lanes {
   display: flex;
   flex-direction: column;
   gap: 4px;
   width: 100%;
 }
-.flow-lane {
+:where(.jev-devtools) .flow-lane {
   border-radius: 5px;
   background: #211923;
   padding: 6px 8px;
   font-size: 11px;
   min-height: 28px;
 }
-.flow-lane > span {
+:where(.jev-devtools) .flow-lane > span {
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.flow-lane > span > span {
+:where(.jev-devtools) .flow-lane > span > span {
   color: #ef9ed9;
   margin-right: 4px;
 }
-.flow-lane small {
+:where(.jev-devtools) .flow-lane small {
   color: #b9aebf;
 }
-.flow-lane-details {
+:where(.jev-devtools) .flow-lane-details {
   padding-left: 18px;
   font-size: 12px;
 }
-.flow-request-heading > span:first-child {
+:where(.jev-devtools) .flow-request-heading > span:first-child {
   min-width: 0;
   max-width: 80%;
 }
-.flow-request-description {
+:where(.jev-devtools) .flow-request-description {
   display: block;
   white-space: pre-wrap;
   font-size: 12px;
@@ -1776,7 +1791,7 @@
   opacity: calc(0.65 + 0.35 * var(--lab-noul-probability, 1));
 }
 
-.flow-condition-rule {
+:where(.jev-devtools) .flow-condition-rule {
   display: block;
   padding: 10px 12px;
   border: 1px solid #49324b;
@@ -1784,13 +1799,13 @@
   background: #211723;
   width: 100%;
 }
-.flow-condition-label {
+:where(.jev-devtools) .flow-condition-label {
   display: block;
   font-size: 10px;
   color: #ba9dbe;
   margin-bottom: 5px;
 }
-.flow-condition-rule code {
+:where(.jev-devtools) .flow-condition-rule code {
   display: block;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -1800,13 +1815,13 @@
   color: #f2d7eb;
 }
 
-.flow-condition-incoming {
+:where(.jev-devtools) .flow-condition-incoming {
   display: block;
   padding-bottom: 10px;
   margin-bottom: 10px;
   border-bottom: 1px solid #49324b;
 }
-.flow-condition-input {
+:where(.jev-devtools) .flow-condition-input {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -1814,11 +1829,11 @@
   font-size: 12px;
   padding: 3px 0;
 }
-.flow-condition-input > span {
+:where(.jev-devtools) .flow-condition-input > span {
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.flow-condition-input > b {
+:where(.jev-devtools) .flow-condition-input > b {
   font-size: 17px;
   font-weight: 600;
   color: #f2d7eb;
@@ -1826,24 +1841,24 @@
   white-space: normal;
   max-width: 65%;
 }
-.flow-input-details {
+:where(.jev-devtools) .flow-input-details {
   font-size: 12px;
 }
-.flow-input-details > div {
+:where(.jev-devtools) .flow-input-details > div {
   display: flex;
   gap: 16px;
   margin: 6px 0;
 }
-.flow-input-details code {
+:where(.jev-devtools) .flow-input-details code {
   color: #a092a7;
   margin-left: 8px;
 }
-.flow-input-details dd {
+:where(.jev-devtools) .flow-input-details dd {
   margin: 0;
   overflow-wrap: anywhere;
 }
 
-.flow-overview-stack {
+:where(.jev-devtools) .flow-overview-stack {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -1851,13 +1866,13 @@
   min-width: 0;
   overflow: hidden;
 }
-.flow-map-progress {
+:where(.jev-devtools) .flow-map-progress {
   display: grid;
   gap: 10px;
   font-size: 14px;
   line-height: 1.5;
 }
-.flow-map-progress small {
+:where(.jev-devtools) .flow-map-progress small {
   color: #b5a6bc;
 }
 
@@ -1878,7 +1893,7 @@
 .jev-devtools .flow-card-body:hover {
   background: transparent;
 }
-.flow-collection-controls {
+:where(.jev-devtools) .flow-collection-controls {
   display: flex;
   align-items: end;
   gap: 10px;
@@ -1886,7 +1901,7 @@
   margin-top: 4px;
   padding-top: 12px;
 }
-.flow-collection-controls label {
+:where(.jev-devtools) .flow-collection-controls label {
   display: grid;
   gap: 6px;
   flex: 1;
@@ -1902,17 +1917,17 @@
   flex: none;
   color: #efb1df;
 }
-.flow-collection-expansion {
+:where(.jev-devtools) .flow-collection-expansion {
   position: absolute;
   width: max-content;
 }
-.flow-item-frame {
+:where(.jev-devtools) .flow-item-frame {
   border: 1px solid #64415d;
   border-radius: 12px;
   background: #100c13;
   overflow: hidden;
 }
-.flow-collection-heading {
+:where(.jev-devtools) .flow-collection-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1921,43 +1936,43 @@
   border-bottom: 1px solid #49324b;
   background: #1c1220;
 }
-.flow-collection-heading h3 {
+:where(.jev-devtools) .flow-collection-heading h3 {
   margin: 5px 0;
   font-size: 16px;
 }
-.flow-collection-heading small {
+:where(.jev-devtools) .flow-collection-heading small {
   color: #b9aebf;
 }
-.flow-collection-link text {
+:where(.jev-devtools) .flow-collection-link text {
   fill: #ce9abd;
   font-size: 12px;
 }
-.flow-item-placeholder {
+:where(.jev-devtools) .flow-item-placeholder {
   width: 600px;
   padding: 24px;
   line-height: 1.6;
 }
-.flow-inline-overview,
-.flow-inline-overview > .whole-flow,
-.flow-inline-overview > .whole-flow > .flow-workspace {
+:where(.jev-devtools) .flow-inline-overview,
+:where(.jev-devtools) .flow-inline-overview > .whole-flow,
+:where(.jev-devtools) .flow-inline-overview > .whole-flow > .flow-workspace {
   display: block;
   flex: none;
 }
-.flow-inline-surface {
+:where(.jev-devtools) .flow-inline-surface {
   position: relative;
 }
 
-.flow-item-content {
+:where(.jev-devtools) .flow-item-content {
   min-width: 0;
-  animation: flow-item-enter 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: jev-flow-item-enter 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-.flow-item-forward {
+:where(.jev-devtools) .flow-item-forward {
   --flow-item-offset: 28px;
 }
-.flow-item-backward {
+:where(.jev-devtools) .flow-item-backward {
   --flow-item-offset: -28px;
 }
-@keyframes flow-item-enter {
+@keyframes jev-flow-item-enter {
   from {
     opacity: 0;
     transform: translateX(var(--flow-item-offset));
@@ -1968,7 +1983,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .flow-item-content {
+  :where(.jev-devtools) .flow-item-content {
     animation: none;
   }
 }
@@ -1991,14 +2006,14 @@
   background: #382035;
   border-color: #e551ba;
 }
-.flow-item-arrow svg {
+:where(.jev-devtools) .flow-item-arrow svg {
   width: 28px;
   height: 28px;
 }
 
-.flow-item-previous {
+:where(.jev-devtools) .flow-item-previous {
   left: -76px;
 }
-.flow-item-next {
+:where(.jev-devtools) .flow-item-next {
   right: -76px;
 }
