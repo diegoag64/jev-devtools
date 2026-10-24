@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Verified 0.4.0 publication metadata and current installation docs. |
+| [Unreleased](#unreleased) | Not published | Verified 0.4.0 publication metadata, current installation docs, and what-if thresholds for recorded flow conditions. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Flow API extensions, six cookbooks, React/Next.js setup documentation, SDK peer dependency, loopback-only inspector middleware without authorization, and Windows support for the package and Next.js verification scripts. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
 | [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Batched updates, changed-trace streaming, frame-coalesced rendering, less work while the drawer is closed, virtualized Questions, compact Choice diagrams, and reuse of unchanged inspector views. |
@@ -20,6 +20,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 ## Unreleased
 
 - Record verified npm publication metadata for 0.4.0, remove pending-publication instructions from installation docs, and link the published release. Documentation only; package behavior is unchanged. ([#35](https://github.com/diegoag64/jev-devtools/pull/35))
+
+- Add a What if section to selected `branch()` and `if()` condition steps in the Flows view, including conditions inside map items and loop iterations. Change a numeric threshold to see whether the selected run and other retained runs (or items and iterations) would take the other route, and where their recorded values sit against it. It replays captured answers and task outputs locally and makes no Jev calls. ([#31](https://github.com/diegoag64/jev-devtools/pull/31))
 
 ## 0.4.0 — October 24, 2026 (experimental)
 

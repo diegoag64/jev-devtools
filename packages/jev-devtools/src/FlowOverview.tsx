@@ -18,10 +18,14 @@ import { formatFlowCondition } from "./flow-condition.js";
 import { TraceDiagram } from "./TraceDiagram.js";
 import { FlowDetailsPanel } from "./FlowDetailsPanel.js";
 import { DiagramContent } from "./DiagramContent.js";
+import { WhatIfPanel } from "./WhatIfPanel.js";
+import { whatIfItemRuns } from "./what-if.js";
+import { useStableArray } from "./use-stable-array.js";
 type Lane = { name: string; status: string };
 type Bounds = { x: number; y: number; width: number; height: number };
 type Size = Pick<Bounds, "width" | "height">;
 type CollectionView = { index: number; open: boolean };
+const noRuns: readonly FlowRun[] = [];
 // Measure in canvas coordinates: screen rectangles also include the camera zoom.
 function useNodeHeight<T extends HTMLElement>(
   id: string,
@@ -453,13 +457,19 @@ const Card = memo(function Card({
 export const FlowOverview = memo(function FlowOverview({
   definition,
   run,
+  runs,
   traces,
   inline = false,
+  unit,
 }: {
   definition: FlowDefinition;
   run: FlowRun;
+  /** Retained runs of this definition, for what-if counts. */
+  runs: readonly FlowRun[];
   traces: Trace[];
   inline?: boolean;
+  /** Item flows only: what one of `runs` is. */
+  unit?: "item" | "iteration";
 }) {
   const [selected, setSelected] = useState(
     () => definition.nodes.find((n) => n.kind === "jev")?.id ?? "",
@@ -473,6 +483,16 @@ export const FlowOverview = memo(function FlowOverview({
   const tracesById = useMemo(
     () => new Map(traces.map((trace) => [trace.id, trace])),
     [traces],
+  );
+  // Item runs of each map and loop across the retained runs, for item what-if.
+  const itemRuns = useMemo(
+    () =>
+      new Map(
+        definition.nodes
+          .filter((n) => n.itemDefinition)
+          .map((n) => [n.id, whatIfItemRuns(runs, n.id)]),
+      ),
+    [definition, runs],
   );
   const inputsByStep = useMemo(
     () =>
@@ -958,6 +978,7 @@ export const FlowOverview = memo(function FlowOverview({
                     collection={collection}
                     index={index}
                     bounds={bounds}
+                    runs={itemRuns.get(id) ?? noRuns}
                     traces={traces}
                     onResize={resizeItem}
                     onCollectionChange={changeCollection}
@@ -1097,6 +1118,18 @@ export const FlowOverview = memo(function FlowOverview({
                             : "Not met · else route"}
                     </p>
                   )}
+                  {(node.kind === "branch" || node.kind === "if") &&
+                    node.conditionRule !== undefined && (
+                      <WhatIfPanel
+                        key={node.id}
+                        definition={definition}
+                        node={node}
+                        run={run}
+                        runs={runs}
+                        traces={tracesById}
+                        unit={unit}
+                      />
+                    )}
                   <p className="muted">
                     {node.path.length ? node.path.join(" / ") : "Main path"}
                   </p>
@@ -1146,6 +1179,7 @@ const InlineItemFlow = memo(function InlineItemFlow({
   collection,
   index,
   bounds,
+  runs,
   traces,
   onResize,
   onCollectionChange,
@@ -1155,11 +1189,15 @@ const InlineItemFlow = memo(function InlineItemFlow({
   collection: NonNullable<FlowStep["collection"]>;
   index: number;
   bounds: Bounds;
+  /** Item runs of this node across the retained parent runs. */
+  runs: readonly FlowRun[];
   traces: Trace[];
   onResize: (id: string, size: Size) => void;
   onCollectionChange: (id: string, view: CollectionView) => void;
 }) {
   const ref = useRef<HTMLElement>(null);
+  // Parent updates rebuild item run lists; keep them while the runs match.
+  const itemRuns = useStableArray(runs);
   const item = collection.items[index];
   const unit = node.kind === "loop" ? "iteration" : "collection item";
   const [direction, setDirection] = useState(1);
@@ -1249,8 +1287,10 @@ const InlineItemFlow = memo(function InlineItemFlow({
               key={item.run.id}
               definition={node.itemDefinition}
               run={item.run}
+              runs={itemRuns}
               traces={traces}
               inline
+              unit={node.kind === "loop" ? "iteration" : "item"}
             />
           ) : (
             <p className="flow-item-placeholder">
