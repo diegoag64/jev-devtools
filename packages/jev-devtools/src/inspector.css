@@ -43,8 +43,7 @@
 }
 .jev-devtools button,
 .jev-devtools input,
-.jev-devtools select,
-.jev-devtools textarea {
+.jev-devtools select {
   font: inherit;
   color: inherit;
   border: 1px solid #3b303d;
@@ -67,7 +66,7 @@
 .jev-devtools button:hover:not(:disabled) {
   border-color: #e551ba;
 }
-.jev-devtools :is(button, input, select, textarea, summary):focus-visible {
+.jev-devtools :is(button, input, select, summary):focus-visible {
   outline: 2px solid #e551ba;
   outline-offset: 3px;
 }
@@ -282,47 +281,6 @@
   background-image: radial-gradient(#342337 0.6px, transparent 0.6px);
   background-size: 16px 16px;
 }
-.jev-devtools .request-flow {
-  display: flex;
-  align-items: center;
-  gap: 40px;
-  padding: 14px 0 20px;
-}
-.jev-devtools .state-node {
-  position: relative;
-  flex: 0 0 160px;
-  border: 1px solid #e551ba;
-  padding: 20px 15px;
-  background: #1f1320;
-  border-radius: 6px;
-}
-.jev-devtools .state-node h3 {
-  margin-top: 12px;
-}
-.jev-devtools .state-node p {
-  color: #b69db3;
-  line-height: 1.5;
-}
-.jev-devtools .state-node code {
-  font-size: 10px;
-}
-.jev-devtools .state-node:after {
-  content: "";
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  width: 20px;
-  border-top: 1px solid #7f416d;
-}
-.jev-devtools .question-branches {
-  border-left: 1px solid #7f416d;
-  padding-left: 20px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(160px, 1fr));
-  gap: 12px;
-  flex: 1;
-  position: relative;
-}
 .jev-devtools .question-node {
   position: relative;
   border: 1px solid #75516c;
@@ -331,6 +289,9 @@
   background: #110d14;
   min-width: 0;
 }
+/* Retain the legacy question connectors and standalone suppression together.
+   Remove only after resolving the narrow-screen visual differences in
+   https://github.com/diegoag64/jev-devtools/issues/57. */
 .jev-devtools .question-node:before {
   content: "";
   position: absolute;
@@ -360,11 +321,6 @@
   border: 1px solid #5e3654;
   border-radius: 3px;
   padding: 3px 5px;
-}
-.jev-devtools .instructions {
-  font-size: 11px;
-  color: #b8a6bc;
-  line-height: 1.5;
 }
 .jev-devtools .answer-value {
   display: block;
@@ -501,43 +457,9 @@
   border-bottom: 1px solid #302634;
   padding: 14px;
 }
-.jev-devtools .flow-dot {
-  display: none;
-}
-.jev-devtools .pending .flow-dot {
-  display: block;
-  position: absolute;
-  right: -23px;
-  top: calc(50% - 3px);
-  width: 6px;
-  height: 6px;
-  background: #e551ba;
-  border-radius: 50%;
-  animation: jev-inspector-pulse 1s infinite;
-}
-@keyframes jev-inspector-pulse {
-  50% {
-    opacity: 0.2;
-    transform: scale(0.7);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .jev-devtools .pending .flow-dot {
-    animation: none;
-  }
-}
 @media (max-width: 1100px) {
-  .jev-devtools .question-branches {
-    grid-template-columns: 1fr;
-  }
   .jev-devtools .question-branches .question-node:not(:first-child):before {
     display: block;
-  }
-  .jev-devtools .request-flow {
-    align-items: flex-start;
-  }
-  .jev-devtools .state-node {
-    margin-top: 45px;
   }
   .jev-devtools .metrics {
     gap: 12px;
@@ -572,9 +494,6 @@
     min-width: 240px;
     padding: 8px 12px;
   }
-  .jev-devtools .request-detail {
-    min-height: 0;
-  }
   .jev-devtools .detail-header {
     padding: 12px;
   }
@@ -589,65 +508,12 @@
   .jev-devtools .metrics {
     display: none;
   }
-  .jev-devtools .state-node {
-    flex-basis: 115px;
-    padding: 12px;
-  }
-  .jev-devtools .request-flow {
-    gap: 25px;
-  }
-  .jev-devtools .state-node:after {
-    width: 12px;
-  }
-  .jev-devtools .question-branches {
-    padding-left: 12px;
-  }
   .jev-devtools .question-node:before {
     width: 13px;
   }
   .jev-devtools .question-node {
     padding: 12px;
   }
-}
-
-.jev-devtools .request-flow {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 24px;
-}
-.jev-devtools .state-node {
-  flex: auto;
-  width: fit-content;
-  align-self: center;
-  padding: 12px 24px;
-  text-align: center;
-  margin: 0;
-}
-.jev-devtools .state-node h3 {
-  display: inline-block;
-  margin: 0 12px;
-}
-.jev-devtools .state-node p {
-  display: inline-block;
-  margin: 0 12px 0 0;
-  font-size: 11px;
-}
-.jev-devtools .state-node .eyebrow {
-  display: none;
-}
-.jev-devtools .state-node:after {
-  left: 50%;
-  top: 100%;
-  width: 0;
-  height: 24px;
-  border-top: 0;
-  border-left: 1px solid #7f416d;
-}
-.jev-devtools .question-branches {
-  border-left: 0;
-  border-top: 1px solid #7f416d;
-  padding: 20px 0 0;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 .jev-devtools .question-node:before,
 .jev-devtools .question-branches .question-node:not(:first-child):before {
@@ -663,18 +529,7 @@
 .jev-devtools .standalone:before {
   display: none;
 }
-.jev-devtools .flow-caption {
-  margin-top: 0;
-}
-.jev-devtools .pending .flow-dot {
-  right: auto;
-  left: calc(50% - 3px);
-  top: calc(100% + 10px);
-}
 @media (max-width: 900px) {
-  .jev-devtools .question-branches {
-    grid-template-columns: 1fr;
-  }
   .jev-devtools .question-node:before,
   .jev-devtools .question-branches .question-node:not(:first-child):before {
     height: 12px;
@@ -683,16 +538,6 @@
   .jev-devtools .question-branches .question-node:first-child:before {
     height: 20px;
     top: -21px;
-  }
-  .jev-devtools .state-node {
-    padding: 10px;
-  }
-  .jev-devtools .state-node p {
-    display: block;
-    margin: 6px 0;
-  }
-  .jev-devtools .state-node h3 {
-    font-size: 12px;
   }
 }
 
@@ -755,10 +600,6 @@
   align-items: center;
   gap: 9px;
   font-weight: 600;
-}
-.jev-devtools .jev-mark {
-  color: #e551ba;
-  font-size: 21px;
 }
 .jev-devtools .jev-drawer-header > div {
   display: flex;
@@ -1176,7 +1017,6 @@
   overflow: auto;
   overscroll-behavior: contain;
   min-height: 0;
-  flex: 1;
 }
 .jev-devtools .lab-choice-browser table {
   width: 100%;
@@ -1395,7 +1235,6 @@
 }
 :where(.jev-devtools) .flow-step {
   position: absolute;
-  width: 220px;
   min-height: 172px;
   overflow-wrap: anywhere;
   display: flex;

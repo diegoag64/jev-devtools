@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | CSS isolation for public flow styles and the drawer; verified 0.4.0 publication metadata. |
+| [Unreleased](#unreleased) | Not published | CSS isolation and removal of unused package styles; verified 0.4.0 publication metadata. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Flow API extensions, six cookbooks, React/Next.js setup documentation, SDK peer dependency, loopback-only inspector middleware without authorization, and Windows support for the package and Next.js verification scripts. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
 | [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Batched updates, changed-trace streaming, frame-coalesced rendering, less work while the drawer is closed, virtualized Questions, compact Choice diagrams, and reuse of unchanged inspector views. |
@@ -18,6 +18,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 | [0.1.0](#010--october-23-2026-experimental) | 2026-10-23 | First public package: React inspector, Jev diagrams, Node adapter, and Next.js integration. |
 
 ## Unreleased
+
+- Remove confirmed unused legacy layout, dot animation, caption, mark and instruction styles, unused textarea selectors, and declarations superseded by current rules or inline geometry. Preserve the public CSS export and current component appearance. Flow cascade conflicts and the question-connector/suppression rules remain deferred to [#57](https://github.com/diegoag64/jev-devtools/issues/57). ([#36](https://github.com/diegoag64/jev-devtools/pull/36))
 
 - Scope connected-flow styles to the DevTools boundary and namespace their animation so the optional public stylesheet does not restyle host content. Keep the host reset in the shadow stylesheet instead of an expanded inline style attribute. Suppress page-authored host decorations, reset text direction and internal CSS-variable defaults, and keep flow hint colors independent of app theme variables. Remove redundant CSS imports from sample apps and setup snippets, and document automatic drawer styling in the guides and bundled skill. Existing component APIs and CSS imports remain compatible; document-level transforms and page JavaScript remain outside CSS isolation. ([#36](https://github.com/diegoag64/jev-devtools/pull/36))
 
