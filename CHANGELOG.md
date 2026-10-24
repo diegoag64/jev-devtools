@@ -20,7 +20,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-- Run the React 18/19 drawer CI checks on Ubuntu 24.04 using the runner's system libraries and Playwright's pinned Chromium headless shell, skipping per-run system package installation. Package APIs, verification coverage, and the release workflow are unchanged. ([#64](https://github.com/diegoag64/jev-devtools/pull/64))
+- Run the React 18/19 drawer CI checks on Ubuntu 24.04 using the runner's system libraries and Playwright's pinned Chromium headless shell, skipping per-run system package installation. Reuse matching installed React packages and read the lockfile for version overrides, verifying both React packages before browser checks. Package APIs, verification coverage, and the release workflow are unchanged. ([#64](https://github.com/diegoag64/jev-devtools/pull/64))
 - Record verified npm/GitHub publication for 0.4.1, including recovery from delayed npm visibility, exact-commit provenance, and archive integrity. Update installation guides to reflect publication.
 - Allow nearly ten minutes for npm version/latest verification after upload instead of about one minute. Keep manual approval, integrity/provenance checks, and the no-republish recovery rule unchanged; no package runtime or API changes.
 
