@@ -7,7 +7,11 @@ permissions:
   contents: read
 jobs:
   drawer:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    container:
+      # Keep this version aligned with the root Playwright dependency.
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
     strategy:
       fail-fast: false
       matrix:
@@ -20,7 +24,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm install --no-save --package-lock=false react@${{ matrix.react }} react-dom@${{ matrix.react }}
-      - run: npx playwright install --with-deps chromium --only-shell
       - run: npm run verify:drawer
 
   verify:
