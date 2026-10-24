@@ -101,6 +101,34 @@ test("captures SDK error and cancellation without turning either into success", 
     assert.equal(trace.result, undefined);
   }
 });
+test("keeps SDK success and hides response redaction failures", async () => {
+  const sentinel = "private-redactor-error-sentinel";
+  const { client, recorder } = setup(
+    "triage",
+    new JevRecorder({
+      redact: (path, value) => {
+        if (path.join(".") === "answers.category.choice")
+          throw new Error(`${sentinel}: cannot redact value=${value}`);
+        return value;
+      },
+    }),
+  );
+
+  const result = await client.systemOne(await makeRequest("triage"));
+  assert.ok(result.answers.category.type === "choice");
+  assert.equal(result.answers.category.choice, "billing");
+  const traces = await settled(recorder);
+  assert.equal(traces.length, 1);
+  assert.doesNotMatch(JSON.stringify(traces), new RegExp(sentinel));
+  const [trace] = traces;
+  assert.equal(trace.status, "success");
+  assert.equal(trace.requestId, "sample-triage-1");
+  assert.equal(trace.result, undefined);
+  assert.equal(trace.error, undefined);
+  assert.deepEqual(trace.captureWarnings, [
+    "Response snapshot failed; result unavailable.",
+  ]);
+});
 test("isolates concurrent sessions and transport attempts, with bounded retention and observer failure containment", async () => {
   const recorder = new JevRecorder({
     limit: 2,

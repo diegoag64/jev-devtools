@@ -296,22 +296,30 @@ export class JevRecorder {
             void promise
               .asResponse()
               .then(async (response) => {
-                const data = await response.clone().json();
+                let result: Trace["result"];
+                try {
+                  const data = await response.clone().json();
+                  result = capture(
+                    data,
+                    warnings,
+                    this.options.redact,
+                  ) as Trace["result"];
+                } catch {
+                  // Capture failures are not SDK failures, and redactor errors
+                  // may contain the sensitive values they were meant to hide.
+                  warnings.add("Response snapshot failed; result unavailable.");
+                }
                 this.update(id, (t) => {
                   t.status = "success";
                   t.durationMs = performance.now() - started;
                   t.requestId =
                     response.headers.get("x-typesafe-request-id") ?? undefined;
-                  t.result = capture(
-                    data,
-                    warnings,
-                    this.options.redact,
-                  ) as Trace["result"];
+                  t.result = result;
                   t.captureWarnings = [...warnings];
                 });
               }, fail)
-              .catch((error) => {
-                fail(error);
+              .catch(() => {
+                /* Recording errors must not affect inference or expose data. */
               });
             return promise;
           } catch (error) {
