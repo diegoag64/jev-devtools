@@ -20,6 +20,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 Local experiment; not published or submitted as a PR.
 
+- Bound playground request waits (30 seconds for samples, five minutes for live flows), including stalled response bodies. Timeouts restore the controls and explain recovery; Cancel now aborts the browser wait immediately and requests server cancellation in the background.
+
 - Add the sample-only Structure Recovery cookbook using existing flow APIs: two sequential batched requests, visible line-merge and Markdown-render tasks, a safe original/preview comparison, every join/type probability, and cases for threshold boundaries, separated text and empty input. Prompts and rendering rules follow the official executable recipe; documents and answers are synthetic. No new flow primitive or live provider is introduced.
 
 - Add typed, pre-test `flow.loop()` with state carried between iterations, explicit `FlowLoopLimitError` on unfinished iteration-limit exhaustion, zero-iteration support and cancellation. Loops may contain maps; all expanded work shares one run-wide step budget. Loop templates and nested item templates count toward the definition limit. Nested loops and loops inside maps remain unsupported.

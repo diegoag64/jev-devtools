@@ -1,3 +1,4 @@
+import { postPlayground, RunError } from "./playground-request.js";
 import {
   structureCases,
   type StructureCase,
@@ -18,7 +19,7 @@ import {
   type RagCase,
 } from "../../../cookbooks/rag-passages/cases.js";
 import { RagCookbookResult } from "./RagCookbookResult.js";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { JevDevtools } from "jev-devtools";
 import { ScenarioResult, type RunState } from "./ScenarioResult";
@@ -57,26 +58,14 @@ const savedSession = sessionStorage.getItem("jev-inspector-session");
 const session = savedSession || crypto.randomUUID();
 sessionStorage.setItem("jev-inspector-session", session);
 const endpoint = (path: string) => `/__jev/${path}?session=${session}`;
-class RunError extends Error {
-  constructor(
-    message: string,
-    public cancelled = false,
-  ) {
-    super(message);
-  }
-}
-async function post(path: string, body: unknown = {}) {
-  const response = await fetch(endpoint(path), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await response.json();
-  if (!response.ok)
-    throw new RunError(data.error || "Request failed", data.cancelled === true);
-  return data;
-}
+const post = (
+  path: string,
+  body: unknown = {},
+  options: { timeoutMs?: number; signal?: AbortSignal } = {},
+) => postPlayground(endpoint(path), body, options);
 function App() {
+  const activeRequest = useRef<AbortController | null>(null);
+  useEffect(() => () => activeRequest.current?.abort(), []);
   const [structureCase, setStructureCase] = useState<StructureCase>("memo");
   const [hierarchyCase, setHierarchyCase] = useState<HierarchyCase>("recovery");
   const [sdeCase, setSdeCase] = useState<SdeCase>("fabricated");
@@ -140,6 +129,8 @@ function App() {
   }, []);
   async function run() {
     const id = crypto.randomUUID();
+    const controller = new AbortController();
+    activeRequest.current = controller;
     const started = performance.now();
     const captured = { id, scenario, mode, message };
     setFlowResult(null);
@@ -147,19 +138,26 @@ function App() {
     setRunId(id);
     setFeedback("Request running…");
     try {
-      const data = await post("run", {
-        runId: id,
-        scenario,
-        mode,
-        message,
-        profile,
-        stress,
-        cookbookCase,
-        ragCase,
-        sdeCase,
-        hierarchyCase,
-        structureCase,
-      });
+      const data = await post(
+        "run",
+        {
+          runId: id,
+          scenario,
+          mode,
+          message,
+          profile,
+          stress,
+          cookbookCase,
+          ragCase,
+          sdeCase,
+          hierarchyCase,
+          structureCase,
+        },
+        {
+          signal: controller.signal,
+          timeoutMs: mode === "sample" ? 30_000 : 300_000,
+        },
+      );
       if (data.flow) setFlowResult(data.flow);
       setOutcome({
         ...captured,
@@ -173,15 +171,20 @@ function App() {
           : "Response ready. Explore the result below.",
       );
     } catch (e) {
+      if (e instanceof RunError && e.timedOut)
+        void post("cancel", { runId: id }, { timeoutMs: 5000 }).catch(() => {});
       setOutcome({
         ...captured,
         status: e instanceof RunError && e.cancelled ? "cancelled" : "error",
         error: e instanceof Error ? e.message : "Request failed",
       });
       setFeedback(
-        `${e instanceof Error ? e.message : "Request failed"}. See the inspector for details.`,
+        e instanceof RunError && (e.timedOut || e.cancelled)
+          ? e.message
+          : `${e instanceof Error ? e.message : "Request failed"}. See the inspector for details.`,
       );
     } finally {
+      if (activeRequest.current === controller) activeRequest.current = null;
       setRunId(undefined);
     }
   }
@@ -702,11 +705,13 @@ function App() {
             {runId && (
               <Button
                 variant="outline"
-                onClick={() =>
-                  void post("cancel", { runId }).catch((e) =>
-                    setFeedback(e.message),
-                  )
-                }
+                onClick={() => {
+                  activeRequest.current?.abort();
+                  // Stop waiting locally even if the server cancellation cannot arrive.
+                  void post("cancel", { runId }, { timeoutMs: 5000 }).catch(
+                    () => {},
+                  );
+                }}
               >
                 Cancel
               </Button>
