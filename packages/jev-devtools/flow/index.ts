@@ -14,6 +14,7 @@ import type {
   FlowStep,
 } from "../src/flow-protocol.js";
 import { jsonSnapshot, runCallback } from "./runtime.js";
+import type { Json } from "../src/protocol.js";
 export type {
   FlowDisplay,
   FlowDefinition,
@@ -1033,18 +1034,57 @@ export function defineJevFlow<T>(
       } catch {
         /* Recording cannot stop execution. */
       }
+      // Data objects are replaced, never mutated by execution. Keep detached
+      // copies stable so the recorder can reuse its captures on unrelated updates.
+      const observerData = new WeakMap<object, Json>();
+      const snapshotData = (value: unknown): Json => {
+        if (value && typeof value === "object" && observerData.has(value))
+          return observerData.get(value)!;
+        let snapshot: Json;
+        try {
+          snapshot = jsonSnapshot(value);
+        } catch {
+          // Direct flow outputs may be non-JSON; only their capture is unavailable.
+          snapshot = "[capture unavailable]";
+        }
+        if (value && typeof value === "object")
+          observerData.set(value, snapshot);
+        return snapshot;
+      };
       const emit = () => {
         try {
           if (observer) {
             const { value, steps, ...metadata } = run;
-            // Stable data snapshots are captured once by the recorder, not
-            // cloned/redacted again on every unrelated step update.
             observer.update({
               ...structuredClone(metadata),
               steps: Object.fromEntries(
-                Object.entries(steps).map(([id, step]) => [id, { ...step }]),
+                Object.entries(steps).map(([id, step]) => [
+                  id,
+                  {
+                    ...step,
+                    ...(step.data !== undefined
+                      ? { data: snapshotData(step.data) }
+                      : {}),
+                    ...(step.loop ? { loop: { ...step.loop } } : {}),
+                    ...(step.captureWarnings
+                      ? { captureWarnings: [...step.captureWarnings] }
+                      : {}),
+                    ...(step.collection
+                      ? {
+                          collection: {
+                            ...step.collection,
+                            // Child runs have already crossed this snapshot boundary.
+                            // Copy mutable collection metadata, reuse detached children.
+                            items: step.collection.items.map((item) => ({
+                              ...item,
+                            })),
+                          },
+                        }
+                      : {}),
+                  },
+                ]),
               ),
-              ...(value !== undefined ? { value } : {}),
+              ...(value !== undefined ? { value: snapshotData(value) } : {}),
             });
           }
         } catch {
@@ -1446,7 +1486,7 @@ export function defineJevFlow<T>(
           throw new Error("Flow must return a named output");
         run.status = "success";
         run.outcome = result.outcome;
-        // Only the recorder snapshots output data; runtime keeps the actual typed value.
+        // emit() detaches the observer's output; callers keep the actual typed value.
         if (result.value !== undefined)
           run.value = result.value as FlowRun["value"];
         return { runId: run.id, ...result };
