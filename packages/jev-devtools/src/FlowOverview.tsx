@@ -571,23 +571,42 @@ export const FlowOverview = memo(function FlowOverview({
           : h / 2 + 40;
         const y = Math.max(bottom, center - h / 2);
         points.set(node.id, { x, y, width: w, height: h });
-        const expanded =
-          collectionViews[node.id]?.open &&
-          node.itemDefinition &&
-          run.steps[node.id]?.collection?.total;
-        const size = expanded
-          ? itemSizes[node.id] ?? { width: 2400, height: 800 }
-          : undefined;
-        if (size) expansions.set(node.id, { x, y: y + h + 96, ...size });
-        bottom = y + h + (size ? size.height + 96 : 0) + 100;
-        width = Math.max(width, w, size?.width ?? 0);
+        bottom = y + h + 100;
+        width = Math.max(width, w);
       }
       x += width + 160;
+    }
+    // Collection previews occupy a separate row below the original graph.
+    // Their dimensions must never participate in its column or lane spacing.
+    const expansionY =
+      Math.max(...[...points.values()].map((p) => p.y + p.height), 40) + 96;
+    for (const node of definition.nodes) {
+      if (
+        !collectionViews[node.id]?.open ||
+        !node.itemDefinition ||
+        !run.steps[node.id]?.collection?.total
+      )
+        continue;
+      const card = points.get(node.id);
+      if (!card) continue;
+      const size = itemSizes[node.id] ?? { width: 2400, height: 800 };
+      let left = Math.max(40, card.x + card.width / 2 - size.width / 2);
+      // Keep simultaneously expanded collections separate without moving any
+      // original step, even when their preferred preview positions overlap.
+      for (const area of [...expansions.values()].sort((a, b) => a.x - b.x)) {
+        if (left < area.x + area.width + 96 && left + size.width + 96 > area.x)
+          left = area.x + area.width + 96;
+      }
+      expansions.set(node.id, { x: left, y: expansionY, ...size });
     }
     return {
       points,
       expansions,
-      width: Math.max(700, x - 120),
+      width: Math.max(
+        700,
+        x - 120,
+        ...[...expansions.values()].map((p) => p.x + p.width + 40),
+      ),
       height: Math.max(
         400,
         ...[...points.values(), ...expansions.values()].map(
@@ -616,17 +635,15 @@ export const FlowOverview = memo(function FlowOverview({
     },
     [preserveCamera],
   );
-  const pendingCollectionFocus = useRef<string | null>(null);
+  const started = useRef(false);
   const changeCollection = useCallback(
     (id: string, view: CollectionView) => {
       preserveCamera();
       setSelected(id);
-      if (!inline && view.open && !collectionViews[id]?.open)
-        pendingCollectionFocus.current = id;
-      else pendingCollectionFocus.current = null;
+      started.current = true;
       setCollectionViews((previous) => ({ ...previous, [id]: view }));
     },
-    [preserveCamera, collectionViews, inline],
+    [preserveCamera],
   );
   const resizeItem = useCallback(
     (id: string, size: Size) => {
@@ -640,23 +657,6 @@ export const FlowOverview = memo(function FlowOverview({
     },
     [preserveCamera],
   );
-  useEffect(() => {
-    const id = pendingCollectionFocus.current;
-    if (!id || !itemSizes[id]) return;
-    const card = layout.points.get(id),
-      item = layout.expansions.get(id);
-    if (!card || !item) return;
-    pendingCollectionFocus.current = null;
-    // Opening explicitly reveals both the collection and its linked item;
-    // cycling items afterwards leaves the camera where the user put it.
-    focusArea({
-      x: card.x,
-      y: card.y,
-      width: Math.max(card.width, item.width),
-      height: item.y + item.height - card.y,
-    });
-  }, [layout, itemSizes, focusArea]);
-  const started = useRef(false);
   useEffect(() => {
     if (inline || started.current) return;
     const first = layout.points.get(selected);
@@ -801,17 +801,20 @@ export const FlowOverview = memo(function FlowOverview({
                 {[...layout.expansions].map(([id, area]) => {
                   const card = layout.points.get(id)!;
                   const x = card.x + card.width / 2;
+                  const endX = area.x + area.width / 2;
+                  const startY = card.y + card.height;
+                  const bendY = startY + (area.y - startY) / 2;
                   return (
                     <g key={id} className="flow-collection-link">
                       <path
-                        d={`M${x},${card.y + card.height} V${area.y}`}
+                        d={`M${x},${startY} C${x},${bendY} ${endX},${bendY} ${endX},${area.y}`}
                         fill="none"
                         stroke="#E551BA"
                         strokeWidth="2"
                         strokeDasharray="6 5"
                         markerEnd={`url(#arrow-${run.id})`}
                       />
-                      <text x={x + 14} y={area.y - 40}>
+                      <text x={endX + 14} y={area.y - 20}>
                         Selected item {(collectionViews[id]?.index ?? 0) + 1}
                       </text>
                     </g>
