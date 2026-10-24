@@ -13,7 +13,12 @@ import type {
   FlowRun,
   FlowStep,
 } from "../src/flow-protocol.js";
-import { jsonSnapshot, observerSnapshot, runCallback } from "./runtime.js";
+import {
+  jsonSnapshot,
+  observerSnapshot,
+  observeRequest,
+  runCallback,
+} from "./runtime.js";
 import type { Json } from "../src/protocol.js";
 export type {
   FlowDisplay,
@@ -185,6 +190,7 @@ export type FlowObserver = {
   ):
     | {
         update(run: FlowRun): void;
+        /** Call through synchronously to establish recording context. The runner owns the result. */
         request<T>(
           link: { runId: string; stepId: string; executionId: string },
           onTrace: (id: string) => void,
@@ -1151,10 +1157,12 @@ export function defineJevFlow<T>(
                 return evaluate(e.ast, data, values);
               }) as SystemOneRequest<Questions>;
               abortCheck();
-              const call = () =>
-                options.client.systemOne(request, {
+              const call = () => {
+                abortCheck();
+                return options.client.systemOne(request, {
                   signal: controller.signal,
                 });
+              };
               const link = {
                 runId: run.id,
                 stepId: step.id,
@@ -1162,21 +1170,25 @@ export function defineJevFlow<T>(
               };
               value = await runCallback(
                 () =>
-                  observer
-                    ? observer.request(
-                        link,
-                        (id) => {
-                          if (
-                            controller.signal.aborted ||
-                            state.status !== "running"
+                  observeRequest(
+                    call,
+                    observer
+                      ? (callOnce) =>
+                          observer.request(
+                            link,
+                            (id) => {
+                              if (
+                                controller.signal.aborted ||
+                                state.status !== "running"
+                              )
+                                return;
+                              state.traceId = id;
+                              emit();
+                            },
+                            callOnce,
                           )
-                            return;
-                          state.traceId = id;
-                          emit();
-                        },
-                        call,
-                      )
-                    : call(),
+                      : undefined,
+                  ),
                 controller.signal,
               );
               abortCheck();

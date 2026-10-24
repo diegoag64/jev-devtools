@@ -85,6 +85,35 @@ export function observerSnapshot(value: unknown): Json {
   return visit(value, 0);
 }
 
+/** Recording may establish synchronous context, but cannot replace or repeat execution. */
+export function observeRequest<T>(
+  callback: () => T,
+  observe?: (call: () => T) => unknown,
+): T {
+  let called = false;
+  let result: T;
+  let failure: { error: unknown } | undefined;
+  const callOnce = (): T => {
+    if (!called) {
+      called = true;
+      try {
+        result = callback();
+      } catch (error) {
+        failure = { error };
+      }
+    }
+    if (failure) throw failure.error;
+    return result;
+  };
+  try {
+    // Observe rejected hook promises without awaiting them or changing the SDK result.
+    if (observe) void Promise.resolve(observe(callOnce)).catch(() => {});
+  } catch {
+    // A hook can fail before or after calling through. Reuse that invocation below.
+  }
+  return callOnce();
+}
+
 /** Cancellation ends awaiting, even when user code ignores the cooperative signal. */
 export function runCallback(
   callback: (signal: AbortSignal) => unknown,

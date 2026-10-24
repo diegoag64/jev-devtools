@@ -185,6 +185,8 @@ Each lane returns an expression. The join exposes a named reference with that ex
 
 ## Errors, cancellation, and recording
 
+Request observation is best effort: a recording hook that throws or rejects cannot replace the SDK result or its real error. Each Jev step invokes the supplied client's `systemOne` at most once; repeated or deferred observer callbacks reuse that invocation, while SDK retries remain unchanged. Custom request observers should call their callback synchronously to establish recording context. If a hook fails before calling through, the runner dispatches the request itself unless cancelled; trace linkage may be unavailable for that request.
+
 The flow preserves SDK retries within each Jev step and adds no flow retries. Failed work blocks dependents. A failed parallel lane aborts sibling calls, waits for them to settle, then rejects with the first failure. An external abort propagates through SDK request signals and rejects; work already completed remains completed. Untaken branches remain untaken. Remaining unreachable work is blocked on failure or cancelled on external abort. Successful steps record duration and decision nodes record the evaluated Boolean independently of captured/redacted answers.
 
 `run()` works with an ordinary SDK client and no inspector, or a disabled inspector. To link nodes to request details, pass a client created by the **same** inspector. A plain client still executes and records flow-level states when an inspector is supplied, but there is no request capture to link. For custom session scoping, wrap `run()` in the inspector's existing `inspector.run(request, callback)` helper.
