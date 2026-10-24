@@ -14,6 +14,7 @@ export class FlowRecorder {
   private revisions = new Map<string, number>();
   private revision = 0;
   private listeners = new Set<(sessions: Set<string>) => void>();
+  private itemCaptures = new WeakMap<FlowRun, FlowRun>();
   private taskCaptures = new WeakMap<
     object,
     { data: Json; warnings: string[] }
@@ -35,21 +36,32 @@ export class FlowRecorder {
   start(definition: FlowDefinition, run: FlowRun, session: string) {
     if (!this.definitions.has(definition.id)) {
       const stored = structuredClone(definition);
-      for (const node of stored.nodes) {
-        if (node.conditionRule === undefined) continue;
-        try {
-          node.conditionRule = capture(
-            node.conditionRule,
-            new Set(),
-            this.options.redact
-              ? (path, value) =>
-                  this.options.redact!(["conditions", node.id, ...path], value)
-              : undefined,
-          );
-        } catch {
-          node.conditionRule = "[rule capture unavailable]";
+      const redactRules = (
+        definition: FlowDefinition,
+        prefix: string[] = [],
+      ) => {
+        for (const node of definition.nodes) {
+          if (node.itemDefinition)
+            redactRules(node.itemDefinition, [...prefix, node.id, "items"]);
+          if (node.conditionRule === undefined) continue;
+          try {
+            node.conditionRule = capture(
+              node.conditionRule,
+              new Set(),
+              this.options.redact
+                ? (path, value) =>
+                    this.options.redact!(
+                      ["conditions", ...prefix, node.id, ...path],
+                      value,
+                    )
+                : undefined,
+            );
+          } catch {
+            node.conditionRule = "[rule capture unavailable]";
+          }
         }
-      }
+      };
+      redactRules(stored);
       this.definitions.set(definition.id, stored);
       this.definitionRevisions.set(definition.id, ++this.revision);
     }
@@ -66,12 +78,33 @@ export class FlowRecorder {
     this.prune();
     this.notify(sessions);
   }
-  update(run: FlowRun) {
-    if (!this.runs.has(run.id)) return; // Clear/eviction cannot resurrect pending runs.
+  private captureRun(run: FlowRun, prefix: string[] = []): FlowRun {
+    // Child updates are immutable snapshots; unchanged items need no recapture.
+    const previous = prefix.length ? this.itemCaptures.get(run) : undefined;
+    if (previous) return previous;
     const stored = {
       ...run,
       steps: Object.fromEntries(
-        Object.entries(run.steps).map(([id, step]) => {
+        Object.entries(run.steps).map(([id, raw]) => {
+          const step = { ...raw };
+          if (raw.collection)
+            step.collection = {
+              ...raw.collection,
+              items: raw.collection.items.map((item) => ({
+                ...item,
+                ...(item.run
+                  ? {
+                      run: this.captureRun(item.run, [
+                        ...prefix,
+                        "steps",
+                        id,
+                        "items",
+                        String(item.index),
+                      ]),
+                    }
+                  : {}),
+              })),
+            };
           if (step.data === undefined) return [id, { ...step }];
           const key = step.data;
           let captured =
@@ -89,7 +122,7 @@ export class FlowRecorder {
                   this.options.redact
                     ? (path, value) =>
                         this.options.redact!(
-                          ["steps", id, "data", ...path],
+                          [...prefix, "steps", id, "data", ...path],
                           value,
                         )
                     : undefined,
@@ -115,12 +148,23 @@ export class FlowRecorder {
     };
     if ("value" in stored) {
       try {
-        stored.value = capture(stored.value, new Set(), this.options.redact);
+        stored.value = capture(
+          stored.value,
+          new Set(),
+          this.options.redact
+            ? (path, value) => this.options.redact!([...prefix, ...path], value)
+            : undefined,
+        );
       } catch {
         stored.value = "[capture unavailable]";
       }
     }
-    this.runs.set(run.id, stored);
+    if (prefix.length) this.itemCaptures.set(run, stored);
+    return stored;
+  }
+  update(run: FlowRun) {
+    if (!this.runs.has(run.id)) return; // Clear/eviction cannot resurrect pending runs.
+    this.runs.set(run.id, this.captureRun(run));
     this.revisions.set(run.id, ++this.revision);
     this.notify(new Set([this.sessions.get(run.id)!]));
   }

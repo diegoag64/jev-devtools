@@ -17,7 +17,7 @@ export type FlowCondition =
 /** Structural metadata and authored rules; runtime inputs/answers stay in request captures. */
 export type FlowNode = FlowDisplay & {
   id: string;
-  kind: "jev" | "task" | "branch" | "parallel" | "output";
+  kind: "jev" | "task" | "map" | "branch" | "parallel" | "output";
   dependencies: string[];
   path: string[];
   condition?: string;
@@ -25,6 +25,8 @@ export type FlowNode = FlowDisplay & {
   conditionRule?: Json | FlowCondition;
   /** Named concurrent lanes; optional for older captures. */
   lanes?: string[];
+  /** Reusable item program; map nesting is not supported in v1. */
+  itemDefinition?: FlowDefinition;
 };
 export type FlowDefinition = {
   version: 1;
@@ -51,6 +53,15 @@ export type FlowStep = {
   /** Optional bounded, redacted task input/output; never executable code. */
   data?: Json;
   captureWarnings?: string[];
+  collection?: {
+    total: number;
+    concurrency: number;
+    items: Array<{
+      index: number;
+      status: FlowStep["status"];
+      run?: FlowRun;
+    }>;
+  };
 };
 export type FlowRun = {
   version: 1;

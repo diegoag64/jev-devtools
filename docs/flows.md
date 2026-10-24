@@ -131,7 +131,7 @@ const evaluation = flow.task("external-evaluation", {
 - Abort signals are cooperative. The runner can stop waiting for asynchronous work that ignores a signal, but cannot kill arbitrary JavaScript, undo side effects, or guarantee remote cancellation. CPU-bound work blocks the event loop until it returns; a result returned after its timeout is rejected. Use a worker/service for expensive computation.
 - Task cards show their status, duration, and returned-value preview. Select one for expandable inputs/outputs and capture warnings. Conditions referencing task results read the **redacted captured output** in the viewer.
 - Task input/output capture uses the existing size/depth limits and default secret-key redaction. Custom redaction paths start with `steps`, the step ID, `data`, then `input` or `output`. Capture truncation/redaction never changes the value executed or returned. Capture failures suppress the data and do not fail the task. Only error names are recorded; exception messages/stacks remain server-side.
-- The wire format adds an optional task kind/data to version 1. Existing captures remain readable; use the matching updated drawer for function previews. This does not add loops, dynamic fan-out, persisted jobs, distributed execution, or automatic deployment.
+- The wire format adds an optional task kind/data to version 1. Existing captures remain readable; use the matching updated drawer for function previews. Dynamic fan-out is provided separately by the experimental `map()` API below. This does not add loops, persisted jobs, distributed execution, or automatic deployment.
 
 ### Try the local sample
 
@@ -230,3 +230,41 @@ Condition cards separate **Incoming value** from **Requirement**, alongside your
 Rule literals now appear in captures, including numeric thresholds and string comparison labels. They use the existing capture limits and `redact` callback, with paths prefixed by `["conditions", stepId]`; a literal's final path segment is `value`. For example, return `"[redacted]"` whenever `path[0] === "conditions" && path.at(-1) === "value"` to hide all rule literals. Redaction/truncation is displayed explicitly and never changes execution. Rules are bounded to 128 expression nodes before capture. Existing integrations and older captures remain supported; old captures show their original rule with hidden literals.
 
 Incoming values are read from linked, retained Jev captures and respect their redaction. Missing or evicted captures, older rule metadata, and references to flow input or parallel aggregate values that are not request answers show **Not captured**; the viewer does not collect extra runtime values or infer them from the chosen route. Duplicate input names include their source step title to distinguish them. The card previews up to three inputs; select it for the complete list and technical references. Compound requirements preserve AND/OR/NOT grouping and use the same readable input names.
+
+## Dynamic collections: `flow.map()` (unreleased experiment)
+
+`map(id, options, buildItem, display?)` runs the same item program over an array produced at runtime. The callback builds a template once; it does not execute application work during definition.
+
+```ts
+const assessed = flow.map("assess-passages", {
+  items: retrieved, // FlowExpression<Passage[]> or an ordinary array
+  input: { query: flow.input.get("query") }, // explicit shared context
+  concurrency: 4, // default 4; 1–16
+  maxItems: 12, // required; 1–64; exceeding it fails without truncating
+}, (item) => {
+  const request = item.jev("assess", {
+    state: {
+      query: item.input.get("context").get("query"),
+      passage: item.input.get("item"),
+    },
+    questions: { relevant: noul("Is the passage relevant to the query?") },
+  });
+  return item.task("result", {
+    input: { passage: item.input.get("item"), relevance: request.answer("relevant").noul },
+    run: (value) => value,
+  });
+});
+// assessed is a typed FlowExpression<Array<{ passage: Passage; relevance: number }>>.
+```
+
+`item.input` contains `{ item, index, context }`; index is zero-based. Pass outer references explicitly through `input`; they cannot be captured directly inside the item builder. Each item receives a detached JSON-compatible snapshot. A template can contain tasks, Jev calls and static parallel lanes, and returns an expression. The runner adds the item-result output. Terminal `output()`/`branch()` calls in the item builder and nested maps are not supported in this first version. Use a task for deterministic routing that returns a value.
+
+Results preserve input order regardless of completion order. An empty list returns `[]` and executes no item steps. The map waits for every item before advancing. A failed item aborts running siblings, blocks queued items, and prevents downstream work; external cancellation marks queued work cancelled. There is no partial-success mode or automatic map/task retry. SDK retries remain governed by the supplied client. Signals are cooperative for remote side effects; cancellation cannot undo work already performed.
+
+Definitions are limited to 256 nodes including item templates; runs permit at most 1,024 expanded nodes including root nodes and item-result nodes. Limits reject excess work rather than silently reducing the list. Concurrency is per map, not a global provider limit across simultaneous flow runs. No durable/distributed execution or iteration is added.
+
+The collection card shows progress; select it to choose any item and open its complete connected diagram. Parent camera/selection are retained while viewing an item. Item requests have distinct execution IDs and are linked to their parent run using `map-id/index/step-id`. Only started items have a diagram; queued, blocked and cancelled-before-start items retain their status. Older captures remain readable with the matching updated drawer; this optional map metadata extends wire version 1.
+
+Item input/output and result snapshots follow the same capture limits and redaction as other steps. Custom redaction paths are prefixed with `steps`, map ID, `items`, index before child paths. Template conditions are prefixed with `conditions`, map ID, `items`. Inputs never become structural labels. Runtime values stay untruncated; capture failures do not change execution. Clear/eviction still cannot resurrect a run.
+
+Try the [RAG passage cookbook](../cookbooks/rag-passages/README.md) for a twelve-item sample with four concurrent requests and every passage inspectable.

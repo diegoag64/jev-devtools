@@ -28,6 +28,7 @@ type Ast =
   | { op: "literal"; value: unknown }
   | { op: "eq" | "lt" | "gte" | "all" | "any" | "not"; args: Ast[] };
 const owners = new WeakMap<object, object>();
+const builderIds = new WeakMap<object, Set<string>>();
 function freezeAst(ast: Ast, depth = 0): void {
   if (depth > 80) throw new Error("Expression nesting exceeds 80");
   if (Object.isFrozen(ast)) return;
@@ -151,6 +152,13 @@ type Step = {
   factory?: (input: never) => SystemOneRequest<Questions>;
   timeoutMs?: number;
   answerNames?: Set<string>;
+  collection?: {
+    items: unknown;
+    context: unknown;
+    concurrency: number;
+    maxItems: number;
+    program: ReturnType<typeof defineJevFlow<unknown>>;
+  };
 };
 /** Observer contract used by createJevDevtools; execution never depends on successful recording. */
 export type FlowObserver = {
@@ -361,6 +369,20 @@ export interface FlowBuilder<T> {
     task: FlowTask<I, O>,
     display?: FlowDisplay,
   ): FlowExpression<Awaited<O>>;
+  /** Execute a reusable item program with bounded concurrency; return results in input order. */
+  map<I, C, O>(
+    id: string,
+    options: {
+      items: FlowExpression<readonly I[]> | readonly I[];
+      input: C;
+      concurrency?: number;
+      maxItems: number;
+    },
+    build: (
+      item: FlowBuilder<{ item: I; index: number; context: Resolved<C> }>,
+    ) => FlowExpression<O>,
+    display?: FlowDisplay,
+  ): FlowExpression<O[]>;
   /** Terminal decision: each callback must return output() or another branch(). */
   branch(
     id: string,
@@ -396,6 +418,7 @@ export function defineJevFlow<T>(
     nodes: FlowNode[] = [];
   const input = new FlowExpression<T>({ op: "input" }, owner);
   let building = true;
+  let templateSteps = 0;
   let activeBlock: object | undefined;
   function block(
     callback: (builder: FlowBuilder<T>) => FlowExpression<unknown>,
@@ -432,7 +455,8 @@ export function defineJevFlow<T>(
         throw new Error("No steps allowed after a terminal output or branch");
       if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/.test(id) || ids.has(id))
         throw new Error(`Invalid or duplicate step ID: ${id}`);
-      if (ids.size >= 256) throw new Error("Flows support at most 256 steps");
+      if (ids.size + templateSteps >= 256)
+        throw new Error("Flows support at most 256 steps");
       const copy: FlowDisplay = {};
       if (display !== undefined) {
         if (!display || typeof display !== "object" || Array.isArray(display))
@@ -561,6 +585,68 @@ export function defineJevFlow<T>(
         step.timeoutMs = task.timeoutMs;
         return new FlowExpression({ op: "ref", id }, owner) as never;
       },
+      map(id, config, buildItem, display) {
+        const concurrency = config.concurrency ?? 4;
+        if (
+          !Number.isInteger(concurrency) ||
+          concurrency < 1 ||
+          concurrency > 16
+        )
+          throw new Error("Map concurrency must be an integer from 1 to 16");
+        if (
+          !Number.isInteger(config.maxItems) ||
+          config.maxItems < 1 ||
+          config.maxItems > 64
+        )
+          throw new Error("Map maxItems must be an integer from 1 to 64");
+        const frozen = mapValue(
+          { items: config.items, context: config.input },
+          (e) => e,
+        ) as { items: unknown; context: unknown };
+        const step = add(id, "map", frozen, display);
+        const parentScope = activeBlock;
+        activeBlock = undefined;
+        let program: ReturnType<
+          typeof defineJevFlow<{
+            item: unknown;
+            index: number;
+            context: unknown;
+          }>
+        >;
+        try {
+          program = defineJevFlow<{
+            item: unknown;
+            index: number;
+            context: unknown;
+          }>(`Item · ${display?.title ?? id}`.slice(0, 100), (item) => {
+            const result = buildItem(item as never);
+            let outputId = "item-result";
+            for (let suffix = 1; builderIds.get(item)!.has(outputId); suffix++)
+              outputId = `item-result-${suffix}`;
+            return item.output(outputId, result, {
+              title: "Item result",
+            });
+          });
+        } finally {
+          activeBlock = parentScope;
+        }
+        if (program.definition.nodes.some((n) => n.kind === "map"))
+          throw new Error("Nested maps are not supported");
+        templateSteps += program.definition.nodes.length;
+        if (ids.size + templateSteps > 256)
+          throw new Error(
+            "Flows support at most 256 steps including map templates",
+          );
+        step.collection = {
+          ...frozen,
+          concurrency,
+          maxItems: config.maxItems,
+          program: program as never,
+        };
+        nodes.find((node) => node.id === id)!.itemDefinition =
+          program.definition;
+        return new FlowExpression({ op: "ref", id }, owner) as never;
+      },
       branch(id, paths, display) {
         const step = add(id, "branch", paths.when, display);
         step.when = paths.when;
@@ -633,6 +719,7 @@ export function defineJevFlow<T>(
         );
       },
     };
+    builderIds.set(builder, ids);
     const parentBlock = activeBlock;
     activeBlock = token;
     let returned: FlowExpression<unknown>;
@@ -682,6 +769,7 @@ export function defineJevFlow<T>(
     Object.freeze(node.path);
     if (node.lanes) Object.freeze(node.lanes);
     freezeRule(node.conditionRule);
+    freezeRule(node.itemDefinition);
     Object.freeze(node);
   }
   Object.freeze(definitionView.nodes);
@@ -712,6 +800,7 @@ export function defineJevFlow<T>(
       };
       const started = performance.now(),
         values = new Map<string, unknown>();
+      let expandedSteps = nodes.length;
       let observer: ReturnType<FlowObserver["startFlow"]>;
       try {
         observer = options.devtools?.startFlow(
@@ -808,16 +897,25 @@ export function defineJevFlow<T>(
                 stepId: step.id,
                 executionId: state.executionId,
               };
-              value = await (observer
-                ? observer.request(
-                    link,
-                    (id) => {
-                      state.traceId = id;
-                      emit();
-                    },
-                    call,
-                  )
-                : call());
+              value = await runCallback(
+                () =>
+                  observer
+                    ? observer.request(
+                        link,
+                        (id) => {
+                          if (
+                            controller.signal.aborted ||
+                            state.status !== "running"
+                          )
+                            return;
+                          state.traceId = id;
+                          emit();
+                        },
+                        call,
+                      )
+                    : call(),
+                controller.signal,
+              );
               abortCheck();
             } else if (step.kind === "task") {
               const input = jsonSnapshot(
@@ -840,6 +938,124 @@ export function defineJevFlow<T>(
               );
               abortCheck();
               state.data = { input, output: jsonSnapshot(value) };
+            } else if (step.kind === "map") {
+              const config = step.collection!;
+              const items = jsonSnapshot(
+                mapValue(config.items, (e) => evaluate(e.ast, data, values)),
+              );
+              const context = jsonSnapshot(
+                mapValue(config.context, (e) => evaluate(e.ast, data, values)),
+              );
+              if (!Array.isArray(items))
+                throw new TypeError("Map items must be an array");
+              if (items.length > config.maxItems)
+                throw new RangeError("Map exceeds maxItems");
+              expandedSteps +=
+                items.length * config.program.definition.nodes.length;
+              if (expandedSteps > 1024)
+                throw new RangeError("Flow exceeds 1024 expanded steps");
+              state.collection = {
+                total: items.length,
+                concurrency: config.concurrency,
+                items: items.map((_, index) => ({ index, status: "waiting" })),
+              };
+              emit();
+              const results: unknown[] = new Array(items.length);
+              let next = 0,
+                failed = false,
+                firstError: unknown;
+              const updateItem = (index: number, child: FlowRun) => {
+                state.collection = {
+                  ...state.collection!,
+                  items: state.collection!.items.map((item) =>
+                    item.index === index
+                      ? {
+                          index,
+                          status:
+                            child.status === "pending"
+                              ? "running"
+                              : child.status === "success"
+                                ? "completed"
+                                : child.status,
+                          run: child,
+                        }
+                      : item,
+                  ),
+                };
+                emit();
+              };
+              const worker = async () => {
+                while (
+                  !controller.signal.aborted &&
+                  !failed &&
+                  next < items.length
+                ) {
+                  const index = next++;
+                  try {
+                    const result = await config.program.run(
+                      { item: items[index], index, context },
+                      {
+                        client: options.client,
+                        signal: controller.signal,
+                        devtools: {
+                          startFlow(_definition, child) {
+                            updateItem(index, child);
+                            return {
+                              update(child) {
+                                updateItem(index, child);
+                              },
+                              request(link, onTrace, callback) {
+                                return observer
+                                  ? observer.request(
+                                      {
+                                        ...link,
+                                        runId: run.id,
+                                        stepId: `${step.id}/${index}/${link.stepId}`,
+                                      },
+                                      onTrace,
+                                      callback,
+                                    )
+                                  : callback();
+                              },
+                            };
+                          },
+                        },
+                      },
+                    );
+                    results[index] = result.value;
+                  } catch (error) {
+                    if (!failed) {
+                      failed = true;
+                      firstError = error;
+                    }
+                    controller.abort(error);
+                  }
+                }
+              };
+              await Promise.all(
+                Array.from(
+                  { length: Math.min(config.concurrency, items.length) },
+                  worker,
+                ),
+              );
+              if (failed || controller.signal.aborted) {
+                state.collection = {
+                  ...state.collection,
+                  items: state.collection!.items.map((item) =>
+                    item.status === "waiting"
+                      ? {
+                          ...item,
+                          status: options.signal?.aborted
+                            ? "cancelled"
+                            : "blocked",
+                        }
+                      : item,
+                  ),
+                };
+                if (failed) throw firstError;
+                abortCheck();
+              }
+              value = results;
             } else if (step.kind === "branch") {
               const decision = evaluate(step.when!.ast, data, values);
               if (typeof decision !== "boolean")
