@@ -138,7 +138,7 @@ The prop applies to Context, Raw, Questions, request diagrams and flow data, inc
 
 **Display masking is not removal from captured data.** Supported personal fields remain in server capture memory, SSE payloads and browser memory even while visually masked. Use the server-side `redact(path, value)` callback when a value must never reach the browser. Credentials and values removed by that callback cannot be revealed by setting this prop to `false`; older or truncated captures cannot recover absent data either.
 
-Matching uses the complete field name, ignores case, and removes hyphens and underscores. For example, `X-API-Key`, `x_api_key`, and `xApiKey` all match `xapikey`. A matching object's entire value is replaced with `[redacted]`, recursively through arrays and objects.
+Matching uses the complete field name, ignores case, and removes hyphens and underscores. For example, `X-API-Key`, `x_api_key`, and `xApiKey` all match `xapikey`. A matching object's entire value is replaced with `[redacted]`, recursively through arrays and objects. Display masking preserves SDK structure: question IDs, Choice category labels/probabilities, score levels, and asset reference names remain intact even when named `email` or `phone`. Sensitive fields inside their instructions, descriptions, and other content are still masked. This display rule does not undo mandatory credential or custom server redaction.
 
 | Policy | Normalized field names |
 | --- | --- |

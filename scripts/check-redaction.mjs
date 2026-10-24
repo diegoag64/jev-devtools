@@ -21,6 +21,20 @@ export async function checkRedaction({ page, browser, url, load }) {
   const view = (name) =>
     page.getByRole("button", { name, exact: true }).click();
   const prop = (value) => page.selectOption("#display-redaction", value);
+  // Question IDs and Choice labels are structural maps, even when their names
+  // match personal-data fields. Exercise their real Questions/diagram renderers.
+  await view("Questions");
+  await expect(
+    body.getByRole("heading", { name: "email", exact: true }),
+  ).toBeVisible();
+  await expect(body).toContainText("Preferred contact method?");
+  await expect(body).toContainText("Email reply");
+  await expect(body).not.toContainText(personal);
+  await expect(body).not.toContainText(credential);
+  await view("Flow");
+  await expect(body).toContainText("80% probability");
+  await expect(body).toContainText("20% probability");
+  await expect(body).not.toContainText("NaN");
   await view("Context");
   await expect(body).toContainText("browser-public-customer");
   await expect(body).not.toContainText(personal);
@@ -37,6 +51,10 @@ export async function checkRedaction({ page, browser, url, load }) {
   await prop("off");
   await view("Context");
   await expect(body).toContainText(personal);
+  await view("Questions");
+  await expect(body).toContainText(personal);
+  await expect(body).not.toContainText(credential);
+  await view("Context");
 
   const other = await browser.newPage({
     viewport: { width: 1440, height: 1000 },

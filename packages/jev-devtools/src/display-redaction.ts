@@ -32,30 +32,59 @@ function memoize<T extends object>(project: (value: T) => T) {
   };
 }
 
+// Map entries without interpreting their names. Preserve redacted/truncated
+// scalar placeholders and retain identity when every value is unchanged.
+function mapValues<T>(
+  value: T,
+  project: (item: unknown, key: string) => unknown,
+): T {
+  if (!value || typeof value !== "object") return value;
+  if (Array.isArray(value)) {
+    const next = value.map((item, i) => project(item, String(i)));
+    return next.every((item, i) => item === value[i]) ? value : (next as T);
+  }
+  let changed = false;
+  const entries = Object.entries(value).map(([key, item]) => {
+    const next = project(item, key);
+    changed ||= next !== item;
+    return [key, next];
+  });
+  return changed ? (Object.fromEntries(entries) as T) : value;
+}
+
 /** One projection cache per mounted inspector. Stream captures are immutable;
  * unchanged rows and nested runs retain identity across unrelated updates. */
 export function createDisplayRedactor() {
-  const objects = memoize<object>((value) => {
-    if (Array.isArray(value)) {
-      const next = value.map(data);
-      return next.every((item, i) => item === value[i]) ? value : next;
-    }
-    let changed = false;
-    const entries = Object.entries(value).map(([key, item]) => {
-      const next = sensitiveKeys.has(key.replace(/[-_]/g, "").toLowerCase())
-        ? "[redacted]"
-        : data(item);
-      changed ||= next !== item;
-      return [key, next];
-    });
-    return changed ? Object.fromEntries(entries) : value;
-  });
+  function fields<T>(
+    value: T,
+    structural: Record<string, (item: unknown) => unknown> = {},
+  ): T {
+    return mapValues(value, (item, key) =>
+      Object.hasOwn(structural, key)
+        ? structural[key](item)
+        : sensitiveKeys.has(key.replace(/[-_]/g, "").toLowerCase())
+          ? "[redacted]"
+          : data(item),
+    );
+  }
+  const objects = memoize<object>((value) => fields(value));
   function data<T>(value: T): T {
     return value && typeof value === "object" ? (objects(value) as T) : value;
   }
+  const contents = (value: unknown) => mapValues(value, data);
+  // SDK maps use arbitrary question IDs, category labels and asset references.
+  // Mask their contents, not the entry itself because its name resembles PII.
+  const question = (value: unknown) => fields(value, { criteria: contents });
+  const answer = (value: unknown) =>
+    fields(value, { probabilities: contents, legend: contents });
   const trace = memoize<Trace>((value) => {
-    const request = data(value.request),
-      result = data(value.result);
+    const request = fields(value.request, {
+        questions: (items) => mapValues(items, question),
+        assets: contents,
+      }),
+      result = fields(value.result, {
+        answers: (items) => mapValues(items, answer),
+      });
     return request === value.request && result === value.result
       ? value
       : { ...value, request, result };

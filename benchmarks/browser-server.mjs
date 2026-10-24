@@ -4,6 +4,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { build } from "vite";
 import { defineJevFlow } from "jev-devtools/flow";
+import { choice } from "@typesafe-ai/sdk";
 import { scenarios, recordedFixture, fixture, invoke } from "./fixtures.mjs";
 const root = dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.BENCH_PORT || 4190);
@@ -194,16 +195,50 @@ const server = createServer(async (req, res) => {
       }
       // Independent synthetic capture for the display-prop browser regression;
       // benchmark workloads and production APIs do not need a test-only hook.
-      const { adapter, client, request, requestId } = adapters.get("small");
+      const { adapter, client } = adapters.get("small");
       const state = {
         email: "browser-personal@example.test",
         client_secret: "browser-credential-sentinel",
         customerId: "browser-public-customer",
       };
-      await invoke(client, { ...request, state });
+      const requestId = "redaction-structural-keys";
+      const captureClient = adapter.createClient(
+        {
+          apiKey: "sample",
+          logLevel: "off",
+          fetch: async () =>
+            Response.json(
+              {
+                model: "fixture",
+                answers: {
+                  email: {
+                    type: "choice",
+                    choice: "email",
+                    confidence: 0.8,
+                    probabilities: { email: 0.8, phone: 0.2 },
+                  },
+                },
+              },
+              { headers: { "x-typesafe-request-id": requestId } },
+            ),
+        },
+        { source: "sample", label: "Display redaction" },
+      );
+      await invoke(captureClient, {
+        state,
+        questions: {
+          email: choice(
+            { prompt: "Preferred contact method?", ...state },
+            {
+              email: { description: "Email reply", ...state },
+              phone: "Phone reply",
+            },
+          ),
+        },
+      });
       await redactionFlow.run(state, { client, devtools: adapter });
       res.setHeader("content-type", "application/json");
-      return res.end(JSON.stringify({ requestId: requestId() }));
+      return res.end(JSON.stringify({ requestId }));
     }
     if (url.pathname === "/bench/pulse" && req.method === "POST") {
       if (req.headers.origin !== `http://127.0.0.1:${port}`) {
