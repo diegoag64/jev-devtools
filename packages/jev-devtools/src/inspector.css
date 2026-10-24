@@ -2002,3 +2002,52 @@
 .flow-item-next {
   right: -76px;
 }
+.flow-run-summary {
+  text-align: right;
+}
+.flow-fixture-button {
+  display: block;
+  margin: 6px 0 0 auto;
+  font-size: 11px;
+}
+.flow-fixture {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  gap: 4px;
+  padding: 0 24px;
+  text-align: right;
+}
+.flow-fixture p {
+  margin: 0;
+  max-width: 360px;
+  font-size: 11px;
+}
+.flow-fixture details {
+  max-width: 360px;
+  font-size: 11px;
+}
+.flow-fixture details ul {
+  max-height: 120px;
+  margin: 4px 0 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  font-family: "JetBrains Mono", monospace;
+  overflow-wrap: anywhere;
+}
+.flow-fixture details ul:focus-visible {
+  outline: 2px solid #e551ba;
+  outline-offset: 2px;
+}
+.flow-fixture textarea {
+  width: 360px;
+  max-width: 100%;
+  height: 120px;
+  padding: 8px;
+  font:
+    11px "JetBrains Mono",
+    monospace;
+  text-align: left;
+}

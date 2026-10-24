@@ -332,3 +332,36 @@ An iteration can contain tasks, Jev requests, `if()`, parallel lanes and **one l
 In the drawer, a **Loop** card shows completed iterations, the continuation rule and its stop reason. Choose **Iteration → View Flow** to reveal that iteration’s complete connected diagram underneath. Previous/next iteration arrows preserve the parent graph and camera. A collection within the selected iteration can expose its own item flow. Initial/latest states and the condition’s captured incoming values are available in Details; each iteration’s returned state is its captured outcome. Captures remain bounded/redacted, so a large state may be truncated in the inspector even though runtime execution uses the full value. Request links include both iteration and item paths and retain distinct execution IDs. New loop metadata extends version-1 records; use the matching updated drawer and server.
 
 Try the [hierarchical classification cookbook](../cookbooks/hierarchical-classification/README.md), including beam recovery, deterministic paths, a zero-iteration leaf, and an intentional iteration-limit failure.
+
+## Replay a run in tests
+
+Unreleased: not in npm 0.4.0 yet.
+
+**Copy fixture** in a run's header exports the retained answers of its completed Jev steps as JSON, including steps inside map items and loop iterations. Save it with your tests and run the flow with `replayClient` from `jev-devtools/flow`. Jev calls replay with no network access or API key. Map items and loop iterations replay from their own answers; tasks run again and may call outside services.
+
+```ts
+import { readFileSync } from "node:fs";
+import { replayClient, type FlowFixture } from "jev-devtools/flow";
+
+const fixture: FlowFixture = JSON.parse(
+  readFileSync(new URL("./refund-approve.json", import.meta.url), "utf8"),
+);
+
+const result = await refundFlow.run(input, { client: replayClient(fixture) });
+assert.equal(result.outcome, "approve");
+```
+
+Each Jev step is answered with `fixture.steps[stepId]`, in any order and across parallel lanes and concurrent items. Steps inside a map item or loop iteration use the same ID as their request link: `parent-id/index/step-id`, where the parent is the map or loop and the index is the item or iteration (from 0). A map inside a loop composes both, so the `assess` step of the second item in the first iteration of `rounds` is `rounds/0/batch/1/assess`. `fixture.flow` is always the root flow's name.
+
+Conditions, `if()` arms, map item counts and loop conditions still evaluate the replayed answers, so a test covers the flow's own routing. `if()` merges are not fixture entries. Tasks are never fixture entries: they run locally on replay with the replayed values, so a task that calls a provider or other service still makes that call. Runtime request factories also run, and replay checks the question names they generate.
+
+You can write a fixture by hand to mock Jev by step ID: `{ version: 1, flow, steps }` with one response body (`{ model, answers }`) per step. In code, `flowFixture(definition, run, traces)` from `jev-devtools` or `jev-devtools/flow` returns `{ fixture, missing, warnings }`; save `fixture` as JSON.
+
+Replay matches step IDs, the flow name, and question names. It does not check prompts or state, and SDK request validation still applies. Each mismatch rejects with a plain error:
+
+- A fixture from another flow: `Fixture was recorded from flow "A" but is replaying flow "B".`
+- A step with no response: `Fixture has no response for step "x". The run took a route the fixture didn't record, or that step's capture was missing when the fixture was copied.` More items or iterations than the capture had also end here, naming the composed ID.
+- Answers missing a requested question, naming the step and the questions. Re-record the fixture after changing a flow's requests.
+- A call made outside a flow run.
+
+The drawer reports completed steps it could not include and any capture warnings. Request history is bounded by `limit`, so a large map or loop can evict early item captures; raise `limit` before recording such a run. A failed or cancelled run gives a partial fixture without its failed steps. Fixtures hold captured answers with the drawer's size limits and redaction, so truncation or redaction shows up in them. The recorder's built-in key redaction (`password`, `secret`, `api_key` and similar) also applies to answer keys, so a question with such a name replays as `"[redacted]"`.

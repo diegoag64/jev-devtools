@@ -9,6 +9,8 @@ export type {
   AnswerView,
   QuestionView,
 } from "./protocol.js";
+export { flowFixture } from "./flow-fixture.js";
+export type { FlowFixture, BuiltFlowFixture } from "./flow-fixture.js";
 export type JevDevtoolsProps = {
   endpoint?: string;
   /** Opt in explicitly, normally with import.meta.env.DEV. */
