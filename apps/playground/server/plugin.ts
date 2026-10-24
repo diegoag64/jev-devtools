@@ -1,3 +1,10 @@
+import { ragFlow } from "../../../cookbooks/rag-passages/flow.js";
+import { ragSampleTransport } from "../../../cookbooks/rag-passages/samples.js";
+import {
+  ragCases,
+  isRagCase,
+  type RagCase,
+} from "../../../cookbooks/rag-passages/cases.js";
 import {
   refundFlow,
   parallelFlow,
@@ -96,6 +103,7 @@ export function jevInspectorServer(
             profile?: SampleProfile;
             stress?: StressOptions;
             cookbookCase?: string;
+            ragCase?: string;
           };
           try {
             let text = "";
@@ -133,6 +141,7 @@ export function jevInspectorServer(
               "flow-approve",
               "flow-functions",
               "flow-skills",
+              "flow-rag",
               "flow-manual",
               "flow-other",
               "flow-parallel",
@@ -144,6 +153,9 @@ export function jevInspectorServer(
             typeof body.message !== "string" ||
             body.message.length > 8000 ||
             (body.scenario === "stress" && !validStress(body.stress)) ||
+            (body.scenario === "flow-rag" &&
+              (!isRagCase(body.ragCase) ||
+                body.message !== ragCases[body.ragCase].message)) ||
             (body.scenario === "flow-skills" &&
               (!isSkillCase(body.cookbookCase) ||
                 (body.mode === "sample" &&
@@ -185,24 +197,28 @@ export function jevInspectorServer(
           try {
             if (body.scenario!.startsWith("flow-")) {
               const flow =
-                body.scenario === "flow-skills"
-                  ? cookbook
-                  : body.scenario === "flow-functions"
-                    ? skillShortlistFlow
-                    : body.scenario === "flow-parallel"
-                      ? parallelFlow
-                      : refundFlow;
+                body.scenario === "flow-rag"
+                  ? ragFlow
+                  : body.scenario === "flow-skills"
+                    ? cookbook
+                    : body.scenario === "flow-functions"
+                      ? skillShortlistFlow
+                      : body.scenario === "flow-parallel"
+                        ? parallelFlow
+                        : refundFlow;
               const client = inspector.createClient(
                 {
                   apiKey: body.mode === "live" ? apiKey : "sample-only",
                   fetch:
-                    body.scenario === "flow-skills"
-                      ? body.mode === "live"
-                        ? globalThis.fetch
-                        : skillSampleTransport(
-                            body.cookbookCase as keyof typeof skillCases,
-                          )
-                      : flowTransport(body.scenario!),
+                    body.scenario === "flow-rag"
+                      ? ragSampleTransport(body.ragCase as RagCase)
+                      : body.scenario === "flow-skills"
+                        ? body.mode === "live"
+                          ? globalThis.fetch
+                          : skillSampleTransport(
+                              body.cookbookCase as keyof typeof skillCases,
+                            )
+                        : flowTransport(body.scenario!),
                   logLevel: "off",
                   retry: { maxRetries: 0 },
                   timeout: 120_000,
@@ -213,7 +229,7 @@ export function jevInspectorServer(
                 },
               );
               const result = await flow.run(
-                { message: body.message },
+                { message: body.message, caseId: body.ragCase as RagCase },
                 { client, devtools: inspector, signal: controller.signal },
               );
               send(res, 200, { ok: true, flow: result });

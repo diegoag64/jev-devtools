@@ -733,3 +733,56 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+.rag-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.rag-filters button {
+  padding: 7px 12px;
+  border: 1px solid #443448;
+  border-radius: 6px;
+  background: #17121a;
+  color: #e5dce8;
+}
+.rag-filters button[aria-pressed="true"] {
+  border-color: #e551ba;
+  background: #35182e;
+}
+.rag-passage {
+  border: 1px solid #443448;
+  border-radius: 8px;
+  padding: 14px;
+  margin: 10px 0;
+}
+.rag-passage[data-route="include"] {
+  border-left: 3px solid #9ec9ad;
+}
+.rag-passage[data-route="conflicting_evidence"] {
+  border-left: 3px solid #e8bf77;
+}
+.rag-passage summary {
+  cursor: pointer;
+  line-height: 1.8;
+}
+.rag-passage summary strong {
+  font-size: 13px;
+}
+.rag-passage dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  margin: 8px 0;
+}
+.rag-passage dd {
+  color: #efb4df;
+  font-variant-numeric: tabular-nums;
+}
+.rag-passage pre,
+.cookbook-agent-hint pre {
+  max-height: 340px;
+  overflow: auto;
+}

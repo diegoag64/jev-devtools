@@ -1,0 +1,10 @@
+{
+  "source": "https://raw.githubusercontent.com/typesafe-ai/typesafe-public-examples/25e9d373f4853b3e7e300e55a194f50e54838f68/cookbooks/classifying_rag_passages/corpus.json",
+  "sourceSha256": "caa6a2489f154cd4f6f5f449188bf0a82e5f5d0cc022ea7d8a9153bc4c624931",
+  "passagesSha256": "9b05e663bbaadffd5d6e83f076274e7490a55948637211e796362d06acd46e0f",
+  "transformation": "Keep the 14 unmodified passages needed by the two 12-candidate examples; preserve source fields. Retrieval uses fixed lists, not embedding inference.",
+  "sourceCount": 81,
+  "localCount": 14,
+  "licenseSource": "https://raw.githubusercontent.com/supabase/supabase/master/LICENSE",
+  "licenseSha256": "c29468abcd629e248c2f76848155c386b733872bcabcc4cf65ef1e7c61431042"
+}

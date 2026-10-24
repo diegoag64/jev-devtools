@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Local experiment: function steps, runtime requests, and the skill-suggestion cookbook. |
+| [Unreleased](#unreleased) | Not published | Local experiment: function steps, runtime requests, bounded collections, and skill/RAG cookbooks. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
 | [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Batched updates, changed-trace streaming, frame-coalesced rendering, less work while the drawer is closed, virtualized Questions, compact Choice diagrams, and reuse of unchanged inspector views. |
 | [0.1.3](#013--october-23-2026-experimental) | 2026-10-23 | Isolated drawer styles, diagram pan/zoom, and version-specific npm links. |
@@ -19,6 +19,9 @@ Dates below use UTC and were checked against npm's publication history. The hist
 ## Unreleased
 
 Local experiment; not published or submitted as a PR.
+
+- Add typed `flow.map()` with bounded concurrency, stable input-order results, isolated item programs, fail-fast cancellation, empty-list support and explicit item/execution limits. Collection cards show progress and let users inspect every started item’s full request/function diagram.
+- Add the RAG passage-classification cookbook with twelve candidates, official question/policy semantics, separate evidence/conflict blocks, and three sample cases. Retrieval and generation are explicitly labeled stand-ins; no live providers are called.
 
 - Collapse flow metadata behind a Show details bar by default. The expanded panel scrolls independently and supports vertical pointer/keyboard resizing; selecting another step keeps the chosen panel height and does not open it automatically.
 

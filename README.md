@@ -83,6 +83,8 @@ Controls cover 3/6/7/150 choices, tied probabilities, zero-probability alternati
 
 The local [skill-suggestion cookbook](cookbooks/skill-suggestion/README.md) runs the official 182-skill selection flow with three clearly labeled synthetic cases. Open `http://127.0.0.1:4182/?cookbook=skill-suggestion` and inspect the connected requests, function steps, and branches in **Jev DevTools → Flows**. This experiment requires the current checkout; its API additions are not in npm 0.3.0.
 
+Try the [RAG passage cookbook](cookbooks/rag-passages/README.md) at `http://127.0.0.1:4182/?cookbook=rag-passages` for twelve passage assessments with bounded concurrency, per-item diagrams and evidence routing. It runs entirely with labeled samples.
+
 For optional live mode, copy `apps/playground/.env.example` to `apps/playground/.env.local`, set `TYPESAFE_API_KEY`, and restart. Keys stay on the server. Verification uses sample responses; live inference has not been verified.
 
 ## Set up with your coding agent

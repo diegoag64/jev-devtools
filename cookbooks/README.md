@@ -1,6 +1,6 @@
 # TypeSafe cookbook showcases — research preview
 
-Local experiment, researched **2026-10-23** against Jev DevTools **0.3.0**. This directory catalogs all 20 recipes. **[Skill suggestion](skill-suggestion/README.md) is now runnable locally**; the other cookbook ports remain proposals. The follow-up local function-step experiment is documented in [the flow guide](../docs/flows.md#function-steps-and-runtime-requests-unreleased-experiment); the catalog below records the original baseline assessment.
+Local experiment, researched **2026-10-23** against Jev DevTools **0.3.0**. This directory catalogs all 20 recipes. **[Skill suggestion](skill-suggestion/README.md) and [RAG passage classification](rag-passages/README.md) are now runnable locally**; the other cookbook ports remain proposals. The follow-up local function-step experiment is documented in [the flow guide](../docs/flows.md#function-steps-and-runtime-requests-unreleased-experiment); the catalog below records the original baseline assessment.
 
 The goal is to adapt the [official TypeSafe cookbooks](https://docs.typesafe.ai/cookbooks) into small applications where you can inspect the real requests, connected flow, branching conditions, and useful final result. These would be community-maintained TypeScript adaptations of official recipes, not official TypeSafe integrations.
 

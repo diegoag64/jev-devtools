@@ -1,3 +1,8 @@
+import {
+  ragCases,
+  type RagCase,
+} from "../../../cookbooks/rag-passages/cases.js";
+import { RagCookbookResult } from "./RagCookbookResult.js";
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { JevDevtools } from "jev-devtools";
@@ -24,6 +29,8 @@ import { defaultStress, type StressOptions } from "./stress-options";
 const sandbox = new URLSearchParams(location.search).has("sandbox");
 const cookbookRequested =
   new URLSearchParams(location.search).get("cookbook") === "skill-suggestion";
+const ragRequested =
+  new URLSearchParams(location.search).get("cookbook") === "rag-passages";
 const savedSession = sessionStorage.getItem("jev-inspector-session");
 const session = savedSession || crypto.randomUUID();
 sessionStorage.setItem("jev-inspector-session", session);
@@ -48,6 +55,7 @@ async function post(path: string, body: unknown = {}) {
   return data;
 }
 function App() {
+  const [ragCase, setRagCase] = useState<RagCase>("premise");
   const [cookbookCase, setCookbookCase] = useState<SkillCase>("deck");
   const [stress, setStress] = useState<StressOptions>(defaultStress);
   const [flowResult, setFlowResult] = useState<{
@@ -68,14 +76,22 @@ function App() {
     setFeedback("Ready to capture a request.");
   };
   const [scenario, setScenario] = useState(
-      cookbookRequested ? "flow-skills" : sandbox ? "stress" : "triage",
+      ragRequested
+        ? "flow-rag"
+        : cookbookRequested
+          ? "flow-skills"
+          : sandbox
+            ? "stress"
+            : "triage",
     ),
     [mode, setMode] = useState("sample"),
     [live, setLive] = useState(false);
   const [message, setMessage] = useState(
-    cookbookRequested
-      ? skillCases.deck.message
-      : "I was charged twice and checkout is blocked. I need a human to help me today.",
+    ragRequested
+      ? ragCases.premise.message
+      : cookbookRequested
+        ? skillCases.deck.message
+        : "I was charged twice and checkout is blocked. I need a human to help me today.",
   );
   const [runId, setRunId] = useState<string>(),
     [feedback, setFeedback] = useState("Ready to capture a request.");
@@ -102,6 +118,7 @@ function App() {
         profile,
         stress,
         cookbookCase,
+        ragCase,
       });
       if (data.flow) setFlowResult(data.flow);
       setOutcome({
@@ -131,6 +148,30 @@ function App() {
   return (
     <>
       <main className="playground dark">
+        {scenario === "flow-rag" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · bounded flow.map()
+            </span>
+            <h1>RAG passage classification</h1>
+            <p>
+              Retrieve 12 passages, assess four at a time, separate evidence
+              from conflicts, and build a cited answer preview.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/classifying_rag_passages"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Official recipe ↗
+            </a>
+            <p className="sample-note">
+              Official questions and routing policy, with fixed retrieval lists,
+              synthetic Jev scores and a deterministic answer preview. No
+              external API calls or reproduced evaluation claims.
+            </p>
+          </div>
+        )}
         {scenario === "flow-skills" && (
           <div className="cookbook-intro">
             <span className="cookbook-eyebrow">
@@ -156,13 +197,14 @@ function App() {
             </p>
           </div>
         )}
-        {scenario.startsWith("flow-") && scenario !== "flow-skills" && (
-          <p>
-            Sample-only flow. Run a sample, open Jev DevTools, and choose Flows.
-            Select a node to inspect its captured request.
-          </p>
-        )}
-        {flowResult && scenario !== "flow-skills" && (
+        {scenario.startsWith("flow-") &&
+          !["flow-skills", "flow-rag"].includes(scenario) && (
+            <p>
+              Sample-only flow. Run a sample, open Jev DevTools, and choose
+              Flows. Select a node to inspect its captured request.
+            </p>
+          )}
+        {flowResult && !["flow-skills", "flow-rag"].includes(scenario) && (
           <div role="status">
             <strong>Outcome: {flowResult.outcome}</strong>
             <pre>{JSON.stringify(flowResult.value, null, 2)}</pre>
@@ -180,6 +222,8 @@ function App() {
                 onChange={(e) => {
                   setScenario(e.target.value);
                   resetOutcome();
+                  if (e.target.value === "flow-rag")
+                    setMessage(ragCases[ragCase].message);
                   if (e.target.value === "flow-skills")
                     setMessage(skillCases[cookbookCase].message);
                   if (
@@ -194,6 +238,7 @@ function App() {
                   "flow-functions":
                     "Flow · Functions + dynamic questions (synthetic)",
                   "flow-skills": "Cookbook · Skill suggestion (182 skills)",
+                  "flow-rag": "Cookbook · RAG passages (12 items)",
                   "flow-manual": "Flow · Manual review",
                   "flow-other": "Flow · Other",
                   "flow-parallel": "Flow · Parallel checks + join",
@@ -248,6 +293,28 @@ function App() {
                 </NativeSelectOption>
               </NativeSelect>
             </div>
+            {scenario === "flow-rag" && (
+              <div className="form-field">
+                <Label htmlFor="rag-case">RAG sample</Label>
+                <NativeSelect
+                  id="rag-case"
+                  value={ragCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as RagCase;
+                    setRagCase(next);
+                    setMessage(ragCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(ragCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
             {scenario === "flow-skills" && (
               <div className="form-field">
                 <Label htmlFor="cookbook-case">
@@ -393,7 +460,10 @@ function App() {
             <div className="form-field context-field">
               <Label htmlFor="context">Context</Label>
               <Textarea
-                readOnly={scenario === "flow-skills" && mode === "sample"}
+                readOnly={
+                  ["flow-skills", "flow-rag"].includes(scenario) &&
+                  mode === "sample"
+                }
                 id="context"
                 className="min-h-32 resize-y"
                 disabled={!!runId}
@@ -439,13 +509,18 @@ function App() {
             <span role="status">{feedback}</span>
           </div>
           <p id="sample-note" className="sample-note">
-            {scenario === "flow-skills" && mode === "sample"
-              ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
-              : mode === "sample"
-                ? "Fixed sample answers, including when you edit context. No external API calls."
-                : "Live inference uses your server key and may incur API charges."}
+            {scenario === "flow-rag"
+              ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
+              : scenario === "flow-skills" && mode === "sample"
+                ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
+                : mode === "sample"
+                  ? "Fixed sample answers, including when you edit context. No external API calls."
+                  : "Live inference uses your server key and may incur API charges."}
           </p>
         </section>
+        {scenario === "flow-rag" && flowResult && (
+          <RagCookbookResult result={flowResult} />
+        )}
         {scenario === "flow-skills" && flowResult && (
           <SkillCookbookResult result={flowResult} mode={mode} />
         )}
