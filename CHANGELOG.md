@@ -8,8 +8,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | No changes yet. |
-| [0.4.0](#040--pending-publication) | Pending publication | Flow API extensions, six cookbooks, React/Next.js setup documentation, SDK peer dependency, loopback-only inspector middleware without authorization, and Windows support for the package and Next.js verification scripts. |
+| [Unreleased](#unreleased) | Not published | Verified 0.4.0 publication metadata and current installation docs. |
+| [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Flow API extensions, six cookbooks, React/Next.js setup documentation, SDK peer dependency, loopback-only inspector middleware without authorization, and Windows support for the package and Next.js verification scripts. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
 | [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Batched updates, changed-trace streaming, frame-coalesced rendering, less work while the drawer is closed, virtualized Questions, compact Choice diagrams, and reuse of unchanged inspector views. |
 | [0.1.3](#013--october-23-2026-experimental) | 2026-10-23 | Isolated drawer styles, diagram pan/zoom, and version-specific npm links. |
@@ -19,11 +19,11 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No changes yet.
+- Record verified npm publication metadata for 0.4.0, remove pending-publication instructions from installation docs, and link the published release. Documentation only; package behavior is unchanged.
 
-## 0.4.0 — Pending publication
+## 0.4.0 — October 24, 2026 (experimental)
 
-Experimental minor release prepared for review; npm publication has not occurred. The flow extensions are part of the 0.4.0 package. Cookbook apps and fixtures remain repository examples. This section records the release contents, not a publication date.
+Experimental minor release. The flow extensions are part of the 0.4.0 package; cookbook apps and fixtures remain repository examples. [Published package](https://www.npmjs.com/package/jev-devtools/v/0.4.0) · [Release preparation #34](https://github.com/diegoag64/jev-devtools/pull/34). Published at 07:41:04 UTC from commit `bc7f1609a6e94bf8fd9be4351db6983e8d0442ea`. Registry integrity matches the inspected archive; see [release verification](docs/releases.md#release-040--published-october-24-2026).
 
 ### Compatibility and upgrade
 
@@ -194,4 +194,4 @@ Verification uses sample responses through the real SDK. Live inference and brow
 
 ## Registry staging entry
 
-npm also lists `0.0.0-stage`, created on October 23, 2026 during the initial publishing flow. It is a staging placeholder, not a separate feature release. The first public release was `0.1.0`; `latest` pointed to `0.3.0` when this history was checked. Use the exact-version package links above to inspect a specific release.
+npm also lists `0.0.0-stage`, created on October 23, 2026 during the initial publishing flow. It is a staging placeholder, not a separate feature release. The first public release was `0.1.0`; `latest` pointed to `0.4.0` when this history was checked. Use the exact-version package links above to inspect a specific release.

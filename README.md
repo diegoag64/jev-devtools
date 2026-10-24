@@ -37,7 +37,7 @@ Mount the React drawer, connect a server adapter, and make Jev calls through its
 npm install jev-devtools @typesafe-ai/sdk
 ```
 
-Requires React **18/19** and Node **22.12+**. This checkout documents **0.4.0 (pending publication)**; use the packed checkout below until it is published. APIs remain experimental before 1.0. See the [release status](CHANGELOG.md#040--pending-publication). Your API key stays on the server. Capture and display are opt-in and disabled by default.
+Requires React **18/19** and Node **22.12+**. **[Jev DevTools 0.4.0 is available on npm](https://www.npmjs.com/package/jev-devtools/v/0.4.0).** APIs remain experimental before 1.0. See the [release status](CHANGELOG.md#040--october-24-2026-experimental). Your API key stays on the server. Capture and display are opt-in and disabled by default.
 
 ### React + Node
 
@@ -281,7 +281,7 @@ npm run pack:devtools
 npm install /absolute/path/to/jev-devtools/jev-devtools-0.4.0.tgz
 ```
 
-The archive contains the code and bundled setup skill from your checkout. Use it to verify 0.4.0 before publication or to try later local changes. Keep the drawer and server adapter on the same build.
+The archive contains the code and bundled setup skill from your checkout. Use it to try local changes before a future release. Keep the drawer and server adapter on the same build.
 
 </details>
 

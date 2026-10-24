@@ -6,13 +6,13 @@ The package has no Next.js dependency. `handle(request)` also works with other N
 
 ## Install
 
-This guide covers **0.4.0**. Check the [release status](../CHANGELOG.md#040--pending-publication); use a packed checkout while publication is pending. For a published version, install in your Next.js app:
+This guide covers **[0.4.0](https://www.npmjs.com/package/jev-devtools/v/0.4.0)**, available on npm. See the [release notes](../CHANGELOG.md#040--october-24-2026-experimental). Install in your Next.js app:
 
 ```sh
 npm install jev-devtools @typesafe-ai/sdk server-only
 ```
 
-To install this checkout before publication or try later local changes, run `npm ci && npm run pack:devtools` from this repository, then in your Next.js app:
+To try local changes before a future release, run `npm ci && npm run pack:devtools` from this repository, then in your Next.js app:
 
 ```sh
 npm install /absolute/path/to/jev-devtools-0.4.0.tgz server-only

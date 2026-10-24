@@ -1,6 +1,6 @@
 # Define and inspect connected Jev calls
 
-The flow API was introduced in **0.3.0**. This guide covers **0.4.0**, including function steps, runtime requests, collections, returning conditionals, and loops. Existing single-request integrations remain supported; adopting flows is optional. For publication status, check the [changelog](../CHANGELOG.md#040--pending-publication).
+The flow API was introduced in **0.3.0**. This guide covers **0.4.0**, including function steps, runtime requests, collections, returning conditionals, and loops. Existing single-request integrations remain supported; adopting flows is optional. For publication status, check the [changelog](../CHANGELOG.md#040--october-24-2026-experimental).
 
 Start with the [integration guide](integration.md) or [Next.js setup](nextjs.md) to mount the drawer and expose the shared inspector. For coding agents, the [bundled flow recipe](../packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) includes a complete parallel-checks → decision → branch example and no-key verification. It ships with npm for offline, version-matched use.
 

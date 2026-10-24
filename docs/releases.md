@@ -1,10 +1,19 @@
 # Packaging and releases
 
-## Release 0.4.0 — Pending publication
+## Release 0.4.0 — published October 24, 2026
 
-Version 0.4.0 includes server function tasks, runtime request factories, bounded collections, returning conditionals, strict numeric `.gt()` comparisons, and stateful loops, with inline inspection of function results, collection items, and loop iterations. Six cookbook applications demonstrate these APIs from the repository; cookbook code and fixtures are not included in npm. The bundled setup skill and flow recipe cover the complete 0.4.0 API. See the [0.4.0 changelog](../CHANGELOG.md#040--pending-publication).
+Version 0.4.0 includes server function tasks, runtime request factories, bounded collections, returning conditionals, strict numeric `.gt()` comparisons, and stateful loops, with inline inspection of function results, collection items, and loop iterations. Six cookbook applications demonstrate these APIs from the repository; cookbook code and fixtures are not included in npm. The bundled setup skill and flow recipe cover the complete 0.4.0 API. See the [0.4.0 changelog](../CHANGELOG.md#040--october-24-2026-experimental).
 
-This is release preparation, not a published npm release. Review and merge [release PR #34](https://github.com/diegoag64/jev-devtools/pull/34), confirm CI, and inspect an archive from the exact reviewed release commit before publishing with explicit authorization. Until publication, use a locally packed 0.4.0 archive. Record the archive checksum, registry integrity, and verified publication time only when they are known; do not reuse the 0.3.0 evidence below.
+**[jev-devtools@0.4.0](https://www.npmjs.com/package/jev-devtools/v/0.4.0) was published on October 24, 2026 at 07:41:04 UTC**, from commit `bc7f1609a6e94bf8fd9be4351db6983e8d0442ea` after [PR #34](https://github.com/diegoag64/jev-devtools/pull/34) and all eight post-merge checks passed. npm's `latest` tag was verified as `0.4.0`.
+
+The inspected and published archive was `jev-devtools-0.4.0.tgz` (66 files):
+
+- SHA-256: `3b711833250a90a657c3d305ef5dea29a2ab4c28fc36ef4d71e8095abde02bbb`
+- Registry integrity: `sha512-4dxCrrX2Jxj13UTngGU1Fm7vEXGObCTV2hCTl81Jke+OFI6afSvhsrdPr2oDEEIHAGXi9A6rXUxeLXvmmMnv3g==`
+
+The registry integrity matches the inspected archive. Fresh registry-installed React and Next.js consumers passed build, public-export, SSR, development capture/SSE, and disabled-production checks using sample responses. npm initially reported processing after accepting the upload; publication and `latest` were confirmed from registry metadata after processing completed. Do not republish 0.4.0; use a new version for later changes.
+
+The immutable archive contains the preparation-time README. The current repository installation docs and changelog record the verified publication status; updating them does not modify the published archive.
 
 ### Upgrade from 0.3.0
 
