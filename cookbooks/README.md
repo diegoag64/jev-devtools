@@ -1,10 +1,38 @@
-# TypeSafe cookbook showcases — research preview
+# Cookbook examples
 
-Local experiment, researched **2026-10-23** against Jev DevTools **0.3.0**. This directory catalogs all 20 recipes. **[Skill suggestion](skill-suggestion/README.md), [RAG passage classification](rag-passages/README.md), [SDE cascade](sde-cascade/README.md), [hierarchical classification](hierarchical-classification/README.md), [structure recovery](structure-recovery/README.md), and [Simple Memory](simple-memory/README.md) are now runnable locally**; the other cookbook ports remain proposals. The follow-up local function-step experiment is documented in [the flow guide](../docs/flows.md#function-steps-and-runtime-requests-unreleased-experiment); the catalog below records the original baseline assessment.
+Explore small applications that turn TypeSafe recipes into connected, inspectable Jev flows. Each example pairs an application result with the requests, function steps, and routing decisions that produced it.
 
-The goal is to adapt the [official TypeSafe cookbooks](https://docs.typesafe.ai/cookbooks) into small applications where you can inspect the real requests, connected flow, branching conditions, and useful final result. These would be community-maintained TypeScript adaptations of official recipes, not official TypeSafe integrations.
+These are community-maintained TypeScript adaptations of the [official TypeSafe cookbooks](https://docs.typesafe.ai/cookbooks). All six examples below run locally with labeled synthetic samples and no API key. They use this checkout's **unreleased flow APIs**, not the published npm 0.3.0 package. Sample results demonstrate execution and inspection; they are not live model evaluations.
 
-Start with the [research and implementation plan](RESEARCH.md). It covers fidelity, API gaps, fixtures, UI, and verification. [Source snapshots](sources.json) record the reviewed pages and their content hashes; research downloads are not vendored here. The runnable skill-suggestion example includes its attributed, pinned roster.
+## Choose an example
+
+| Example | What you can explore | Run locally |
+| --- | --- | --- |
+| [Skill suggestion](skill-suggestion/README.md) | Narrow 182 skills to a shortlist, then inspect a suggestion or abstention. | [Open](http://127.0.0.1:4182/?cookbook=skill-suggestion) |
+| [RAG passage classification](rag-passages/README.md) | Assess twelve passages with bounded concurrency and inspect each item's evidence routing. | [Open](http://127.0.0.1:4182/?cookbook=rag-passages) |
+| [SDE cascade](sde-cascade/README.md) | Follow field verification, conditional escalation, and a merge into the final record. | [Open](http://127.0.0.1:4182/?cookbook=sde-cascade) |
+| [Hierarchical classification](hierarchical-classification/README.md) | Compare beam and greedy search through iterations, frontier requests, and retained/pruned paths. | [Open](http://127.0.0.1:4182/?cookbook=hierarchical-classification) |
+| [Simple Memory](simple-memory/README.md) | Replay customer tickets and compare routing with and without saved context within a run. | [Open](http://127.0.0.1:4182/?cookbook=simple-memory) |
+| [Structure Recovery](structure-recovery/README.md) | Turn broken lines into a classified, formatted document through two batched requests and function steps. | [Open](http://127.0.0.1:4182/?cookbook=structure-recovery) |
+
+## Run a sample
+
+From the repository root, with Node 22.12+:
+
+```sh
+npm ci
+npm run dev
+```
+
+Open an example using the table above, choose a sample, and run it. Open **Jev DevTools → Flows** to inspect the connected requests and decisions alongside the application's result. Each example's README explains its samples, policy thresholds, source recipe, and limitations. Fixed sample responses do not become live inference when you edit the input.
+
+For the general playground and optional live-mode setup, see the [playground guide](../apps/playground/README.md). Live availability varies by example; check its README before configuring a key.
+
+## Recipe catalog and research
+
+The research below was recorded on **2026-10-23** against Jev DevTools **0.3.0**. It catalogs 20 official recipes and their fit at that baseline. The six examples above are runnable; the remaining ports are proposals.
+
+The [research and implementation plan](RESEARCH.md) covers fidelity, API gaps, fixtures, UI, and verification. [Source snapshots](sources.json) record reviewed pages and content hashes; research downloads are not vendored here. The skill-suggestion example includes its attributed, pinned roster. The [flow guide](../docs/flows.md) documents the APIs now available in the checkout.
 
 ## All 20 published cookbooks
 
@@ -33,9 +61,9 @@ Start with the [research and implementation plan](RESEARCH.md). It covers fideli
 | [Parallel questions](https://docs.typesafe.ai/cookbooks/parallel_questions) | Compare one batched request with individual calls over the same document. | **Core now:** teaches the difference between questions within a request and parallel requests. |
 | [Autoresearch feature discovery](https://docs.typesafe.ai/cookbooks/autoresearch_feature_discovery) | Follow text into numeric features and a training/refinement timeline. | **Extension for full pipeline:** proposal model, changing questions, model training, and iterative feedback. A fixed feature-extraction batch is usable now. |
 
-## Recommended first collection
+## Original implementation roadmap (research baseline)
 
-Build in this order, with a working slice before widening the collection:
+The original research proposed the following order. It is retained as planning context; the runnable collection above reflects what exists now:
 
 1. **Parallel questions:** establish the shared runner, fixture contract, and inspection of every answer.
 2. **Twitch chat filter:** make thresholds and routing tangible through a familiar UI.
@@ -48,6 +76,6 @@ Then add confidence fallback, re-ranking, line search, and guardrails. Use **ski
 
 These cookbooks mainly exercise Choice, Noul, and Score. The reviewed examples do not provide a Box showcase. Keep a separately labeled original Box example rather than inventing an “official cookbook” for it.
 
-## What exists today
+## Related flow sample
 
-The existing playground includes a synthetic **Functions + dynamic questions** scenario demonstrating the follow-up API experiment. It is not a cookbook port. The [flow API](../docs/flows.md) guide explains how to run it; the full skill-suggestion selection flow is available at `http://127.0.0.1:4182/?cookbook=skill-suggestion`. It supports synthetic cases and optional live Jev calls; no separate gallery route is required. The remaining collection can reuse that playground and the same root drawer, with server-only flow definitions and an explicit replay/live distinction. See [the staged plan](RESEARCH.md#staged-implementation) before implementing.
+The playground also includes **Flow · Functions + dynamic questions (synthetic)**, an original sample demonstrating function steps and runtime request factories. See the [flow guide](../docs/flows.md#function-steps-and-runtime-requests-unreleased-experiment). It is separate from the cookbook adaptations above.

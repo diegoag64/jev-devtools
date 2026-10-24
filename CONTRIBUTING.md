@@ -32,3 +32,32 @@ The **PR title** workflow checks drafts and ready PRs on creation, title edits, 
 For user-visible changes, add a concise entry under **Unreleased** in [CHANGELOG.md](CHANGELOG.md) in the same PR. Describe the behavior and any compatibility change, and link the PR once its number is known. Include meaningful documentation and tooling improvements; skip internal refactors with no observable effect. Entries on feature branches describe proposed changes; the changelog on `main` describes merged work.
 
 Keep the overview table useful at a glance. Do not list an open PR as delivered work in another PR's changelog entry. At release time, follow the [release process](docs/releases.md): group the accumulated entries under the new version and verify its publication date before marking it published. npm versions and merged work must remain distinguishable.
+
+## Repository layout
+
+| Path | Purpose |
+| --- | --- |
+| `packages/jev-devtools` | React drawer, diagrams, recorder, Node adapter, scoped CSS |
+| `apps/playground` | Sample/live scenarios, minimal shadcn form, application previews |
+| `examples/react-vite` | Independent consumer using only public package exports |
+| `examples/nextjs-app` | Next.js App Router consumer using the packed package |
+| `docs` | Integration, architecture, provenance, and release process |
+
+See the [playground guide](apps/playground/README.md) for sample scenarios and the manual sandbox. The static diagram lab and its `/docs/` replica remain in the original repo.
+
+## Verification details
+
+```sh
+npm run check
+npm test
+npm run build
+npm run check:playground
+npm run verify:package
+npm run verify:nextjs
+```
+
+`verify:package` packs the library and installs it in a temporary independent React app, checks SSR/disabled behavior, and builds the consumer with a browser/server boundary check. Set `JEV_VERIFY_REACT=18.3.1` to verify React 18 instead of the default React 19. Registry access is allowed by default; `JEV_VERIFY_OFFLINE=1` is available when all dependencies are cached.
+
+`check:playground` compiles the full interactive development UI into a temporary directory. The regular production build intentionally contains only a local-tool notice; it is not a hosted demo.
+
+After `npm run pack:devtools`, you can also run `npm install && npm run dev` inside `examples/react-vite` (port 4183, sample-only).

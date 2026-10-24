@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Flow API extensions, six cookbooks, SDK peer dependency, loopback-only inspector middleware without authorization, and Windows support for the package and Next.js verification scripts. |
+| [Unreleased](#unreleased) | Not published | Flow API extensions, six cookbooks, React/Next.js setup documentation, SDK peer dependency, loopback-only inspector middleware without authorization, and Windows support for the package and Next.js verification scripts. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
 | [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Batched updates, changed-trace streaming, frame-coalesced rendering, less work while the drawer is closed, virtualized Questions, compact Choice diagrams, and reuse of unchanged inspector views. |
 | [0.1.3](#013--october-23-2026-experimental) | 2026-10-23 | Isolated drawer styles, diagram pan/zoom, and version-specific npm links. |
@@ -17,6 +17,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 | [0.1.0](#010--october-23-2026-experimental) | 2026-10-23 | First public package: React inspector, Jev diagrams, Node adapter, and Next.js integration. |
 
 ## Unreleased
+
+- Lead the repository README with React/Next.js setup and a parallel-flow example; make runnable cookbooks easier to discover and move sandbox/contributor details into their guides. Published and unreleased APIs remain explicitly distinguished; no runtime or API compatibility changes.
 
 - Run `verify:package` and `verify:nextjs` on Windows through Node instead of spawning `npm.cmd`, which current Node refuses without a shell. ([#26](https://github.com/diegoag64/jev-devtools/pull/26))
 
