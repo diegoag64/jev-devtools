@@ -153,7 +153,7 @@ For an output with no value, pass `undefined` as the second argument. The same p
 
 Titles accept 1–120 characters; descriptions accept 1–600. Supplied text must be nonblank and is trimmed and copied when the definition is built. Existing calls and older captures continue to use step IDs when no title is provided. IDs, returned outcome names, SDK requests, and routing behavior are unchanged. This is developer-authored context, not model reasoning or extra instructions sent to Jev.
 
-Cards preview the description; select a step to read its full text below the canvas. Output cards identify the returned outcome versus an untaken route, and show the then/else route. Parallel cards show each lane's recorded status and a completion count; select one for the full lane list when there are more than four.
+Cards preview the description; select a step and open **Show details** in the bottom bar to read its full text. The panel starts collapsed, scrolls independently, and retains its height while switching steps or hiding/reopening it. Drag its top divider vertically, or focus the divider and use Up/Down (Shift for larger steps), Home, or End. Resizing leaves space for the canvas. Output cards identify the returned outcome versus an untaken route, and show the then/else route. Parallel cards show each lane's recorded status and a completion count; select one for the full lane list when there are more than four.
 
 Titles and descriptions are definition metadata and are **not passed through request redaction**. Write static, public-safe explanations; never interpolate user inputs, credentials, or other secrets.
 
@@ -197,7 +197,7 @@ Definition captures contain structural IDs/dependencies and parallel lane names 
 
 ## Drawer and samples
 
-Choose **Flows** after capturing a run. Captured Jev calls render their existing request diagrams together on **one canvas**: state, instructions, the selected question's answer, probabilities and output branches. Each request keeps its question picker, Show More and complete probability table. Long input previews remain bounded; **Inspect request** opens Questions/Context/Transport/Raw for the full captured details.
+Choose **Flows** after capturing a run. Captured Jev calls render their existing request diagrams together on **one canvas**: state, instructions, the selected question's answer, probabilities and output branches. Each request keeps its question picker, Show More and complete probability table. Long input previews remain bounded; expand **Show details**, then **Inspect request** opens Questions/Context/Transport/Raw for the full captured details.
 
 Arrows connect requests, conditions and outcomes in execution order; redundant transitive edges are omitted so they do not cross intervening steps. Parallel paths converge at **Wait for both checks** (or **Wait for all N paths**), showing their lane names. Selecting it explains that downstream calls wait until every lane succeeds, and that the marker does not make another Jev call. Untaken, waiting or evicted requests show an explicit placeholder rather than invented content.
 
@@ -225,7 +225,7 @@ State and instruction objects show their top-level properties, with nested objec
 
 ### Branch rules
 
-Condition cards separate **Incoming value** from **Requirement**, alongside your authored description. For example, `decision.answer("ready").noul.gte(0.9)` shows **Ready: 94%** (using the captured answer) and **At least 90%**. The selected-step details retain the technical rule `combined.ready ≥ 90%` when the request step ID is `combined`. Comparisons preserve their operators and AND/OR/NOT grouping. The condition's recorded decision shows **then** or **else**; the viewer never re-evaluates a rule against potentially redacted snapshots. Selecting the card reveals its full captured rule; the card itself previews three lines.
+Condition cards separate **Incoming value** from **Requirement**, alongside your authored description. For example, `decision.answer("ready").noul.gte(0.9)` shows **Ready: 94%** (using the captured answer) and **At least 90%**. The selected-step details retain the technical rule `combined.ready ≥ 90%` when the request step ID is `combined`. Comparisons preserve their operators and AND/OR/NOT grouping. The condition's recorded decision shows **then** or **else**; the viewer never re-evaluates a rule against potentially redacted snapshots. Selecting the card and opening **Show details** reveals its full captured rule; the card itself previews three lines.
 
 Rule literals now appear in captures, including numeric thresholds and string comparison labels. They use the existing capture limits and `redact` callback, with paths prefixed by `["conditions", stepId]`; a literal's final path segment is `value`. For example, return `"[redacted]"` whenever `path[0] === "conditions" && path.at(-1) === "value"` to hide all rule literals. Redaction/truncation is displayed explicitly and never changes execution. Rules are bounded to 128 expression nodes before capture. Existing integrations and older captures remain supported; old captures show their original rule with hidden literals.
 

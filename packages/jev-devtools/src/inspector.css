@@ -1274,12 +1274,74 @@
 /* Connected requests share one camera and one opt-in full request detail. */
 .whole-flow {
   min-width: 0;
+  overflow: hidden;
+}
+.whole-flow > .detail-header,
+.whole-flow > .lab-flow-toolbar {
+  flex-shrink: 0;
+}
+.flow-workspace {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.flow-details-panel {
+  flex: none;
+  min-width: 0;
+  background: #130f17;
+  border-top: 1px solid #342a38;
+}
+.flow-details-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 36px;
+  padding: 0 12px;
+}
+.jev-devtools .flow-details-bar button {
+  flex: none;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+.flow-details-bar > span {
+  color: #b5a6bc;
+  font-size: 11px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.flow-details-body {
   overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.flow-details-resize {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 8px;
+  cursor: ns-resize;
+  touch-action: none;
+  user-select: none;
+}
+.flow-details-resize span {
+  width: 40px;
+  height: 2px;
+  border-radius: 2px;
+  background: #6c5874;
+}
+.flow-details-resize:hover,
+.flow-details-resize:focus-visible {
+  background: #392239;
+  outline: 1px solid #e551ba;
+  outline-offset: -1px;
 }
 .flow-overview-viewport {
   position: relative;
-  min-height: 240px;
-  flex: 1 0 260px;
+  min-height: 0;
+  flex: 1 1 0;
   overflow: hidden;
   touch-action: none;
   cursor: grab;

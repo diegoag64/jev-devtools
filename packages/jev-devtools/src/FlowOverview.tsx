@@ -16,6 +16,7 @@ import {
 } from "./condition-inputs.js";
 import { formatFlowCondition } from "./flow-condition.js";
 import { TraceDiagram } from "./TraceDiagram.js";
+import { FlowDetailsPanel } from "./FlowDetailsPanel.js";
 import { DiagramContent } from "./DiagramContent.js";
 type Lane = { name: string; status: string };
 type Bounds = { x: number; y: number; width: number; height: number };
@@ -538,223 +539,233 @@ export const FlowOverview = memo(function FlowOverview({
           </select>
         </label>
       </div>
-      <div
-        className="flow-overview-viewport diagram-viewport"
-        ref={viewport}
-        tabIndex={0}
-        aria-label="Flow canvas"
-        role="region"
-      >
+      <div className="flow-workspace">
         <div
-          ref={canvas}
-          className="flow-overview-canvas"
-          style={{ width: layout.width, height: layout.height }}
+          className="flow-overview-viewport diagram-viewport"
+          ref={viewport}
+          tabIndex={0}
+          aria-label="Flow canvas"
+          role="region"
         >
-          <svg
-            width={layout.width}
-            height={layout.height}
-            aria-hidden="true"
-            className="flow-connections"
+          <div
+            ref={canvas}
+            className="flow-overview-canvas"
+            style={{ width: layout.width, height: layout.height }}
           >
-            <defs>
-              <marker
-                id={`arrow-${run.id}`}
-                viewBox="0 0 10 10"
-                refX="8"
-                refY="5"
-                markerWidth="5"
-                markerHeight="5"
-                orient="auto"
-              >
-                <path d="M0 0L10 5L0 10z" fill="currentColor" />
-              </marker>
-            </defs>
-            {definition.nodes.flatMap((n) =>
-              (links.get(n.id) ?? []).map((id) => {
-                const a = layout.points.get(id),
-                  b = layout.points.get(n.id);
-                if (!a || !b) return null;
-                const active = ["running", "completed"].includes(
-                  run.steps[n.id]?.status,
-                );
-                return (
-                  <path
-                    key={`${id}-${n.id}`}
-                    d={`M${a.x + a.width},${a.y + a.height / 2} C${a.x + a.width + 80},${a.y + a.height / 2} ${b.x - 80},${b.y + b.height / 2} ${b.x},${b.y + b.height / 2}`}
-                    stroke={active ? "#E551BA" : "currentColor"}
-                    opacity={active ? 1 : 0.35}
-                    fill="none"
-                    strokeWidth="2"
-                    markerEnd={`url(#arrow-${run.id})`}
-                  />
-                );
-              }),
-            )}
-          </svg>
-          {definition.nodes.map((n) => {
-            const p = layout.points.get(n.id);
-            if (!p) return null;
-            const captured = tracesById.get(run.steps[n.id]?.traceId ?? "");
-            return n.kind === "jev" && captured ? (
-              <RequestNode
-                key={n.id}
-                node={n}
-                trace={captured}
-                status={run.steps[n.id]?.status ?? "waiting"}
-                selected={selected === n.id}
-                x={p.x}
-                y={p.y}
-                onSelect={setSelected}
-                onResize={onResize}
-              />
-            ) : (
-              <Card
-                key={n.id}
-                node={n}
-                status={run.steps[n.id]?.status ?? "waiting"}
-                decision={run.steps[n.id]?.decision}
-                selected={selected === n.id}
-                bounds={p}
-                onSelect={setSelected}
-                inputs={inputsByStep.get(n.id)}
-                data={run.steps[n.id]?.data}
-                durationMs={run.steps[n.id]?.durationMs}
-                lanes={parallelLanes.get(n.id) ?? []}
-              />
-            );
-          })}
+            <svg
+              width={layout.width}
+              height={layout.height}
+              aria-hidden="true"
+              className="flow-connections"
+            >
+              <defs>
+                <marker
+                  id={`arrow-${run.id}`}
+                  viewBox="0 0 10 10"
+                  refX="8"
+                  refY="5"
+                  markerWidth="5"
+                  markerHeight="5"
+                  orient="auto"
+                >
+                  <path d="M0 0L10 5L0 10z" fill="currentColor" />
+                </marker>
+              </defs>
+              {definition.nodes.flatMap((n) =>
+                (links.get(n.id) ?? []).map((id) => {
+                  const a = layout.points.get(id),
+                    b = layout.points.get(n.id);
+                  if (!a || !b) return null;
+                  const active = ["running", "completed"].includes(
+                    run.steps[n.id]?.status,
+                  );
+                  return (
+                    <path
+                      key={`${id}-${n.id}`}
+                      d={`M${a.x + a.width},${a.y + a.height / 2} C${a.x + a.width + 80},${a.y + a.height / 2} ${b.x - 80},${b.y + b.height / 2} ${b.x},${b.y + b.height / 2}`}
+                      stroke={active ? "#E551BA" : "currentColor"}
+                      opacity={active ? 1 : 0.35}
+                      fill="none"
+                      strokeWidth="2"
+                      markerEnd={`url(#arrow-${run.id})`}
+                    />
+                  );
+                }),
+              )}
+            </svg>
+            {definition.nodes.map((n) => {
+              const p = layout.points.get(n.id);
+              if (!p) return null;
+              const captured = tracesById.get(run.steps[n.id]?.traceId ?? "");
+              return n.kind === "jev" && captured ? (
+                <RequestNode
+                  key={n.id}
+                  node={n}
+                  trace={captured}
+                  status={run.steps[n.id]?.status ?? "waiting"}
+                  selected={selected === n.id}
+                  x={p.x}
+                  y={p.y}
+                  onSelect={setSelected}
+                  onResize={onResize}
+                />
+              ) : (
+                <Card
+                  key={n.id}
+                  node={n}
+                  status={run.steps[n.id]?.status ?? "waiting"}
+                  decision={run.steps[n.id]?.decision}
+                  selected={selected === n.id}
+                  bounds={p}
+                  onSelect={setSelected}
+                  inputs={inputsByStep.get(n.id)}
+                  data={run.steps[n.id]?.data}
+                  durationMs={run.steps[n.id]?.durationMs}
+                  lanes={parallelLanes.get(n.id) ?? []}
+                />
+              );
+            })}
+          </div>
         </div>
-      </div>
-      <div className="flow-selection">
-        {node && step ? (
-          <>
-            <strong>
-              {node.title ?? node.id} · {step.status}
-            </strong>
-            <span className="muted">
-              {step.durationMs !== undefined
-                ? ` · ${Math.round(step.durationMs)} ms`
-                : ""}
-            </span>
-            {node.description && <p>{node.description}</p>}
-            {node.kind === "task" && (
-              <div className="flow-task-details">
-                <p className="muted">
-                  Application function · runs on your server. Captured values
-                  may be redacted or truncated.
-                </p>
-                {step.data &&
-                typeof step.data === "object" &&
-                !Array.isArray(step.data) ? (
-                  ["input", "output"]
-                    .filter((key) => Object.hasOwn(step.data as object, key))
-                    .map((key) => (
-                      <details key={key} open>
-                        <summary>
-                          {key === "input"
-                            ? "Function inputs"
-                            : "Function output"}
-                        </summary>
-                        <DiagramContent
-                          value={(step.data as Record<string, Json>)[key]}
-                          label={`Function ${key}`}
-                        />
-                      </details>
-                    ))
-                ) : (
+        <FlowDetailsPanel
+          selection={node?.title ?? node?.id}
+          onLayoutChange={preserveCamera}
+        >
+          <div className="flow-selection">
+            {node && step ? (
+              <>
+                <strong>
+                  {node.title ?? node.id} · {step.status}
+                </strong>
+                <span className="muted">
+                  {step.durationMs !== undefined
+                    ? ` · ${Math.round(step.durationMs)} ms`
+                    : ""}
+                </span>
+                {node.description && <p>{node.description}</p>}
+                {node.kind === "task" && (
+                  <div className="flow-task-details">
+                    <p className="muted">
+                      Application function · runs on your server. Captured
+                      values may be redacted or truncated.
+                    </p>
+                    {step.data &&
+                    typeof step.data === "object" &&
+                    !Array.isArray(step.data) ? (
+                      ["input", "output"]
+                        .filter((key) =>
+                          Object.hasOwn(step.data as object, key),
+                        )
+                        .map((key) => (
+                          <details key={key} open>
+                            <summary>
+                              {key === "input"
+                                ? "Function inputs"
+                                : "Function output"}
+                            </summary>
+                            <DiagramContent
+                              value={(step.data as Record<string, Json>)[key]}
+                              label={`Function ${key}`}
+                            />
+                          </details>
+                        ))
+                    ) : (
+                      <p>
+                        {typeof step.data === "string"
+                          ? step.data
+                          : "No function data captured yet."}
+                      </p>
+                    )}
+                    {step.captureWarnings?.map((warning) => (
+                      <p className="muted" key={warning}>
+                        {warning}
+                      </p>
+                    ))}
+                  </div>
+                )}
+                {node.kind === "parallel" && (
                   <p>
-                    {typeof step.data === "string"
-                      ? step.data
-                      : "No function data captured yet."}
+                    These paths run at the same time:{" "}
+                    {(node.lanes ?? node.dependencies).join(", ")}. The next
+                    step starts only after all finish successfully. This marker
+                    waits for their results; it does not make another Jev
+                    request.
                   </p>
                 )}
-                {step.captureWarnings?.map((warning) => (
-                  <p className="muted" key={warning}>
-                    {warning}
+                {node.kind === "parallel" && (
+                  <ul className="flow-lane-details">
+                    {parallelLanes.get(node.id)?.map((lane) => (
+                      <li key={lane.name}>
+                        {lane.name} · {lane.status}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {(inputsByStep.get(node.id)?.length ?? 0) > 0 && (
+                  <dl className="flow-input-details">
+                    {inputsByStep.get(node.id)?.map((input) => (
+                      <div key={input.reference}>
+                        <dt>
+                          {input.name} <code>{input.reference}</code>
+                        </dt>
+                        <dd>{input.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+                {(node.conditionRule !== undefined || node.condition) && (
+                  <p>
+                    <code>
+                      {node.conditionRule !== undefined
+                        ? formatFlowCondition(node.conditionRule)
+                        : node.condition}
+                    </code>{" "}
+                    ·{" "}
+                    {step.decision === undefined
+                      ? "Not evaluated"
+                      : step.decision
+                        ? "Passed · then route"
+                        : "Not met · else route"}
                   </p>
-                ))}
-              </div>
-            )}
-            {node.kind === "parallel" && (
-              <p>
-                These paths run at the same time:{" "}
-                {(node.lanes ?? node.dependencies).join(", ")}. The next step
-                starts only after all finish successfully. This marker waits for
-                their results; it does not make another Jev request.
-              </p>
-            )}
-            {node.kind === "parallel" && (
-              <ul className="flow-lane-details">
-                {parallelLanes.get(node.id)?.map((lane) => (
-                  <li key={lane.name}>
-                    {lane.name} · {lane.status}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {(inputsByStep.get(node.id)?.length ?? 0) > 0 && (
-              <dl className="flow-input-details">
-                {inputsByStep.get(node.id)?.map((input) => (
-                  <div key={input.reference}>
-                    <dt>
-                      {input.name} <code>{input.reference}</code>
-                    </dt>
-                    <dd>{input.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-            {(node.conditionRule !== undefined || node.condition) && (
-              <p>
-                <code>
-                  {node.conditionRule !== undefined
-                    ? formatFlowCondition(node.conditionRule)
-                    : node.condition}
-                </code>{" "}
-                ·{" "}
-                {step.decision === undefined
-                  ? "Not evaluated"
-                  : step.decision
-                    ? "Passed · then route"
-                    : "Not met · else route"}
-              </p>
-            )}
-            <p className="muted">
-              {node.path.length ? node.path.join(" / ") : "Main path"}
-            </p>
-            {step.error && <p role="alert">{step.error}</p>}
-            {node.kind === "jev" &&
-              (trace ? (
-                <button onClick={() => setDetails(!details)}>
-                  {details ? "Hide request details" : "Inspect request"}
-                </button>
-              ) : (
-                <p>
-                  {step.traceId
-                    ? "Request capture was cleared or evicted."
-                    : "No captured request linked yet. Use a client created by this inspector."}
+                )}
+                <p className="muted">
+                  {node.path.length ? node.path.join(" / ") : "Main path"}
                 </p>
-              ))}
-          </>
-        ) : (
-          <p className="muted">
-            Each request diagram shows its context, question and answer. Use its
-            question picker for other answers. Lines between requests show
-            execution dependencies.
-          </p>
-        )}
-        {run.value !== undefined && (
-          <details>
-            <summary>Captured outcome value</summary>
-            <JsonBlock value={run.value} />
-          </details>
-        )}
+                {step.error && <p role="alert">{step.error}</p>}
+                {node.kind === "jev" &&
+                  (trace ? (
+                    <button onClick={() => setDetails(!details)}>
+                      {details ? "Hide request details" : "Inspect request"}
+                    </button>
+                  ) : (
+                    <p>
+                      {step.traceId
+                        ? "Request capture was cleared or evicted."
+                        : "No captured request linked yet. Use a client created by this inspector."}
+                    </p>
+                  ))}
+              </>
+            ) : (
+              <p className="muted">
+                Each request diagram shows its context, question and answer. Use
+                its question picker for other answers. Lines between requests
+                show execution dependencies.
+              </p>
+            )}
+            {run.value !== undefined && (
+              <details>
+                <summary>Captured outcome value</summary>
+                <JsonBlock value={run.value} />
+              </details>
+            )}
+          </div>
+          {details && trace && (
+            <div className="flow-request-detail">
+              <RequestDetail trace={trace} />
+            </div>
+          )}
+        </FlowDetailsPanel>
       </div>
-      {details && trace && (
-        <div className="flow-request-detail">
-          <RequestDetail trace={trace} />
-        </div>
-      )}
     </section>
   );
 });

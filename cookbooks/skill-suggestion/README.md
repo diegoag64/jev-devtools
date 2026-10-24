@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Open [the skill cookbook](http://127.0.0.1:4182/?cookbook=skill-suggestion), choose a synthetic case, and run it. Open **Jev DevTools → Flows** for the connected diagram. Select a function to inspect inputs/output, or use each Jev request's question picker to inspect its gate/fit answers. The initial Choice has 182 accessible probabilities, with compact expansion and search.
+Open [the skill cookbook](http://127.0.0.1:4182/?cookbook=skill-suggestion), choose a synthetic case, and run it. Open **Jev DevTools → Flows** for the connected diagram. Select a function and open **Show details** in the bottom bar to inspect inputs/output, or use each Jev request's question picker to inspect its gate/fit answers. The initial Choice has 182 accessible probabilities, with compact expansion and search.
 
 The three synthetic cases exercise:
 

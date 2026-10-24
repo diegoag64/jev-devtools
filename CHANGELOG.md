@@ -20,6 +20,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 Local experiment; not published or submitted as a PR.
 
+- Collapse flow metadata behind a Show details bar by default. The expanded panel scrolls independently and supports vertical pointer/keyboard resizing; selecting another step keeps the chosen panel height and does not open it automatically.
+
 - Add the full skill-suggestion selection flow using the official 182-skill roster, exact request/fit gates, dynamic shortlist questions, and agent-hint formatting. Provide three labeled synthetic cases, an adaptive result UI, and optional explicit live mode; the external-agent benchmark is not run.
 - Expose `.answers` references on Jev steps so functions can consume answers with runtime-generated names.
 - Preserve up to 256 criteria/probability map entries in captures, allowing all 182 skills to remain inspectable. General collection, byte, and depth bounds still apply.
