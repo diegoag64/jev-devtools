@@ -13,6 +13,7 @@ import type {
   FlowRun,
   FlowStep,
 } from "../src/flow-protocol.js";
+import { jsonSnapshot, runCallback } from "./runtime.js";
 export type {
   FlowDisplay,
   FlowDefinition,
@@ -40,7 +41,7 @@ function freezeAst(ast: Ast, depth = 0): void {
 }
 /** Inspectable expression, not an application callback. Use get() for input fields. */
 export class FlowExpression<T> {
-  declare private readonly valueType: T;
+  private declare readonly valueType: T;
   constructor(
     readonly ast: Ast,
     owner?: object,
@@ -107,6 +108,31 @@ type AnswerRefs<Q extends Questions> = {
 type Request<Q extends Questions> = Omit<SystemOneRequest<Q>, "state"> & {
   state: unknown;
 };
+/** Resolve nested references before invoking a server callback. */
+export type Resolved<T> =
+  T extends FlowExpression<infer V>
+    ? V
+    : T extends readonly unknown[]
+      ? { [K in keyof T]: Resolved<T[K]> }
+      : T extends object
+        ? { [K in keyof T]: Resolved<T[K]> }
+        : T;
+export type TaskContext = {
+  signal: AbortSignal;
+  runId: string;
+  stepId: string;
+  executionId: string;
+};
+export type FlowTask<I, O> = {
+  input: I;
+  run: (input: Resolved<I>, context: TaskContext) => O | Promise<O>;
+  timeoutMs?: number;
+};
+export type FlowRequestFactory<I, Q extends Questions> = {
+  input: I;
+  /** Synchronous construction only; the runner executes the SDK request. */
+  request: (input: Resolved<I>) => SystemOneRequest<Q>;
+};
 type Block = { nodes: Step[]; result?: FlowExpression<unknown> };
 type Step = {
   id: string;
@@ -118,6 +144,11 @@ type Step = {
   lanes?: Record<string, Block>;
   value?: unknown;
   outcome?: string;
+  input?: unknown;
+  task?: (input: never, context: TaskContext) => unknown;
+  factory?: (input: never) => SystemOneRequest<Questions>;
+  timeoutMs?: number;
+  answerNames?: Set<string>;
 };
 /** Observer contract used by createJevDevtools; execution never depends on successful recording. */
 export type FlowObserver = {
@@ -181,7 +212,11 @@ function describe(ast: Ast): string {
   if (ast.op === "literal") return "[literal]";
   return `${ast.op}(${ast.args.map(describe).join(", ")})`;
 }
-function conditionRule(ast: Ast, requests: Set<string>): FlowCondition {
+function conditionRule(
+  ast: Ast,
+  requests: Set<string>,
+  tasks: Set<string>,
+): FlowCondition {
   let remaining = 128;
   const visit = (node: Ast): FlowCondition => {
     if (--remaining < 0) return { op: "literal", value: "[rule truncated]" };
@@ -223,10 +258,12 @@ function conditionRule(ast: Ast, requests: Set<string>): FlowCondition {
           ? path.length === 3 && ["noul", "choice", "score"].includes(path[2])
             ? path[1]
             : path.slice(1).join(" ")
-          : (path.at(-1) ?? "Input"),
+          : path.at(-1) ?? "Input",
         ...(base.op === "ref" && requests.has(base.id)
           ? { stepId: base.id, path }
-          : {}),
+          : base.op === "ref" && tasks.has(base.id)
+            ? { stepId: base.id, path, source: "task" as const }
+            : {}),
       };
     }
     if (node.op === "literal")
@@ -312,6 +349,16 @@ export interface FlowBuilder<T> {
     request: Request<Q>,
     display?: FlowDisplay,
   ): AnswerRefs<Q>;
+  jev<I, const Q extends Questions>(
+    id: string,
+    request: FlowRequestFactory<I, Q>,
+    display?: FlowDisplay,
+  ): AnswerRefs<Q>;
+  task<I, O>(
+    id: string,
+    task: FlowTask<I, O>,
+    display?: FlowDisplay,
+  ): FlowExpression<Awaited<O>>;
   /** Terminal decision: each callback must return output() or another branch(). */
   branch(
     id: string,
@@ -423,17 +470,44 @@ export function defineJevFlow<T>(
     }
     const builder: FlowBuilder<T> = {
       input,
-      jev(id, request, display) {
-        const frozen = mapValue(request, (expr) => expr) as Request<Questions>;
+      jev<I, Q extends Questions>(
+        id: string,
+        request: Request<Q> | FlowRequestFactory<I, Q>,
+        display?: FlowDisplay,
+      ) {
+        const dynamic = "request" in request;
+        if (dynamic && typeof request.request !== "function")
+          throw new Error("Request factory must be a function");
+        const frozen = mapValue(
+          dynamic ? request.input : request,
+          (expr) => expr,
+        );
         const step = add(id, "jev", frozen, display);
-        step.request = frozen;
+        if (dynamic) {
+          step.input = frozen;
+          step.factory = request.request as Step["factory"];
+          step.answerNames = new Set();
+        } else step.request = frozen as Request<Questions>;
         return {
           answer(question: string) {
-            if (!Object.hasOwn(frozen.questions, question))
+            if (!dynamic && !Object.hasOwn(step.request!.questions, question))
               throw new Error(`Unknown question: ${question}`);
-            const type = frozen.questions[question].type;
-            const fields =
-              type === "noul"
+            step.answerNames?.add(question);
+            const type = dynamic
+              ? undefined
+              : step.request!.questions[question].type;
+            const fields = dynamic
+              ? [
+                  "type",
+                  "noul",
+                  "choice",
+                  "score",
+                  "confidence",
+                  "probabilities",
+                  "legend",
+                  "box",
+                ]
+              : type === "noul"
                 ? ["type", "noul"]
                 : type === "choice"
                   ? ["type", "choice", "confidence", "probabilities"]
@@ -464,6 +538,23 @@ export function defineJevFlow<T>(
           },
         };
       },
+      task(id, task, display) {
+        if (typeof task.run !== "function")
+          throw new Error("Task run must be a function");
+        if (
+          task.timeoutMs !== undefined &&
+          (!Number.isInteger(task.timeoutMs) ||
+            task.timeoutMs < 1 ||
+            task.timeoutMs > 2_147_483_647)
+        )
+          throw new Error("Task timeoutMs must be a positive 32-bit integer");
+        const frozen = mapValue(task.input, (expr) => expr);
+        const step = add(id, "task", frozen, display);
+        step.input = frozen;
+        step.task = task.run as Step["task"];
+        step.timeoutMs = task.timeoutMs;
+        return new FlowExpression({ op: "ref", id }, owner) as never;
+      },
       branch(id, paths, display) {
         const step = add(id, "branch", paths.when, display);
         step.when = paths.when;
@@ -474,6 +565,7 @@ export function defineJevFlow<T>(
         node.conditionRule = conditionRule(
           paths.when.ast,
           new Set(nodes.filter((n) => n.kind === "jev").map((n) => n.id)),
+          new Set(nodes.filter((n) => n.kind === "task").map((n) => n.id)),
         );
         step.then = block(
           paths.then,
@@ -626,9 +718,14 @@ export function defineJevFlow<T>(
       const emit = () => {
         try {
           if (observer) {
-            const { value, ...metadata } = run;
+            const { value, steps, ...metadata } = run;
+            // Stable data snapshots are captured once by the recorder, not
+            // cloned/redacted again on every unrelated step update.
             observer.update({
               ...structuredClone(metadata),
+              steps: Object.fromEntries(
+                Object.entries(steps).map(([id, step]) => [id, { ...step }]),
+              ),
               ...(value !== undefined ? { value } : {}),
             });
           }
@@ -661,9 +758,41 @@ export function defineJevFlow<T>(
           try {
             let value: unknown;
             if (step.kind === "jev") {
-              const request = mapValue(step.request, (e) =>
-                evaluate(e.ast, data, values),
-              ) as SystemOneRequest<Questions>;
+              const generated = step.factory
+                ? step.factory(
+                    jsonSnapshot(
+                      mapValue(step.input, (e) =>
+                        evaluate(e.ast, data, values),
+                      ),
+                    ) as never,
+                  )
+                : step.request;
+              if (step.factory) {
+                if (
+                  generated &&
+                  typeof (generated as unknown as { then?: unknown }).then ===
+                    "function"
+                ) {
+                  // Invalid async factories must not leave an unhandled rejection.
+                  void Promise.resolve(generated).catch(() => {});
+                  throw new TypeError("Request factory must be synchronous");
+                }
+                if (!plain(generated) || !plain(generated.questions))
+                  throw new Error(
+                    "Request factory must return a synchronous SDK request",
+                  );
+                for (const name of step.answerNames!)
+                  if (!Object.hasOwn(generated.questions, name))
+                    throw new Error(`Unknown generated question: ${name}`);
+              }
+              const request = mapValue(generated, (e) => {
+                if (step.factory)
+                  throw new Error(
+                    "Request factories must return resolved values",
+                  );
+                return evaluate(e.ast, data, values);
+              }) as SystemOneRequest<Questions>;
+              abortCheck();
               const call = () =>
                 options.client.systemOne(request, {
                   signal: controller.signal,
@@ -684,6 +813,27 @@ export function defineJevFlow<T>(
                   )
                 : call());
               abortCheck();
+            } else if (step.kind === "task") {
+              const input = jsonSnapshot(
+                mapValue(step.input, (e) => evaluate(e.ast, data, values)),
+              );
+              state.data = { input };
+              emit();
+              value = jsonSnapshot(
+                await runCallback(
+                  (signal) =>
+                    step.task!(jsonSnapshot(input) as never, {
+                      signal,
+                      runId: run.id,
+                      stepId: step.id,
+                      executionId: state.executionId,
+                    }),
+                  controller.signal,
+                  step.timeoutMs,
+                ),
+              );
+              abortCheck();
+              state.data = { input, output: jsonSnapshot(value) };
             } else if (step.kind === "branch") {
               const decision = evaluate(step.when!.ast, data, values);
               if (typeof decision !== "boolean")

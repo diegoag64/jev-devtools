@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | No changes yet. |
+| [Unreleased](#unreleased) | Not published | Local experiment: function steps, runtime Jev request construction, and captured function data. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
 | [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Batched updates, changed-trace streaming, frame-coalesced rendering, less work while the drawer is closed, virtualized Questions, compact Choice diagrams, and reuse of unchanged inspector views. |
 | [0.1.3](#013--october-23-2026-experimental) | 2026-10-23 | Isolated drawer styles, diagram pan/zoom, and version-specific npm links. |
@@ -18,7 +18,12 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No changes yet.
+Local experiment; not published or submitted as a PR.
+
+- Add server-side `flow.task()` with typed resolved inputs/results, asynchronous callbacks, cooperative cancellation and optional timeouts. Late results cannot advance failed/cancelled flows; tasks do not retry automatically.
+- Add a synchronous request-factory overload to `flow.jev()` for questions/criteria built from preceding results while retaining SDK request capture and linkage. Existing static requests remain supported.
+- Display function cards, captured input/output property views, duration/status, capture warnings, and task-derived condition values. Task data is bounded/redacted independently of runtime values; exception messages and callback code are not sent to the browser.
+- Add a clearly labeled synthetic shortlist playground flow and human/AI API guidance. Mapping, iteration, and distributed execution are not included.
 
 ## 0.3.0 — October 24, 2026 (experimental)
 

@@ -1,6 +1,11 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { FlowDefinition, FlowNode, FlowRun } from "./flow-protocol.js";
-import type { Trace } from "./protocol.js";
+import type {
+  FlowDefinition,
+  FlowNode,
+  FlowRun,
+  FlowStep,
+} from "./flow-protocol.js";
+import type { Trace, Json } from "./protocol.js";
 import { useDiagramViewport } from "./useDiagramViewport.js";
 import { RequestDetail } from "./JevDevtools.js";
 import { JsonBlock } from "./TraceContent.js";
@@ -11,6 +16,7 @@ import {
 } from "./condition-inputs.js";
 import { formatFlowCondition } from "./flow-condition.js";
 import { TraceDiagram } from "./TraceDiagram.js";
+import { DiagramContent } from "./DiagramContent.js";
 type Lane = { name: string; status: string };
 type Bounds = { x: number; y: number; width: number; height: number };
 const RequestNode = memo(function RequestNode({
@@ -81,6 +87,8 @@ const Card = memo(function Card({
   onSelect,
   lanes,
   inputs,
+  data,
+  durationMs,
 }: {
   node: FlowNode;
   status: string;
@@ -90,6 +98,8 @@ const Card = memo(function Card({
   onSelect: (id: string) => void;
   lanes: Lane[];
   inputs?: ConditionInput[];
+  data?: FlowStep["data"];
+  durationMs?: number;
 }) {
   const join = node.kind === "parallel";
   const finished = lanes.filter((lane) => lane.status === "completed").length;
@@ -105,7 +115,7 @@ const Card = memo(function Card({
 
   return (
     <button
-      className={`flow-step ${selected ? "selected" : ""}`}
+      className={`flow-step ${node.kind === "task" ? "flow-task" : ""} ${selected ? "selected" : ""}`}
       data-status={status}
       style={{
         left: bounds.x,
@@ -127,6 +137,8 @@ const Card = memo(function Card({
           >
             {join ? (
               <path d="M4 5h4l5 7h7M4 19h4l5-7m4-3 3 3-3 3" />
+            ) : node.kind === "task" ? (
+              <path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18" />
             ) : node.kind === "output" ? (
               <>
                 <rect x="4" y="4" width="16" height="16" rx="4" />
@@ -142,7 +154,9 @@ const Card = memo(function Card({
             ? "Parallel checks"
             : node.kind === "branch"
               ? "Condition"
-              : node.kind}
+              : node.kind === "task"
+                ? "Function"
+                : node.kind}
         </span>
         {node.kind === "output" && (
           <span className="flow-status">{stateLabel}</span>
@@ -153,6 +167,26 @@ const Card = memo(function Card({
       </strong>
       {node.description && (
         <span className="flow-step-description">{node.description}</span>
+      )}
+      {node.kind === "task" && (
+        <span className="flow-task-preview">
+          <span className="flow-condition-label">Returned value</span>
+          <code>
+            {data &&
+            typeof data === "object" &&
+            !Array.isArray(data) &&
+            Object.hasOwn(data, "output")
+              ? JSON.stringify(data.output, null, 2).slice(0, 280)
+              : status === "running"
+                ? "Running application code…"
+                : "No output captured"}
+          </code>
+          <small>
+            {durationMs === undefined
+              ? "Select to inspect inputs and output"
+              : `${Math.round(durationMs)} ms · select to inspect`}
+          </small>
+        </span>
       )}
       {node.kind === "branch" &&
         (node.conditionRule !== undefined || node.condition) && (
@@ -388,7 +422,7 @@ export const FlowOverview = memo(function FlowOverview({
           tracesById.has(run.steps[node.id]?.traceId ?? "");
         const w = captured ? 1120 : 360,
           h = captured
-            ? (heights[node.id] ?? 640)
+            ? heights[node.id] ?? 640
             : node.kind === "parallel"
               ? 190 +
                 (node.description ? 64 : 0) +
@@ -397,7 +431,9 @@ export const FlowOverview = memo(function FlowOverview({
                 (node.kind === "branch"
                   ? 110 +
                     Math.min(3, inputsByStep.get(node.id)?.length ?? 0) * 24
-                  : 0);
+                  : node.kind === "task"
+                    ? 130
+                    : 0);
         const parents = (links.get(node.id) ?? [])
           .map((id) => points.get(id)!)
           .filter(Boolean);
@@ -462,7 +498,7 @@ export const FlowOverview = memo(function FlowOverview({
           {run.outcome ? (
             <strong>Outcome: {run.outcome}</strong>
           ) : (
-            (run.error ?? "Execution paths")
+            run.error ?? "Execution paths"
           )}
           <small className="muted">
             {run.durationMs !== undefined
@@ -581,6 +617,8 @@ export const FlowOverview = memo(function FlowOverview({
                 bounds={p}
                 onSelect={setSelected}
                 inputs={inputsByStep.get(n.id)}
+                data={run.steps[n.id]?.data}
+                durationMs={run.steps[n.id]?.durationMs}
                 lanes={parallelLanes.get(n.id) ?? []}
               />
             );
@@ -599,6 +637,44 @@ export const FlowOverview = memo(function FlowOverview({
                 : ""}
             </span>
             {node.description && <p>{node.description}</p>}
+            {node.kind === "task" && (
+              <div className="flow-task-details">
+                <p className="muted">
+                  Application function · runs on your server. Captured values
+                  may be redacted or truncated.
+                </p>
+                {step.data &&
+                typeof step.data === "object" &&
+                !Array.isArray(step.data) ? (
+                  ["input", "output"]
+                    .filter((key) => Object.hasOwn(step.data as object, key))
+                    .map((key) => (
+                      <details key={key} open>
+                        <summary>
+                          {key === "input"
+                            ? "Function inputs"
+                            : "Function output"}
+                        </summary>
+                        <DiagramContent
+                          value={(step.data as Record<string, Json>)[key]}
+                          label={`Function ${key}`}
+                        />
+                      </details>
+                    ))
+                ) : (
+                  <p>
+                    {typeof step.data === "string"
+                      ? step.data
+                      : "No function data captured yet."}
+                  </p>
+                )}
+                {step.captureWarnings?.map((warning) => (
+                  <p className="muted" key={warning}>
+                    {warning}
+                  </p>
+                ))}
+              </div>
+            )}
             {node.kind === "parallel" && (
               <p>
                 These paths run at the same time:{" "}

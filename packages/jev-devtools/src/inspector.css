@@ -1422,6 +1422,44 @@
 .flow-card-heading {
   justify-content: flex-start;
 }
+.flow-task .flow-kind-icon {
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  padding: 4px;
+}
+.flow-task-preview {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.flow-task-preview code {
+  display: block;
+  white-space: pre-wrap;
+  overflow: hidden;
+  max-height: 90px;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.flow-task-preview small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.flow-task-details {
+  display: grid;
+  gap: 12px;
+}
+.flow-task-details details {
+  min-width: 0;
+}
+.flow-task-details summary {
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+.flow-task-details .diagram-content {
+  max-height: 320px;
+  overflow: auto;
+}
 .flow-kind-icon {
   width: 26px;
   height: 26px;

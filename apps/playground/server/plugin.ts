@@ -1,4 +1,9 @@
-import { refundFlow, parallelFlow, flowTransport } from "./flows.js";
+import {
+  refundFlow,
+  parallelFlow,
+  skillShortlistFlow,
+  flowTransport,
+} from "./flows.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Plugin } from "vite";
 
@@ -112,6 +117,7 @@ export function jevInspectorServer(apiKey?: string): Plugin {
               "error",
               "stress",
               "flow-approve",
+              "flow-functions",
               "flow-manual",
               "flow-other",
               "flow-parallel",
@@ -159,7 +165,11 @@ export function jevInspectorServer(apiKey?: string): Plugin {
           try {
             if (body.scenario!.startsWith("flow-")) {
               const flow =
-                body.scenario === "flow-parallel" ? parallelFlow : refundFlow;
+                body.scenario === "flow-functions"
+                  ? skillShortlistFlow
+                  : body.scenario === "flow-parallel"
+                    ? parallelFlow
+                    : refundFlow;
               const client = inspector.createClient(
                 {
                   apiKey: "sample-only",

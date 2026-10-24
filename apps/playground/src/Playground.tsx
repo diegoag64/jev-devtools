@@ -151,6 +151,8 @@ function App() {
               >
                 {Object.entries({
                   "flow-approve": "Flow · Approve",
+                  "flow-functions":
+                    "Flow · Functions + dynamic questions (synthetic)",
                   "flow-manual": "Flow · Manual review",
                   "flow-other": "Flow · Other",
                   "flow-parallel": "Flow · Parallel checks + join",

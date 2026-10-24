@@ -1,5 +1,79 @@
 import { choice, noul, type Fetch } from "@typesafe-ai/sdk";
 import { defineJevFlow, all } from "jev-devtools/flow";
+/** Reduced synthetic demonstration, not a port of the official skill cookbook. */
+export const skillShortlistFlow = defineJevFlow<{ message: string }>(
+  "Skill shortlist · synthetic sample",
+  (flow) => {
+    const ranking = flow.jev(
+      "rank-skills",
+      {
+        state: flow.input,
+        questions: {
+          ranking: choice("Which skill fits this request?", {
+            coding: "Build and debug software",
+            diagrams: "Visualize concepts",
+            writing: "Write and edit text",
+            research: "Investigate a topic",
+            planning: "Organize a project",
+          }),
+        },
+      },
+      {
+        title: "Rank available skills",
+        description:
+          "Synthetic probabilities for five skills, shown with the complete request.",
+      },
+    );
+    const shortlist = flow.task(
+      "select-shortlist",
+      {
+        input: {
+          probabilities: ranking.answer("ranking").probabilities,
+          limit: 3,
+        },
+        run: ({ probabilities, limit }) =>
+          Object.entries(probabilities)
+            .sort(([, a], [, b]) => b - a)
+            .slice(0, limit)
+            .map(([name]) => name),
+      },
+      {
+        title: "Keep the top three skills",
+        description:
+          "Application code sorts the returned probabilities. Its output becomes the next request's Choice options.",
+      },
+    );
+    const selection = flow.jev(
+      "assess-shortlist",
+      {
+        input: { message: flow.input.get("message"), skills: shortlist },
+        request: ({ message, skills }) => ({
+          state: { message, skills },
+          questions: {
+            selected: choice(
+              "Which shortlisted skill best fits?",
+              Object.fromEntries(skills.map((name) => [name, null])),
+            ),
+          },
+        }),
+      },
+      {
+        title: "Assess the shortlist",
+        description:
+          "This request is constructed at runtime from the function's actual returned candidates.",
+      },
+    );
+    return flow.output(
+      "suggestion",
+      { skill: selection.answer("selected").choice, shortlist },
+      {
+        title: "Suggested skill",
+        description:
+          "Return the selected skill to the app. No tool is invoked; responses are synthetic fixtures.",
+      },
+    );
+  },
+);
 export const refundFlow = defineJevFlow<{ message: string }>(
   "refund-review",
   (flow) => {
@@ -202,6 +276,28 @@ export function flowTransport(scenario: string): Fetch {
       else signal?.addEventListener("abort", abort, { once: true });
     });
     const req = JSON.parse(String(init?.body));
+    if (scenario === "flow-functions") {
+      const ranking = !!req.questions.ranking;
+      const names = Object.keys(
+        req.questions[ranking ? "ranking" : "selected"].criteria,
+      );
+      const weights = ranking
+        ? [0.44, 0.27, 0.14, 0.1, 0.05]
+        : [0.65, 0.25, 0.1];
+      return Response.json({
+        model: "synthetic-skill-sample",
+        answers: {
+          [ranking ? "ranking" : "selected"]: {
+            type: "choice",
+            choice: names[0],
+            confidence: ranking ? 0.4 : 0.7,
+            probabilities: Object.fromEntries(
+              names.map((name, i) => [name, weights[i]]),
+            ),
+          },
+        },
+      });
+    }
     if (scenario === "flow-error" && !req.questions.category)
       return Response.json(
         { error: { message: "Sample review failed" } },

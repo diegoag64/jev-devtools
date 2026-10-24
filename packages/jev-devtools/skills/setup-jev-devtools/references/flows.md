@@ -98,7 +98,7 @@ For custom server-derived sessions, use `await inspector.run(request, () => revi
 | `flow.output(name, value?, display?)` | Terminal named result, optionally containing nested resolved expressions. Output names are globally unique node IDs. For metadata without a value, pass `undefined` second. |
 | `definition.run(input, { client, devtools?, signal? })` | Returns `{ runId, outcome: string, value?: unknown }`. Narrow/validate values in application code; outcomes are not inferred as a discriminated union. A normal SDK client works without recording. |
 
-Use the callback's current builder (`lane` or `path`) to add steps; do not call the outer builder inside it. References must belong to the same definition and be available on the current path. Reusing an earlier parent reference is allowed. IDs must be unique across all paths/lanes: 1–80 letters, digits, `_`, or `-`, starting with a letter or digit. Maximum 256 nodes and 16 nested blocks; no loops or arbitrary execution callbacks. Plain templates are copied when defining; treat SDK assets as immutable. Define once to avoid a new definition identity on every request; hot reload can still create a new identity.
+Use the callback's current builder (`lane` or `path`) to add steps; do not call the outer builder inside it. References must belong to the same definition and be available on the current path. Reusing an earlier parent reference is allowed. IDs must be unique across all paths/lanes: 1–80 letters, digits, `_`, or `-`, starting with a letter or digit. Maximum 256 nodes and 16 nested blocks; no loops. Published 0.3.0 has no execution callbacks; see the explicitly unreleased task/factory extension below only when present in installed declarations. Plain templates are copied when defining; treat SDK assets as immutable. Define once to avoid a new definition identity on every request; hot reload can still create a new identity.
 
 SDK retries remain within each request; the flow adds no retries. A failed step blocks dependents and rejects the run. A failed lane aborts siblings and waits for them to settle. External cancellation propagates to SDK signals; already completed calls stay completed. Handle rejection in the app; do not retry a whole flow automatically or imply durable/resumable execution.
 
@@ -148,3 +148,14 @@ Check these observable results:
 If the flow executes but details are absent, check: `devtools` passed to `run`, `client` from that same adapter, same process/session, capture enabled, `/flows/events` forwarded, and histories not cleared/evicted. A plain SDK client can produce flow states but cannot link request details. See [verify.md](verify.md) for general endpoint checks.
 
 Remove temporary verification routes unless requested as a demo. Report the installed version, integration location, outcomes observed, whether browser checks were performed, and that responses were samples. Never equate sample verification with live-model correctness.
+
+## Unreleased function-step experiment
+
+Only use this section when the installed declarations actually include `task` and the request-factory overload. These APIs are not in npm 0.3.0. Do not copy them into a 0.3.0 consumer.
+
+- `flow.task(id, { input, run, timeoutMs? }, display?)`: resolve nested input references, run server code, and return a typed reference. `run(input, { signal, runId, stepId, executionId })` may return a value or Promise. Inputs/outputs must be plain JSON-compatible values; return null rather than undefined. No implicit retry.
+- `flow.jev(id, { input, request: resolved => ({ state, questions, ...sdkOptions }) }, display?)`: construct a synchronous SDK request at execution time. Do asynchronous work in a preceding task. Keep Jev calls here to retain full linked diagrams. Never return unresolved flow references or a Promise from the factory.
+- Neither callback executes at definition time. Runtime input snapshots protect previous values from mutation. Task timeouts/cancellation stop downstream work and signal the callback, but cannot undo side effects or forcibly interrupt synchronous code.
+- Captures show function inputs/outputs under `steps.<id>.data.input/output` redaction paths, with warnings for truncation. Only error names are exposed. Definition descriptions remain static public-safe metadata. Remote function calls are ordinary server fetches, not code serialized to another machine.
+- For verification, follow actual answers into a task and a subsequent generated request; confirm the latter's criteria and trace link, then inspect redacted task data. Use the synthetic playground Functions scenario for a no-key example.
+- There is no `flow.map`, `flow.repeat`, distributed worker API, or durable job store. Do not invent these APIs.

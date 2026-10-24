@@ -10,13 +10,14 @@ export type FlowCondition =
       name?: string;
       stepId?: string;
       path?: string[];
+      source?: "task";
     }
   | { op: "literal"; value: string | number | boolean | null }
   | { op: "eq" | "lt" | "gte" | "all" | "any" | "not"; args: FlowCondition[] };
 /** Structural metadata and authored rules; runtime inputs/answers stay in request captures. */
 export type FlowNode = FlowDisplay & {
   id: string;
-  kind: "jev" | "branch" | "parallel" | "output";
+  kind: "jev" | "task" | "branch" | "parallel" | "output";
   dependencies: string[];
   path: string[];
   condition?: string;
@@ -47,6 +48,9 @@ export type FlowStep = {
   decision?: boolean;
   traceId?: string;
   error?: string;
+  /** Optional bounded, redacted task input/output; never executable code. */
+  data?: Json;
+  captureWarnings?: string[];
 };
 export type FlowRun = {
   version: 1;

@@ -4,6 +4,7 @@ import type {
   FlowUpdate,
 } from "../src/flow-protocol.js";
 import { capture, type CaptureOptions } from "./recorder.js";
+import type { Json } from "../src/protocol.js";
 /** Independent bounded run store. Definitions are retained only while referenced. */
 export class FlowRecorder {
   private runs = new Map<string, FlowRun>();
@@ -13,6 +14,10 @@ export class FlowRecorder {
   private revisions = new Map<string, number>();
   private revision = 0;
   private listeners = new Set<(sessions: Set<string>) => void>();
+  private taskCaptures = new WeakMap<
+    object,
+    { data: Json; warnings: string[] }
+  >();
   constructor(private options: CaptureOptions) {}
   subscribe(fn: (sessions: Set<string>) => void) {
     this.listeners.add(fn);
@@ -63,7 +68,51 @@ export class FlowRecorder {
   }
   update(run: FlowRun) {
     if (!this.runs.has(run.id)) return; // Clear/eviction cannot resurrect pending runs.
-    const stored = { ...run };
+    const stored = {
+      ...run,
+      steps: Object.fromEntries(
+        Object.entries(run.steps).map(([id, step]) => {
+          if (step.data === undefined) return [id, { ...step }];
+          const key = step.data;
+          let captured =
+            key && typeof key === "object"
+              ? this.taskCaptures.get(key)
+              : undefined;
+          if (!captured) {
+            const warnings = new Set<string>();
+            let data: Json;
+            try {
+              data =
+                capture(
+                  step.data,
+                  warnings,
+                  this.options.redact
+                    ? (path, value) =>
+                        this.options.redact!(
+                          ["steps", id, "data", ...path],
+                          value,
+                        )
+                    : undefined,
+                ) ?? null;
+            } catch {
+              data = "[capture unavailable]";
+              warnings.add("Task capture unavailable.");
+            }
+            captured = { data, warnings: [...warnings] };
+            if (key && typeof key === "object")
+              this.taskCaptures.set(key, captured);
+          }
+          return [
+            id,
+            {
+              ...step,
+              data: captured.data,
+              captureWarnings: captured.warnings,
+            },
+          ];
+        }),
+      ),
+    };
     if ("value" in stored) {
       try {
         stored.value = capture(stored.value, new Set(), this.options.redact);

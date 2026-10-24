@@ -66,9 +66,80 @@ Definitions are synchronous and make no SDK calls. Plain request/value templates
 
 Question/answer reference types are inferred. `run()` returns `{runId, outcome: string, value?: unknown}` in v1: supplying `defineJevFlow<Ticket>` keeps the input ergonomic, but does not infer a discriminated union of all terminal values. Narrow the returned value in application code.
 
+## Function steps and runtime requests (unreleased experiment)
+
+These additions are available in this working tree, **not in the published 0.3.0 package**. Existing static requests and flow behavior remain supported. They run on Node; never import `/flow` into a browser component.
+
+`task(id, { input, run, timeoutMs? }, display?)` executes a server function after its dependencies. Nested references in `input` resolve to ordinary values. The callback's return type becomes a typed `FlowExpression`, so its fields can feed another task, request, condition, or output. The optional third argument uses the same static `title` and `description` as other steps.
+
+```ts
+const shortlist = flow.task("shortlist", {
+  input: { probabilities: ranking.answer("skills").probabilities, limit: 3 },
+  run: ({ probabilities, limit }) => Object.entries(probabilities)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, limit)
+    .map(([name]) => name),
+}, {
+  title: "Keep the top skills",
+  description: "Application code sorts the probabilities before another assessment.",
+});
+
+const selection = flow.jev("select", {
+  input: { message: flow.input.get("message"), skills: shortlist },
+  request: ({ message, skills }) => ({
+    state: { message, skills },
+    questions: {
+      selected: choice("Which skill fits best?",
+        Object.fromEntries(skills.map((name) => [name, null]))),
+    },
+  }),
+}, { title: "Assess the shortlist" });
+
+return flow.output("suggestion", selection.answer("selected").choice);
+```
+
+Here `ranking` is an earlier Jev request with a Choice question named `skills`. This is a minimal API illustration, not the complete official skill-suggestion cookbook.
+
+Factory inputs use the same JSON-compatible snapshot contract as tasks. Construct SDK assets inside the factory when needed, rather than passing asset instances through its inputs. A request factory is **synchronous**: return an ordinary SDK request, with no unresolved expressions. Use a preceding task for asynchronous work. The runner makes the SDK call through the supplied client, so retries, request linkage, questions, and answer inspection remain intact. No factory runs during definition. Referenced question names are checked against the generated request before dispatch. Known keys retain inference; genuinely dynamic keys require runtime checking. The factory has no separate diagram node; its resulting Jev request is the visible step.
+
+Tasks may be synchronous or asynchronous. The second callback argument is `TaskContext`: `{ signal, runId, stepId, executionId }`. A task can call a remote service with ordinary server code:
+
+```ts
+const evaluation = flow.task("external-evaluation", {
+  input: { document: flow.input.get("document") },
+  timeoutMs: 30_000,
+  run: async (input, { signal }) => {
+    const response = await fetch(serviceUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+      signal,
+    });
+    if (!response.ok) throw new Error("Evaluation failed");
+    return response.json();
+  },
+}, { title: "External evaluation" });
+```
+
+`serviceUrl` and any credentials belong to trusted server configuration. Functions/closures are never serialized to the browser or uploaded for remote execution. Keep Jev calls in `flow.jev()` when they need their own linked request diagram; arbitrary calls hidden inside a task are not automatically modeled as child flow steps.
+
+### Task values, lifetime, and capture
+
+- Inputs and outputs must be JSON-compatible: null, booleans, finite numbers, strings, arrays, and plain objects. Return `null` for no value. Undefined, functions, dates, class instances, BigInt, cycles, and nesting beyond 40 levels fail rather than being silently converted. `Resolved<T>`, `FlowTask`, `FlowRequestFactory`, and `TaskContext` are exported types. JSON validity is also checked at runtime.
+- Each callback receives detached input data. Its output is snapshotted before downstream use. Mutating callback inputs or retaining/mutating a returned object does not rewrite earlier state or captured previews.
+- A timeout must be a positive integer no larger than 2,147,483,647 milliseconds. There is no default timeout or automatic task retry. A timeout fails the step with `TimeoutError`; cancellation records `cancelled`. Dependent steps do not run. Late fulfillment/rejection cannot resurrect a completed, failed, or cancelled run.
+- Abort signals are cooperative. The runner can stop waiting for asynchronous work that ignores a signal, but cannot kill arbitrary JavaScript, undo side effects, or guarantee remote cancellation. CPU-bound work blocks the event loop until it returns; a result returned after its timeout is rejected. Use a worker/service for expensive computation.
+- Task cards show their status, duration, and returned-value preview. Select one for expandable inputs/outputs and capture warnings. Conditions referencing task results read the **redacted captured output** in the viewer.
+- Task input/output capture uses the existing size/depth limits and default secret-key redaction. Custom redaction paths start with `steps`, the step ID, `data`, then `input` or `output`. Capture truncation/redaction never changes the value executed or returned. Capture failures suppress the data and do not fail the task. Only error names are recorded; exception messages/stacks remain server-side.
+- The wire format adds an optional task kind/data to version 1. Existing captures remain readable; use the matching updated drawer for function previews. This does not add loops, dynamic fan-out, persisted jobs, distributed execution, or automatic deployment.
+
+### Try the local sample
+
+From the repository root run `npm run dev`, open `http://127.0.0.1:4182/`, and select **Flow · Functions + dynamic questions (synthetic)**. Run the sample, open **Jev DevTools → Flows**, and select **Keep the top three skills**. Inspect its output, then the next request's three Choice criteria. Both model responses are synthetic fixtures; no API key or remote call is required. This demonstrates the API, not a faithful port of the official cookbook.
+
 ## Explain steps in the diagram
 
-All four builder methods accept an optional third argument: `{ title, description }`.
+All builder methods accept an optional third argument: `{ title, description }`.
 Use it to explain the purpose of a request, a condition, a parallel join, or an outcome:
 
 ```ts
@@ -146,7 +217,7 @@ node benchmarks/flows-isolated.mjs
 
 The new-flow scaling suite measures 11/51/151-node linear graphs and 200 retained 11-node runs, opening and keyboard pan CPU in isolated Chromium. It is not a before/after optimization claim. For existing request regressions, use `BENCH_SUITE=rerenders npm run bench:compare -- main` and keep those findings separate. Generated data and screenshots stay in ignored `benchmarks/results/`; report comparisons and limitations in the PR.
 
-V1 has no standalone viewer, generic tasks, arbitrary callbacks at execution time, loops, automatic business actions, durable execution, cross-process coordination, or distributed persistence. A run belongs to one process and its supplied SDK client. Large flow canvases are bounded, not virtualized. They mount the retained request diagrams; CSS content visibility skips offscreen layout/paint where supported while preserving local controls. This uses more DOM and memory than status cards. Only the selected full tabbed inspector mounts; all captured answers remain accessible through each request’s question picker and the Questions tab.
+Published 0.3.0 has no generic tasks or runtime request factories; the local experiment above adds those two capabilities. Neither version has a standalone viewer, loops, automatic business actions, durable execution, cross-process coordination, or distributed persistence. A run belongs to one process and its supplied SDK client. Large flow canvases are bounded, not virtualized. They mount the retained request diagrams; CSS content visibility skips offscreen layout/paint where supported while preserving local controls. This uses more DOM and memory than status cards. Only the selected full tabbed inspector mounts; all captured answers remain accessible through each request’s question picker and the Questions tab.
 
 ### Structured content in request cards
 

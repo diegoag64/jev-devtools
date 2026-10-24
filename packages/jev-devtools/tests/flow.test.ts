@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { setTimeout as delay } from "node:timers/promises";
+import { gunzipSync, zstdDecompressSync } from "node:zlib";
 import {
   TypeSafeClient,
   choice,
@@ -836,5 +837,324 @@ test("rule literals follow condition redaction and capture failures never expose
     } finally {
       inspector.dispose();
     }
+  }
+});
+
+test("tasks resolve typed inputs and construct linked SDK requests without exposing raw capture data", async () => {
+  let taskCalls = 0,
+    factoryCalls = 0;
+  const sent: Array<{
+    state: { text?: string };
+    questions: Record<string, { criteria: object }>;
+  }> = [];
+  const inspector = createJevDevtools({
+    origin,
+    enabled: true,
+    redact: (path, value) =>
+      path.join(".") === "steps.shortlist.data.output.approved"
+        ? "[redacted]"
+        : value,
+  });
+  try {
+    const client = inspector.createClient(
+      options(async (_url, init) => {
+        const bytes = new Uint8Array(
+          await new Response(init?.body).arrayBuffer(),
+        );
+        const req = JSON.parse(
+          new Headers(init?.headers).get("content-encoding") === "gzip"
+            ? gunzipSync(bytes).toString()
+            : new Headers(init?.headers).get("content-encoding") === "zstd"
+              ? zstdDecompressSync(bytes).toString()
+              : new TextDecoder().decode(bytes),
+        );
+        sent.push(req);
+        return Response.json({
+          model: "fixture",
+          answers: {
+            [sent.length === 1 ? "ranking" : "selected"]: {
+              type: "choice",
+              choice: "beta",
+              confidence: 0.8,
+              probabilities:
+                sent.length === 1
+                  ? { alpha: 0.3, beta: 0.6, gamma: 0.1 }
+                  : { alpha: 0.3, beta: 0.7 },
+            },
+          },
+        });
+      }),
+      { source: "sample" },
+    );
+    const flow = defineJevFlow<{ apiKey: string; message: string }>(
+      "functions",
+      (f) => {
+        const rank = f.jev("rank", {
+          state: f.input,
+          questions: {
+            ranking: choice("Rank?", { alpha: null, beta: null, gamma: null }),
+          },
+        });
+        const shortlist = f.task("shortlist", {
+          input: {
+            probabilities: rank.answer("ranking").probabilities,
+            context: f.input,
+          },
+          run: ({ probabilities, context }, execution) => {
+            taskCalls++;
+            assert.equal(execution.stepId, "shortlist");
+            assert.ok(
+              execution.runId &&
+                execution.executionId &&
+                !execution.signal.aborted,
+            );
+            context.message = "mutated inside callback";
+            return {
+              names: Object.entries(probabilities)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 2)
+                .map(([name]) => name),
+              approved: true,
+              apiKey: context.apiKey,
+              text: "x".repeat(20_000),
+            };
+          },
+        });
+        const selected = f.jev("select", {
+          input: { names: shortlist.get("names"), text: shortlist.get("text") },
+          request: ({ names, text }) => {
+            factoryCalls++;
+            return {
+              state: { text },
+              questions: {
+                selected: choice(
+                  "Choose?",
+                  Object.fromEntries(names.map((name) => [name, null])),
+                ),
+              },
+            };
+          },
+        });
+        return f.branch("approved", {
+          when: shortlist.get("approved").eq(true),
+          then: (p) =>
+            p.output("ok", {
+              name: selected.answer("selected").choice,
+              text: shortlist.get("text"),
+            }),
+          else: (p) => p.output("no"),
+        });
+      },
+    );
+    assert.equal(taskCalls + factoryCalls + sent.length, 0);
+    const input = { apiKey: "private-token-value", message: "unchanged" };
+    const result = await flow.run(input, { client, devtools: inspector });
+    assert.equal(taskCalls, 1);
+    assert.equal(factoryCalls, 1);
+    assert.equal(sent.length, 2);
+    assert.equal(input.message, "unchanged");
+    assert.deepEqual(Object.keys(sent[1].questions.selected.criteria), [
+      "beta",
+      "alpha",
+    ]);
+    assert.equal(sent[1].state.text?.length, 20_000);
+    assert.deepEqual(result.value, { name: "beta", text: "x".repeat(20_000) });
+    const captured = (await history(inspector)) as FlowUpdate;
+    const run = captured.upserts[0];
+    assert.equal(run.steps.shortlist.status, "completed");
+    assert.ok(run.steps.rank.traceId && run.steps.select.traceId);
+    const data = run.steps.shortlist.data as {
+      input: { context: { message: string; apiKey: string } };
+      output: { approved: string; text: string; apiKey: string };
+    };
+    assert.equal(data.input.context.message, "unchanged");
+    assert.equal(data.input.context.apiKey, "[redacted]");
+    assert.equal(data.output.approved, "[redacted]");
+    assert.ok(data.output.text.length < 20_000);
+    assert.ok(run.steps.shortlist.captureWarnings?.length);
+    assert.ok(!JSON.stringify(captured).includes("private-token-value"));
+    assert.ok(!JSON.stringify(captured).includes("mutated inside callback"));
+    assert.equal(
+      conditionInputs(
+        captured.definitions[0].nodes.find((n) => n.id === "approved")!
+          .conditionRule!,
+        run,
+        new Map(),
+      )[0].value,
+      "[redacted]",
+    );
+  } finally {
+    inspector.dispose();
+  }
+});
+
+test("task cancellation and timeout finish promptly, block dependents and ignore late completion", async () => {
+  for (const mode of ["cancel", "timeout", "failure"] as const) {
+    const inspector = createJevDevtools({ origin, enabled: true });
+    try {
+      let release!: (value: string) => void;
+      let started!: () => void;
+      let contextSignal: AbortSignal | undefined;
+      let downstream = 0;
+      const ready = new Promise<void>((resolve) => {
+        started = resolve;
+      });
+      const pending = new Promise<string>((resolve) => {
+        release = resolve;
+      });
+      const abort = new AbortController();
+      const flow = defineJevFlow("task-lifecycle", (f) => {
+        const task = f.task("work", {
+          input: {},
+          timeoutMs: mode === "timeout" ? 10 : undefined,
+          run: (_input, { signal }) => {
+            contextSignal = signal;
+            started();
+            if (mode === "failure")
+              throw new TypeError("private failure detail");
+            return pending; // Deliberately ignores cancellation.
+          },
+        });
+        const after = f.task("after", {
+          input: task,
+          run: (value) => {
+            downstream++;
+            return value;
+          },
+        });
+        return f.output("done", after);
+      });
+      const promise = flow.run(
+        {},
+        {
+          client: inspector.createClient(options(transport)),
+          devtools: inspector,
+          signal: abort.signal,
+        },
+      );
+      const rejected = assert.rejects(promise, {
+        name:
+          mode === "cancel"
+            ? "AbortError"
+            : mode === "timeout"
+              ? "TimeoutError"
+              : "TypeError",
+      });
+      await ready;
+      if (mode === "cancel") abort.abort();
+      await rejected;
+      assert.equal(downstream, 0);
+      if (mode !== "failure") assert.equal(contextSignal?.aborted, true);
+      const before = (await history(inspector)).upserts[0];
+      assert.equal(before.status, mode === "cancel" ? "cancelled" : "error");
+      assert.equal(
+        before.steps.after.status,
+        mode === "cancel" ? "cancelled" : "blocked",
+      );
+      release("late value");
+      await delay(0);
+      assert.deepEqual((await history(inspector)).upserts[0], before);
+      assert.ok(!JSON.stringify(before).includes("private failure detail"));
+    } finally {
+      inspector.dispose();
+    }
+  }
+});
+
+test("task data and generated request validation fail before downstream SDK dispatch", async () => {
+  let dispatched = 0;
+  const client = new TypeSafeClient(
+    options(async () => {
+      dispatched++;
+      throw new Error("must not dispatch");
+    }),
+  );
+  for (const value of [
+    undefined,
+    Infinity,
+    new Date(),
+    () => 1,
+    { value: undefined },
+    { value: BigInt(1) },
+  ]) {
+    const flow = defineJevFlow("invalid-data", (f) => {
+      const task = f.task("bad", { input: {}, run: () => value });
+      f.jev("later", { state: task, questions });
+      return f.output("done");
+    });
+    await assert.rejects(flow.run({}, { client }), /JSON-compatible/);
+  }
+  const unknown = defineJevFlow("missing-generated-question", (f) => {
+    const result = f.jev("dynamic", {
+      input: {},
+      request: () => ({ state: "a", questions }),
+    });
+    return f.output("done", result.answer("missing" as "category").choice);
+  });
+  await assert.rejects(
+    unknown.run({}, { client }),
+    /Unknown generated question/,
+  );
+  const asyncFactory = defineJevFlow("async-factory", (f) => {
+    f.jev("dynamic", {
+      input: {},
+      // Emulate a JavaScript consumer bypassing the synchronous TypeScript contract.
+      request: (async () => {
+        throw new Error("private factory detail");
+      }) as unknown as () => { state: string; questions: typeof questions },
+    });
+    return f.output("done");
+  });
+  await assert.rejects(asyncFactory.run({}, { client }), /must be synchronous/);
+  assert.equal(dispatched, 0);
+  assert.throws(
+    () =>
+      defineJevFlow("invalid-timeout", (f) => {
+        const task = f.task("bad", {
+          input: {},
+          timeoutMs: -1,
+          run: () => true,
+        });
+        return f.output("done", task);
+      }),
+    /timeoutMs/,
+  );
+});
+
+test("failed task capture cannot leak its data or change execution", async () => {
+  const inspector = createJevDevtools({
+    origin,
+    enabled: true,
+    redact: (path, value) => {
+      if (path[0] === "steps") throw new Error("redactor unavailable");
+      return value;
+    },
+  });
+  try {
+    const flow = defineJevFlow("capture-failure", (f) => {
+      const result = f.task("work", {
+        input: { text: "private task input" },
+        run: () => ({ message: "private task output", accepted: true }),
+      });
+      return f.output("done", result.get("accepted"));
+    });
+    assert.equal(
+      (
+        await flow.run(
+          {},
+          {
+            client: inspector.createClient(options(transport)),
+            devtools: inspector,
+          },
+        )
+      ).value,
+      true,
+    );
+    const captured = await history(inspector);
+    assert.equal(captured.upserts[0].steps.work.data, "[capture unavailable]");
+    assert.ok(!JSON.stringify(captured).includes("private task"));
+    assert.ok(captured.upserts[0].steps.work.captureWarnings.length);
+  } finally {
+    inspector.dispose();
   }
 });

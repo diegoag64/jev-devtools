@@ -31,6 +31,15 @@ export function conditionInputs(
           : undefined;
       let value: unknown = trace?.result;
       let available = !!trace?.result;
+      if (node.source === "task" && typeof node.stepId === "string") {
+        const data = run.steps[node.stepId]?.data;
+        available =
+          !!data &&
+          typeof data === "object" &&
+          !Array.isArray(data) &&
+          Object.hasOwn(data, "output");
+        value = available ? (data as Record<string, Json>).output : undefined;
+      }
       if (
         !Array.isArray(node.path) ||
         !node.path.every((key) => typeof key === "string")
@@ -116,7 +125,7 @@ export function conditionRequirement(
         ...node,
         label:
           typeof node.label === "string"
-            ? (names.get(node.label) ?? "Input")
+            ? names.get(node.label) ?? "Input"
             : "Input",
       };
     if (Array.isArray(node.args))
