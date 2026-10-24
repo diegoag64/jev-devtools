@@ -1495,12 +1495,12 @@
   gap: 8px;
   min-width: 0;
 }
-.flow-task-preview code {
-  display: block;
-  white-space: pre-wrap;
-  font-size: 12px;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
+.jev-devtools .flow-task-preview .diagram-content {
+  max-height: 280px;
+  padding: 8px 10px;
+  border: 1px solid #35283b;
+  border-radius: 4px;
+  background: #100c13;
 }
 .flow-task-preview small {
   color: var(--muted);

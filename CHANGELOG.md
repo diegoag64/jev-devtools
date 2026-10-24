@@ -20,6 +20,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 Local experiment; not published or submitted as a PR.
 
+- Format function and merge-card outputs as typed, collapsible properties instead of cut-off JSON strings. Nested objects and arrays expand on demand; long values and additional properties remain accessible without growing the canvas indefinitely.
+
 - Add the Simple Memory cookbook using existing flow APIs: sequential customer ticket replay, explicit per-customer memory, original-ticket/readable-answer capture and the inclusive 50% save gate. Four no-key samples show before/after routing, all team probabilities, transient-only tickets and threshold boundaries. Responses are synthetic; each run starts empty and no persistence API is added.
 
 - Bound playground request waits (30 seconds for samples, five minutes for live flows), including stalled response bodies. Timeouts restore the controls and explain recovery; Cancel now aborts the browser wait immediately and requests server cancellation in the background.

@@ -160,6 +160,38 @@ const Card = memo(function Card({
     Math.max(0, (collection?.total ?? 0) - 1),
   );
   const expanded = collectionView?.open ?? false;
+  const valueCard = node.kind === "task" || node.kind === "merge";
+  const hasOutput =
+    data !== null &&
+    typeof data === "object" &&
+    !Array.isArray(data) &&
+    Object.hasOwn(data, "output");
+  const footer = (
+    <span className="flow-card-footer">
+      <code>{node.id}</code>
+      <small>
+        {join
+          ? status === "completed"
+            ? "All finished · continue"
+            : stateLabel
+          : node.kind === "output"
+            ? route?.endsWith(":then")
+              ? "Then route"
+              : route?.endsWith(":else")
+                ? "Else route"
+                : "Final outcome"
+            : node.kind === "merge" && decision !== undefined
+              ? `Selected ${decision ? "then" : "else"} value · continue`
+              : node.kind === "loop"
+                ? stateLabel
+                : decision !== undefined
+                  ? decision
+                    ? "Condition met · then"
+                    : "Condition not met · else"
+                  : stateLabel}
+      </small>
+    </span>
+  );
   return (
     <article
       ref={ref}
@@ -274,26 +306,6 @@ const Card = memo(function Card({
             </small>
           </span>
         )}
-        {(node.kind === "task" || node.kind === "merge") && (
-          <span className="flow-task-preview">
-            <span className="flow-condition-label">Returned value</span>
-            <code>
-              {data &&
-              typeof data === "object" &&
-              !Array.isArray(data) &&
-              Object.hasOwn(data, "output")
-                ? JSON.stringify(data.output, null, 2).slice(0, 280)
-                : status === "running"
-                  ? "Running application code…"
-                  : "No output captured"}
-            </code>
-            <small>
-              {durationMs === undefined
-                ? "Select to inspect inputs and output"
-                : `${Math.round(durationMs)} ms · select to inspect`}
-            </small>
-          </span>
-        )}
         {(node.kind === "branch" || node.kind === "if") &&
           (node.conditionRule !== undefined || node.condition) && (
             <span className="flow-condition-rule">
@@ -362,30 +374,7 @@ const Card = memo(function Card({
             </span>
           </>
         )}
-        <span className="flow-card-footer">
-          <code>{node.id}</code>
-          <small>
-            {join
-              ? status === "completed"
-                ? "All finished · continue"
-                : stateLabel
-              : node.kind === "output"
-                ? route?.endsWith(":then")
-                  ? "Then route"
-                  : route?.endsWith(":else")
-                    ? "Else route"
-                    : "Final outcome"
-                : node.kind === "merge" && decision !== undefined
-                  ? `Selected ${decision ? "then" : "else"} value · continue`
-                  : node.kind === "loop"
-                    ? stateLabel
-                    : decision !== undefined
-                      ? decision
-                        ? "Condition met · then"
-                        : "Condition not met · else"
-                      : stateLabel}
-          </small>
-        </span>
+        {!valueCard && footer}
         {node.kind === "jev" && (
           <small>
             {status === "untaken"
@@ -394,6 +383,31 @@ const Card = memo(function Card({
           </small>
         )}
       </button>
+      {valueCard && (
+        <>
+          <div className="flow-task-preview">
+            <span className="flow-condition-label">Returned value</span>
+            {hasOutput ? (
+              <DiagramContent
+                value={(data as { output: Json }).output}
+                label={`Returned value for ${node.title ?? node.id}`}
+              />
+            ) : (
+              <span className="diagram-value-empty">
+                {status === "running"
+                  ? "Running application code…"
+                  : "No output captured"}
+              </span>
+            )}
+            <small>
+              {durationMs === undefined
+                ? "Select the heading to inspect inputs and output"
+                : `${Math.round(durationMs)} ms · select heading to inspect`}
+            </small>
+          </div>
+          {footer}
+        </>
+      )}
       {repeated && (
         <div className="flow-collection-controls" data-diagram-scroll>
           <label>
