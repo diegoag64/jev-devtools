@@ -36,6 +36,55 @@ export function jsonSnapshot(
   }
 }
 
+/** Observer-only copy: preserve aliases inside the snapshot, never to execution data. */
+export function observerSnapshot(value: unknown): Json {
+  type Copy = { value: Json; height: number };
+  const copies = new WeakMap<object, Copy>();
+  const ancestors = new Set<object>();
+  const visit = (input: unknown, depth: number): Json => {
+    if (depth > 40) throw new TypeError("Observer data nesting exceeds 40");
+    if (input === null || typeof input !== "object") return jsonSnapshot(input);
+    const previous = copies.get(input);
+    if (previous) {
+      // A shared subtree reached through a deeper path still obeys the depth limit.
+      if (depth + previous.height > 40)
+        throw new TypeError("Observer data nesting exceeds 40");
+      return previous.value;
+    }
+    if (
+      (!Array.isArray(input) &&
+        Object.getPrototypeOf(input) !== Object.prototype &&
+        Object.getPrototypeOf(input) !== null) ||
+      Object.getOwnPropertySymbols(input).length
+    )
+      throw new TypeError("Observer data must be JSON-compatible");
+    if (ancestors.has(input))
+      throw new TypeError("Observer data cannot contain cycles");
+    ancestors.add(input);
+    try {
+      let height = 0;
+      const child = (value: unknown): Json => {
+        const copy = visit(value, depth + 1);
+        const childHeight =
+          value && typeof value === "object" ? copies.get(value)!.height : 0;
+        height = Math.max(height, childHeight + 1);
+        return copy;
+      };
+      const value = Array.isArray(input)
+        ? Array.from(input, child)
+        : Object.fromEntries(
+            Object.entries(input).map(([key, value]) => [key, child(value)]),
+          );
+      const copy = { value, height };
+      copies.set(input, copy);
+      return value;
+    } finally {
+      ancestors.delete(input);
+    }
+  };
+  return visit(value, 0);
+}
+
 /** Cancellation ends awaiting, even when user code ignores the cooperative signal. */
 export function runCallback(
   callback: (signal: AbortSignal) => unknown,

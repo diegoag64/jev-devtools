@@ -46,6 +46,21 @@ BENCH_SUITE=rerenders BENCH_OUTPUT=benchmarks/results/rerenders-comparison \
 
 This sends 20 deterministic sample calls at a target 10 calls/sec per case through the real adapter. It compares an older pinned request in Flow/Raw with following the latest request, using 1/200 retained requests and the combined large-state/Choice workload. It checks that the selected request stays pinned and the latest completed response remains accessible. Production timing and React/CPU profiling run separately; outputs remain local.
 
+## Flow snapshot comparison
+
+To compare observer snapshot cost against a Git revision:
+
+```sh
+BENCH_OUTPUT=benchmarks/results/flow-snapshots-comparison \
+  node benchmarks/flow-snapshots.mjs BASE_COMMIT
+```
+
+The command builds the archived baseline and current package with the installed dependencies, then runs them sequentially in fresh Node processes with alternating variant order. The default five rounds each have one warmup and three measured runs per case; `BENCH_ROUNDS` accepts 1–20. Keep competing builds and benchmarks stopped.
+
+Cases include shared-reference graphs with 13, 17, and 20 distinct objects, an array of 2,048 distinct records, and 32 map tasks followed by eight unrelated task updates. The real recorder runs in every case. Assertions check returned values and unchanged task-data capture counts. No network calls or inference occur.
+
+The report records revisions, the candidate source patch, environment, raw samples, elapsed time, completion heap delta, and capture counts. The heap delta measures allocation pressure at completion after a pre-run GC; it is neither peak nor retained memory. Results stay under ignored `benchmarks/results/`. This suite has no timing thresholds and does not run in CI.
+
 ## Report in the PR
 
 Include:

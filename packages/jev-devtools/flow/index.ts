@@ -13,7 +13,7 @@ import type {
   FlowRun,
   FlowStep,
 } from "../src/flow-protocol.js";
-import { jsonSnapshot, runCallback } from "./runtime.js";
+import { jsonSnapshot, observerSnapshot, runCallback } from "./runtime.js";
 import type { Json } from "../src/protocol.js";
 export type {
   FlowDisplay,
@@ -1042,7 +1042,7 @@ export function defineJevFlow<T>(
           return observerData.get(value)!;
         let snapshot: Json;
         try {
-          snapshot = jsonSnapshot(value);
+          snapshot = observerSnapshot(value);
         } catch {
           // Direct flow outputs may be non-JSON; only their capture is unavailable.
           snapshot = "[capture unavailable]";

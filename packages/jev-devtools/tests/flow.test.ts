@@ -1329,3 +1329,38 @@ test("custom observers cannot mutate nested map results or returned application 
   assert.deepEqual(result.value, [{ count: 1 }, { count: 2 }]);
   assert.deepEqual(input, [{ count: 1 }, { count: 2 }]);
 });
+
+test("observer output copies preserve shared references without sharing application objects", async () => {
+  type Shared = { left?: Shared; right?: Shared; value?: number };
+  const leaf: Shared = { value: 1 };
+  let input = leaf;
+  for (let i = 0; i < 12; i++) input = { left: input, right: input };
+  let snapshot: Shared | undefined;
+  const flow = defineJevFlow<Shared>("shared-output", (f) =>
+    f.output("done", f.input),
+  );
+  const result = await flow.run(input, {
+    client: new TypeSafeClient(options(transport)),
+    devtools: {
+      startFlow: () => ({
+        update(run) {
+          if (run.status === "success") snapshot = run.value as Shared;
+        },
+        request: (_link, _trace, callback) => callback(),
+      }),
+    },
+  });
+  assert.equal(result.value, input);
+  assert.ok(snapshot);
+  let original = input;
+  for (let i = 0; i < 12; i++) {
+    assert.notEqual(snapshot, original);
+    assert.equal(snapshot.left, snapshot.right);
+    assert.ok(snapshot.left);
+    snapshot = snapshot.left;
+    original = original.left!;
+  }
+  assert.notEqual(snapshot, leaf);
+  snapshot.value = 77;
+  assert.equal(leaf.value, 1);
+});

@@ -256,8 +256,8 @@ test("merge captures honor recorder redaction without changing downstream values
   );
 });
 
-test("non-JSON direct-return values are preserved even when their snapshots are unavailable", async () => {
-  const flow = defineJevFlow<{ choose: boolean; value: Date | (() => number) }>(
+test("direct-return values are preserved when their observer snapshots are unavailable", async () => {
+  const flow = defineJevFlow<{ choose: boolean; value: unknown }>(
     "optional",
     (f) => {
       const result = f.if("gate", {
@@ -268,7 +268,19 @@ test("non-JSON direct-return values are preserved even when their snapshots are 
       return f.output("done", result);
     },
   );
-  for (const value of [new Date("2026-10-24T00:00:00Z"), () => 42]) {
+  const cycle: { self?: unknown } = {};
+  cycle.self = cycle;
+  const shared = { nested: { count: 1 } };
+  let deep: unknown = shared;
+  for (let i = 0; i < 39; i++) deep = { child: deep };
+  // Visit shared first, then reach the cached subtree beyond the depth limit.
+  const sharedTooDeep = { shared, deep };
+  for (const value of [
+    new Date("2026-10-24T00:00:00Z"),
+    () => 42,
+    cycle,
+    sharedTooDeep,
+  ]) {
     const observer = observe();
     const result = await flow.run(
       { choose: true, value },
