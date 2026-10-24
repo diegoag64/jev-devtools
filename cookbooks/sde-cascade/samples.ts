@@ -1,5 +1,6 @@
 import { setTimeout as delay } from "node:timers/promises";
-import { gunzipSync, zstdDecompressSync } from "node:zlib";
+// Node 22.12 lacks zstd; the SDK sends uncompressed bodies on that runtime.
+import * as zlib from "node:zlib";
 import { isDeepStrictEqual } from "node:util";
 import type { Fetch } from "@typesafe-ai/sdk";
 import { sdeCases, type SdeCase } from "./cases.js";
@@ -11,9 +12,9 @@ export function sdeSampleTransport(caseId: SdeCase, delayMs = 600): Fetch {
     const encoding = new Headers(init?.headers).get("content-encoding");
     const body = JSON.parse(
       encoding === "zstd"
-        ? zstdDecompressSync(bytes).toString()
+        ? zlib.zstdDecompressSync(bytes).toString()
         : encoding === "gzip"
-          ? gunzipSync(bytes).toString()
+          ? zlib.gunzipSync(bytes).toString()
           : new TextDecoder().decode(bytes),
     );
     const sample = sdeCases[caseId];

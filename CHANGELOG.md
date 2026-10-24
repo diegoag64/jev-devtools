@@ -20,6 +20,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 Flow API extensions and cookbook demos proposed in [#30](https://github.com/diegoag64/jev-devtools/pull/30); not published to npm.
 
+- Keep all six cookbook sample transports compatible with Node 22.12, including the SDK’s uncompressed request fallback when Zstandard is unavailable.
+
 - Require conventional PR titles (`feat: …`, `fix: …`, etc.), with contributor/agent instructions and a lightweight metadata check that reruns on title edits.
 
 - Format function and merge-card outputs as typed, collapsible properties instead of cut-off JSON strings. Nested objects and arrays expand on demand; long values and additional properties remain accessible without growing the canvas indefinitely.

@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { setTimeout as delay } from "node:timers/promises";
-import { gunzipSync, zstdDecompressSync } from "node:zlib";
+// Node 22.12 lacks zstd; the SDK sends uncompressed bodies on that runtime.
+import * as zlib from "node:zlib";
 import {
   TypeSafeClient,
   choice,
@@ -863,9 +864,9 @@ test("tasks resolve typed inputs and construct linked SDK requests without expos
         );
         const req = JSON.parse(
           new Headers(init?.headers).get("content-encoding") === "gzip"
-            ? gunzipSync(bytes).toString()
+            ? zlib.gunzipSync(bytes).toString()
             : new Headers(init?.headers).get("content-encoding") === "zstd"
-              ? zstdDecompressSync(bytes).toString()
+              ? zlib.zstdDecompressSync(bytes).toString()
               : new TextDecoder().decode(bytes),
         );
         sent.push(req);
