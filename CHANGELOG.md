@@ -20,7 +20,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-- Run the React 18/19 drawer CI checks in a pinned Playwright container with browsers and Linux dependencies preinstalled, avoiding per-run system package installation. Package APIs, verification coverage, and the release workflow are unchanged.
+- Run the React 18/19 drawer CI checks in a pinned Playwright container with browsers and Linux dependencies preinstalled, avoiding per-run system package installation. Package APIs, verification coverage, and the release workflow are unchanged. ([#62](https://github.com/diegoag64/jev-devtools/pull/62))
 
 ## 0.4.1 — pending publication (experimental)
 
