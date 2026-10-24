@@ -13,14 +13,27 @@ export type FlowCondition =
       source?: "task";
     }
   | { op: "literal"; value: string | number | boolean | null }
-  | { op: "eq" | "lt" | "gte" | "all" | "any" | "not"; args: FlowCondition[] };
+  | {
+      op: "eq" | "lt" | "gt" | "gte" | "all" | "any" | "not";
+      args: FlowCondition[];
+    };
 /** Structural metadata and authored rules; runtime inputs/answers stay in request captures. */
 export type FlowNode = FlowDisplay & {
   id: string;
-  kind: "jev" | "task" | "map" | "branch" | "parallel" | "output";
+  kind:
+    | "jev"
+    | "task"
+    | "map"
+    | "if"
+    | "merge"
+    | "branch"
+    | "parallel"
+    | "output";
   dependencies: string[];
   path: string[];
   condition?: string;
+  /** Conditional merge edges; only the selected arm supplies a value. */
+  merge?: { condition: string; then: string; else: string };
   /** Optional for older captures; Json allows redacted/truncated subtrees. */
   conditionRule?: Json | FlowCondition;
   /** Named concurrent lanes; optional for older captures. */
@@ -50,7 +63,7 @@ export type FlowStep = {
   decision?: boolean;
   traceId?: string;
   error?: string;
-  /** Optional bounded, redacted task input/output; never executable code. */
+  /** Optional bounded, redacted task input/output or selected merge value; never executable code. */
   data?: Json;
   captureWarnings?: string[];
   collection?: {

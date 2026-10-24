@@ -268,3 +268,38 @@ The collection card shows progress and an item selector. **View Flow** expands t
 Item input/output and result snapshots follow the same capture limits and redaction as other steps. Custom redaction paths are prefixed with `steps`, map ID, `items`, index before child paths. Template conditions are prefixed with `conditions`, map ID, `items`. Inputs never become structural labels. Runtime values stay untruncated; capture failures do not change execution. Clear/eviction still cannot resurrect a run.
 
 Try the [RAG passage cookbook](../cookbooks/rag-passages/README.md) for a twelve-item sample with four concurrent requests and every passage inspectable.
+
+## Returning conditionals: flow.if() (unreleased experiment)
+
+Use `flow.if(id, { when, then, else }, display?)` when one path should produce a value and **both paths continue into shared work**. `flow.branch()` still ends its block with a named outcome. This addition is local to the experimental checkout and is not in npm 0.3.0.
+
+```ts
+const selected = flow.if("choose-extractor", {
+  when: assessment.get("maxFieldProbability").gt(0.7),
+  then: path => path.task("strong", {
+    input: { document: path.input.get("document") },
+    run: ({ document }, { signal }) => extractWithStrongModel(document, signal),
+  }, { title: "Run the stronger extractor" }),
+  else: () => cheapRecord, // An existing in-scope expression is valid too.
+}, {
+  title: "Escalate a flagged field",
+  description: "Use a stronger extractor only when a field flag is above 70%.",
+});
+const formatted = flow.task("format-record", {
+  input: selected,
+  run: record => formatRecord(record),
+});
+return flow.output("final-record", formatted);
+```
+
+This snippet belongs inside a definition with `assessment` and `cheapRecord` references from earlier steps and application-owned `extractWithStrongModel`/`formatRecord` functions. Functions run in your Node process; they may call remote providers with server credentials and the provided signal. The flow API does not transmit executable code to Jev or add a remote job runner.
+
+- Both callbacks define their paths once, synchronously. Only the selected path's **runtime tasks and requests** execute. Put side effects in task callbacks, never in the definition callbacks.
+- Both arms must return a `FlowExpression`. Return a task result, an answer value, an earlier reference, or another `if()` result. Direct `output()` or terminal `branch()` arms are rejected; put the named output after the conditional, or use `branch()` for terminal routing.
+- The result type is the union of the arm values (`FlowExpression<A | B>`). Narrow discriminated unions inside task callbacks as usual. Arm-local references cannot escape into siblings or shared code; use the returned `selected` reference.
+- The diagram shows a condition, both possible paths, and an automatically generated **Selected result** merge card. Only the chosen incoming edge is highlighted. The merge captures JSON-compatible returned values under the ordinary redaction/size limits. If a direct reference cannot be captured as JSON, the viewer reports that limitation without changing the runtime value or stopping execution. A direct-return arm still connects the condition to the merge.
+- The merge is a real counted node with a generated collision-safe ID; do not depend on that ID. Existing 256-definition-node, depth-16 and 1,024-expanded-node limits still apply. Returning conditionals compose with nested conditionals, parallel lanes, and collection item programs.
+- Failure or cancellation prevents the merge and shared continuation. The untaken path stays untaken; no fallback, automatic retry, or error recovery is implied.
+- Numeric expressions now support `.gt(numberOrReference)` for strict greater-than, alongside `.lt()` and `.gte()`. The condition card preserves the actual operator. In the SDE recipe, exactly 0.70 does **not** escalate.
+
+New `if` and `merge` kinds extend the version-1 flow records; use the matching updated server and drawer. Older captured flows remain readable. For four complete no-key samples, see the [SDE cascade cookbook](../cookbooks/sde-cascade/README.md).

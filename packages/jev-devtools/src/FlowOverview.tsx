@@ -180,7 +180,7 @@ const Card = memo(function Card({
               stroke="currentColor"
               strokeWidth="1.5"
             >
-              {join ? (
+              {join || node.kind === "merge" ? (
                 <path d="M4 5h4l5 7h7M4 19h4l5-7m4-3 3 3-3 3" />
               ) : node.kind === "map" ? (
                 <>
@@ -204,7 +204,7 @@ const Card = memo(function Card({
           <span className="eyebrow">
             {join
               ? "Parallel checks"
-              : node.kind === "branch"
+              : node.kind === "branch" || node.kind === "if"
                 ? "Condition"
                 : node.kind === "task"
                   ? "Function"
@@ -246,7 +246,7 @@ const Card = memo(function Card({
             <small>Explore an item's connected flow below</small>
           </span>
         )}
-        {node.kind === "task" && (
+        {(node.kind === "task" || node.kind === "merge") && (
           <span className="flow-task-preview">
             <span className="flow-condition-label">Returned value</span>
             <code>
@@ -266,7 +266,7 @@ const Card = memo(function Card({
             </small>
           </span>
         )}
-        {node.kind === "branch" &&
+        {(node.kind === "branch" || node.kind === "if") &&
           (node.conditionRule !== undefined || node.condition) && (
             <span className="flow-condition-rule">
               {inputs && inputs.length > 0 && (
@@ -347,11 +347,13 @@ const Card = memo(function Card({
                   : route?.endsWith(":else")
                     ? "Else route"
                     : "Final outcome"
-                : decision !== undefined
-                  ? decision
-                    ? "Condition met · then"
-                    : "Condition not met · else"
-                  : stateLabel}
+                : node.kind === "merge" && decision !== undefined
+                  ? `Selected ${decision ? "then" : "else"} value · continue`
+                  : decision !== undefined
+                    ? decision
+                      ? "Condition met · then"
+                      : "Condition not met · else"
+                    : stateLabel}
           </small>
         </span>
         {node.kind === "jev" && (
@@ -464,6 +466,7 @@ export const FlowOverview = memo(function FlowOverview({
         node.id,
         node.dependencies.filter(
           (id) =>
+            node.kind === "merge" ||
             !node.dependencies.some(
               (other) => other !== id && parents.get(other)?.has(id),
             ),
@@ -556,10 +559,10 @@ export const FlowOverview = memo(function FlowOverview({
                   (node.description ? 64 : 0) +
                   Math.min(4, (node.lanes ?? node.dependencies).length) * 32
                 : (node.description ? 244 : 172) +
-                  (node.kind === "branch"
+                  (node.kind === "branch" || node.kind === "if"
                     ? 110 +
                       Math.min(3, inputsByStep.get(node.id)?.length ?? 0) * 24
-                    : node.kind === "task"
+                    : node.kind === "task" || node.kind === "merge"
                       ? 130
                       : 0));
         const parents = (links.get(node.id) ?? [])
@@ -793,9 +796,19 @@ export const FlowOverview = memo(function FlowOverview({
                     const a = layout.points.get(id),
                       b = layout.points.get(n.id);
                     if (!a || !b) return null;
-                    const active = ["running", "completed"].includes(
-                      run.steps[n.id]?.status,
-                    );
+                    const decision = n.merge
+                      ? run.steps[n.merge.condition]?.decision
+                      : undefined;
+                    const active =
+                      ["running", "completed"].includes(
+                        run.steps[n.id]?.status,
+                      ) &&
+                      ["running", "completed"].includes(
+                        run.steps[id]?.status,
+                      ) &&
+                      (!n.merge ||
+                        (decision !== undefined &&
+                          id === n.merge[decision ? "then" : "else"]));
                     return (
                       <path
                         key={`${id}-${n.id}`}
@@ -911,11 +924,13 @@ export const FlowOverview = memo(function FlowOverview({
                       : ""}
                   </span>
                   {node.description && <p>{node.description}</p>}
-                  {node.kind === "task" && (
+                  {(node.kind === "task" || node.kind === "merge") && (
                     <div className="flow-task-details">
                       <p className="muted">
-                        Application function · runs on your server. Captured
-                        values may be redacted or truncated.
+                        {node.kind === "merge"
+                          ? "Value returned by the selected path. This merge does not make another request."
+                          : "Application function · runs on your server."}{" "}
+                        Captured values may be redacted or truncated.
                       </p>
                       {step.data &&
                       typeof step.data === "object" &&
@@ -929,11 +944,17 @@ export const FlowOverview = memo(function FlowOverview({
                               <summary>
                                 {key === "input"
                                   ? "Function inputs"
-                                  : "Function output"}
+                                  : node.kind === "merge"
+                                    ? "Selected value"
+                                    : "Function output"}
                               </summary>
                               <DiagramContent
                                 value={(step.data as Record<string, Json>)[key]}
-                                label={`Function ${key}`}
+                                label={
+                                  node.kind === "merge"
+                                    ? "Selected value"
+                                    : `Function ${key}`
+                                }
                               />
                             </details>
                           ))
@@ -941,7 +962,9 @@ export const FlowOverview = memo(function FlowOverview({
                         <p>
                           {typeof step.data === "string"
                             ? step.data
-                            : "No function data captured yet."}
+                            : node.kind === "merge"
+                              ? "No selected value captured yet."
+                              : "No function data captured yet."}
                         </p>
                       )}
                       {step.captureWarnings?.map((warning) => (

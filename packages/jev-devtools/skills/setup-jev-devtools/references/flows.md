@@ -166,3 +166,26 @@ Only use this section when the installed declarations actually include `task` an
 `flow.map(id, { items, input, concurrency?: 4, maxItems }, buildItem, display?)` is available only in the experimental checkout, not npm 0.3.0. Its builder receives `item.input` shaped as `{ item, index, context }`; `context` resolves the explicit `input` option. Return a typed expression from the item builder. Use tasks for deterministic value-producing routing; terminal output/branch calls and nested maps are unsupported. Results preserve array order. An empty array makes no calls. Concurrency is 1–16 per map, maxItems is required (1–64), definitions including templates are capped at 256 nodes and execution at 1,024 expanded nodes. Exceeding bounds fails without truncation. Failures abort siblings and block queued work; no automatic task retries or partial results. Remote cancellation remains cooperative.
 
 Choose an item in the collection card, then **View Flow** to expand its full request/function diagram directly underneath on the same canvas. Changing the selector replaces the inline item flow; **Hide Flow** collapses it. Item values use bounded/redacted capture; don't put runtime data in structural titles. For an executable sample, see `cookbooks/rag-passages/README.md` in the repository checkout. Do not promise embedding search or LLM generation in that sample: it uses fixed retrieved passages, synthetic Jev scores and a deterministic excerpt preview.
+
+## Local experiment: returning conditionals and SDE cascade
+
+Check the installed declarations first: `flow.if()` and `.gt()` are unreleased additions in the experimental checkout, **not npm 0.3.0**. Use `flow.if(id, { when, then, else }, display?)` for a conditional whose value feeds shared downstream steps. Each arm returns a `FlowExpression`; only the selected arm executes. The result type is the union of both values. An arm may return an earlier expression without adding a task. `output()` and terminal `branch()` arms are rejected. Scope-local refs must not leak; consume the returned conditional reference. Conditionals may nest and run inside parallel lanes or map items.
+
+```ts
+const record = flow.if("escalate", {
+  when: flags.get("maxFieldProbability").gt(0.7),
+  then: path => path.task("strong-extractor", {
+    input: document,
+    run: (text, { signal }) => strongExtractor(text, signal),
+  }),
+  else: () => cheapRecord,
+}, { title: "Escalate a flagged field" });
+// `record` is available to shared tasks/requests here; output ends the flow.
+return flow.output("record", record);
+```
+
+This is a fragment inside a definition with prior `flags`, `document`, `cheapRecord` expressions and an application-owned `strongExtractor`. Do not execute application side effects while defining either arm. Runtime callbacks stay on Node; this API is not remote code execution or a durable runner. Pass provider credentials server-side and propagate the signal. Failure/cancellation blocks the merge and continuation, without executing the other arm as a fallback.
+
+The drawer generates a Selected result merge, highlights only its selected incoming path, and captures its value with normal redaction. Generated merge IDs are not an application contract; merge nodes count toward existing limits. Use a matching server/drawer build for the new `if`/`merge` node kinds. Check both paths, a boundary and cancellation with samples before live calls.
+
+The repository's `cookbooks/sde-cascade` provides a complete local example at `/?cookbook=sde-cascade`: cheap extraction → runtime field verification → **any per-field probability > 0.70** → stronger extractor or keep cheap → shared comparison. The overall judge is displayed but excluded from the gate. Empty fields receive only `absence_wrong`. All four cases use synthetic probabilities and local extractor fixtures; no real provider performance or original evaluation is reproduced. Do not turn on live extraction just by adding an API key.

@@ -112,9 +112,9 @@ export function conditionRequirement(
       !Array.isArray(right) &&
       left.op === "reference" &&
       right.op === "literal" &&
-      ["gte", "lt", "eq"].includes(String(rule.op))
+      ["gte", "lt", "gt", "eq"].includes(String(rule.op))
     ) {
-      return `${rule.op === "gte" ? "At least" : rule.op === "lt" ? "Less than" : "Equal to"} ${formatConditionLiteral(right.value, left.probability === true)}`;
+      return `${rule.op === "gte" ? "At least" : rule.op === "lt" ? "Less than" : rule.op === "gt" ? "Greater than" : "Equal to"} ${formatConditionLiteral(right.value, left.probability === true)}`;
     }
   }
   const rename = (node: Json, depth = 0): Json => {

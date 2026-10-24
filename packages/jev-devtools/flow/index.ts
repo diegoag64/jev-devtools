@@ -26,7 +26,7 @@ type Ast =
   | { op: "ref"; id: string }
   | { op: "get"; from: Ast; key: string }
   | { op: "literal"; value: unknown }
-  | { op: "eq" | "lt" | "gte" | "all" | "any" | "not"; args: Ast[] };
+  | { op: "eq" | "lt" | "gt" | "gte" | "all" | "any" | "not"; args: Ast[] };
 const owners = new WeakMap<object, object>();
 const builderIds = new WeakMap<object, Set<string>>();
 function freezeAst(ast: Ast, depth = 0): void {
@@ -63,6 +63,12 @@ export class FlowExpression<T> {
   ): FlowExpression<boolean> {
     return operation("lt", [this, value]);
   }
+  gt(
+    this: FlowExpression<number>,
+    value: number | FlowExpression<number>,
+  ): FlowExpression<boolean> {
+    return operation("gt", [this, value]);
+  }
   gte(
     this: FlowExpression<number>,
     value: number | FlowExpression<number>,
@@ -81,7 +87,7 @@ function expression<T>(ast: Ast, values: unknown[]): FlowExpression<T> {
   return new FlowExpression<T>(ast, tokens.values().next().value);
 }
 function operation(
-  op: "eq" | "lt" | "gte" | "all" | "any" | "not",
+  op: "eq" | "lt" | "gt" | "gte" | "all" | "any" | "not",
   args: unknown[],
 ): FlowExpression<boolean> {
   return expression(
@@ -152,6 +158,7 @@ type Step = {
   factory?: (input: never) => SystemOneRequest<Questions>;
   timeoutMs?: number;
   answerNames?: Set<string>;
+  mergeOf?: string;
   collection?: {
     items: unknown;
     context: unknown;
@@ -349,7 +356,7 @@ function evaluate(
     !Number.isFinite(b)
   )
     throw new Error("Numeric comparison requires finite numbers");
-  return ast.op === "lt" ? a < b : a >= b;
+  return ast.op === "lt" ? a < b : ast.op === "gt" ? a > b : a >= b;
 }
 
 export interface FlowBuilder<T> {
@@ -383,6 +390,16 @@ export interface FlowBuilder<T> {
     ) => FlowExpression<O>,
     display?: FlowDisplay,
   ): FlowExpression<O[]>;
+  /** Execute one value-returning path, then continue with its typed result. */
+  if<A, B>(
+    id: string,
+    paths: {
+      when: FlowExpression<boolean>;
+      then: (path: FlowBuilder<T>) => FlowExpression<A>;
+      else: (path: FlowBuilder<T>) => FlowExpression<B>;
+    },
+    display?: FlowDisplay,
+  ): FlowExpression<A | B>;
   /** Terminal decision: each callback must return output() or another branch(). */
   branch(
     id: string,
@@ -427,6 +444,7 @@ export function defineJevFlow<T>(
     previous: string[] = [],
     depth = 0,
     requireOutcome = false,
+    requireValue = false,
   ): Block {
     if (depth > 16) throw new Error("Flow nesting exceeds 16");
     const token = {};
@@ -647,6 +665,60 @@ export function defineJevFlow<T>(
           program.definition;
         return new FlowExpression({ op: "ref", id }, owner) as never;
       },
+      if(id, paths, display) {
+        if (!(paths.when instanceof FlowExpression))
+          throw new Error("if requires a condition expression");
+        const step = add(id, "if", paths.when, display);
+        step.when = paths.when;
+        const node = nodes.find((n) => n.id === id)!;
+        node.condition = describe(paths.when.ast);
+        node.conditionRule = conditionRule(
+          paths.when.ast,
+          new Set(nodes.filter((n) => n.kind === "jev").map((n) => n.id)),
+          new Set(
+            nodes
+              .filter((n) => n.kind === "task" || n.kind === "merge")
+              .map((n) => n.id),
+          ),
+        );
+        step.then = block(
+          paths.then,
+          new Set(available),
+          [...path, `${id}:then`],
+          [id],
+          depth + 1,
+          false,
+          true,
+        );
+        step.else = block(
+          paths.else,
+          new Set(available),
+          [...path, `${id}:else`],
+          [id],
+          depth + 1,
+          false,
+          true,
+        );
+        // A separate merge keeps the diagram acyclic and gives downstream refs a
+        // scope-safe identity, including when an arm returns an existing value.
+        const base = `${id.slice(0, 65)}-result`;
+        let mergeId = base;
+        for (let suffix = 2; ids.has(mergeId); suffix++)
+          mergeId = `${base}-${suffix}`;
+        const merge = add(mergeId, "merge", undefined, {
+          title: "Selected result",
+          description: "Continue with the value returned by the selected path.",
+        });
+        merge.mergeOf = id;
+        const mergeNode = nodes.find((n) => n.id === mergeId)!;
+        const ends = {
+          then: step.then.nodes.at(-1)?.id ?? id,
+          else: step.else.nodes.at(-1)?.id ?? id,
+        };
+        mergeNode.dependencies = [...new Set(Object.values(ends))];
+        mergeNode.merge = { condition: id, ...ends };
+        return new FlowExpression({ op: "ref", id: mergeId }, owner) as never;
+      },
       branch(id, paths, display) {
         const step = add(id, "branch", paths.when, display);
         step.when = paths.when;
@@ -657,7 +729,11 @@ export function defineJevFlow<T>(
         node.conditionRule = conditionRule(
           paths.when.ast,
           new Set(nodes.filter((n) => n.kind === "jev").map((n) => n.id)),
-          new Set(nodes.filter((n) => n.kind === "task").map((n) => n.id)),
+          new Set(
+            nodes
+              .filter((n) => n.kind === "task" || n.kind === "merge")
+              .map((n) => n.id),
+          ),
         );
         step.then = block(
           paths.then,
@@ -731,6 +807,10 @@ export function defineJevFlow<T>(
     if (!(returned instanceof FlowExpression))
       throw new Error(
         "Flow callbacks must return an expression, output, or branch",
+      );
+    if (requireValue && terminal)
+      throw new Error(
+        "if paths must return a value, not a terminal output or branch",
       );
     if (requireOutcome && !terminal)
       throw new Error("Branch paths must end with output or branch");
@@ -1056,7 +1136,17 @@ export function defineJevFlow<T>(
                 abortCheck();
               }
               value = results;
-            } else if (step.kind === "branch") {
+            } else if (step.kind === "merge") {
+              value = values.get(step.mergeOf!);
+              state.decision = run.steps[step.mergeOf!].decision;
+              // Capture is observational; a direct input/reference can contain
+              // a non-JSON value even though task boundaries require JSON.
+              try {
+                state.data = { output: jsonSnapshot(value) };
+              } catch {
+                state.data = "Selected value could not be captured as JSON.";
+              }
+            } else if (step.kind === "branch" || step.kind === "if") {
               const decision = evaluate(step.when!.ast, data, values);
               if (typeof decision !== "boolean")
                 throw new Error("Branch condition did not return a boolean");

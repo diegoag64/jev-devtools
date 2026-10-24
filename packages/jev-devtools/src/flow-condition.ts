@@ -32,7 +32,10 @@ export function formatFlowCondition(value: Json, depth = 0): string {
         : "FALSE (no conditions)";
     return `(${args.map(format).join(value.op === "all" ? " AND " : " OR ")})`;
   }
-  if (!["eq", "lt", "gte"].includes(String(value.op)) || args.length !== 2)
+  if (
+    !["eq", "lt", "gt", "gte"].includes(String(value.op)) ||
+    args.length !== 2
+  )
     return "[rule unavailable]";
   const probability = args.some(
     (arg) =>
@@ -49,5 +52,5 @@ export function formatFlowCondition(value: Json, depth = 0): string {
     arg.op === "literal"
       ? formatConditionLiteral(arg.value, probability)
       : format(arg);
-  return `${operand(args[0])} ${value.op === "eq" ? "=" : value.op === "lt" ? "<" : "≥"} ${operand(args[1])}`;
+  return `${operand(args[0])} ${value.op === "eq" ? "=" : value.op === "lt" ? "<" : value.op === "gt" ? ">" : "≥"} ${operand(args[1])}`;
 }
