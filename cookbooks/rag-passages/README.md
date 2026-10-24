@@ -1,6 +1,6 @@
 # RAG passage classification
 
-Local adaptation of [TypeSafe's cookbook](https://docs.typesafe.ai/cookbooks/classifying_rag_passages). Requires this experimental checkout; `flow.map()` is not in published npm 0.3.0.
+Local adaptation of [TypeSafe's cookbook](https://docs.typesafe.ai/cookbooks/classifying_rag_passages). Uses `flow.map()` from Jev DevTools 0.4.0. Run the cookbook from this repository; its application code and fixtures are not bundled in npm.
 
 ## Try the full sample flow
 

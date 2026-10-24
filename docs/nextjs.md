@@ -6,16 +6,16 @@ The package has no Next.js dependency. `handle(request)` also works with other N
 
 ## Install
 
-The first release is experimental and [available on npm](https://www.npmjs.com/package/jev-devtools). Install in your Next.js app:
+This guide covers **0.4.0**. Check the [release status](../CHANGELOG.md#040--pending-publication); use a packed checkout while publication is pending. For a published version, install in your Next.js app:
 
 ```sh
 npm install jev-devtools @typesafe-ai/sdk server-only
 ```
 
-To try unpublished local changes instead, run `npm ci && npm run pack:devtools` from this repository, then in your Next.js app:
+To install this checkout before publication or try later local changes, run `npm ci && npm run pack:devtools` from this repository, then in your Next.js app:
 
 ```sh
-npm install /absolute/path/to/jev-devtools-0.3.0.tgz server-only
+npm install /absolute/path/to/jev-devtools-0.4.0.tgz server-only
 ```
 
 Use Node 22.12+ and React 18/19. The App Router example pins Next.js 16.4.2 and React 19.3.1. The broader package's React 18 checks use the Vite consumer; they are not a claim that every Next.js version supports that combination.

@@ -1,10 +1,10 @@
 # Jev DevTools
 
-[![npm version 0.3.0](https://img.shields.io/badge/npm-v0.3.0-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.3.0)
+[![npm version 0.4.0](https://img.shields.io/badge/npm-v0.4.0-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.4.0)
 
 A React drawer and Node adapter for inspecting TypeSafe Jev requests with animated diagrams. Includes request history, context, questions, typed answers, transport attempts, and raw snapshots.
 
-**Experimental (pre-1.0).** React 18/19 and Node 22.12+ are supported. APIs may change before 1.0. Verification uses sample responses through the real TypeSafe SDK, not live inference.
+**0.4.0 — pending publication.** Use a packed checkout until publication is confirmed in the changelog. **Experimental (pre-1.0).** React 18/19 and Node 22.12+ are supported. APIs may change before 1.0. Verification uses sample responses through the real TypeSafe SDK, not live inference.
 
 [Changelog and release history](https://github.com/diegoag64/jev-devtools/blob/main/CHANGELOG.md) — published versions and unreleased work.
 
@@ -37,14 +37,14 @@ Install from npm:
 npm install jev-devtools @typesafe-ai/sdk
 ```
 
-To try unpublished local changes instead:
+To install this checkout before publication or try later local changes:
 
 ```sh
 # From the jev-devtools repository root:
 npm ci
 npm run pack:devtools
 # From the consuming app:
-npm install /absolute/path/to/jev-devtools-0.3.0.tgz
+npm install /absolute/path/to/jev-devtools-0.4.0.tgz
 ```
 
 Mount once:
@@ -81,9 +81,9 @@ For Next.js App Router, use `getJevDevtools(appKey, optionsFactory)` from `/serv
 
 MIT for project code. See bundled LICENSE and THIRD_PARTY_NOTICES.txt for original design attribution and TypeSafe branding.
 
-## Connected Jev flows
+## Connected Jev flows with `jev-devtools/flow`
 
-New in **0.3.0**: define calls, conditions, parallel checks, and named outcomes with `jev-devtools/flow`. The drawer connects each request's complete diagram on one canvas. Condition cards show the incoming value and its requirement; optional titles and descriptions explain each step. Existing single-request integrations need no changes.
+Define calls, conditions, parallel checks, and named outcomes with `jev-devtools/flow`. **0.4.0 adds** server function steps (`task`), runtime request factories, bounded collections (`map`), returning conditionals (`if`), stateful iteration (`loop`), and strict numeric `.gt()` comparisons. The drawer connects request diagrams, function results, selected paths, collection items, and loop iterations on one canvas. Existing single-request integrations remain supported.
 
 On the server, reuse the instrumented `jev` client and `inspector` from the setup above:
 
@@ -112,7 +112,7 @@ const result = await review.run({ message: 'Please review my ticket.' }, {
 // Handle result.outcome in your app. The flow does not execute business actions.
 ```
 
-Define once in a Node module and run per request. Use `flow.parallel` for concurrent named lanes; downstream calls wait for every lane to succeed. Branches are terminal in their block. Runs are in-process, with bounded inspector history, SDK retries, and cancellation support; they are not durable workflows.
+Define once in a Node module and run per request. Use `flow.parallel` for concurrent named lanes; downstream calls wait for every lane to succeed. `flow.branch` is terminal in its block; use `flow.if` when selected values feed shared downstream work. Tasks execute application code on Node with JSON-compatible inputs/results; maps and loops have explicit bounds. Runs have SDK retries and cooperative cancellation, with bounded in-memory inspector history. They do not provide durable or distributed execution. Keep the 0.4.0 server and drawer together to inspect its new step kinds.
 
 [Full flow guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md) · [AI flow recipe](https://github.com/diegoag64/jev-devtools/blob/main/packages/jev-devtools/skills/setup-jev-devtools/references/flows.md)
 

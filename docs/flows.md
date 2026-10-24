@@ -1,12 +1,12 @@
 # Define and inspect connected Jev calls
 
-Introduced in **0.3.0**. Existing single-request integrations are unchanged; adopting flows is optional. For release availability, check the [changelog](../CHANGELOG.md).
+The flow API was introduced in **0.3.0**. This guide covers **0.4.0**, including function steps, runtime requests, collections, returning conditionals, and loops. Existing single-request integrations remain supported; adopting flows is optional. For publication status, check the [changelog](../CHANGELOG.md#040--pending-publication).
 
 Start with the [integration guide](integration.md) or [Next.js setup](nextjs.md) to mount the drawer and expose the shared inspector. For coding agents, the [bundled flow recipe](../packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) includes a complete parallel-checks → decision → branch example and no-key verification. It ships with npm for offline, version-matched use.
 
-The examples below import `@typesafe-ai/sdk` question helpers; declare it as a direct dependency in the server workspace (0.3.0 is verified with SDK 0.7.0). Keep API keys and both `/server` and `/flow` imports in Node code.
+The examples below import `@typesafe-ai/sdk` question helpers; declare it as a direct dependency in the server workspace (0.4.0 requires SDK `>=0.7.0 <0.8.0`, verified with 0.7.0). Keep API keys and both `/server` and `/flow` imports in Node code.
 
-`jev-devtools/flow` is a TypeScript/Node entry point. A definition builds an inspectable, bounded graph once; each `run()` executes an independent instance. This is an in-process helper for Jev calls, not a durable workflow engine or a business-action executor.
+`jev-devtools/flow` is a TypeScript/Node entry point. A definition builds an inspectable, bounded graph once; each `run()` executes an independent instance. This is an in-process helper for Jev calls and application-owned function steps. Tasks can execute server code with side effects; the runner does not provide durable execution or rollback.
 
 ```ts
 import { choice, noul } from "@typesafe-ai/sdk";
@@ -57,18 +57,18 @@ Mount the existing `<JevDevtools enabled={...} />` and serve the inspector endpo
 
 - `jev(id, request)` queues one ordinary SDK `systemOne` call. Preserve SDK questions, model selection, assets, and multiple questions. `state` may contain nested expressions. SDK assets remain SDK assets; the flow does not invent another question format.
 - `flow.input` references the run input. Use `flow.input.get("message")` for typed fields. Answer names and fields come from the supplied questions: Choice labels/probabilities, Score numbers/legend, Noul probabilities, and Box coordinates/confidence. Use `.get(key)` to select nested fields.
-- Scalar references support `.eq(value)`. Numeric references support `.lt(value)` and `.gte(value)`. `all`, `any`, and `not` compose Boolean expressions. There is no `eval`, arbitrary predicate callback, or CEL interpreter. All operands are evaluated; a missing value is an error even if another operand would short-circuit. Equality requires matching scalar types; ordering requires finite numbers.
-- `branch(id, { when, then, else })` is terminal in its block. Both synchronous callbacks build possible paths; exactly one executes. Each path must return its terminal `output()` or nested `branch()`. Branches cannot fall through to subsequent work in v1.
+- Scalar references support `.eq(value)`. Numeric references support `.lt(value)`, `.gt(value)`, and `.gte(value)`. `all`, `any`, and `not` compose Boolean expressions. There is no `eval`, arbitrary predicate callback, or CEL interpreter. All operands are evaluated; a missing value is an error even if another operand would short-circuit. Equality requires matching scalar types; ordering requires finite numbers.
+- `branch(id, { when, then, else })` is terminal in its block. Both synchronous callbacks build possible paths; exactly one executes. Each path must return its terminal `output()` or nested `branch()`. For paths that return values and continue into shared work, use `flow.if()`.
 - `output(name, value?)` returns a named outcome and optional resolved value. Output names are also node IDs, so they must be unique across the definition. This is data, not an action.
-- IDs are unique across the whole definition, including untaken paths and parallel lanes: 1–80 letters, digits, `_`, or `-`, starting with a letter or digit. Definitions are limited to 256 nodes and 16 nested blocks. No loops.
+- IDs are unique across the whole definition, including untaken paths and parallel lanes: 1–80 letters, digits, `_`, or `-`, starting with a letter or digit. Definitions are limited to 256 nodes, including map/loop templates, and 16 nested blocks. Runs share a 1,024-expanded-node budget. Use `flow.loop()` for bounded stateful iteration.
 
 Definitions are synchronous and make no SDK calls. Plain request/value templates are copied at definition time. Treat SDK asset instances as immutable. References from another definition, a sibling lane, or a branch-local scope cannot be used outside their available scope. Structural validation happens while defining, before any run can dispatch; input-dependent missing values and invalid comparisons fail when reached during execution.
 
 Question/answer reference types are inferred. `run()` returns `{runId, outcome: string, value?: unknown}` in v1: supplying `defineJevFlow<Ticket>` keeps the input ergonomic, but does not infer a discriminated union of all terminal values. Narrow the returned value in application code.
 
-## Function steps and runtime requests (unreleased experiment)
+## Function steps and runtime requests
 
-These additions are available in this working tree, **not in the published 0.3.0 package**. Existing static requests and flow behavior remain supported. They run on Node; never import `/flow` into a browser component.
+Function steps and runtime request factories are included in **0.4.0**. Existing static requests and flow behavior remain supported. They run on Node; never import `/flow` into a browser component.
 
 `task(id, { input, run, timeoutMs? }, display?)` executes a server function after its dependencies. Nested references in `input` resolve to ordinary values. The callback's return type becomes a typed `FlowExpression`, so its fields can feed another task, request, condition, or output. The optional third argument uses the same static `title` and `description` as other steps.
 
@@ -131,7 +131,7 @@ const evaluation = flow.task("external-evaluation", {
 - Abort signals are cooperative. The runner can stop waiting for asynchronous work that ignores a signal, but cannot kill arbitrary JavaScript, undo side effects, or guarantee remote cancellation. CPU-bound work blocks the event loop until it returns; a result returned after its timeout is rejected. Use a worker/service for expensive computation.
 - Task cards show their status, duration, and returned value as typed, collapsible properties. Nested objects and arrays expand on demand; long values and additional properties stay accessible in a bounded scroll area. Select one for expandable inputs/outputs and capture warnings. Conditions referencing task results read the **redacted captured output** in the viewer.
 - Task input/output capture uses the existing size/depth limits and default secret-key redaction. Custom redaction paths start with `steps`, the step ID, `data`, then `input` or `output`. Capture truncation/redaction never changes the value executed or returned. Capture failures suppress the data and do not fail the task. Only error names are recorded; exception messages/stacks remain server-side.
-- The wire format adds an optional task kind/data to version 1. Existing captures remain readable; use the matching updated drawer for function previews. Dynamic fan-out is provided separately by the experimental `map()` API below. Stateful iteration is provided by `loop()` below. These APIs do not add persisted jobs, distributed execution, or automatic deployment.
+- The wire format adds an optional task kind/data to version 1. Existing captures remain readable; use the matching updated drawer for function previews. Dynamic fan-out is provided by the `map()` API below. Stateful iteration is provided by `loop()` below. These APIs do not add persisted jobs, distributed execution, or automatic deployment.
 
 ### Try the local sample
 
@@ -217,7 +217,7 @@ node benchmarks/flows-isolated.mjs
 
 The new-flow scaling suite measures 11/51/151-node linear graphs and 200 retained 11-node runs, opening and keyboard pan CPU in isolated Chromium. It is not a before/after optimization claim. For existing request regressions, use `BENCH_SUITE=rerenders npm run bench:compare -- main` and keep those findings separate. Generated data and screenshots stay in ignored `benchmarks/results/`; report comparisons and limitations in the PR.
 
-Published 0.3.0 has no generic tasks, runtime request factories, dynamic maps, returning conditionals, or loops. This unreleased checkout adds those capabilities. Neither version has a standalone viewer, durable execution, cross-process coordination, or distributed persistence. Tasks run application-owned code and may have side effects; the runner does not deploy services or provide rollback. A run belongs to one process and its supplied SDK client. Large flow canvases are bounded, not virtualized. They mount the retained request diagrams; CSS content visibility skips offscreen layout/paint where supported while preserving local controls. This uses more DOM and memory than status cards. Only the selected full tabbed inspector mounts; all captured answers remain accessible through each request’s question picker and the Questions tab.
+Version 0.4.0 includes tasks, runtime request factories, maps, returning conditionals, and loops. It does not include a standalone viewer, durable execution, cross-process coordination, or distributed persistence. Tasks run application-owned code and may have side effects; the runner does not deploy services or provide rollback. A run belongs to one process and its supplied SDK client. Large flow canvases are bounded, not virtualized. They mount the retained request diagrams; CSS content visibility skips offscreen layout/paint where supported while preserving local controls. This uses more DOM and memory than status cards. Only the selected full tabbed inspector mounts; all captured answers remain accessible through each request’s question picker and the Questions tab.
 
 ### Structured content in request cards
 
@@ -231,7 +231,7 @@ Rule literals now appear in captures, including numeric thresholds and string co
 
 Incoming values are read from linked, retained Jev captures and respect their redaction. Missing or evicted captures, older rule metadata, and references to flow input or parallel aggregate values that are not request answers show **Not captured**; the viewer does not collect extra runtime values or infer them from the chosen route. Duplicate input names include their source step title to distinguish them. The card previews up to three inputs; select it for the complete list and technical references. Compound requirements preserve AND/OR/NOT grouping and use the same readable input names.
 
-## Dynamic collections: `flow.map()` (unreleased experiment)
+## Dynamic collections: `flow.map()`
 
 `map(id, options, buildItem, display?)` runs the same item program over an array produced at runtime. The callback builds a template once; it does not execute application work during definition.
 
@@ -257,7 +257,7 @@ const assessed = flow.map("assess-passages", {
 // assessed is a typed FlowExpression<Array<{ passage: Passage; relevance: number }>>.
 ```
 
-`item.input` contains `{ item, index, context }`; index is zero-based. Pass outer references explicitly through `input`; they cannot be captured directly inside the item builder. Each item receives a detached JSON-compatible snapshot. A template can contain tasks, Jev calls and static parallel lanes, and returns an expression. The runner adds the item-result output. Terminal `output()`/`branch()` calls in the item builder and nested maps are not supported in this first version. Use a task for deterministic routing that returns a value.
+`item.input` contains `{ item, index, context }`; index is zero-based. Pass outer references explicitly through `input`; they cannot be captured directly inside the item builder. Each item receives a detached JSON-compatible snapshot. A template can contain tasks, Jev calls, returning conditionals and static parallel lanes, and returns an expression. The runner adds the item-result output. Terminal `output()`/`branch()` calls in the item builder and nested maps are unsupported. Use `if()` for returning paths or a task for deterministic routing that returns a value.
 
 Results preserve input order regardless of completion order. An empty list returns `[]` and executes no item steps. The map waits for every item before advancing. A failed item aborts running siblings, blocks queued items, and prevents downstream work; external cancellation marks queued work cancelled. There is no partial-success mode or automatic map/task retry. SDK retries remain governed by the supplied client. Signals are cooperative for remote side effects; cancellation cannot undo work already performed.
 
@@ -269,9 +269,9 @@ Item input/output and result snapshots follow the same capture limits and redact
 
 Try the [RAG passage cookbook](../cookbooks/rag-passages/README.md) for a twelve-item sample with four concurrent requests and every passage inspectable.
 
-## Returning conditionals: flow.if() (unreleased experiment)
+## Returning conditionals: `flow.if()`
 
-Use `flow.if(id, { when, then, else }, display?)` when one path should produce a value and **both paths continue into shared work**. `flow.branch()` still ends its block with a named outcome. This addition is local to the experimental checkout and is not in npm 0.3.0.
+Use `flow.if(id, { when, then, else }, display?)` when one path should produce a value and **both paths continue into shared work**. `flow.branch()` still ends its block with a named outcome. Returning conditionals and strict `.gt()` comparisons are included in **0.4.0**.
 
 ```ts
 const selected = flow.if("choose-extractor", {
@@ -304,9 +304,9 @@ This snippet belongs inside a definition with `assessment` and `cheapRecord` ref
 
 New `if` and `merge` kinds extend the version-1 flow records; use the matching updated server and drawer. Older captured flows remain readable. For four complete no-key samples, see the [SDE cascade cookbook](../cookbooks/sde-cascade/README.md).
 
-## Stateful iteration: flow.loop() (unreleased experiment)
+## Stateful iteration: `flow.loop()`
 
-`flow.loop(id, { initial, input, while, maxIterations }, buildIteration, display?)` returns the final state as a typed `FlowExpression<S>`. Available in this checkout, not npm 0.3.0.
+`flow.loop(id, { initial, input, while, maxIterations }, buildIteration, display?)` returns the final state as a typed `FlowExpression<S>`. Included in **0.4.0**.
 
 ```ts
 const final = flow.loop("count", {

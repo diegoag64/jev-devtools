@@ -1,6 +1,6 @@
 ---
 name: setup-jev-devtools
-description: Install and verify Jev DevTools in an existing React application with a Node backend or Next.js App Router. Use when asked to add the Jev request inspector, wire capture, build connected Jev flows with branches and parallel checks, or troubleshoot its setup.
+description: Install and verify Jev DevTools in an existing React application with a Node backend or Next.js App Router. Use when asked to add the Jev request inspector, wire capture, build connected Jev flows with tasks, branches, collections and loops, or troubleshoot its setup.
 ---
 
 # Set up Jev DevTools
@@ -17,9 +17,9 @@ Inspect the app's package manager/lockfile, React and Node versions, root compon
 
 Install `jev-devtools` using the app's existing package manager (npm: `npm install jev-devtools @typesafe-ai/sdk`; pnpm: `pnpm add jev-devtools @typesafe-ai/sdk`; Yarn: `yarn add jev-devtools @typesafe-ai/sdk`). `@typesafe-ai/sdk` is a peer dependency: keep the app's existing SDK version when it satisfies the peer range. Install in the workspace(s) that actually import it. It is a regular dependency when application modules import it, even though capture/display are development-only. React 18/19 and Node 22.12+ are required. Do not replace the app's framework or upgrade unrelated dependencies to force compatibility.
 
-## Optional connected flow API (0.3.0+)
+## Optional connected flow API (0.4.0)
 
-When asked to build or inspect connected calls, read [references/flows.md](references/flows.md) after the framework recipe. It includes an executable parallel-checks/branch example, step titles/descriptions, scope and execution rules, sample verification, and privacy limits. Preserve existing application policies; do not convert unrelated calls just to install the drawer. Flow execution is server-only and continues even with the inspector disabled.
+When asked to build or inspect connected calls, read [references/flows.md](references/flows.md) after the framework recipe. It covers the 0.4.0 API: requests, server function tasks, runtime request factories, parallel checks, terminal branches, returning conditionals, bounded collections, and stateful loops. It includes sample verification, scope/execution rules, and privacy limits. For an older installation, use its bundled recipe and declarations rather than assuming these operations exist. Preserve existing application policies; do not convert unrelated calls just to install the drawer. Flow execution is server-only and continues even with the inspector disabled.
 
 ## Integration invariants
 

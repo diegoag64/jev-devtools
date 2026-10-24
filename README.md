@@ -8,7 +8,7 @@ A React inspector for TypeSafe Jev.<br />
 Explore requests, returned probabilities, and the paths your application takes.<br />
 Works with React and Next.js App Router.
 
-[![npm version 0.3.0](https://img.shields.io/badge/npm-v0.3.0-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.3.0)
+[![npm version 0.4.0](https://img.shields.io/badge/npm-v0.4.0-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.4.0)
 [![CI](https://github.com/diegoag64/jev-devtools/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/diegoag64/jev-devtools/actions/workflows/ci.yml)
 [![React 18 / 19](https://img.shields.io/badge/React-18%20%2F%2019-61DAFB?logo=react&logoColor=61DAFB&labelColor=0D0A0F)](#add-to-your-app)
 [![Next.js App Router](https://img.shields.io/badge/Next.js-App%20Router-white?logo=nextdotjs&labelColor=0D0A0F)](docs/nextjs.md)
@@ -37,7 +37,7 @@ Mount the React drawer, connect a server adapter, and make Jev calls through its
 npm install jev-devtools @typesafe-ai/sdk
 ```
 
-Requires React **18/19** and Node **22.12+**. [npm 0.3.0](https://www.npmjs.com/package/jev-devtools/v/0.3.0) is experimental; APIs may change before 1.0. Your API key stays on the server. Capture and display are opt-in and disabled by default.
+Requires React **18/19** and Node **22.12+**. This checkout documents **0.4.0 (pending publication)**; use the packed checkout below until it is published. APIs remain experimental before 1.0. See the [release status](CHANGELOG.md#040--pending-publication). Your API key stays on the server. Capture and display are opt-in and disabled by default.
 
 ### React + Node
 
@@ -217,7 +217,7 @@ Open **Jev DevTools → Flows** to follow the run:
 
 Define once in a Node module and run per request. Typed answer references can feed later requests, conditions, and outputs. Step titles and descriptions explain your application's policy. Runs support SDK retries and cancellation, with bounded in-memory history; they do not provide durable workflow execution. Existing request capture works without adopting the flow API.
 
-**Available in npm 0.3.0:** sequential requests, parallel lanes with joins, terminal branches, and named outcomes. **Unreleased preview in this checkout:** server function steps (`task`), runtime request factories, bounded collections (`map`), conditional paths that rejoin (`if`), and stateful iteration (`loop`). These let you inspect more complex flows such as passage assessment and hierarchical classification; use a packed checkout to try them.
+**New in 0.4.0:** server function steps (`task`), runtime request factories, bounded collections (`map`), conditional paths that rejoin (`if`), and stateful iteration (`loop`). Combine them with sequential requests, parallel lanes, terminal branches, and named outcomes to inspect complex flows such as passage assessment and hierarchical classification. Numeric conditions also support strict greater-than with `.gt()`.
 
 [Full flow API guide](docs/flows.md) · [Flow recipe for coding agents](packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) · [Release availability](CHANGELOG.md)
 
@@ -235,7 +235,7 @@ Diagrams show captured inputs, responses, and routing rules you explicitly defin
 
 ## Explore cookbook examples
 
-Cookbooks are small, runnable adaptations of official TypeSafe recipes that show how requests and application logic fit into inspectable flows. Explore passage classification, skill selection, structured extraction, memory, and more using labeled sample responses. The six local examples use this checkout's unreleased APIs and can run without an API key.
+Cookbooks are small, runnable adaptations of official TypeSafe recipes that show how requests and application logic fit into inspectable flows. Explore passage classification, skill selection, structured extraction, memory, and more using labeled sample responses. The six examples use the 0.4.0 flow API and run from this repository without an API key; cookbook application code and fixtures are not bundled in npm.
 
 [Browse the cookbooks and run an example →](cookbooks/README.md)
 
@@ -269,7 +269,7 @@ npm run dev
 Open [the playground](http://127.0.0.1:4182/), run a scenario, and open **Jev DevTools**. Sample mode needs no API key and makes no inference calls. The [playground guide](apps/playground/README.md) covers scenarios, the edge-case sandbox, and optional live mode.
 
 <details>
-<summary>Try unreleased APIs in your own app</summary>
+<summary>Install a packed checkout in your own app</summary>
 
 Pack the local checkout, then install the archive in your app:
 
@@ -278,10 +278,10 @@ Pack the local checkout, then install the archive in your app:
 npm run pack:devtools
 
 # In your React application:
-npm install /absolute/path/to/jev-devtools/jev-devtools-0.3.0.tgz
+npm install /absolute/path/to/jev-devtools/jev-devtools-0.4.0.tgz
 ```
 
-This archive includes local changes even though its version is still 0.3.0. It is not the published npm 0.3.0 release. Keep the drawer and server adapter on the same build.
+The archive contains the code and bundled setup skill from your checkout. Use it to verify 0.4.0 before publication or to try later local changes. Keep the drawer and server adapter on the same build.
 
 </details>
 

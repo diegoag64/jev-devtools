@@ -1,6 +1,6 @@
 # Hierarchical classification · sample showcase
 
-A local TypeScript adaptation of the [official hierarchical classification cookbook](https://docs.typesafe.ai/cookbooks/hierarchical_classification). It uses unreleased `flow.loop()` plus `map()` and `if()` to compare width-three beam search with width-one greedy search.
+A local TypeScript adaptation of the [official hierarchical classification cookbook](https://docs.typesafe.ai/cookbooks/hierarchical_classification). It uses `flow.loop()`, `map()`, and `if()` from Jev DevTools 0.4.0 to compare width-three beam search with width-one greedy search.
 
 Run `npm ci` then `npm run dev` from the repository root. Open [the local cookbook](http://127.0.0.1:4182/?cookbook=hierarchical-classification), choose **Hierarchy sample**, and click **Run sample**. No key or paid inference is needed. Live mode is disabled. Restart an older dev server after rebuilding the package.
 
@@ -31,6 +31,6 @@ Scoring preserves `product(max(p, 1e-9)) ** (1 / decision_count)`, counting only
 
 The taxonomy, documents and all probabilities are authored synthetic fixtures. We do not vendor or reproduce the full CPC, Shopify, MeSH or source-code taxonomies, upstream cache, provider retries, cost or accuracy evaluations. Exact-match sample transport rejects edited documents and unknown question sets. Fixture delays only make progress visible.
 
-The implementation is in `flow.ts`, scenarios in `cases.ts`, and the SDK transport in `samples.ts`. `provenance.json` records the reviewed source hash and adaptations; `LICENSE.typesafe` retains the upstream MIT notice for the adapted algorithm and instruction text. See `../../apps/playground/tests/hierarchy.test.ts` for execution/fidelity checks and [the flow API guide](../../docs/flows.md#stateful-iteration-flowloop-unreleased-experiment) for limits.
+The implementation is in `flow.ts`, scenarios in `cases.ts`, and the SDK transport in `samples.ts`. `provenance.json` records the reviewed source hash and adaptations; `LICENSE.typesafe` retains the upstream MIT notice for the adapted algorithm and instruction text. See `../../apps/playground/tests/hierarchy.test.ts` for execution/fidelity checks and [the flow API guide](../../docs/flows.md#stateful-iteration-flowloop) for limits.
 
-This cookbook and its API additions require the current checkout; they are not in npm 0.3.0. To use real providers later, deliberately replace the sample transport, preserve the request and scoring contracts, and authorize/bound the new inference calls. Adding a key alone does not enable live mode.
+The flow APIs are included in Jev DevTools 0.4.0. The cookbook application and sample fixtures run from this repository and are not bundled in npm. To use real providers later, deliberately replace the sample transport, preserve the request and scoring contracts, and authorize/bound the new inference calls. Adding a key alone does not enable live mode.

@@ -1,6 +1,6 @@
 # SDE cascade · sample showcase
 
-A local TypeScript adaptation of the [official TypeSafe SDE cascade](https://docs.typesafe.ai/cookbooks/sde_cascade), built with the unreleased `flow.if()` API. This is a community-maintained walkthrough, not an official integration or evaluation result.
+A local TypeScript adaptation of the [official TypeSafe SDE cascade](https://docs.typesafe.ai/cookbooks/sde_cascade), built with `flow.if()` from Jev DevTools 0.4.0. This is a community-maintained walkthrough, not an official integration or evaluation result.
 
 From the repository root:
 
@@ -49,4 +49,4 @@ To adapt this to real extraction, replace the two task callbacks with your serve
 - `LICENSE.typesafe`: upstream notice retained with the adapted code.
 - `../../apps/playground/tests/sde-cascade.test.ts`: complete executions, boundary/fidelity checks, fixture mismatch and cancellation.
 
-The API and cookbook require this checkout; they are not available in npm 0.3.0. See [the flow guide](../../docs/flows.md#returning-conditionals-flowif-unreleased-experiment) for syntax and execution limits.
+The flow API is included in Jev DevTools 0.4.0. The cookbook application and sample fixtures run from this repository and are not bundled in npm. See [the flow guide](../../docs/flows.md#returning-conditionals-flowif) for syntax and execution limits.

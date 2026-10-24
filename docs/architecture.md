@@ -1,6 +1,6 @@
 # Architecture
 
-The package has three public entry points: the SSR-safe React component, scoped CSS, and a Node server adapter. Browser-safe trace types are exported from the React entry. Server modules and the TypeSafe SDK must never enter the browser bundle.
+The package has four public entry points: the SSR-safe React component (`jev-devtools`), scoped CSS (`jev-devtools/styles.css`), a Node server adapter (`jev-devtools/server`), and the server-only flow API (`jev-devtools/flow`). Browser-safe trace types are exported from the React entry. Server modules and the TypeSafe SDK must never enter the browser bundle.
 
 `createJevDevtools()` owns a bounded in-memory recorder. Its `createClient()` instruments the SDK's `systemOne` calls while preserving APIPromise behavior. AsyncLocalStorage links retries to the logical call. The adapter exposes configuration, SSE snapshots, and scoped clearing; the React drawer handles subscriptions and displays diagrams. There is no network interception or hidden-model reasoning capture.
 
@@ -11,6 +11,12 @@ The package has three public entry points: the SSR-safe React component, scoped 
 `examples/nextjs-app` uses the packed library through App Router routes, Server Actions, and Server Components. `verify:nextjs` checks real framework routing, shared traces, reload retention, SSE, and disabled production endpoints.
 
 `examples/react-vite` installs a packed tarball. The verification script copies it outside the workspace so it cannot accidentally resolve internal source or hoisted dependencies. CI checks React 18 and 19 and Node 22.12 and 24. The regular build intentionally creates a local-only notice; a separate check compiles the full development UI.
+
+## Connected flows
+
+`defineJevFlow()` builds a bounded graph once; each `run()` executes an independent instance in the Node process. Version 0.4.0 supports Jev requests, server function tasks, runtime request factories, parallel lanes, terminal branches, value-returning conditionals, collections, and stateful loops. A shared inspector links each Jev step to its full request capture. Task data, collection items, and iteration state use bounded/redacted snapshots; runtime values remain independent of capture limits.
+
+Definitions and runs are separate version-1 records streamed over `/flows/events`. The 0.4.0 drawer understands task, collection, merge, and loop records; keep the server and drawer on the same build. Definitions are limited to 256 nodes including templates and 16 nested blocks, while a run shares a 1,024-expanded-step budget. Execution is in-process with cooperative cancellation, without durable state, resume, or automatic task retries. See the [flow guide](flows.md) for scope and nesting constraints.
 
 ## Provenance
 

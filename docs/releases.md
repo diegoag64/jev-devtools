@@ -1,5 +1,15 @@
 # Packaging and releases
 
+## Release 0.4.0 — Pending publication
+
+Version 0.4.0 includes server function tasks, runtime request factories, bounded collections, returning conditionals, strict numeric `.gt()` comparisons, and stateful loops, with inline inspection of function results, collection items, and loop iterations. Six cookbook applications demonstrate these APIs from the repository; cookbook code and fixtures are not included in npm. The bundled setup skill and flow recipe cover the complete 0.4.0 API. See the [0.4.0 changelog](../CHANGELOG.md#040--pending-publication).
+
+This is release preparation, not a published npm release. Review and merge the release PR, confirm CI, and inspect an archive from the exact reviewed release commit before publishing with explicit authorization. Until publication, use a locally packed 0.4.0 archive. Record the archive checksum, registry integrity, and verified publication time only when they are known; do not reuse the 0.3.0 evidence below.
+
+### Upgrade from 0.3.0
+
+Install `@typesafe-ai/sdk` explicitly with the package; it is now a peer dependency (`>=0.7.0 <0.8.0`, verified with 0.7.0). Existing React setup and static flow calls remain supported. Upgrade the server and drawer together for the new flow record kinds. Node middleware without `authorize` now requires loopback connections; network-accessible or Docker/VM/proxy setups need application authorization. Web Request servers must bind to `127.0.0.1` or set `authorize`.
+
 ## Release 0.3.0 — published October 24, 2026
 
 This experimental minor release adds the Node flow API, connected request diagrams, readable condition inputs/requirements, parallel joins and outcomes, and structured content previews. It includes version-matched AI flow instructions in the npm archive. Existing single-request integration is unchanged. See the [0.3.0 changelog](../CHANGELOG.md#030--october-24-2026-experimental).
@@ -24,7 +34,7 @@ The inspected and published archive was `jev-devtools-0.2.0.tgz`:
 - SHA-256: `d64f0d8234b52108fa3079cbd61786054843d9396a0284f8ca02ac6519a3a8f0`
 - Registry integrity: `sha512-U63uyugokRyL0Yth+8yaWFOqwnQV3XpPcgVJ+3eyXpnK7eYR4StEo7LzAEYyFn57Wb2m+xjO5+xkOWbrDVujQg==`
 
-Do not republish 0.2.0. Archive commands below document its verification; use a new version and explicit approval for the next release. The first-publish commands remain historical.
+Do not republish 0.2.0. Use the current archive workflow below and explicit approval for the next release. The first-publish commands remain historical.
 
 ## First published release
 
@@ -48,8 +58,8 @@ npm run verify:drawer
 git diff --check
 npm pack --dry-run --json -w jev-devtools
 npm run pack:devtools
-tar -tzf jev-devtools-0.3.0.tgz
-shasum -a 256 jev-devtools-0.3.0.tgz
+tar -tzf jev-devtools-0.4.0.tgz
+shasum -a 256 jev-devtools-0.4.0.tgz
 ```
 
 The archive must contain only `package.json`, the package README, MIT license, third-party notices, the setup skill and its four Markdown references under `skills/setup-jev-devtools`, and compiled JavaScript, declaration files, and scoped CSS under `lib/src`, `lib/server`, and `lib/flow`. It must not contain playground code, tests, fixtures, source TypeScript, demo media, environment files, or credentials. `verify:package` checks the actual pack file list before installing into an independent React app. `verify:nextjs` checks a separate packed installation with real development and production Next.js servers. Both use sample responses; neither makes live inference calls.
@@ -57,7 +67,7 @@ The archive must contain only `package.json`, the package README, MIT license, t
 Inspect the packed manifest too:
 
 ```sh
-tar -xOf jev-devtools-0.3.0.tgz package/package.json
+tar -xOf jev-devtools-0.4.0.tgz package/package.json
 ```
 
 Confirm the name/version, public access, Node engine, React peers, public exports (including the `/flow` entry point), and absence of `private: true`. Save the release commit SHA and archive checksum with the release evidence. Keep the archive unchanged between final inspection and publication. Do not publish from a dirty checkout or use a wildcard that could select an old archive.

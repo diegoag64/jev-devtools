@@ -1,6 +1,6 @@
 # Skill suggestion
 
-A local TypeScript port of the official [TypeSafe skill-suggestion cookbook](https://docs.typesafe.ai/cookbooks/skill_suggestion), using Jev DevTools function steps and runtime requests. **Unreleased local experiment; requires this checkout, not npm 0.3.0.**
+A local TypeScript port of the official [TypeSafe skill-suggestion cookbook](https://docs.typesafe.ai/cookbooks/skill_suggestion), using Jev DevTools function steps and runtime requests. **Uses the 0.4.0 flow API.** Run this cookbook from the repository; its application code and fixtures are not bundled in npm.
 
 ## Run locally
 

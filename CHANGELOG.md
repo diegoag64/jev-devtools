@@ -8,7 +8,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Flow API extensions, six cookbooks, React/Next.js setup documentation, SDK peer dependency, loopback-only inspector middleware without authorization, and Windows support for the package and Next.js verification scripts. |
+| [Unreleased](#unreleased) | Not published | No changes yet. |
+| [0.4.0](#040--pending-publication) | Pending publication | Flow API extensions, six cookbooks, React/Next.js setup documentation, SDK peer dependency, loopback-only inspector middleware without authorization, and Windows support for the package and Next.js verification scripts. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
 | [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Batched updates, changed-trace streaming, frame-coalesced rendering, less work while the drawer is closed, virtualized Questions, compact Choice diagrams, and reuse of unchanged inspector views. |
 | [0.1.3](#013--october-23-2026-experimental) | 2026-10-23 | Isolated drawer styles, diagram pan/zoom, and version-specific npm links. |
@@ -18,6 +19,25 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
+No changes yet.
+
+## 0.4.0 — Pending publication
+
+Experimental minor release prepared for review; npm publication has not occurred. The flow extensions are part of the 0.4.0 package. Cookbook apps and fixtures remain repository examples. This section records the release contents, not a publication date.
+
+### Compatibility and upgrade
+
+- Install `@typesafe-ai/sdk` explicitly alongside `jev-devtools`: the SDK is now a peer dependency (`>=0.7.0 <0.8.0`, verified with 0.7.0).
+- Existing React mounting, static Jev requests, and terminal branch behavior remain supported. Keep the 0.4.0 server and drawer together to inspect task, map, merge, and loop captures.
+- Without `authorize`, Node middleware now accepts only loopback connections. Docker/VM/proxy setups may need application authorization. Web Request handlers must run on a loopback-bound server or configure authorization.
+- Tasks and loops are in-process, with explicit bounds and cooperative cancellation. They do not add persistent workflows, automatic task retries, or rollback.
+
+### Release preparation
+
+- Set workspace/package versions and example archives to 0.4.0, update README badges and links, and align documentation and bundled skills with the complete flow API. Correct stale claims about missing `.gt()`, maps, and loops, and make the skill's sample transport handle compressed SDK requests. No additional runtime changes.
+
+### Changes
+
 - Lead the repository README with React/Next.js setup and a parallel-flow example; make runnable cookbooks easier to discover and move sandbox/contributor details into their guides. Published and unreleased APIs remain explicitly distinguished; no runtime or API compatibility changes. ([#33](https://github.com/diegoag64/jev-devtools/pull/33))
 
 - Run `verify:package` and `verify:nextjs` on Windows through Node instead of spawning `npm.cmd`, which current Node refuses without a shell. ([#26](https://github.com/diegoag64/jev-devtools/pull/26))
@@ -26,7 +46,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 - Make `@typesafe-ai/sdk` a peer dependency (`>=0.7.0 <0.8.0`, tested with 0.7.0) instead of a pinned dependency, so `createClient` uses the application's SDK copy. Install it with the package: `npm install jev-devtools @typesafe-ai/sdk`. Applications on another SDK version must move to 0.7.x. ([#28](https://github.com/diegoag64/jev-devtools/pull/28))
 
-Flow API extensions and cookbook demos merged in [#30](https://github.com/diegoag64/jev-devtools/pull/30); not published to npm.
+Flow API extensions and cookbook demos for 0.4.0 were merged in [#30](https://github.com/diegoag64/jev-devtools/pull/30).
 
 - Preserve the original failure when a map fails inside parallel work; cancelling sibling lanes no longer misreports the run as cancelled.
 

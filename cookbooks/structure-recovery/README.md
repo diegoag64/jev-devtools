@@ -30,4 +30,4 @@ Formatting preserves the normalized input wording, adding Markdown markers; it d
 
 Requests with no questions are explicitly bypassed, an adaptation that makes separated and empty inputs runnable. The normal memo uses two sequential requests, not one request per line or block. Cancellation prevents downstream work and clears the previous page result. Fixture delays only make progress visible.
 
-Implementation: `flow.ts`; sample choices: `cases.ts`; fixed transport: `samples.ts`; behavior checks: `../../apps/playground/tests/structure.test.ts`. This requires the current experimental checkout and is not included in npm 0.3.0. Adding an API key alone does not enable live mode.
+Implementation: `flow.ts`; sample choices: `cases.ts`; fixed transport: `samples.ts`; behavior checks: `../../apps/playground/tests/structure.test.ts`. This uses the 0.4.0 flow API; the cookbook application and sample fixtures run from this repository and are not bundled in npm. Adding an API key alone does not enable live mode.

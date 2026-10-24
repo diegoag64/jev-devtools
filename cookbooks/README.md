@@ -2,7 +2,7 @@
 
 Explore small applications that turn TypeSafe recipes into connected, inspectable Jev flows. Each example pairs an application result with the requests, function steps, and routing decisions that produced it.
 
-These are community-maintained TypeScript adaptations of the [official TypeSafe cookbooks](https://docs.typesafe.ai/cookbooks). All six examples below run locally with labeled synthetic samples and no API key. They use this checkout's **unreleased flow APIs**, not the published npm 0.3.0 package. Sample results demonstrate execution and inspection; they are not live model evaluations.
+These are community-maintained TypeScript adaptations of the [official TypeSafe cookbooks](https://docs.typesafe.ai/cookbooks). All six examples below run locally with labeled synthetic samples and no API key. They use the **0.4.0 flow API**. Run the cookbook apps from this repository; the npm package contains the library and setup skill, not cookbook code or fixtures. Sample results demonstrate execution and inspection; they are not live model evaluations.
 
 ## Choose an example
 
@@ -78,4 +78,4 @@ These cookbooks mainly exercise Choice, Noul, and Score. The reviewed examples d
 
 ## Related flow sample
 
-The playground also includes **Flow · Functions + dynamic questions (synthetic)**, an original sample demonstrating function steps and runtime request factories. See the [flow guide](../docs/flows.md#function-steps-and-runtime-requests-unreleased-experiment). It is separate from the cookbook adaptations above.
+The playground also includes **Flow · Functions + dynamic questions (synthetic)**, an original sample demonstrating function steps and runtime request factories. See the [flow guide](../docs/flows.md#function-steps-and-runtime-requests). It is separate from the cookbook adaptations above.

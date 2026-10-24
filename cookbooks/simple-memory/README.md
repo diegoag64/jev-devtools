@@ -40,4 +40,4 @@ Memory is **run-local application state**: every click starts fresh. It is not p
 - `samples.ts`: server-only synthetic transport with request validation and cancellation.
 - `provenance.json` and `LICENSE.typesafe`: source snapshot hash, adaptations and upstream notice.
 
-This experiment is local to the repository and is not included in published npm 0.3.0. See [the flow guide](../../docs/flows.md) for the experimental API.
+This cookbook uses the 0.4.0 flow API. Its application code and sample fixtures run from this repository and are not bundled in npm. See [the flow guide](../../docs/flows.md) for API contracts and limits.

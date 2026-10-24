@@ -11,9 +11,9 @@
 
 The skill and references ship in npm at `node_modules/jev-devtools/skills/setup-jev-devtools/`. Prefer the installed version's guidance and declaration files when it differs from main. These are explicit entry points, not a promise of automatic discovery by every AI tool.
 
-## Build connected flows (0.3.0+)
+## Build connected flows (0.4.0)
 
-- [Bundled flow recipe](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/packages/jev-devtools/skills/setup-jev-devtools/references/flows.md): Agent workflow, complete parallel/branch example, metadata, scope rules, sample checks and troubleshooting. Available offline beside the installed setup skill.
+- [Bundled flow recipe](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/packages/jev-devtools/skills/setup-jev-devtools/references/flows.md): Agent workflow for requests, tasks, runtime factories, parallel lanes, branches, returning conditionals, maps and loops; scope rules, sample checks and troubleshooting. Available offline beside the installed setup skill.
 - [Flow API guide](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/docs/flows.md): Definition versus execution, typed references, conditions, joins, errors/cancellation, recording and viewer limits.
 
 Use the installed `lib/flow/index.d.ts` as the version-matched API contract. Define on Node; execute with the shared instrumented client and inspector. Existing request capture does not require adopting flows. Do not invent thresholds or business actions.
@@ -31,10 +31,12 @@ Use the installed `lib/flow/index.d.ts` as the version-matched API contract. Def
 - [Repository workflow](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/AGENTS.md): For package contributors, not installation into a consumer app.
 - [Release process](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/docs/releases.md)
 
-Local experiment (not npm 0.3.0): returning `flow.if()` paths, strict `.gt()`, bounded `flow.map()` and server function tasks. Read the checkout’s `docs/flows.md` and `cookbooks/sde-cascade/README.md` for sample-only cascade execution. Confirm installed declarations before generating code with these APIs.
+## 0.4.0 capabilities and examples
 
-Local experimental stateful iteration: `flow.loop()` checks an expression before each iteration, returns the final JSON state, and rejects incomplete iteration-limit exhaustion. It supports maps inside loops with a shared expanded-step budget. See checkout `docs/flows.md` and `cookbooks/hierarchical-classification/README.md`; not available in npm 0.3.0.
+The 0.4.0 flow API includes `task()`, runtime `jev()` request factories, `.answers`, `map()`, `if()`, strict `.gt()` comparisons, and `loop()`. Loops check a state expression before each iteration and reject incomplete iteration-limit exhaustion with `FlowLoopLimitError`. A loop can contain a map; all expanded work shares one run-wide budget. There are no nested loops, loops inside maps, nested maps, durable jobs, or automatic task retries. Use installed declarations and bundled references for the exact version; check the changelog for publication status.
 
-- Local experimental Structure Recovery showcase: cookbooks/structure-recovery/README.md. Uses existing task(), dynamic jev() and if(); four sample-only cases, not in npm 0.3.0.
-
-- Local experimental Simple Memory showcase: cookbooks/simple-memory/README.md. Existing task(), dynamic jev(), if() and loop(); four sample-only timelines, explicit customer-scoped run-local memory, original-ticket/readable-answer storage, inclusive 50% save gate. Not persistent storage or part of npm 0.3.0.
+- [Cookbook collection](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/README.md): Six runnable repository apps using the 0.4.0 APIs. Code and synthetic fixtures are not shipped in npm.
+- [SDE cascade](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/sde-cascade/README.md): Sample-only returning conditional, strict escalation gate and shared continuation.
+- [Hierarchical classification](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/hierarchical-classification/README.md): Bounded iteration, frontier collections, beam versus greedy search and iteration-limit failure.
+- [Structure Recovery](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/structure-recovery/README.md): Tasks, dynamic requests and returning conditionals; four sample-only cases.
+- [Simple Memory](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/simple-memory/README.md): Tasks, dynamic requests, conditionals and loops; four sample-only timelines with customer-scoped run-local memory and an inclusive 50% save gate. No persistent storage.
