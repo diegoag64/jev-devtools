@@ -67,17 +67,30 @@ Do not replace or revoke another publisher without reviewing it. Keep the enviro
 
 ### Recover a partial automated release
 
-Read the run summary, npm metadata, and remote tag before taking action. After any uncertain publish outcome, do not dispatch a new publication or rerun the publish job: the preflight intentionally refuses an existing npm version. Download `npm-publication` or `release-evidence` from the original run, compare its checksums with the approved candidate, and resume only the missing verification or GitHub steps under existing release authorization. If a tag/release already exists, inspect and verify it manually; never move its tag or blindly recreate it. Expired artifacts or mismatched checksums require investigation, not rebuilding and pretending the bytes are the original candidate.
+Read the run summary, npm metadata, and remote tag before taking action. The verification loop now polls every five seconds for up to 120 attempts (nearly ten minutes), within the publish job's twenty-minute timeout. If npm processing still outlasts that window, treat the release as partial and resume verification once the registry is ready; the loop never repeats the upload.
+
+After any uncertain publish outcome, do not dispatch a new publication or rerun the publish job: the preflight intentionally refuses an existing npm version. Download `npm-publication` or `release-evidence` from the original run, compare its checksums with the approved candidate, and resume only the missing verification or GitHub steps under existing release authorization. If a tag/release already exists, inspect and verify it manually; never move its tag or blindly recreate it. Expired artifacts or mismatched checksums require investigation, not rebuilding and pretending the bytes are the original candidate.
 
 The independent consumer checks accept `JEV_VERIFY_TARBALL=/absolute/path/to/archive.tgz` to check an inspected archive, or `JEV_VERIFY_VERSION=X.Y.Z` to check a fresh registry installation. Do not set both. Use the verification scripts from the release commit so later regression tests do not incorrectly reject an older release. With neither variable, the existing local pack-and-check behavior is unchanged.
 
-## Release 0.4.1 — pending publication
+## Release 0.4.1 — published October 24, 2026
 
-This patch release candidate includes all changes merged after 0.4.0: drawer CSS isolation and cleanup, corrected published `FlowExpression` types, and the contributor/release workflow updates. See the [0.4.1 changelog](../CHANGELOG.md#041--pending-publication-experimental) for the complete changes and compatibility notes.
+This patch release includes drawer CSS isolation and cleanup, corrected published `FlowExpression` types, and the contributor/release workflow updates. See the [0.4.1 changelog](../CHANGELOG.md#041--october-24-2026-experimental) for all included changes and compatibility notes.
 
-Preparation sets the workspace, package, playground dependency, independent archive examples, README versions, and bundled flow recipe to 0.4.1. npm publication, `v0.4.1`, and the GitHub release remain pending. The exact release commit will be the reviewed merge commit after CI passes; local candidate archives are preparation evidence, not published artifacts.
+**[jev-devtools@0.4.1](https://www.npmjs.com/package/jev-devtools/v/0.4.1) was published on October 24, 2026 at 17:33:19.570 UTC**, from commit `4ce235dd950b8b2f94e97d268ecbd5ae2b5b96ea` after [PR #61](https://github.com/diegoag64/jev-devtools/pull/61) and its main CI passed. npm's `latest` tag was verified as `0.4.1`.
 
-After approval and merge, follow the remote release workflow above: rehearse the merged commit, inspect the publishing run's candidate, and approve the `npm-release` deployment manually. Record the verified npm timestamp, archive checksum/integrity, exact tag commit, registry consumer results, and GitHub Latest status in a follow-up documentation PR. Until publication is verified, installation commands resolve the existing published 0.4.0 release.
+The [approved release run](https://github.com/diegoag64/jev-devtools/actions/runs/40116262449) successfully uploaded the inspected archive through npm OIDC trusted publishing and generated provenance. npm reported that the package was being processed. The original verification loop exhausted its approximately 55-second polling window before version/latest visibility was confirmed, so the run failed and skipped its GitHub completion job. Authentication succeeded; the failed run is retained as the record of that attempt.
+
+Recovery downloaded the original `npm-publication` artifact, verified its checksums, and resumed verification without rebuilding or republishing. Registry integrity matches the approved archive. The [npm provenance](https://registry.npmjs.org/-/npm/v1/attestations/jev-devtools@0.4.1) identifies the exact commit above and `.github/workflows/release.yml` in the original run. Fresh registry-installed React and Next.js consumers passed public-export, packed flow type, build, SSR, development capture/SSE, and disabled-production checks using sample responses. These recovery checks used the scripts from the release commit on Node 24.21.0.
+
+The inspected and published archive was `jev-devtools-0.4.1.tgz` (66 files):
+
+- SHA-256: `15a9c53c66bc7458e9054d4f29d30378d73afe5614386a64481ab32a072c66ee`
+- Registry integrity: `sha512-gplLhwhzKCg4I4PNspYCwwq14jFdpvNmeH7oIo8N9Fsre4ttMa2/NpwFUQTfuALg+ym9xJokL2FJmIwE8naHtA==`
+
+The missing [GitHub release v0.4.1](https://github.com/diegoag64/jev-devtools/releases/tag/v0.4.1) was published during recovery at 17:35:21 UTC on October 24, 2026 using the original candidate's notes. Its lightweight remote tag resolves to `4ce235dd950b8b2f94e97d268ecbd5ae2b5b96ea`; it is neither a draft nor a prerelease, and GitHub's latest-release endpoint returned `v0.4.1`.
+
+npm and GitHub publication are verified. This documentation follow-up remains pending until its PR is merged. The immutable npm archive contains the preparation-time README; these documentation updates do not alter it. Do not republish 0.4.1 or rerun the failed publishing job.
 
 ## Release 0.4.0 — published October 24, 2026
 

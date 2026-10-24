@@ -8,8 +8,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | No additional changes. |
-| [0.4.1](#041--pending-publication-experimental) | Pending | Manually approved OIDC releases; complete npm/GitHub release checklist; published flow declarations keep FlowExpression type checks; consistent PR descriptions and evidence guidance; CSS isolation and removal of unused package styles; verified 0.4.0 publication metadata. |
+| [Unreleased](#unreleased) | Not published | Record verified 0.4.1 publication and recovery; allow more time for npm processing before release verification times out. |
+| [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | Manually approved OIDC releases; complete npm/GitHub release checklist; published flow declarations keep FlowExpression type checks; consistent PR descriptions and evidence guidance; CSS isolation and removal of unused package styles; verified 0.4.0 publication metadata. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Flow API extensions, six cookbooks, React/Next.js setup documentation, SDK peer dependency, loopback-only inspector middleware without authorization, and Windows support for the package and Next.js verification scripts. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
 | [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Batched updates, changed-trace streaming, frame-coalesced rendering, less work while the drawer is closed, virtualized Questions, compact Choice diagrams, and reuse of unchanged inspector views. |
@@ -20,11 +20,12 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No additional changes.
+- Record verified npm/GitHub publication for 0.4.1, including recovery from delayed npm visibility, exact-commit provenance, and archive integrity. Update installation guides to reflect publication.
+- Allow nearly ten minutes for npm version/latest verification after upload instead of about one minute. Keep manual approval, integrity/provenance checks, and the no-republish recovery rule unchanged; no package runtime or API changes.
 
-## 0.4.1 — pending publication (experimental)
+## 0.4.1 — October 24, 2026 (experimental)
 
-Patch release candidate containing all changes merged since 0.4.0. npm publication, the exact release tag, and the GitHub release are pending; no publication date or release commit is assigned yet. See the [release preparation record](docs/releases.md#release-041--pending-publication).
+Patch release containing the CSS isolation fixes, corrected published flow declarations, and contributor/release workflow updates merged since 0.4.0. [Published package](https://www.npmjs.com/package/jev-devtools/v/0.4.1) · [GitHub release](https://github.com/diegoag64/jev-devtools/releases/tag/v0.4.1) · [Release preparation #61](https://github.com/diegoag64/jev-devtools/pull/61). Published at 17:33:19.570 UTC from commit `4ce235dd950b8b2f94e97d268ecbd5ae2b5b96ea`. npm integrity and provenance match the approved candidate; the GitHub release was completed at 17:35:21 UTC after recovering from the workflow's npm verification timeout. Both services' Latest designations were verified. See the [release verification and recovery record](docs/releases.md#release-041--published-october-24-2026).
 
 ### Compatibility and upgrade
 
@@ -221,4 +222,4 @@ Verification uses sample responses through the real SDK. Live inference and brow
 
 ## Registry staging entry
 
-npm also lists `0.0.0-stage`, created on October 23, 2026 during the initial publishing flow. It is a staging placeholder, not a separate feature release. The first public release was `0.1.0`; `latest` pointed to `0.4.0` when this history was checked. Use the exact-version package links above to inspect a specific release.
+npm also lists `0.0.0-stage`, created on October 23, 2026 during the initial publishing flow. It is a staging placeholder, not a separate feature release. The first public release was `0.1.0`; `latest` pointed to `0.4.1` when this history was checked. Use the exact-version package links above to inspect a specific release.
