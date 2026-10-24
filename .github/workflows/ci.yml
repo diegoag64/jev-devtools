@@ -39,11 +39,6 @@ jobs:
             console.log(`${name}: ${expected}`);
           }
           NODE
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-headless-ubuntu-24.04-${{ runner.arch }}-${{ hashFiles('package-lock.json') }}
       # Use the runner image's system libraries; keep Playwright's pinned browser.
       - run: npx playwright install chromium --only-shell
       - run: npm run verify:drawer
