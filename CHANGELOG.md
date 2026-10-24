@@ -19,7 +19,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-- Add a manually dispatched GitHub Actions release workflow using npm trusted publishing, with a required GitHub environment approval, exact-archive checks, registry consumer verification, and GitHub release completion. Support checking an existing tarball or registry version in the consumer scripts. Package APIs and runtime behavior are unchanged; publishing needs the configured npm trust and GitHub environment protection.
+- Add a manually dispatched GitHub Actions release workflow using npm trusted publishing, with a required GitHub environment approval, exact-archive checks, registry consumer verification, and GitHub release completion. Support checking an existing tarball or registry version in the consumer scripts. Package APIs and runtime behavior are unchanged; publishing needs the configured npm trust and GitHub environment protection. ([#60](https://github.com/diegoag64/jev-devtools/pull/60))
 
 - Require a version-independent release checklist covering npm, the exact release tag, GitHub publication and Latest status, and explicit partial-completion reporting. Record the recovered v0.4.0 GitHub release and explain authentication options for remote publishing. Documentation only; existing checks and package compatibility are unchanged. ([#59](https://github.com/diegoag64/jev-devtools/pull/59))
 
