@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { JevDevtools } from "jev-devtools";
-import "jev-devtools/styles.css";
 import "./host.css";
 function App() {
   const [enabled, setEnabled] = useState(true),

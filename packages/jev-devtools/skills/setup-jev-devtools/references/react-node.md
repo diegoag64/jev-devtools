@@ -6,13 +6,12 @@ Add to the existing root without replacing providers or routing:
 
 ```tsx
 import { JevDevtools } from 'jev-devtools';
-import 'jev-devtools/styles.css';
 
 // Inside the existing root JSX, alongside the app:
 <JevDevtools enabled={import.meta.env.DEV} defaultOpen={false} />
 ```
 
-`import.meta.env.DEV` is Vite-specific. For another bundler use its existing development flag. The component is SSR-safe; no provider or client prop is required. `endpoint` defaults to `/api/jev-devtools`. CSS is scoped to the inspector.
+`import.meta.env.DEV` is Vite-specific. For another bundler use its existing development flag. The component is SSR-safe; no provider or client prop is required. `endpoint` defaults to `/api/jev-devtools`. The drawer injects its own stylesheet into its Shadow DOM; no CSS import is needed.
 
 ## Existing Express/Connect backend
 

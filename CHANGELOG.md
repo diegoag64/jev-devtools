@@ -19,7 +19,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-- Scope connected-flow styles to the DevTools boundary and namespace their animation so the optional public stylesheet does not restyle host content. Keep the host reset in the shadow stylesheet instead of an expanded inline style attribute. Suppress page-authored host decorations, reset text direction and internal CSS-variable defaults, and keep flow hint colors independent of app theme variables. Existing component APIs and CSS imports remain compatible; document-level transforms and page JavaScript remain outside CSS isolation. ([#36](https://github.com/diegoag64/jev-devtools/pull/36))
+- Scope connected-flow styles to the DevTools boundary and namespace their animation so the optional public stylesheet does not restyle host content. Keep the host reset in the shadow stylesheet instead of an expanded inline style attribute. Suppress page-authored host decorations, reset text direction and internal CSS-variable defaults, and keep flow hint colors independent of app theme variables. Remove redundant CSS imports from sample apps and setup snippets, and document automatic drawer styling in the guides and bundled skill. Existing component APIs and CSS imports remain compatible; document-level transforms and page JavaScript remain outside CSS isolation. ([#36](https://github.com/diegoag64/jev-devtools/pull/36))
 
 - Record verified npm publication metadata for 0.4.0, remove pending-publication instructions from installation docs, and link the published release. Documentation only; package behavior is unchanged. ([#35](https://github.com/diegoag64/jev-devtools/pull/35))
 

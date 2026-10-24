@@ -41,11 +41,10 @@ Requires React **18/19** and Node **22.12+**. **[Jev DevTools 0.4.0 is available
 
 ### React + Node
 
-Mount once near your app's root. This example uses Vite's development flag:
+Mount once near your app's root. The drawer loads its own styles; no CSS import is needed. This example uses Vite's development flag:
 
 ```tsx
 import { JevDevtools } from 'jev-devtools';
-import 'jev-devtools/styles.css';
 import { App } from './App';
 
 export function Root() {
@@ -142,12 +141,11 @@ export function Devtools() {
 }
 ```
 
-Mount it in your existing root layout:
+Mount it in your existing root layout. The drawer supplies its own styles; keep your application's styles as usual:
 
 ```tsx
 // app/layout.tsx
 import type { ReactNode } from 'react';
-import 'jev-devtools/styles.css';
 import { Devtools } from './devtools';
 
 export const runtime = 'nodejs';

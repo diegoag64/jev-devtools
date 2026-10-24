@@ -68,7 +68,7 @@ Report HTTP/capture checks separately from visual browser checks, and sample ver
 
 | Symptom | Check |
 | --- | --- |
-| No launcher | Mount once, import CSS, and explicitly enable in development. It intentionally renders nothing on the server. |
+| No launcher | Mount once and explicitly enable in development. Styles load automatically; no CSS import is needed. It intentionally renders nothing on the server. |
 | Disconnected or HTML instead of config | Ensure base path **and** subpaths reach the adapter before the SPA fallback; check proxy and Next optional catch-all. |
 | 403 | Match scheme/hostname/port and Host exactly; preserve proxy Host, verify Origin and authorization. Don't disable guards. |
 | Connected but empty | Use the adapter's instrumented client, same adapter/key/process and session. Direct SDK clients are not intercepted. |

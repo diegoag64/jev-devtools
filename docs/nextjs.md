@@ -92,7 +92,6 @@ export function Devtools() {
 ```tsx
 // app/layout.tsx
 import type { ReactNode } from 'react';
-import 'jev-devtools/styles.css';
 import { Devtools } from './devtools';
 
 export const runtime = 'nodejs';
@@ -101,7 +100,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-The drawer renders nothing during SSR, connects after mounting when enabled, and keeps its state across App Router navigation under the root layout. [Client Components](https://nextjs.org/docs/app/getting-started/server-and-client-components) isolate its browser APIs from your server code. CSS is scoped to the inspector. In the example, production builds disable both recording and inspector endpoints; ordinary SDK calls still work.
+The drawer renders nothing during SSR, connects after mounting when enabled, and keeps its state across App Router navigation under the root layout. [Client Components](https://nextjs.org/docs/app/getting-started/server-and-client-components) isolate its browser APIs from your server code. The drawer injects its own stylesheet into its Shadow DOM; no CSS import is needed. In the example, production builds disable both recording and inspector endpoints; ordinary SDK calls still work.
 
 ## Try the complete sample
 

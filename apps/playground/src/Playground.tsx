@@ -38,7 +38,6 @@ import { Textarea } from "./components/ui/textarea";
 import { Label } from "./components/ui/label";
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import "./controls.css";
-import "jev-devtools/styles.css";
 import "./style.css";
 import {
   skillCases,

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { JevDevtools } from "jev-devtools";
-import "jev-devtools/styles.css";
 function App() {
   const [status, setStatus] = useState("Ready");
   const [scenario, setScenario] = useState("flow-approve");

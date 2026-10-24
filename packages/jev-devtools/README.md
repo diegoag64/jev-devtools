@@ -47,11 +47,10 @@ npm run pack:devtools
 npm install /absolute/path/to/jev-devtools-0.4.0.tgz
 ```
 
-Mount once:
+Mount once. The drawer loads its own styles; no CSS import is needed:
 
 ```tsx
 import { JevDevtools } from 'jev-devtools';
-import 'jev-devtools/styles.css';
 
 <JevDevtools enabled={import.meta.env.DEV} defaultOpen={false} />
 ```

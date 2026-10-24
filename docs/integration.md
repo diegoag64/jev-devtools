@@ -27,11 +27,10 @@ From your React project, install the generated archive:
 npm install /absolute/path/to/jev-devtools/jev-devtools-0.4.0.tgz
 ```
 
-Mount once near the root. No provider, client object, trace props, or application hook is needed:
+Mount once near the root. The drawer loads its own styles; no CSS import, provider, client object, trace props, or application hook is needed:
 
 ```tsx
 import { JevDevtools } from 'jev-devtools';
-import 'jev-devtools/styles.css';
 
 export function Root() {
   return <>
@@ -55,7 +54,7 @@ The component portals its host directly under `document.body`, even when mounted
 inside a React `<main>` or `<section>`. Global page selectors such as `section`,
 `main > *`, and `button` cannot reach the shadow tree, so no page-specific padding
 override is needed. The drawer supplies its own styles and resets inherited
-typography; importing `jev-devtools/styles.css` is optional.
+typography. No CSS import is needed to use the component.
 
 **Unreleased:** the public stylesheet also scopes connected-flow selectors to
 `.jev-devtools` and namespaces their animation, preventing collisions with host

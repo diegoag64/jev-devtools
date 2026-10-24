@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import "jev-devtools/styles.css";
 import "./style.css";
 import { Devtools } from "./devtools";
 

@@ -68,7 +68,7 @@ export function Devtools() {
 }
 ```
 
-In the **existing** root layout, import `jev-devtools/styles.css`, import `Devtools`, and add `<Devtools />` inside `<body>` alongside the existing children/providers. Keep the layout a Server Component; do not mark the entire layout `use client`. Ensure segments doing Jev work run on Node, not Edge. The drawer renders no SSR markup and connects after mounting in development.
+In the **existing** root layout, import `Devtools` and add `<Devtools />` inside `<body>` alongside the existing children/providers. Keep the layout a Server Component; do not mark the entire layout `use client`. Ensure segments doing Jev work run on Node, not Edge. The drawer renders no SSR markup and connects after mounting in development. It injects its own stylesheet into its Shadow DOM; no CSS import is needed.
 
 ## Verify
 
