@@ -4,7 +4,7 @@
 
 Version 0.4.0 includes server function tasks, runtime request factories, bounded collections, returning conditionals, strict numeric `.gt()` comparisons, and stateful loops, with inline inspection of function results, collection items, and loop iterations. Six cookbook applications demonstrate these APIs from the repository; cookbook code and fixtures are not included in npm. The bundled setup skill and flow recipe cover the complete 0.4.0 API. See the [0.4.0 changelog](../CHANGELOG.md#040--pending-publication).
 
-This is release preparation, not a published npm release. Review and merge the release PR, confirm CI, and inspect an archive from the exact reviewed release commit before publishing with explicit authorization. Until publication, use a locally packed 0.4.0 archive. Record the archive checksum, registry integrity, and verified publication time only when they are known; do not reuse the 0.3.0 evidence below.
+This is release preparation, not a published npm release. Review and merge [release PR #34](https://github.com/diegoag64/jev-devtools/pull/34), confirm CI, and inspect an archive from the exact reviewed release commit before publishing with explicit authorization. Until publication, use a locally packed 0.4.0 archive. Record the archive checksum, registry integrity, and verified publication time only when they are known; do not reuse the 0.3.0 evidence below.
 
 ### Upgrade from 0.3.0
 

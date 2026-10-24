@@ -34,7 +34,7 @@ Experimental minor release prepared for review; npm publication has not occurred
 
 ### Release preparation
 
-- Set workspace/package versions and example archives to 0.4.0, update README badges and links, and align documentation and bundled skills with the complete flow API. Correct stale claims about missing `.gt()`, maps, and loops, and make the skill's sample transport handle compressed SDK requests. No additional runtime changes.
+- Set workspace/package versions and example archives to 0.4.0, update README badges and links, and align documentation and bundled skills with the complete flow API. Correct stale claims about missing `.gt()`, maps, and loops, and make the skill's sample transport handle compressed SDK requests. No additional runtime changes. ([#34](https://github.com/diegoag64/jev-devtools/pull/34))
 
 ### Changes
 
