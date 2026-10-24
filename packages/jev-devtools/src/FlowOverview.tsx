@@ -16,6 +16,11 @@ import {
 } from "./condition-inputs.js";
 import { formatFlowCondition } from "./flow-condition.js";
 import { TraceDiagram } from "./TraceDiagram.js";
+import {
+  CopyFixtureButton,
+  CopyFixtureReport,
+  useFixtureCopy,
+} from "./CopyFixture.js";
 import { FlowDetailsPanel } from "./FlowDetailsPanel.js";
 import { DiagramContent } from "./DiagramContent.js";
 type Lane = { name: string; status: string };
@@ -683,6 +688,7 @@ export const FlowOverview = memo(function FlowOverview({
     collectionViews,
     itemSizes,
   ]);
+  const fixtureCopy = useFixtureCopy(definition, run, tracesById);
   const { viewport, canvas, zoom, zoomBy, fit, preserveCamera, focusArea } =
     useDiagramViewport(layout.width, layout.height, run.id, {
       x: layout.left,
@@ -752,7 +758,7 @@ export const FlowOverview = memo(function FlowOverview({
               <span className="eyebrow">Flow run · {run.status}</span>
               <h2>{run.name}</h2>
             </div>
-            <div>
+            <div className="flow-run-summary">
               {run.outcome ? (
                 <strong>Outcome: {run.outcome}</strong>
               ) : (
@@ -763,9 +769,11 @@ export const FlowOverview = memo(function FlowOverview({
                   ? ` · ${Math.round(run.durationMs)} ms`
                   : ""}
               </small>
+              <CopyFixtureButton control={fixtureCopy} />
             </div>
           </header>
         )}
+        {!inline && <CopyFixtureReport control={fixtureCopy} />}
         <div className="lab-flow-toolbar">
           {!inline && (
             <div>
