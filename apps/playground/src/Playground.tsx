@@ -1,4 +1,9 @@
 import {
+  structureCases,
+  type StructureCase,
+} from "../../../cookbooks/structure-recovery/cases.js";
+import { StructureCookbookResult } from "./StructureCookbookResult.js";
+import {
   hierarchyCases,
   type HierarchyCase,
 } from "../../../cookbooks/hierarchical-classification/cases.js";
@@ -43,6 +48,8 @@ const ragRequested =
   new URLSearchParams(location.search).get("cookbook") === "rag-passages";
 const sdeRequested =
   new URLSearchParams(location.search).get("cookbook") === "sde-cascade";
+const structureRequested =
+  new URLSearchParams(location.search).get("cookbook") === "structure-recovery";
 const hierarchyRequested =
   new URLSearchParams(location.search).get("cookbook") ===
   "hierarchical-classification";
@@ -70,6 +77,7 @@ async function post(path: string, body: unknown = {}) {
   return data;
 }
 function App() {
+  const [structureCase, setStructureCase] = useState<StructureCase>("memo");
   const [hierarchyCase, setHierarchyCase] = useState<HierarchyCase>("recovery");
   const [sdeCase, setSdeCase] = useState<SdeCase>("fabricated");
   const [ragCase, setRagCase] = useState<RagCase>("premise");
@@ -93,30 +101,34 @@ function App() {
     setFeedback("Ready to capture a request.");
   };
   const [scenario, setScenario] = useState(
-      hierarchyRequested
-        ? "flow-hierarchy"
-        : sdeRequested
-          ? "flow-sde"
-          : ragRequested
-            ? "flow-rag"
-            : cookbookRequested
-              ? "flow-skills"
-              : sandbox
-                ? "stress"
-                : "triage",
+      structureRequested
+        ? "flow-structure"
+        : hierarchyRequested
+          ? "flow-hierarchy"
+          : sdeRequested
+            ? "flow-sde"
+            : ragRequested
+              ? "flow-rag"
+              : cookbookRequested
+                ? "flow-skills"
+                : sandbox
+                  ? "stress"
+                  : "triage",
     ),
     [mode, setMode] = useState("sample"),
     [live, setLive] = useState(false);
   const [message, setMessage] = useState(
-    hierarchyRequested
-      ? hierarchyCases.recovery.message
-      : sdeRequested
-        ? sdeCases.fabricated.message
-        : ragRequested
-          ? ragCases.premise.message
-          : cookbookRequested
-            ? skillCases.deck.message
-            : "I was charged twice and checkout is blocked. I need a human to help me today.",
+    structureRequested
+      ? structureCases.memo.message
+      : hierarchyRequested
+        ? hierarchyCases.recovery.message
+        : sdeRequested
+          ? sdeCases.fabricated.message
+          : ragRequested
+            ? ragCases.premise.message
+            : cookbookRequested
+              ? skillCases.deck.message
+              : "I was charged twice and checkout is blocked. I need a human to help me today.",
   );
   const [runId, setRunId] = useState<string>(),
     [feedback, setFeedback] = useState("Ready to capture a request.");
@@ -146,6 +158,7 @@ function App() {
         ragCase,
         sdeCase,
         hierarchyCase,
+        structureCase,
       });
       if (data.flow) setFlowResult(data.flow);
       setOutcome({
@@ -175,6 +188,29 @@ function App() {
   return (
     <>
       <main className="playground dark">
+        {scenario === "flow-structure" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · two-pass structure recovery
+            </span>
+            <h1>Recover structure. Keep the words.</h1>
+            <p>
+              Stitch broken sentences, classify the resulting blocks, then
+              render headings, lists, code and callouts in ordinary code.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/autoformat"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official Structure Recovery cookbook ↗
+            </a>
+            <p className="sample-note">
+              Authored short documents · synthetic Jev answers · no API key or
+              text-generation calls.
+            </p>
+          </div>
+        )}
         {scenario === "flow-hierarchy" && (
           <div className="cookbook-intro">
             <span className="cookbook-eyebrow">
@@ -274,18 +310,26 @@ function App() {
           </div>
         )}
         {scenario.startsWith("flow-") &&
-          !["flow-skills", "flow-rag", "flow-sde", "flow-hierarchy"].includes(
-            scenario,
-          ) && (
+          ![
+            "flow-skills",
+            "flow-rag",
+            "flow-sde",
+            "flow-hierarchy",
+            "flow-structure",
+          ].includes(scenario) && (
             <p>
               Sample-only flow. Run a sample, open Jev DevTools, and choose
               Flows. Select a node to inspect its captured request.
             </p>
           )}
         {flowResult &&
-          !["flow-skills", "flow-rag", "flow-sde", "flow-hierarchy"].includes(
-            scenario,
-          ) && (
+          ![
+            "flow-skills",
+            "flow-rag",
+            "flow-sde",
+            "flow-hierarchy",
+            "flow-structure",
+          ].includes(scenario) && (
             <div role="status">
               <strong>Outcome: {flowResult.outcome}</strong>
               <pre>{JSON.stringify(flowResult.value, null, 2)}</pre>
@@ -303,6 +347,8 @@ function App() {
                 onChange={(e) => {
                   setScenario(e.target.value);
                   resetOutcome();
+                  if (e.target.value === "flow-structure")
+                    setMessage(structureCases[structureCase].message);
                   if (e.target.value === "flow-hierarchy")
                     setMessage(hierarchyCases[hierarchyCase].message);
                   if (e.target.value === "flow-sde")
@@ -324,6 +370,7 @@ function App() {
                     "Flow · Functions + dynamic questions (synthetic)",
                   "flow-skills": "Cookbook · Skill suggestion (182 skills)",
                   "flow-hierarchy": "Cookbook · Hierarchical classification",
+                  "flow-structure": "Cookbook · Structure recovery",
                   "flow-sde": "Cookbook · SDE cascade",
                   "flow-rag": "Cookbook · RAG passages (12 items)",
                   "flow-manual": "Flow · Manual review",
@@ -380,6 +427,28 @@ function App() {
                 </NativeSelectOption>
               </NativeSelect>
             </div>
+            {scenario === "flow-structure" && (
+              <div className="form-field">
+                <Label htmlFor="structure-case">Structure sample</Label>
+                <NativeSelect
+                  id="structure-case"
+                  value={structureCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as StructureCase;
+                    setStructureCase(next);
+                    setMessage(structureCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(structureCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
             {scenario === "flow-hierarchy" && (
               <div className="form-field">
                 <Label htmlFor="hierarchy-case">Hierarchy sample</Label>
@@ -597,6 +666,7 @@ function App() {
                     "flow-rag",
                     "flow-sde",
                     "flow-hierarchy",
+                    "flow-structure",
                   ].includes(scenario) && mode === "sample"
                 }
                 id="context"
@@ -644,19 +714,24 @@ function App() {
             <span role="status">{feedback}</span>
           </div>
           <p id="sample-note" className="sample-note">
-            {scenario === "flow-hierarchy"
-              ? "Run a sample, then open Flows. Choose an iteration in either Loop card and View Flow; expand a frontier item to inspect its request. The limit case returns FlowLoopLimitError on purpose."
-              : scenario === "flow-sde"
-                ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
-                : scenario === "flow-rag"
-                  ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
-                  : scenario === "flow-skills" && mode === "sample"
-                    ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
-                    : mode === "sample"
-                      ? "Fixed sample answers, including when you edit context. No external API calls."
-                      : "Live inference uses your server key and may incur API charges."}
+            {scenario === "flow-structure"
+              ? "Run a sample, then open Jev DevTools → Flows. Inspect both batched requests, the line-merge decisions and the deterministic Markdown renderer."
+              : scenario === "flow-hierarchy"
+                ? "Run a sample, then open Flows. Choose an iteration in either Loop card and View Flow; expand a frontier item to inspect its request. The limit case returns FlowLoopLimitError on purpose."
+                : scenario === "flow-sde"
+                  ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
+                  : scenario === "flow-rag"
+                    ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
+                    : scenario === "flow-skills" && mode === "sample"
+                      ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
+                      : mode === "sample"
+                        ? "Fixed sample answers, including when you edit context. No external API calls."
+                        : "Live inference uses your server key and may incur API charges."}
           </p>
         </section>
+        {scenario === "flow-structure" && flowResult && (
+          <StructureCookbookResult result={flowResult} />
+        )}
         {scenario === "flow-hierarchy" && flowResult && (
           <HierarchyCookbookResult result={flowResult} />
         )}

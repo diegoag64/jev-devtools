@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Local experiment: function steps, runtime requests, bounded collections, returning conditionals, bounded loops, and four cookbooks. |
+| [Unreleased](#unreleased) | Not published | Local experiment: function steps, runtime requests, bounded collections, returning conditionals, bounded loops, and five cookbooks. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
 | [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Batched updates, changed-trace streaming, frame-coalesced rendering, less work while the drawer is closed, virtualized Questions, compact Choice diagrams, and reuse of unchanged inspector views. |
 | [0.1.3](#013--october-23-2026-experimental) | 2026-10-23 | Isolated drawer styles, diagram pan/zoom, and version-specific npm links. |
@@ -19,6 +19,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 ## Unreleased
 
 Local experiment; not published or submitted as a PR.
+
+- Add the sample-only Structure Recovery cookbook using existing flow APIs: two sequential batched requests, visible line-merge and Markdown-render tasks, a safe original/preview comparison, every join/type probability, and cases for threshold boundaries, separated text and empty input. Prompts and rendering rules follow the official executable recipe; documents and answers are synthetic. No new flow primitive or live provider is introduced.
 
 - Add typed, pre-test `flow.loop()` with state carried between iterations, explicit `FlowLoopLimitError` on unfinished iteration-limit exhaustion, zero-iteration support and cancellation. Loops may contain maps; all expanded work shares one run-wide step budget. Loop templates and nested item templates count toward the definition limit. Nested loops and loops inside maps remain unsupported.
 - Inspect loop iterations inline with selectors and navigation arrows, preserving the parent graph and camera. Initial/latest state, continuation decisions and nested request captures use the existing redaction limits. New loop records require a matching server/drawer build.
