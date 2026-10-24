@@ -1049,6 +1049,13 @@ const InlineItemFlow = memo(function InlineItemFlow({
 }) {
   const ref = useRef<HTMLElement>(null);
   const item = collection.items[index];
+  const cycleItem = (direction: number) => {
+    if (collection.total <= 1) return;
+    onCollectionChange(node.id, {
+      index: (index + direction + collection.total) % collection.total,
+      open: true,
+    });
+  };
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
@@ -1083,7 +1090,7 @@ const InlineItemFlow = memo(function InlineItemFlow({
       <header className="flow-collection-heading">
         <div>
           <span className="eyebrow">Selected collection item</span>
-          <h3>
+          <h3 aria-live="polite" aria-atomic="true">
             {node.title ?? node.id} · Item {index + 1} of {collection.total}
           </h3>
           <small>{item?.status ?? "waiting"}</small>
@@ -1094,21 +1101,65 @@ const InlineItemFlow = memo(function InlineItemFlow({
           Hide Flow
         </button>
       </header>
-      {item?.run && node.itemDefinition ? (
-        <FlowOverview
-          key={item.run.id}
-          definition={node.itemDefinition}
-          run={item.run}
-          traces={traces}
-          inline
-        />
-      ) : (
-        <p className="flow-item-placeholder">
-          {item?.status === "waiting"
-            ? "This item is queued. Its flow will appear here when it starts."
-            : "This item has no captured execution. It may have been cancelled or blocked before starting."}
-        </p>
-      )}
+      <div className="flow-item-navigation">
+        <button
+          className="flow-item-arrow"
+          aria-label="Previous collection item"
+          aria-controls={`${id}-item`}
+          title="Previous collection item"
+          disabled={collection.total <= 1}
+          onClick={() => cycleItem(-1)}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m14 6-6 6 6 6" />
+          </svg>
+        </button>
+        <div id={`${id}-item`} className="flow-item-content">
+          {item?.run && node.itemDefinition ? (
+            <FlowOverview
+              key={item.run.id}
+              definition={node.itemDefinition}
+              run={item.run}
+              traces={traces}
+              inline
+            />
+          ) : (
+            <p className="flow-item-placeholder">
+              {item?.status === "waiting"
+                ? "This item is queued. Its flow will appear here when it starts."
+                : "This item has no captured execution. It may have been cancelled or blocked before starting."}
+            </p>
+          )}
+        </div>
+        <button
+          className="flow-item-arrow"
+          aria-label="Next collection item"
+          aria-controls={`${id}-item`}
+          title="Next collection item"
+          disabled={collection.total <= 1}
+          onClick={() => cycleItem(1)}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m10 6 6 6-6 6" />
+          </svg>
+        </button>
+      </div>
     </article>
   );
 });

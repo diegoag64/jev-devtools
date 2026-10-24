@@ -1943,3 +1943,32 @@
 .flow-inline-surface {
   position: relative;
 }
+
+.flow-item-navigation {
+  display: grid;
+  grid-template-columns: 80px max-content 80px;
+  align-items: center;
+}
+.flow-item-content {
+  min-width: 0;
+}
+.jev-devtools .flow-item-arrow {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 12px;
+  margin: 0 auto;
+  border: 1px solid #64415d;
+  border-radius: 50%;
+  background: #211623;
+  color: #efa7db;
+}
+.jev-devtools .flow-item-arrow:hover:not(:disabled) {
+  background: #382035;
+  border-color: #e551ba;
+}
+.flow-item-arrow svg {
+  width: 28px;
+  height: 28px;
+}
