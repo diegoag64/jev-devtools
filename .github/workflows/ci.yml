@@ -7,7 +7,7 @@ permissions:
   contents: read
 jobs:
   drawer:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -19,8 +19,28 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci
-      - run: npm install --no-save --package-lock=false react@${{ matrix.react }} react-dom@${{ matrix.react }}
-      - run: npx playwright install --with-deps chromium --only-shell
+      - name: Select React version
+        env:
+          REACT_VERSION: ${{ matrix.react }}
+        run: |
+          node <<'NODE'
+          const assert = require('node:assert/strict');
+          const { execFileSync } = require('node:child_process');
+          const { readFileSync } = require('node:fs');
+          const packages = ['react', 'react-dom'];
+          const version = name => JSON.parse(readFileSync(require.resolve(`${name}/package.json`))).version;
+          const expected = process.env.REACT_VERSION;
+          if (!packages.every(name => version(name) === expected)) {
+            // --no-save preserves the manifests while still reading the lockfile.
+            execFileSync('npm', ['install', '--no-save', ...packages.map(name => `${name}@${expected}`)], { stdio: 'inherit' });
+          }
+          for (const name of packages) {
+            assert.equal(version(name), expected);
+            console.log(`${name}: ${expected}`);
+          }
+          NODE
+      # Use the runner image's system libraries; keep Playwright's pinned browser.
+      - run: npx playwright install chromium --only-shell
       - run: npm run verify:drawer
 
   verify:

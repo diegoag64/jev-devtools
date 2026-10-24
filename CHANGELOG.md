@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Record verified 0.4.1 publication and recovery; allow more time for npm processing before release verification times out. |
+| [Unreleased](#unreleased) | Not published | Drawer CI skips system dependency installation and redundant React setup; record verified 0.4.1 publication and recovery; allow more time for npm processing before release verification times out. |
 | [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | Manually approved OIDC releases; complete npm/GitHub release checklist; published flow declarations keep FlowExpression type checks; consistent PR descriptions and evidence guidance; CSS isolation and removal of unused package styles; verified 0.4.0 publication metadata. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Flow API extensions, six cookbooks, React/Next.js setup documentation, SDK peer dependency, loopback-only inspector middleware without authorization, and Windows support for the package and Next.js verification scripts. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API, complete request diagrams, readable branch requirements, structured content, and bundled AI flow guidance. |
@@ -20,6 +20,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
+- Run the React 18/19 drawer CI checks on Ubuntu 24.04 using the runner's system libraries and Playwright's pinned Chromium headless shell, skipping per-run system package installation. Reuse matching installed React packages and read the lockfile for version overrides, verifying both React packages before browser checks. Package APIs, verification coverage, and the release workflow are unchanged. ([#64](https://github.com/diegoag64/jev-devtools/pull/64))
 - Record verified npm/GitHub publication for 0.4.1, including recovery from delayed npm visibility, exact-commit provenance, and archive integrity. Update installation guides to reflect publication.
 - Allow nearly ten minutes for npm version/latest verification after upload instead of about one minute. Keep manual approval, integrity/provenance checks, and the no-republish recovery rule unchanged; no package runtime or API changes.
 
