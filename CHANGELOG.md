@@ -20,6 +20,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 Local experiment; not published or submitted as a PR.
 
+- Size flow cards and request headings to their text instead of clipping titles and descriptions. Recalculate spacing and connectors when content grows or shrinks, while preserving the camera.
+
 - Add typed `flow.map()` with bounded concurrency, stable input-order results, isolated item programs, fail-fast cancellation, empty-list support and explicit item/execution limits. Collection cards show progress and let users inspect every started item’s full request/function diagram.
 - Add the RAG passage-classification cookbook with twelve candidates, official question/policy semantics, separate evidence/conflict blocks, and three sample cases. Retrieval and generation are explicitly labeled stand-ins; no live providers are called.
 

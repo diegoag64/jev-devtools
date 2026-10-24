@@ -20,6 +20,32 @@ import { FlowDetailsPanel } from "./FlowDetailsPanel.js";
 import { DiagramContent } from "./DiagramContent.js";
 type Lane = { name: string; status: string };
 type Bounds = { x: number; y: number; width: number; height: number };
+// Measure in canvas coordinates: screen rectangles also include the camera zoom.
+function useNodeHeight<T extends HTMLElement>(
+  id: string,
+  onResize: (id: string, height: number) => void,
+) {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    let previous = 0;
+    const measure = () => {
+      const height = element.offsetHeight;
+      // Opening a collection item hides its parent flow without unmounting it.
+      if (height > 0 && height !== previous) {
+        previous = height;
+        onResize(id, height);
+      }
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [id, onResize]);
+  return ref;
+}
+
 const RequestNode = memo(function RequestNode({
   node,
   trace,
@@ -39,13 +65,10 @@ const RequestNode = memo(function RequestNode({
   onSelect: (id: string) => void;
   onResize: (id: string, height: number) => void;
 }) {
-  const headingHeight = node.description ? 104 : 64;
-  const measure = useCallback(
-    (height: number) => onResize(node.id, height + headingHeight),
-    [node.id, onResize, headingHeight],
-  );
+  const ref = useNodeHeight<HTMLElement>(node.id, onResize);
   return (
     <article
+      ref={ref}
       className={`flow-step flow-request ${selected ? "selected" : ""}`}
       data-status={status}
       aria-label={`Request ${node.id}`}
@@ -53,7 +76,6 @@ const RequestNode = memo(function RequestNode({
     >
       <button
         className="flow-request-heading"
-        style={{ height: headingHeight }}
         aria-label={`Step ${node.id}, jev, ${status}`}
         aria-pressed={selected}
         onClick={() => onSelect(node.id)}
@@ -72,7 +94,7 @@ const RequestNode = memo(function RequestNode({
             : ""}
         </span>
       </button>
-      <TraceDiagram trace={trace} embedded onHeightChange={measure} />
+      <TraceDiagram trace={trace} embedded />
     </article>
   );
 });
@@ -85,6 +107,7 @@ const Card = memo(function Card({
   decision,
   selected,
   bounds,
+  onResize,
   onSelect,
   lanes,
   inputs,
@@ -97,6 +120,7 @@ const Card = memo(function Card({
   decision?: boolean;
   selected: boolean;
   bounds: Bounds;
+  onResize: (id: string, height: number) => void;
   onSelect: (id: string) => void;
   lanes: Lane[];
   inputs?: ConditionInput[];
@@ -104,6 +128,7 @@ const Card = memo(function Card({
   durationMs?: number;
   collection?: FlowStep["collection"];
 }) {
+  const ref = useNodeHeight<HTMLButtonElement>(node.id, onResize);
   const join = node.kind === "parallel";
   const finished = lanes.filter((lane) => lane.status === "completed").length;
   const route = [...node.path]
@@ -118,13 +143,13 @@ const Card = memo(function Card({
 
   return (
     <button
+      ref={ref}
       className={`flow-step ${node.kind === "task" ? "flow-task" : ""} ${selected ? "selected" : ""}`}
       data-status={status}
       style={{
         left: bounds.x,
         top: bounds.y,
         width: bounds.width,
-        height: bounds.height,
       }}
       aria-label={`Step ${node.id}, ${node.kind}, ${status}`}
       aria-pressed={selected}
@@ -462,19 +487,21 @@ export const FlowOverview = memo(function FlowOverview({
           node.kind === "jev" &&
           tracesById.has(run.steps[node.id]?.traceId ?? "");
         const w = captured ? 1120 : 360,
-          h = captured
-            ? heights[node.id] ?? 640
-            : node.kind === "parallel"
-              ? 190 +
-                (node.description ? 64 : 0) +
-                Math.min(4, (node.lanes ?? node.dependencies).length) * 32
-              : (node.description ? 244 : 172) +
-                (node.kind === "branch"
-                  ? 110 +
-                    Math.min(3, inputsByStep.get(node.id)?.length ?? 0) * 24
-                  : node.kind === "task"
-                    ? 130
-                    : 0);
+          h =
+            heights[node.id] ??
+            (captured
+              ? 640
+              : node.kind === "parallel"
+                ? 190 +
+                  (node.description ? 64 : 0) +
+                  Math.min(4, (node.lanes ?? node.dependencies).length) * 32
+                : (node.description ? 244 : 172) +
+                  (node.kind === "branch"
+                    ? 110 +
+                      Math.min(3, inputsByStep.get(node.id)?.length ?? 0) * 24
+                    : node.kind === "task"
+                      ? 130
+                      : 0));
         const parents = (links.get(node.id) ?? [])
           .map((id) => points.get(id)!)
           .filter(Boolean);
@@ -699,6 +726,7 @@ export const FlowOverview = memo(function FlowOverview({
                     decision={run.steps[n.id]?.decision}
                     selected={selected === n.id}
                     bounds={p}
+                    onResize={onResize}
                     onSelect={setSelected}
                     inputs={inputsByStep.get(n.id)}
                     data={run.steps[n.id]?.data}
