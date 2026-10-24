@@ -116,6 +116,7 @@ const Card = memo(function Card({
   data,
   durationMs,
   collection,
+  loop,
   collectionView,
   onCollectionChange,
   expansionId,
@@ -132,12 +133,17 @@ const Card = memo(function Card({
   data?: FlowStep["data"];
   durationMs?: number;
   collection?: FlowStep["collection"];
+  loop?: FlowStep["loop"];
   collectionView?: CollectionView;
   onCollectionChange: (id: string, view: CollectionView) => void;
   expansionId: string;
 }) {
   const ref = useNodeHeight<HTMLElement>(node.id, onResize);
   const join = node.kind === "parallel";
+  const repeated = node.kind === "map" || node.kind === "loop";
+  const unit = node.kind === "loop" ? "Iteration" : "Item";
+  const completedItems =
+    collection?.items.filter((item) => item.status === "completed").length ?? 0;
   const finished = lanes.filter((lane) => lane.status === "completed").length;
   const route = [...node.path]
     .reverse()
@@ -182,6 +188,8 @@ const Card = memo(function Card({
             >
               {join || node.kind === "merge" ? (
                 <path d="M4 5h4l5 7h7M4 19h4l5-7m4-3 3 3-3 3" />
+              ) : node.kind === "loop" ? (
+                <path d="M20 7a8 8 0 1 0 0 10M20 3v5h-5" />
               ) : node.kind === "map" ? (
                 <>
                   <rect x="8" y="3" width="12" height="5" rx="1" />
@@ -222,28 +230,48 @@ const Card = memo(function Card({
         {node.description && (
           <span className="flow-step-description">{node.description}</span>
         )}
-        {node.kind === "map" && (
+        {repeated && (
           <span className="flow-map-progress">
             <strong>
-              {collection
-                ? `${collection.items.filter((item) => item.status === "completed").length} of ${collection.total} complete`
-                : "Waiting for collection"}
+              {node.kind === "loop"
+                ? `${completedItems} iteration${completedItems === 1 ? "" : "s"} completed`
+                : collection
+                  ? `${completedItems} of ${collection.total} complete`
+                  : "Waiting for collection"}
             </strong>
-            {collection && (
+            {loop ? (
               <span>
-                {
-                  collection.items.filter((item) => item.status === "running")
-                    .length
-                }{" "}
-                running ·{" "}
-                {
-                  collection.items.filter((item) => item.status === "waiting")
-                    .length
-                }{" "}
-                queued · up to {collection.concurrency} concurrent
+                {loop.stopReason === "limit"
+                  ? "Iteration limit reached · incomplete"
+                  : loop.stopReason === "condition"
+                    ? "Condition is false · finished"
+                    : `Up to ${loop.maxIterations} iteration${loop.maxIterations === 1 ? "" : "s"}`}
               </span>
+            ) : (
+              collection && (
+                <span>
+                  {
+                    collection.items.filter((item) => item.status === "running")
+                      .length
+                  }{" "}
+                  running ·{" "}
+                  {
+                    collection.items.filter((item) => item.status === "waiting")
+                      .length
+                  }{" "}
+                  queued · up to {collection.concurrency} concurrent
+                </span>
+              )
             )}
-            <small>Explore an item's connected flow below</small>
+            {node.kind === "loop" && node.conditionRule && (
+              <code>
+                Continue while {formatFlowCondition(node.conditionRule)}
+              </code>
+            )}
+            <small>
+              Explore {node.kind === "loop" ? "an iteration's" : "an item's"}{" "}
+              connected flow below
+            </small>
           </span>
         )}
         {(node.kind === "task" || node.kind === "merge") && (
@@ -349,11 +377,13 @@ const Card = memo(function Card({
                     : "Final outcome"
                 : node.kind === "merge" && decision !== undefined
                   ? `Selected ${decision ? "then" : "else"} value · continue`
-                  : decision !== undefined
-                    ? decision
-                      ? "Condition met · then"
-                      : "Condition not met · else"
-                    : stateLabel}
+                  : node.kind === "loop"
+                    ? stateLabel
+                    : decision !== undefined
+                      ? decision
+                        ? "Condition met · then"
+                        : "Condition not met · else"
+                      : stateLabel}
           </small>
         </span>
         {node.kind === "jev" && (
@@ -364,12 +394,12 @@ const Card = memo(function Card({
           </small>
         )}
       </button>
-      {node.kind === "map" && (
+      {repeated && (
         <div className="flow-collection-controls" data-diagram-scroll>
           <label>
-            Collection item
+            {node.kind === "loop" ? "Iteration" : "Collection item"}
             <select
-              aria-label={`Collection item for ${node.title ?? node.id}`}
+              aria-label={`${node.kind === "loop" ? "Iteration" : "Collection item"} for ${node.title ?? node.id}`}
               value={itemIndex}
               disabled={!collection?.total}
               onChange={(event) =>
@@ -379,10 +409,14 @@ const Card = memo(function Card({
                 })
               }
             >
-              {!collection?.total && <option value={0}>No items</option>}
+              {!collection?.total && (
+                <option value={0}>
+                  {node.kind === "loop" ? "No iterations" : "No items"}
+                </option>
+              )}
               {collection?.items.map((item) => (
                 <option key={item.index} value={item.index}>
-                  Item {item.index + 1} · {item.status}
+                  {unit} {item.index + 1} · {item.status}
                 </option>
               ))}
             </select>
@@ -770,7 +804,13 @@ export const FlowOverview = memo(function FlowOverview({
             <div
               ref={inline ? undefined : canvas}
               className="flow-overview-canvas"
-              style={{ width: layout.width, height: layout.height }}
+              style={{
+                width: layout.width,
+                height: layout.height,
+                // Inline views have no camera to account for negative bounds.
+                // Keep nested previews and their external arrows in the frame.
+                transform: inline ? `translateX(${-layout.left}px)` : undefined,
+              }}
             >
               <svg
                 width={layout.width}
@@ -839,7 +879,11 @@ export const FlowOverview = memo(function FlowOverview({
                         markerEnd={`url(#arrow-${run.id})`}
                       />
                       <text x={endX + 14} y={area.y - 20}>
-                        Selected item {(collectionViews[id]?.index ?? 0) + 1}
+                        {definition.nodes.find((n) => n.id === id)?.kind ===
+                        "loop"
+                          ? "Selected iteration"
+                          : "Selected item"}{" "}
+                        {(collectionViews[id]?.index ?? 0) + 1}
                       </text>
                     </g>
                   );
@@ -876,6 +920,7 @@ export const FlowOverview = memo(function FlowOverview({
                     durationMs={run.steps[n.id]?.durationMs}
                     lanes={parallelLanes.get(n.id) ?? []}
                     collection={run.steps[n.id]?.collection}
+                    loop={run.steps[n.id]?.loop}
                     collectionView={collectionViews[n.id]}
                     onCollectionChange={changeCollection}
                     expansionId={`collection-${run.id}-${n.id}`}
@@ -924,6 +969,21 @@ export const FlowOverview = memo(function FlowOverview({
                       : ""}
                   </span>
                   {node.description && <p>{node.description}</p>}
+                  {node.kind === "loop" && (
+                    <div className="flow-task-details">
+                      <p>
+                        {step.loop?.stopReason === "limit"
+                          ? "Iteration limit reached. The final state is incomplete and downstream steps did not run."
+                          : step.loop?.stopReason === "condition"
+                            ? "The continuation condition became false. The loop returned its final state."
+                            : "Iterations execute sequentially, carrying state forward."}
+                      </p>
+                      <DiagramContent
+                        value={step.data ?? null}
+                        label="Loop initial and latest state"
+                      />
+                    </div>
+                  )}
                   {(node.kind === "task" || node.kind === "merge") && (
                     <div className="flow-task-details">
                       <p className="muted">
@@ -1015,8 +1075,12 @@ export const FlowOverview = memo(function FlowOverview({
                       {step.decision === undefined
                         ? "Not evaluated"
                         : step.decision
-                          ? "Passed · then route"
-                          : "Not met · else route"}
+                          ? node.kind === "loop"
+                            ? "Continue"
+                            : "Passed · then route"
+                          : node.kind === "loop"
+                            ? "Stop"
+                            : "Not met · else route"}
                     </p>
                   )}
                   <p className="muted">
@@ -1083,6 +1147,7 @@ const InlineItemFlow = memo(function InlineItemFlow({
 }) {
   const ref = useRef<HTMLElement>(null);
   const item = collection.items[index];
+  const unit = node.kind === "loop" ? "iteration" : "collection item";
   const [direction, setDirection] = useState(1);
   const cycleItem = (direction: number) => {
     if (collection.total <= 1) return;
@@ -1120,14 +1185,14 @@ const InlineItemFlow = memo(function InlineItemFlow({
       ref={ref}
       id={id}
       className="flow-collection-expansion"
-      aria-label={`Selected item flow for ${node.title ?? node.id}`}
+      aria-label={`Selected ${unit} flow for ${node.title ?? node.id}`}
       style={{ left: bounds.x, top: bounds.y }}
     >
       <button
         className="flow-item-arrow flow-item-previous"
-        aria-label="Previous collection item"
+        aria-label={`Previous ${unit}`}
         aria-controls={`${id}-item`}
-        title="Previous collection item"
+        title={`Previous ${unit}`}
         disabled={collection.total <= 1}
         onClick={() => cycleItem(-1)}
       >
@@ -1146,9 +1211,11 @@ const InlineItemFlow = memo(function InlineItemFlow({
       <div className="flow-item-frame">
         <header className="flow-collection-heading">
           <div>
-            <span className="eyebrow">Selected collection item</span>
+            <span className="eyebrow">Selected {unit}</span>
             <h3 aria-live="polite" aria-atomic="true">
-              {node.title ?? node.id} · Item {index + 1} of {collection.total}
+              {node.title ?? node.id} ·{" "}
+              {node.kind === "loop" ? "Iteration" : "Item"} {index + 1} of{" "}
+              {collection.total}
             </h3>
             <small>{item?.status ?? "waiting"}</small>
           </div>
@@ -1182,9 +1249,9 @@ const InlineItemFlow = memo(function InlineItemFlow({
       </div>
       <button
         className="flow-item-arrow flow-item-next"
-        aria-label="Next collection item"
+        aria-label={`Next ${unit}`}
         aria-controls={`${id}-item`}
-        title="Next collection item"
+        title={`Next ${unit}`}
         disabled={collection.total <= 1}
         onClick={() => cycleItem(1)}
       >

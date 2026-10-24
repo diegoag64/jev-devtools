@@ -189,3 +189,26 @@ This is a fragment inside a definition with prior `flags`, `document`, `cheapRec
 The drawer generates a Selected result merge, highlights only its selected incoming path, and captures its value with normal redaction. Generated merge IDs are not an application contract; merge nodes count toward existing limits. Use a matching server/drawer build for the new `if`/`merge` node kinds. Check both paths, a boundary and cancellation with samples before live calls.
 
 The repository's `cookbooks/sde-cascade` provides a complete local example at `/?cookbook=sde-cascade`: cheap extraction → runtime field verification → **any per-field probability > 0.70** → stronger extractor or keep cheap → shared comparison. The overall judge is displayed but excluded from the gate. Empty fields receive only `absence_wrong`. All four cases use synthetic probabilities and local extractor fixtures; no real provider performance or original evaluation is reproduced. Do not turn on live extraction just by adding an API key.
+
+## Local experiment: bounded loops
+
+Check installed declarations: `flow.loop()` is unreleased and absent from npm 0.3.0. Syntax:
+
+```ts
+const final = flow.loop("repeat", {
+  initial: { count: 0 }, input: { increment: 1 },
+  while: state => state.get("count").lt(3), maxIterations: 3,
+}, iteration => iteration.task("advance", {
+  input: iteration.input,
+  run: ({ state, context }) => ({ count: state.count + context.increment }),
+}), { title: "Count up to three" });
+return flow.output("done", final);
+```
+
+The predicate/body callbacks build once and must not perform side effects. `while` returns an expression of its own state; pass needed outer values into the initial state. It is checked before every iteration, including the first and after the last allowed body. Initially false means zero iterations. `iteration.input` provides `{ state, index, context }`, with zero-based index and context from explicit `input`. The body returns the same state type as an expression; state/context must be JSON-compatible. Use tasks to compute application predicates and `if()` for returning paths. No outer-scope references or terminal outputs inside the body.
+
+Require `maxIterations` (1–64). If the condition is still true at the limit, `FlowLoopLimitError` rejects the run, records an incomplete loop and blocks continuation. Never present the last state as a completed classification. Preserve completed iteration details on errors/cancellation. There is no durable execution, resume or automatic task retry.
+
+Loops may contain one level of map, plus tasks, requests, conditions and parallel lanes. Nested loops, loops in maps and nested maps remain unsupported. All template nodes count toward the 256-node definition cap; the root execution shares a 1,024-expanded-step budget across iterations and collections. A fresh per-iteration budget would bypass that guarantee. Use a matching server and drawer. Loop cards reuse inline expansion/navigation: select an iteration → View Flow → select a nested frontier item if present. Input/latest state and child outcomes use normal redaction and capture limits.
+
+`cookbooks/hierarchical-classification` is an executable sample at `/?cookbook=hierarchical-classification`. It follows the official executable algorithm’s **separate concurrent requests per frontier node**, despite introductory prose describing batching. Preserve geometric-mean decision-edge scores, epsilon 1e-9, single-child inference bypass, completed-leaf retention and top-k pruning. Samples are a small authored taxonomy and synthetic probabilities, not a replay of official benchmark data. Verify recovery, no-request paths, an initial leaf and intentional depth exhaustion before considering live execution.

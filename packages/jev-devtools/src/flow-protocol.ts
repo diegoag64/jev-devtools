@@ -24,6 +24,7 @@ export type FlowNode = FlowDisplay & {
     | "jev"
     | "task"
     | "map"
+    | "loop"
     | "if"
     | "merge"
     | "branch"
@@ -66,6 +67,7 @@ export type FlowStep = {
   /** Optional bounded, redacted task input/output or selected merge value; never executable code. */
   data?: Json;
   captureWarnings?: string[];
+  loop?: { maxIterations: number; stopReason?: "condition" | "limit" };
   collection?: {
     total: number;
     concurrency: number;

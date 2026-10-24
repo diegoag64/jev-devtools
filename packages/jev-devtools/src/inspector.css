@@ -1362,6 +1362,7 @@
 .flow-connections {
   position: absolute;
   inset: 0;
+  overflow: visible;
   color: #c0b8c4;
   pointer-events: none;
 }

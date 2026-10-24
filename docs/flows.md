@@ -303,3 +303,32 @@ This snippet belongs inside a definition with `assessment` and `cheapRecord` ref
 - Numeric expressions now support `.gt(numberOrReference)` for strict greater-than, alongside `.lt()` and `.gte()`. The condition card preserves the actual operator. In the SDE recipe, exactly 0.70 does **not** escalate.
 
 New `if` and `merge` kinds extend the version-1 flow records; use the matching updated server and drawer. Older captured flows remain readable. For four complete no-key samples, see the [SDE cascade cookbook](../cookbooks/sde-cascade/README.md).
+
+## Stateful iteration: flow.loop() (unreleased experiment)
+
+`flow.loop(id, { initial, input, while, maxIterations }, buildIteration, display?)` returns the final state as a typed `FlowExpression<S>`. Available in this checkout, not npm 0.3.0.
+
+```ts
+const final = flow.loop("count", {
+  initial: { count: 0 },
+  input: { increment: 1 },
+  while: state => state.get("count").lt(3),
+  maxIterations: 3,
+}, iteration => iteration.task("advance", {
+  input: iteration.input,
+  run: ({ state, context }) => ({ count: state.count + context.increment }),
+}), { title: "Count up to three" });
+return flow.output("done", final);
+```
+
+The `while` callback builds an inspectable expression **once**, using only its state reference and literal thresholds. It is not an arbitrary runtime predicate. Put computed Boolean state fields in a task when the continuation rule needs application logic. Outer step references cannot be captured by the predicate; include necessary values in the initial state. The body is also built once; execute side effects only in tasks or Jev requests.
+
+Before each iteration, the runner checks the condition against the current state. An initially false condition runs zero iterations and returns the initial state. Each iteration sees `{ state, index, context }` through `iteration.input`; index is zero-based and context resolves the explicit `input` template. Return an expression of the same state type. Each next state is a detached JSON-compatible snapshot. Direct outer references, terminal `output()`/`branch()` bodies and non-JSON states are rejected. Use `if()` within an iteration when paths should rejoin.
+
+`maxIterations` is required, integer 1–64. After the last permitted iteration, the condition is checked again: false means normal completion; true throws exported `FlowLoopLimitError`. The loop records `stopReason: "limit"`, keeps completed iterations inspectable, and blocks shared downstream work. A partial state is not returned as a successful final result. Task/request failures and cancellation also stop iteration. No automatic task retry, fallback, persistence or resume is added; remote side effects still require cooperative cancellation.
+
+An iteration can contain tasks, Jev requests, `if()`, parallel lanes and **one level of `map()`**. Nested loops, loops inside maps and nested maps are unsupported. Pass outer data through `input`. Loop and collection templates count recursively toward the 256-node definition limit. The entire run shares the 1,024-expanded-step budget across sibling loops and all nested item executions; each program invocation reserves its own nodes and a map reserves all its immediate item programs before dispatch. The budget never resets at iteration boundaries. Exceeding it fails explicitly rather than truncating the work. The existing per-map concurrency limit is not a global request-rate limiter.
+
+In the drawer, a **Loop** card shows completed iterations, the continuation rule and its stop reason. Choose **Iteration → View Flow** to reveal that iteration’s complete connected diagram underneath. Previous/next iteration arrows preserve the parent graph and camera. A collection within the selected iteration can expose its own item flow. Initial/latest states and the condition’s captured incoming values are available in Details; each iteration’s returned state is its captured outcome. Captures remain bounded/redacted, so a large state may be truncated in the inspector even though runtime execution uses the full value. Request links include both iteration and item paths and retain distinct execution IDs. New loop metadata extends version-1 records; use the matching updated drawer and server.
+
+Try the [hierarchical classification cookbook](../cookbooks/hierarchical-classification/README.md), including beam recovery, deterministic paths, a zero-iteration leaf, and an intentional iteration-limit failure.

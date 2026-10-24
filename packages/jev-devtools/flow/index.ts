@@ -159,6 +159,13 @@ type Step = {
   timeoutMs?: number;
   answerNames?: Set<string>;
   mergeOf?: string;
+  loop?: {
+    initial: unknown;
+    context: unknown;
+    when: FlowExpression<boolean>;
+    maxIterations: number;
+    program: ReturnType<typeof defineJevFlow<unknown>>;
+  };
   collection?: {
     items: unknown;
     context: unknown;
@@ -188,6 +195,30 @@ export type FlowRunOptions = {
   devtools?: FlowObserver;
   signal?: AbortSignal;
 };
+// Nested programs share a reservation budget without exposing execution internals in the API.
+const executionBudgets = new WeakMap<FlowRunOptions, { used: number }>();
+function withBudget(
+  options: FlowRunOptions,
+  budget: { used: number },
+): FlowRunOptions {
+  executionBudgets.set(options, budget);
+  return options;
+}
+function definitionSize(definition: FlowDefinition): number {
+  return definition.nodes.reduce(
+    (count, node) =>
+      count +
+      1 +
+      (node.itemDefinition ? definitionSize(node.itemDefinition) : 0),
+    0,
+  );
+}
+export class FlowLoopLimitError extends Error {
+  readonly name = "FlowLoopLimitError";
+  constructor() {
+    super("Loop condition is still true at maxIterations");
+  }
+}
 const plain = (v: unknown): v is Record<string, unknown> =>
   !!v &&
   typeof v === "object" &&
@@ -390,6 +421,20 @@ export interface FlowBuilder<T> {
     ) => FlowExpression<O>,
     display?: FlowDisplay,
   ): FlowExpression<O[]>;
+  /** Pre-test loop with JSON state, explicit context and a required iteration limit. */
+  loop<S, C>(
+    id: string,
+    options: {
+      initial: S | FlowExpression<S>;
+      input: C;
+      while: (state: FlowExpression<NoInfer<S>>) => FlowExpression<boolean>;
+      maxIterations: number;
+    },
+    build: (
+      iteration: FlowBuilder<{ state: S; index: number; context: Resolved<C> }>,
+    ) => FlowExpression<NoInfer<S>>,
+    display?: FlowDisplay,
+  ): FlowExpression<S>;
   /** Execute one value-returning path, then continue with its typed result. */
   if<A, B>(
     id: string,
@@ -650,7 +695,9 @@ export function defineJevFlow<T>(
         }
         if (program.definition.nodes.some((n) => n.kind === "map"))
           throw new Error("Nested maps are not supported");
-        templateSteps += program.definition.nodes.length;
+        if (program.definition.nodes.some((n) => n.kind === "loop"))
+          throw new Error("Loops inside maps are not supported");
+        templateSteps += definitionSize(program.definition);
         if (ids.size + templateSteps > 256)
           throw new Error(
             "Flows support at most 256 steps including map templates",
@@ -665,6 +712,82 @@ export function defineJevFlow<T>(
           program.definition;
         return new FlowExpression({ op: "ref", id }, owner) as never;
       },
+      loop(id, config, buildIteration, display) {
+        if (
+          !Number.isInteger(config.maxIterations) ||
+          config.maxIterations < 1 ||
+          config.maxIterations > 64
+        )
+          throw new Error("Loop maxIterations must be an integer from 1 to 64");
+        const gateOwner = {};
+        const when = config.while(
+          new FlowExpression({ op: "input" }, gateOwner) as never,
+        );
+        if (!(when instanceof FlowExpression) || owners.get(when) !== gateOwner)
+          throw new Error("Loop while must be an expression of its state");
+        inspectAst(when.ast, () => {
+          throw new Error("Loop while cannot reference outer steps");
+        });
+        const frozen = mapValue(
+          { initial: config.initial, context: config.input },
+          (e) => e,
+        ) as { initial: unknown; context: unknown };
+        const step = add(id, "loop", frozen, display);
+        const parentScope = activeBlock;
+        activeBlock = undefined;
+        let program: ReturnType<typeof defineJevFlow<unknown>>;
+        try {
+          program = defineJevFlow<unknown>(
+            `Iteration · ${display?.title ?? id}`.slice(0, 100),
+            (iteration) => {
+              const result = buildIteration(iteration as never);
+              let outputId = "iteration-result";
+              for (
+                let suffix = 1;
+                builderIds.get(iteration)!.has(outputId);
+                suffix++
+              )
+                outputId = `iteration-result-${suffix}`;
+              return iteration.output(outputId, result, {
+                title: "Next iteration state",
+              });
+            },
+          );
+        } finally {
+          activeBlock = parentScope;
+        }
+        if (program.definition.nodes.some((n) => n.kind === "loop"))
+          throw new Error("Nested loops are not supported");
+        templateSteps += definitionSize(program.definition);
+        if (ids.size + templateSteps > 256)
+          throw new Error(
+            "Flows support at most 256 steps including iteration templates",
+          );
+        step.loop = {
+          ...frozen,
+          when,
+          maxIterations: config.maxIterations,
+          program,
+        };
+        const node = nodes.find((n) => n.id === id)!;
+        node.itemDefinition = program.definition;
+        // Point displayed gate inputs at the loop's captured latest state.
+        // Execution still evaluates the original isolated state expression.
+        const referenceState = (ast: Ast): Ast => {
+          if (ast.op === "input") return { op: "ref", id };
+          if (ast.op === "get")
+            return { ...ast, from: referenceState(ast.from) };
+          if ("args" in ast)
+            return { ...ast, args: ast.args.map(referenceState) };
+          return ast;
+        };
+        node.conditionRule = conditionRule(
+          referenceState(when.ast),
+          new Set(),
+          new Set([id]),
+        );
+        return new FlowExpression({ op: "ref", id }, owner) as never;
+      },
       if(id, paths, display) {
         if (!(paths.when instanceof FlowExpression))
           throw new Error("if requires a condition expression");
@@ -677,7 +800,10 @@ export function defineJevFlow<T>(
           new Set(nodes.filter((n) => n.kind === "jev").map((n) => n.id)),
           new Set(
             nodes
-              .filter((n) => n.kind === "task" || n.kind === "merge")
+              .filter(
+                (n) =>
+                  n.kind === "task" || n.kind === "merge" || n.kind === "loop",
+              )
               .map((n) => n.id),
           ),
         );
@@ -731,7 +857,10 @@ export function defineJevFlow<T>(
           new Set(nodes.filter((n) => n.kind === "jev").map((n) => n.id)),
           new Set(
             nodes
-              .filter((n) => n.kind === "task" || n.kind === "merge")
+              .filter(
+                (n) =>
+                  n.kind === "task" || n.kind === "merge" || n.kind === "loop",
+              )
               .map((n) => n.id),
           ),
         );
@@ -880,7 +1009,12 @@ export function defineJevFlow<T>(
       };
       const started = performance.now(),
         values = new Map<string, unknown>();
-      let expandedSteps = nodes.length;
+      const budget = executionBudgets.get(options) ?? { used: nodes.length };
+      const reserve = (count: number) => {
+        if (budget.used + count > 1024)
+          throw new RangeError("Flow exceeds 1024 expanded steps");
+        budget.used += count;
+      };
       let observer: ReturnType<FlowObserver["startFlow"]>;
       try {
         observer = options.devtools?.startFlow(
@@ -1018,6 +1152,99 @@ export function defineJevFlow<T>(
               );
               abortCheck();
               state.data = { input, output: jsonSnapshot(value) };
+            } else if (step.kind === "loop") {
+              const config = step.loop!;
+              const initial = jsonSnapshot(
+                mapValue(config.initial, (e) => evaluate(e.ast, data, values)),
+              );
+              const context = jsonSnapshot(
+                mapValue(config.context, (e) => evaluate(e.ast, data, values)),
+              );
+              let current = jsonSnapshot(initial);
+              state.collection = { total: 0, concurrency: 1, items: [] };
+              state.loop = { maxIterations: config.maxIterations };
+              state.data = { input: initial, output: current };
+              for (let index = 0; ; index++) {
+                abortCheck();
+                const decision = evaluate(config.when.ast, current, new Map());
+                if (typeof decision !== "boolean")
+                  throw new TypeError(
+                    "Loop condition did not return a boolean",
+                  );
+                state.decision = decision;
+                if (!decision) {
+                  state.loop = { ...state.loop, stopReason: "condition" };
+                  break;
+                }
+                if (index === config.maxIterations) {
+                  state.loop = { ...state.loop, stopReason: "limit" };
+                  throw new FlowLoopLimitError();
+                }
+                reserve(config.program.definition.nodes.length);
+                state.collection = {
+                  ...state.collection,
+                  total: index + 1,
+                  items: [
+                    ...state.collection!.items,
+                    { index, status: "waiting" },
+                  ],
+                };
+                const updateIteration = (child: FlowRun) => {
+                  state.collection = {
+                    ...state.collection!,
+                    items: state.collection!.items.map((item) =>
+                      item.index === index
+                        ? {
+                            index,
+                            status:
+                              child.status === "pending"
+                                ? "running"
+                                : child.status === "success"
+                                  ? "completed"
+                                  : child.status,
+                            run: child,
+                          }
+                        : item,
+                    ),
+                  };
+                  emit();
+                };
+                const result = await config.program.run(
+                  { state: current, index, context },
+                  withBudget(
+                    {
+                      client: options.client,
+                      signal: controller.signal,
+                      devtools: {
+                        startFlow(_definition, child) {
+                          updateIteration(child);
+                          return {
+                            update: updateIteration,
+                            request(link, onTrace, callback) {
+                              return observer
+                                ? observer.request(
+                                    {
+                                      ...link,
+                                      runId: run.id,
+                                      stepId: `${step.id}/${index}/${link.stepId}`,
+                                    },
+                                    onTrace,
+                                    callback,
+                                  )
+                                : callback();
+                            },
+                          };
+                        },
+                      },
+                    },
+                    budget,
+                  ),
+                );
+                abortCheck();
+                current = jsonSnapshot(result.value);
+                state.data = { input: initial, output: current };
+              }
+              value = current;
             } else if (step.kind === "map") {
               const config = step.collection!;
               const items = jsonSnapshot(
@@ -1030,10 +1257,7 @@ export function defineJevFlow<T>(
                 throw new TypeError("Map items must be an array");
               if (items.length > config.maxItems)
                 throw new RangeError("Map exceeds maxItems");
-              expandedSteps +=
-                items.length * config.program.definition.nodes.length;
-              if (expandedSteps > 1024)
-                throw new RangeError("Flow exceeds 1024 expanded steps");
+              reserve(items.length * config.program.definition.nodes.length);
               state.collection = {
                 total: items.length,
                 concurrency: config.concurrency,
@@ -1074,33 +1298,36 @@ export function defineJevFlow<T>(
                   try {
                     const result = await config.program.run(
                       { item: items[index], index, context },
-                      {
-                        client: options.client,
-                        signal: controller.signal,
-                        devtools: {
-                          startFlow(_definition, child) {
-                            updateItem(index, child);
-                            return {
-                              update(child) {
-                                updateItem(index, child);
-                              },
-                              request(link, onTrace, callback) {
-                                return observer
-                                  ? observer.request(
-                                      {
-                                        ...link,
-                                        runId: run.id,
-                                        stepId: `${step.id}/${index}/${link.stepId}`,
-                                      },
-                                      onTrace,
-                                      callback,
-                                    )
-                                  : callback();
-                              },
-                            };
+                      withBudget(
+                        {
+                          client: options.client,
+                          signal: controller.signal,
+                          devtools: {
+                            startFlow(_definition, child) {
+                              updateItem(index, child);
+                              return {
+                                update(child) {
+                                  updateItem(index, child);
+                                },
+                                request(link, onTrace, callback) {
+                                  return observer
+                                    ? observer.request(
+                                        {
+                                          ...link,
+                                          runId: run.id,
+                                          stepId: `${step.id}/${index}/${link.stepId}`,
+                                        },
+                                        onTrace,
+                                        callback,
+                                      )
+                                    : callback();
+                                },
+                              };
+                            },
                           },
                         },
-                      },
+                        budget,
+                      ),
                     );
                     results[index] = result.value;
                   } catch (error) {
