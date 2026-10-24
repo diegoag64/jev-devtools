@@ -906,3 +906,50 @@ a {
 .structure-result th, .structure-result td { border-bottom: 1px solid #403442; padding: 10px; vertical-align: top; }
 .structure-result td:nth-child(2) { min-width: 200px; }
 @media (max-width: 720px) { .structure-comparison { grid-template-columns: 1fr; } }
+
+.memory-comparisons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 12px;
+  margin: 20px 0 28px;
+}
+.memory-comparison {
+  padding: 18px;
+  border: 1px solid var(--line, #37303b);
+  border-radius: 6px;
+  background: #17111a;
+}
+.memory-result {
+  overflow-wrap: anywhere;
+}
+.memory-result dl {
+  margin: 12px 0;
+}
+.memory-result dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  padding: 6px 0;
+}
+.memory-result dt {
+  color: #b8aabc;
+}
+.memory-result dd {
+  margin: 0;
+}
+.memory-result .memory-saved {
+  border-top: 1px solid var(--line, #37303b);
+  padding: 12px 0;
+}
+.memory-saved dl > div {
+  display: block;
+}
+.memory-saved dd {
+  margin-top: 8px;
+}
+.memory-probabilities {
+  margin-top: 14px;
+}
+.memory-probabilities summary {
+  cursor: pointer;
+}
