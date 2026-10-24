@@ -78,7 +78,6 @@ export function jevInspectorServer(
   const inspector = createJevDevtools({
     enabled: true,
     origin: "http://127.0.0.1:4182",
-    redact: (path, value) => (path.at(-1) === "email" ? "[redacted]" : value),
   });
   const running = new Map<
     string,

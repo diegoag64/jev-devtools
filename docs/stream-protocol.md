@@ -32,7 +32,9 @@ The client validates envelope versions, revision continuity, unique IDs and whet
 
 The browser applies and validates every event in arrival order, then publishes the latest accumulated history to React once per animation frame. It does not skip protocol revisions or discard independent traces. Fast pending-to-complete transitions can share one paint; requests still pending at publication remain visible as pending. A 100 ms timeout is a fallback when animation frames are suspended (background browser timer throttling can delay it). Only one latest array is queued, and publication cancels the other scheduled callback. Invalid data discards queued publication before resynchronizing; unmount cancels both publication callbacks and reconnect retries. Connection status updates remain immediate.
 
-Authorization, same-origin enforcement, server-derived session scope, redaction and capture limits are unchanged. No raw SDK options or unredacted request bodies are added to the transport.
+Authorization, same-origin enforcement, server-derived session scope and capture limits remain in force. No raw SDK options are added to the transport. Credential masking is mandatory; optional personal-data masking follows the [session redaction policy](integration.md#redaction-policy).
+
+Updated servers add `redactAdditionalSensitiveData: boolean` to configuration responses and trace snapshot/delta payloads. A settings-only change emits `event: settings` with `{ "redactAdditionalSensitiveData": boolean }` on the same trace stream; it does not advance the trace revision or change trace history. Slow readers receive the latest setting on their next writable turn. Reconnect snapshots include the current value. Older readers can ignore the additional field/event. The drawer applies settings from SSE rather than an asynchronous PUT response, so a late response cannot replace a newer streamed value.
 
 ## Remaining costs
 

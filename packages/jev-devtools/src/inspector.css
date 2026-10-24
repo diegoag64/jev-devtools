@@ -144,6 +144,28 @@
   gap: 7px;
   padding: 0 12px 12px;
 }
+.jev-devtools .capture-settings {
+  padding: 0 12px 12px;
+  font-size: 11px;
+}
+.jev-devtools .capture-settings label {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  cursor: pointer;
+}
+.jev-devtools .capture-settings input {
+  /* A native checkbox must not inherit the full-width text-field sizing. */
+  width: auto;
+  padding: 0;
+  margin: 2px 0 0;
+  flex: none;
+  accent-color: #e551ba;
+}
+.jev-devtools .capture-settings p {
+  margin: 5px 0 0;
+  color: #a89bac;
+}
 .jev-devtools .list-filters input {
   min-width: 0;
 }
@@ -473,7 +495,7 @@
     flex-direction: column;
   }
   .jev-devtools .request-list {
-    flex-basis: 140px;
+    flex-basis: 180px;
     flex-shrink: 0;
     border-right: 0;
     border-bottom: 1px solid #302634;

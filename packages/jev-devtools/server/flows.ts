@@ -10,14 +10,16 @@ export class FlowRecorder {
   private runs = new Map<string, FlowRun>();
   private definitions = new Map<string, FlowDefinition>();
   private sessions = new Map<string, string>();
+  private policies = new Map<string, boolean>();
   private revisions = new Map<string, number>();
   private revision = 0;
   private listeners = new Set<(sessions: Set<string>) => void>();
-  private itemCaptures = new WeakMap<FlowRun, FlowRun>();
-  private taskCaptures = new WeakMap<
-    object,
-    { data: Json; warnings: string[] }
-  >();
+  // Immutable snapshots may be shared, but captures made under different
+  // policies must never reuse one another's unredacted data.
+  private caches = [true, false].map(() => ({
+    items: new WeakMap<FlowRun, FlowRun>(),
+    tasks: new WeakMap<object, { data: Json; warnings: string[] }>(),
+  }));
   constructor(private options: CaptureOptions) {}
   subscribe(fn: (sessions: Set<string>) => void) {
     this.listeners.add(fn);
@@ -32,7 +34,12 @@ export class FlowRecorder {
       } catch {}
     }
   }
-  start(definition: FlowDefinition, run: FlowRun, session: string) {
+  start(
+    definition: FlowDefinition,
+    run: FlowRun,
+    session: string,
+    redactAdditional = true,
+  ) {
     if (!this.definitions.has(definition.id)) {
       const stored = structuredClone(definition);
       const redactRules = (
@@ -65,6 +72,7 @@ export class FlowRecorder {
     }
     this.runs.set(run.id, run);
     this.sessions.set(run.id, session);
+    this.policies.set(run.id, redactAdditional);
     this.revisions.set(run.id, ++this.revision);
     const sessions = new Set([session]);
     const limit = Math.max(1, Math.min(200, this.options.limit ?? 50));
@@ -76,9 +84,14 @@ export class FlowRecorder {
     this.prune();
     this.notify(sessions);
   }
-  private captureRun(run: FlowRun, prefix: string[] = []): FlowRun {
+  private captureRun(
+    run: FlowRun,
+    redactAdditional: boolean,
+    prefix: string[] = [],
+  ): FlowRun {
+    const cache = this.caches[redactAdditional ? 0 : 1];
     // Child updates are immutable snapshots; unchanged items need no recapture.
-    const previous = prefix.length ? this.itemCaptures.get(run) : undefined;
+    const previous = prefix.length ? cache.items.get(run) : undefined;
     if (previous) return previous;
     const stored = {
       ...run,
@@ -92,7 +105,7 @@ export class FlowRecorder {
                 ...item,
                 ...(item.run
                   ? {
-                      run: this.captureRun(item.run, [
+                      run: this.captureRun(item.run, redactAdditional, [
                         ...prefix,
                         "steps",
                         id,
@@ -106,9 +119,7 @@ export class FlowRecorder {
           if (step.data === undefined) return [id, { ...step }];
           const key = step.data;
           let captured =
-            key && typeof key === "object"
-              ? this.taskCaptures.get(key)
-              : undefined;
+            key && typeof key === "object" ? cache.tasks.get(key) : undefined;
           if (!captured) {
             const warnings = new Set<string>();
             let data: Json;
@@ -124,14 +135,14 @@ export class FlowRecorder {
                           value,
                         )
                     : undefined,
+                  redactAdditional,
                 ) ?? null;
             } catch {
               data = "[capture unavailable]";
               warnings.add("Task capture unavailable.");
             }
             captured = { data, warnings: [...warnings] };
-            if (key && typeof key === "object")
-              this.taskCaptures.set(key, captured);
+            if (key && typeof key === "object") cache.tasks.set(key, captured);
           }
           return [
             id,
@@ -152,23 +163,25 @@ export class FlowRecorder {
           this.options.redact
             ? (path, value) => this.options.redact!([...prefix, ...path], value)
             : undefined,
+          redactAdditional,
         );
       } catch {
         stored.value = "[capture unavailable]";
       }
     }
-    if (prefix.length) this.itemCaptures.set(run, stored);
+    if (prefix.length) cache.items.set(run, stored);
     return stored;
   }
   update(run: FlowRun) {
     if (!this.runs.has(run.id)) return; // Clear/eviction cannot resurrect pending runs.
-    this.runs.set(run.id, this.captureRun(run));
+    this.runs.set(run.id, this.captureRun(run, this.policies.get(run.id)!));
     this.revisions.set(run.id, ++this.revision);
     this.notify(new Set([this.sessions.get(run.id)!]));
   }
   private remove(id: string) {
     this.runs.delete(id);
     this.sessions.delete(id);
+    this.policies.delete(id);
     this.revisions.delete(id);
   }
   private prune() {

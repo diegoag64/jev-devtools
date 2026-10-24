@@ -153,6 +153,36 @@ try {
   assert.match(html, /One inspector/);
   assert.equal((await http("/api/jev-devtools")).status, 200);
   assert.deepEqual(await snapshot(), []);
+  assert.equal(
+    (await (await http("/api/jev-devtools")).json())
+      .redactAdditionalSensitiveData,
+    true,
+  );
+  assert.equal(
+    (
+      await http("/api/jev-devtools/settings", {
+        method: "PUT",
+        body: JSON.stringify({ redactAdditionalSensitiveData: false }),
+        headers: { "content-type": "application/json" },
+      })
+    ).status,
+    403,
+  );
+  assert.equal(
+    (
+      await http("/api/jev-devtools/settings", {
+        method: "PUT",
+        body: JSON.stringify({ redactAdditionalSensitiveData: false }),
+        headers: { origin, "content-type": "application/json" },
+      })
+    ).status,
+    200,
+  );
+  assert.equal(
+    (await (await http("/api/jev-devtools")).json())
+      .redactAdditionalSensitiveData,
+    false,
+  );
   const route = await http("/api/triage", {
     method: "POST",
     headers: { origin },
@@ -160,6 +190,19 @@ try {
   assert.equal(route.status, 200);
   assert.equal((await route.json()).category, "billing");
   const original = await completed("Route Handler");
+  // This example deliberately supplies a custom email redactor; it must remain
+  // active even after additional built-in redaction is disabled via Next's PUT.
+  assert.equal(original.request.state.email, "[redacted]");
+  assert.equal(
+    (
+      await http("/api/jev-devtools/settings", {
+        method: "PUT",
+        body: JSON.stringify({ redactAdditionalSensitiveData: true }),
+        headers: { origin, "content-type": "application/json" },
+      })
+    ).status,
+    200,
+  );
 
   // Submit the action field rendered by Next itself, as a progressive form POST.
   const actionField = html.match(/name="(\$ACTION_ID_[^"]+)"/);
@@ -224,17 +267,18 @@ try {
   );
   assert.deepEqual(await snapshot(), []);
   console.log(
-    "Next dev: route handler, Server Action, Server Component, reload retention, SSE, and clear passed.",
+    "Next dev: route handler, Server Action, Server Component, reload retention, SSE, redaction settings/custom policy, and clear passed.",
   );
   await stop();
   npm(["run", "build"], { cwd: app, env, stdio: "inherit" });
   start("start");
   await ready();
-  for (const path of ["", "/events", "/clear"]) {
+  for (const path of ["", "/events", "/clear", "/settings"]) {
     assert.equal(
       (
         await http("/api/jev-devtools" + path, {
-          method: path === "/clear" ? "DELETE" : "GET",
+          method:
+            path === "/clear" ? "DELETE" : path === "/settings" ? "PUT" : "GET",
           headers: { origin },
         })
       ).status,

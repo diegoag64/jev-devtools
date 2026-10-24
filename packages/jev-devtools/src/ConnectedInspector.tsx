@@ -10,7 +10,12 @@ import {
   type FlowHistory,
 } from "./flow-stream.js";
 const RetainedPanel = memo(JevPanel);
-type Snapshot = { traces: Trace[]; connection: string; flows: FlowHistory };
+type Snapshot = {
+  traces: Trace[];
+  connection: string;
+  flows: FlowHistory;
+  redactAdditionalSensitiveData?: boolean;
+};
 function endpointUrl(endpoint: string) {
   const url = new URL(endpoint, window.location.origin);
   if (
@@ -58,13 +63,20 @@ export default function ConnectedInspector({
       if (
         next.traces === latest.current.traces &&
         next.connection === latest.current.connection &&
-        next.flows === latest.current.flows
+        next.flows === latest.current.flows &&
+        next.redactAdditionalSensitiveData ===
+          latest.current.redactAdditionalSensitiveData
       )
         return;
       latest.current = next;
       if (visible.current) setSnapshot(latest.current);
     };
-    update({ traces: [], connection: "connecting", flows: emptyFlows });
+    update({
+      traces: [],
+      connection: "connecting",
+      flows: emptyFlows,
+      redactAdditionalSensitiveData: undefined,
+    });
     void (async () => {
       try {
         const url = endpointUrl(endpoint);
@@ -82,6 +94,10 @@ export default function ConnectedInspector({
         if (config.version !== 1 || !config.enabled)
           throw new Error("Unsupported inspector endpoint");
         if (!alive) return;
+        if (typeof config.redactAdditionalSensitiveData === "boolean")
+          update({
+            redactAdditionalSensitiveData: config.redactAdditionalSensitiveData,
+          });
         if (config.flows)
           disconnectFlows = connectFlowStream(url, (flows) =>
             update({ flows }),
@@ -90,6 +106,8 @@ export default function ConnectedInspector({
           url,
           (traces) => update({ traces }),
           (connection) => update({ connection }),
+          (redactAdditionalSensitiveData) =>
+            update({ redactAdditionalSensitiveData }),
         );
       } catch (error) {
         if (alive)
@@ -106,6 +124,21 @@ export default function ConnectedInspector({
       disconnectFlows();
     };
   }, [endpoint]);
+  const changeRedaction = useCallback(
+    async (value: boolean) => {
+      const response = await fetch(endpointUrl(endpoint) + "/settings", {
+        method: "PUT",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ redactAdditionalSensitiveData: value }),
+      });
+      if (!response.ok)
+        throw new Error(`Cannot update redaction (${response.status})`);
+      // SSE is authoritative across viewers; a late HTTP response must not
+      // overwrite a more recent setting received on the ordered stream.
+    },
+    [endpoint],
+  );
   const clear = useCallback(async () => {
     const response = await fetch(endpointUrl(endpoint) + "/clear", {
       method: "DELETE",
@@ -116,7 +149,13 @@ export default function ConnectedInspector({
   }, [endpoint]);
   return (
     <JevDrawer open={open} onOpenChange={toggle}>
-      {visited && <RetainedPanel {...snapshot} onClear={clear} />}
+      {visited && (
+        <RetainedPanel
+          {...snapshot}
+          onClear={clear}
+          onRedactionChange={changeRedaction}
+        />
+      )}
     </JevDrawer>
   );
 }

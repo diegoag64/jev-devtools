@@ -45,7 +45,14 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
   );
   if (options.enabled && !local && !options.authorize)
     throw new Error("Non-loopback inspector endpoints require authorize");
-  const recorder = new JevRecorder(options),
+  const additionalVisible = new Set<string>();
+  const additionalRedaction = (session: string) =>
+    !additionalVisible.has(session);
+  const settingsFor = (session: string) => ({
+    redactAdditionalSensitiveData: additionalRedaction(session),
+  });
+  const settingsListeners = new Set<(session: string) => void>();
+  const recorder = new JevRecorder(options, additionalRedaction),
     scope = new AsyncLocalStorage<string>();
   const flows = new FlowRecorder(options);
   const streams = new Set<() => void>();
@@ -63,7 +70,7 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
     if (!incremental)
       return {
         bytes: encoder.encode(
-          `event: snapshot\ndata: ${JSON.stringify({ version: 1, traces: recorder.snapshot(session) })}\n\n`,
+          `event: snapshot\ndata: ${JSON.stringify({ version: 1, traces: recorder.snapshot(session), ...settingsFor(session) })}\n\n`,
         ),
         revision: 0,
       };
@@ -74,7 +81,7 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
       : { version: 2, base: cursor, revision, upserts, order };
     return {
       bytes: encoder.encode(
-        `event: ${initial ? "snapshot" : "delta"}\ndata: ${JSON.stringify(data)}\n\n`,
+        `event: ${initial ? "snapshot" : "delta"}\ndata: ${JSON.stringify({ ...data, ...settingsFor(session) })}\n\n`,
       ),
       revision,
     };
@@ -135,7 +142,41 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
       return json({ error: "Unauthorized" }, 403);
     const session = await sessionFor(request);
     if (url.pathname === endpoint && request.method === "GET")
-      return json({ version: 1, enabled: true, flows: true });
+      return json({
+        version: 1,
+        enabled: true,
+        flows: true,
+        ...settingsFor(session),
+      });
+    if (url.pathname === endpoint + "/settings") {
+      if (request.method !== "PUT")
+        return json({ error: "Method not allowed" }, 405);
+      if (request.headers.get("origin") !== origin)
+        return json({ error: "Same-origin requests required" }, 403);
+      let value: unknown;
+      try {
+        value = (await request.json())?.redactAdditionalSensitiveData;
+      } catch {
+        return json({ error: "Invalid settings" }, 400);
+      }
+      if (typeof value !== "boolean")
+        return json({ error: "Invalid settings" }, 400);
+      // Bound explicitly opted-out scopes without silently changing another
+      // session's policy. Default-on scopes allocate no settings entry.
+      if (
+        !value &&
+        !additionalVisible.has(session) &&
+        additionalVisible.size >= 200
+      )
+        return json(
+          { error: "Too many sessions with additional redaction disabled" },
+          409,
+        );
+      if (value) additionalVisible.delete(session);
+      else additionalVisible.add(session);
+      for (const listener of settingsListeners) listener(session);
+      return json(settingsFor(session));
+    }
     if (url.pathname === endpoint + "/clear") {
       if (request.method !== "DELETE")
         return json({ error: "Method not allowed" }, 405);
@@ -237,14 +278,30 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {
         let closed = false,
-          dirty = true;
+          dirty = true,
+          settingsDirty = false;
         flush = (updateFor) => {
-          if (closed || !dirty || (controller.desiredSize ?? 0) <= 0) return;
-          dirty = false;
+          if (
+            closed ||
+            (!dirty && !settingsDirty) ||
+            (controller.desiredSize ?? 0) <= 0
+          )
+            return;
           try {
-            const update = updateFor(session, incremental, cursor);
-            controller.enqueue(update.bytes);
-            cursor = update.revision;
+            if (dirty) {
+              const update = updateFor(session, incremental, cursor);
+              controller.enqueue(update.bytes);
+              cursor = update.revision;
+              dirty = false;
+              settingsDirty = false; // Trace updates also carry the current setting.
+            } else if (settingsDirty) {
+              controller.enqueue(
+                encoder.encode(
+                  `event: settings\ndata: ${JSON.stringify(settingsFor(session))}\n\n`,
+                ),
+              );
+              settingsDirty = false;
+            }
           } catch {
             // Deferred observer failures must not escape into the application's
             // event loop or prevent other viewers from receiving their update.
@@ -252,9 +309,19 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
           }
         };
         wake = () => {
-          if (!closed && dirty && (controller.desiredSize ?? 0) > 0)
+          if (
+            !closed &&
+            (dirty || settingsDirty) &&
+            (controller.desiredSize ?? 0) > 0
+          )
             schedule(flush);
         };
+        const settingChanged = (changedSession: string) => {
+          if (changedSession !== session) return;
+          settingsDirty = true;
+          wake();
+        };
+        settingsListeners.add(settingChanged);
         const unsubscribe = recorder.subscribe((sessions) => {
           if (!sessions.has(session)) return;
           dirty = true;
@@ -268,6 +335,7 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
           if (closed) return;
           closed = true;
           unsubscribe();
+          settingsListeners.delete(settingChanged);
           unschedule(flush);
           clearInterval(heartbeat);
           request.signal.removeEventListener("abort", cleanup);
@@ -330,9 +398,20 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
       for (const [key, value] of Object.entries(req.headers))
         if (value !== undefined)
           headers.set(key, Array.isArray(value) ? value.join(",") : value);
+      const init: RequestInit & { duplex?: "half" } = {
+        method: req.method,
+        headers,
+        signal: abort.signal,
+      };
+      // The settings endpoint consumes JSON. Keep it streamed so handle's
+      // origin/authorization guards run before reading the request body.
+      if (req.method === "PUT") {
+        init.body = Readable.toWeb(req) as ReadableStream<Uint8Array>;
+        init.duplex = "half";
+      }
       const request = new Request(
         new URL(req.url!, `${new URL(origin).protocol}//${req.headers.host}`),
-        { method: req.method, headers, signal: abort.signal },
+        init,
       );
       const response = await handle(request);
       res.writeHead(response.status, Object.fromEntries(response.headers));
@@ -354,13 +433,15 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
   }
   const startFlow: FlowObserver["startFlow"] = (definition, run) => {
     if (!enabled()) return;
-    flows.start(definition, run, scope.getStore() ?? "local");
+    const session = scope.getStore() ?? "local";
+    const redactAdditional = additionalRedaction(session);
+    flows.start(definition, run, session, redactAdditional);
     return {
       update: (next) => {
         if (enabled()) flows.update(next);
       },
       request: (link, onTrace, callback) =>
-        recorder.withFlow(link, onTrace, callback),
+        recorder.withFlow(link, onTrace, callback, redactAdditional),
     };
   };
   return {
@@ -406,6 +487,7 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
     dispose() {
       disposed = true;
       for (const close of [...streams]) close();
+      additionalVisible.clear();
     },
   };
 }
