@@ -72,4 +72,8 @@ The original integration, flow, and Next.js documents remain the detailed compan
 
 ## GitHub header
 
-The header uses bundled GitHub Octicons and a star count fetched once per build or dev-server process from the public GitHub repository API. It does not make visitor-side GitHub requests. Rebuild/restart to refresh the count. Unavailable or invalid counts fall back to a Star link; zero is a valid count. Icon attribution is retained in `assets/octicons-LICENSE.txt` and the published `third-party-notices.txt`.
+The header uses bundled GitHub Octicons and a star count fetched once per build or dev-server process from the public GitHub repository API. It does not make visitor-side GitHub requests. Rebuild/restart to refresh the count. The count is a non-interactive statistic, with no hover/selected state or tab stop. Unavailable or invalid counts display an em dash with an accessible explanation; zero is a valid count. Icon attribution is retained in `assets/octicons-LICENSE.txt` and the published `third-party-notices.txt`.
+
+## Method documentation style
+
+Use **Parameters** for positional arguments, **Options** or **Properties** for object fields, and **Props** for React component props. Method sections must show both input and return interfaces in tables with types. Distinguish a builder's expression reference from its resolved runtime value; do not imply that `FlowOutcome.value` has an inferred concrete public type. Explain each code example using its actual variables, operations, and result. Avoid vague labels such as “Part” or “What comes back.” Use short method names in on-page navigation through `tocLabels`, preserving existing heading IDs and deep links.

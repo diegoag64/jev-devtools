@@ -48,6 +48,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **Clearer method contracts.** Show input and return interfaces in tables, explain the operations used in each example, shorten flow navigation labels without changing section links, and present GitHub stars as a passive count. Documentation and docs UI only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
+
 - **GitHub header links.** Show the GitHub logo and a build-time repository star count in the docs header, including compact mobile controls. If GitHub is unavailable, retain a Star link without inventing a count. No package API changes. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
 
 - **Complete API reference and beginner flow guide.** Add a linked glossary for public APIs and exact build-time declarations, plus small checked examples for each flow operation. Connect reference entries from prose and code examples without adding browser dependencies. Documentation only; package behavior is unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).

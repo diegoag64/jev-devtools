@@ -4,20 +4,23 @@ Most applications should use the [server adapter](@/api/server/). Reach for [`Je
 
 <!-- example: recorder.ts -->
 
+**Example walkthrough:** the recorder retains up to 50 traces. `transport()` observes HTTP attempts, while `instrument()` observes logical `systemOne` calls and assigns their session and label. The subscriber filters notifications to the local session, then reads a detached snapshot. Call `unsubscribe()` during cleanup.
+
+
 [`instrument`](@/api/reference/#recorder-instrument) observes logical calls; [`transport`](@/api/reference/#recorder-transport) observes HTTP attempts. Pair them to preserve both views. The instrumented proxy preserves the original SDK promise and response helpers. This example needs a real key when you call `client.systemOne()`.
 
 ## Recorder methods
 
-| Method                              | Purpose                                                                                                                 |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| [`new JevRecorder(options?)`](@/api/reference/#jevrecorder)         | Create bounded history with `limit` and [`redact`](@/api/reference/#createjevdevtools).                                                                       |
-| [`transport(fetcher)`](@/api/reference/#recorder-transport)                | Wrap a compatible fetch implementation to capture attempts.                                                             |
-| [`instrument(client, metadata)`](@/api/reference/#recorder-instrument)      | Return an instrumented client. Metadata is `{ session, label, source }` or a factory returning that object.             |
-| [`snapshot(session)`](@/api/reference/#recorder-snapshot)                 | Return detached traces, newest first, for one session.                                                                  |
-| [`changes(session, after?)`](@/api/reference/#recorder-changes)          | Return `{ revision, order, upserts }` for incremental viewers. Omit the cursor for a full initial view.                 |
-| [`subscribe(listener)`](@/api/reference/#recorder-subscribe)               | Receive affected session sets; returns an unsubscribe function.                                                         |
-| [`clear(session)`](@/api/reference/#recorder-clear)                    | Remove retained traces for that session.                                                                                |
-| [`withFlow(link, onTrace, callback)`](@/api/reference/#recorder-withflow) | Link a request to `{ runId, stepId, executionId }` while calling through. Normally used by the adapter's flow observer. |
+| Method | Return type | Purpose                                                                                                                 |
+| --- | --- | --- |
+| [`new JevRecorder(options?)`](@/api/reference/#jevrecorder)         | `JevRecorder` | Create bounded history with `limit` and [`redact`](@/api/reference/#createjevdevtools).                                                                       |
+| [`transport(fetcher)`](@/api/reference/#recorder-transport)                | `Fetch` | Wrap a compatible fetch implementation to capture attempts.                                                             |
+| [`instrument(client, metadata)`](@/api/reference/#recorder-instrument)      | `T (the original client type)` | Return an instrumented client. Metadata is `{ session, label, source }` or a factory returning that object.             |
+| [`snapshot(session)`](@/api/reference/#recorder-snapshot)                 | `Trace[]` | Return detached traces, newest first, for one session.                                                                  |
+| [`changes(session, after?)`](@/api/reference/#recorder-changes)          | `{ revision: number; order: string[]; upserts: Trace[] }` | Return `{ revision, order, upserts }` for incremental viewers. Omit the cursor for a full initial view.                 |
+| [`subscribe(listener)`](@/api/reference/#recorder-subscribe)               | `() => void` | Receive affected session sets; returns an unsubscribe function.                                                         |
+| [`clear(session)`](@/api/reference/#recorder-clear)                    | `void` | Remove retained traces for that session.                                                                                |
+| [`withFlow(link, onTrace, callback)`](@/api/reference/#recorder-withflow) | `T (the callback result)` | Link a request to `{ runId, stepId, executionId }` while calling through. Normally used by the adapter's flow observer. |
 
 The retention limit is global to the recorder, not a per-session allocation. Snapshots are captured inspection copies, not complete original SDK objects.
 

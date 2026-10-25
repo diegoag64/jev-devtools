@@ -131,7 +131,7 @@ export async function generate(
 <main id="main" tabindex="-1"><div class="breadcrumb">Docs <span>/</span> ${page.group}</div><div class="page-heading"><p class="eyebrow">${page.group}</p><h1>${page.title}</h1><p class="lead">${page.description}</p></div>${isChangelog ? `<div class="changelog-source"><a href="${changelogSource}">Source on GitHub ↗</a><p>${changelogStatus}</p></div>` : ""}<article>${html}</article><footer class="article-footer"><a href="${editURL}">Edit this page ↗</a><a href="${base}raw/${page.slug || "introduction"}.md">Read as Markdown</a></footer><nav class="page-nav" aria-label="Previous and next pages">${neighbour(pages[index - 1], "Previous")}${neighbour(pages[index + 1], "Next")}</nav><p class="site-note">Jev DevTools is an independent, open-source community project. It is not affiliated with TypeSafe AI.</p></main>
 <aside class="toc"><nav aria-label="On this page"><p>On this page</p>${headings
       .filter((h) => h.depth === 2)
-      .map((h) => `<a href="#${h.id}">${escape(h.title)}</a>`)
+      .map((h) => `<a href="#${h.id}">${escape(page.tocLabels?.[h.id] ?? h.title)}</a>`)
       .join(
         "",
       )}</nav></aside></div>

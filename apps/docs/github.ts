@@ -22,11 +22,11 @@ export async function renderGitHubLinks() {
       throw new Error("GitHub returned an invalid star count");
     return count;
   }).catch((error: unknown) => {
-    console.warn(`GitHub star count unavailable; showing Star link. ${String(error)}`);
+    console.warn(`GitHub star count unavailable; showing an unavailable count. ${String(error)}`);
     return undefined;
   });
   const count = await stars;
-  const label = count === undefined ? "Star on GitHub" : `${count.toLocaleString("en-US")} GitHub stars`;
-  const display = count === undefined ? "Star" : new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(count);
-  return `<div class="github-links"><a class="github-link" href="${repositoryURL}" aria-label="GitHub repository">${githubIcon}<span class="github-label">GitHub</span></a><a class="github-stars" href="${repositoryURL}/stargazers" aria-label="${label}" title="${label}${count === undefined ? "" : " at docs build time"}">${starIcon}<span>${display}</span></a></div>`;
+  const label = count === undefined ? "GitHub star count unavailable" : `${count.toLocaleString("en-US")} GitHub stars`;
+  const display = count === undefined ? "—" : new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(count);
+  return `<div class="github-links"><a class="github-link" href="${repositoryURL}" aria-label="GitHub repository">${githubIcon}<span class="github-label">GitHub</span></a><span class="github-stars" role="img" aria-label="${label}" title="${label}${count === undefined ? "" : " at docs build time"}">${starIcon}<span aria-hidden="true">${display}</span></span></div>`;
 }

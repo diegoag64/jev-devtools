@@ -2,16 +2,46 @@ A flow is a recipe your server follows: take some input, run steps, and return a
 
 This guide starts with a flow that makes **no network requests**. Each example is a complete definition with its own import. Keep these files on your Node server. If you have not connected the drawer yet, start with the [quick start](@/getting-started/).
 
+The interface tables use the types from each example. The [API glossary](@/api/reference/) contains the generic signatures for other input and result types. A builder return is a reference created while defining the recipe; a resolved value is the actual data produced during execution.
+
 ## Your first flow
 
 <!-- example: first-flow.ts -->
+
+**Example walkthrough**
 
 There are two moments to understand:
 
 1. [`defineJevFlow`](@/api/reference/#definejevflow) describes the recipe once. The `{ name: string }` type says what data a caller must provide.
 2. [`greet.run`](@/api/reference/#flow-run) executes that recipe with `{ name: "Ada" }`. It returns a promise; use `await` to read the result.
 
-The result's `outcome` is the name you chose (`"greeted"`). Its `value` is the data you returned (`"Ada"`). `runId` identifies this particular execution. Running the same definition again creates a new run.
+### Input interface
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | The name of the flow definition: `"greet"`. |
+| `build` | `(flow: FlowBuilder<{ name: string }>) => FlowExpression<FlowOutcome>` | Describes the steps and returns a terminal output or branch. |
+| `run(input, options)` → `input` | `{ name: string }` in this example | Data supplied each time the flow executes. |
+| `run(input, options)` → `options` | `FlowRunOptions` | Required `client`, optional `devtools` and `signal`. |
+
+### Return interface
+
+`defineJevFlow()` returns an object with these members:
+
+| Member | Type | Description |
+| --- | --- | --- |
+| `definition` | `FlowDefinition` | The static graph; reading it does not execute work. |
+| `run` | `(input: { name: string }, options: FlowRunOptions) => Promise<FlowOutcome & { runId: string }>` | Executes the flow with new input. |
+
+Awaiting `greet.run(...)` returns:
+
+| Property | Type | Value in this example |
+| --- | --- | --- |
+| `runId` | `string` | A unique ID for this execution. |
+| `outcome` | `string` | `"greeted"`, from `flow.output()`. |
+| `value?` | `unknown` | `"Ada"`, resolved from the input reference. |
+
+The table gives this example's values; the public `value` type remains `unknown`. Narrow it before using it in application code. Running the definition again creates a new run.
 
 Every run requires a `client`. The tiny `noInference` client above makes it explicit that this recipe never calls Jev. For recipes that do call Jev, pass the real client from the [server setup](@/api/server/). Add `devtools: inspector` to the run options to see the flow in your drawer.
 
@@ -21,7 +51,14 @@ Every run requires a `client`. The tiny `noInference` client above makes it expl
 
 During definition, this is a **reference to a future value**, not the actual string. You cannot call `.toUpperCase()` on it. Pass it to a task, whose callback receives the real value when the flow runs. You also do not `await` a builder method: it creates a reference, not a promise.
 
-Inside a map or loop, `input` refers to that item or iteration. Those shapes are explained below.
+### Property interface
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `flow.input` | `FlowExpression<{ name: string }>` | Reference to the current builder's input. It takes no arguments. |
+| `flow.input.get("name")` | `FlowExpression<string>` in the first example | Reference to one input field. |
+
+**Example walkthrough:** `flow.input.get("name")` in `greet` selects the field provided to `greet.run({ name: "Ada" }, ...)`. Passing that reference to `output()` makes the final value `"Ada"`. Inside a map or loop, `input` instead refers to that item or iteration; their shapes are shown below.
 
 ## task — run your own code
 
@@ -29,14 +66,25 @@ Use [`task`](@/api/reference/#flow-task) for calculations, database reads, or ca
 
 <!-- example: flow-task.ts -->
 
-| Part | What you provide |
-| --- | --- |
-| `id` | `"make-message"`, a unique name for this step. |
-| `input` | A value, reference, or object/array containing references. |
-| [`run`](@/api/reference/#flow-run) | A function that receives the resolved input and returns the result. It can be `async`. |
-| `timeoutMs` | Optional maximum wait in milliseconds. |
+### Input interface
 
-**What comes back:** a reference to the callback's result. With `{ name: "Ada" }`, this flow returns outcome `"greeted"` and value `"Hello, Ada!"`.
+| Parameter / option | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Unique step ID: `"make-message"`. |
+| `input` | `FlowExpression<string>` | A value or nested references; here, `FlowExpression<string>`. |
+| `run` | `(name: string, context: TaskContext) => string` | Application callback receiving actual values. This is the task callback, not the flow's `run()` method. |
+| `timeoutMs?` | `number` | Optional timeout in milliseconds. |
+| `display?` | `FlowDisplay` | Optional final argument for inspector labels. |
+
+### Return interface
+
+| Value | Type | Description |
+| --- | --- | --- |
+| Builder return (`message`) | `FlowExpression<string>` | Reference to the callback result. |
+| Resolved task value | `string` | `"Hello, Ada!"` when `name` is `"Ada"`. |
+| Final run result | `{ runId: string; outcome: string; value?: unknown }` | Outcome `"greeted"`, value `"Hello, Ada!"`. |
+
+**Example walkthrough:** `get("name")` selects the input field. The task resolves it before calling `run`, so `name` inside the callback is an ordinary string. The template literal constructs the greeting. `output("greeted", message)` resolves that task result and makes it the final flow value.
 
 A task callback can also accept a second argument containing `signal`, `runId`, `stepId`, and `executionId`. Pass its signal to cancellable work such as `fetch`. A timeout or cancellation cannot undo a payment, database write, or other side effect. Tasks do not retry automatically.
 
@@ -46,25 +94,68 @@ Use [`jev`](@/api/reference/#flow-jev) when you need a model answer rather than 
 
 <!-- example: flow-jev.ts -->
 
-| Part | What you provide |
-| --- | --- |
-| `id` | `"ask-team"`, the step name shown in the flow. |
-| `state` | The context Jev should use. References are resolved before the request. |
-| `questions` | An object of named SDK questions. Here the name is `team`. |
+### Input interface
 
-**What comes back:** references to the answers, not an immediate response. [`result.answer("team").choice`](@/api/reference/#request-answer) selects the chosen team. [`result.answers`](@/api/reference/#request-answers) refers to the entire answer object. A live run of this example needs an SDK client and server-side API key; its chosen team is not predetermined.
+| Parameter / option | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Unique request step ID: `"ask-team"`. |
+| `state` | Values or nested references | Context sent to Jev after resolving references. |
+| `questions` | SDK `Questions` object | Named questions; `team` is a Choice question here. |
+| `display?` | `FlowDisplay` | Optional inspector labels. |
+
+### Return interface
+
+| Member / value | Type | Description |
+| --- | --- | --- |
+| `result.answer(name)` | Object of typed field references | Selects a named question's answer fields. |
+| `result.answer("team").choice` | `FlowExpression<"billing" \| "support">` | The selected team, such as `"billing"` or `"support"` in this example. |
+| `result.answer("team").confidence` | `FlowExpression<number>` | SDK-reported confidence. |
+| `result.answer("team").probabilities` | `FlowExpression<{ billing: number; support: number }>` | Probability for each allowed label. |
+| `result.answers` | `FlowExpression` of the full answer object | All named SDK answers, including their metadata. |
+| Final run result | `{ runId: string; outcome: string; value?: unknown }` | Outcome `"classified"`; value is the selected team. |
+
+**Example walkthrough:** `state: flow.input` sends the message as context. The SDK's `choice()` helper defines the allowed teams and their descriptions. `answer("team").choice` selects the model's chosen label, and `output()` returns it. Defining this flow does not send a request; executing it with a live client does. The selected team is not predetermined.
+
+A live run requires an SDK client and server-side API key.
 
 `choice` comes from the TypeSafe SDK. [`flow.jev`](@/api/reference/#flow-jev) connects that SDK request to the flow. If you need to construct a question using a resolved string, use the factory form:
 
 <!-- example: flow-factory.ts -->
 
-The factory receives resolved `input` and returns a normal SDK request. It must be synchronous. Fetch data in a preceding task when preparing a request requires asynchronous work.
+### Factory input interface
+
+| Parameter / option | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Unique request step ID: `"ask"`. |
+| `input` | `FlowExpression<string>` | Values/references to resolve before constructing the request. |
+| `request` | `(message: string) => SystemOneRequest<Questions>` | Synchronously constructs a normal SDK request. |
+| `display?` | `FlowDisplay` | Optional inspector labels. |
+
+The factory form returns the same `answer(name)` and `answers` interface shown above.
+
+**Example walkthrough:** the factory receives the actual message string, so the template literal can include it in the question. The `state` object also carries the message as context. Returning `result.answers` from `output()` retains the full answer object, rather than just the chosen team. The factory must be synchronous; use a preceding task for asynchronous preparation.
 
 ## output — finish with a result
 
 Every top-level recipe ends with `return flow.output(name, value)` or a terminal branch. `name` is the outcome your application will read; `value` is optional. It may contain references inside an object or array.
 
-For example, the task recipe above ends with `return flow.output("greeted", message)`. At runtime, `message` becomes the actual greeting string. Output does not send a message or perform a business action; your application decides what to do with the result.
+### Input interface
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Outcome name and unique node ID. |
+| `value?` | `unknown` | Optional value, expression, or nested object/array of expressions. |
+| `display?` | `FlowDisplay` | Optional inspector labels. |
+
+### Return interface
+
+| Value / property | Type | Description |
+| --- | --- | --- |
+| Builder return | `FlowExpression<FlowOutcome>` | Terminal reference to return from the flow or branch callback. |
+| Resolved `outcome` | `string` | The name passed to `output()`. |
+| Resolved `value?` | `unknown` | The supplied value with references resolved. |
+
+**Example walkthrough:** the task recipe above ends with `return flow.output("greeted", message)`. At runtime, `message` becomes the actual greeting string. Output does not send a message or perform a business action; your application decides what to do with the result.
 
 ## if — choose a value, then continue
 
@@ -72,13 +163,25 @@ Use [`if`](@/api/reference/#flow-if) when two paths should rejoin before the flo
 
 <!-- example: flow-if.ts -->
 
-| Part | What you provide |
-| --- | --- |
-| `when` | A Boolean expression. [`.eq(true)`](@/api/reference/#expression-eq) compares the future input with `true`. |
-| `then` | A callback returning a value reference for the true path. |
-| `else` | A callback returning a value reference for the false path. |
+### Input interface
 
-**What comes back:** the selected value reference. With `{ express: true }`, `days` resolves to `1`; the shared `describe` task returns `"Delivery in 1 day(s)"`. With `false`, it uses `5`.
+| Parameter / option | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Unique decision ID: `"choose-speed"`. |
+| `when` | `FlowExpression<boolean>` | Condition evaluated during the run. |
+| `then` | `(path: FlowBuilder<{ express: boolean }>) => FlowExpression<number>` | Builds the true path and returns its value reference. |
+| `else` | `(path: FlowBuilder<{ express: boolean }>) => FlowExpression<number>` | Builds the false path and returns its value reference. |
+| `display?` | `FlowDisplay` | Optional inspector labels. |
+
+### Return interface
+
+| Value | Type | Description |
+| --- | --- | --- |
+| Builder return (`days`) | `FlowExpression<number>` | Reference to the selected path's value; both paths return numbers here. |
+| Resolved `days` | `number` | `1` for express delivery; otherwise `5`. |
+| Final run result | `{ runId: string; outcome: string; value?: unknown }` | Outcome `"estimated"`; value `"Delivery in 1 day(s)"` or `"Delivery in 5 day(s)"`. |
+
+**Example walkthrough:** `.eq(true)` turns the `express` reference into a condition. Each path uses a task to supply a number. After the paths join, the shared `describe` task receives the selected number and formats the delivery message. This shared continuation is why the example uses `if()` rather than `branch()`.
 
 Both callbacks describe their paths when the definition is built. Only the selected path's **steps** run. Put application work inside tasks, not directly inside the path-building callbacks. Do not use JavaScript `if (flow.input...)`: a reference is an object, not a resolved Boolean.
 
@@ -90,7 +193,24 @@ Use [`branch`](@/api/reference/#flow-branch) when each path should end the flow 
 
 The options are `when`, `then`, and `else`, like [`if`](@/api/reference/#flow-if). The difference is what each path returns: a branch path must return [`output`](@/api/reference/#flow-output) or another terminal [`branch`](@/api/reference/#flow-branch).
 
-**What comes back:** the selected terminal result. `{ needsReview: true }` produces outcome `"manual-review"`; `false` produces `"ready"`. There is no shared step after this branch. Use [`if`](@/api/reference/#flow-if) when you want shared work afterward.
+### Input interface
+
+| Parameter / option | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Unique decision ID: `"pick-path"`. |
+| `when` | `FlowExpression<boolean>` | Selects which terminal path to execute. |
+| `then`, `else` | `(path: FlowBuilder<{ needsReview: boolean }>) => FlowExpression<FlowOutcome>` | Each returns `output()` or another terminal branch. |
+| `display?` | `FlowDisplay` | Optional inspector labels. |
+
+### Return interface
+
+| Value / property | Type | Description |
+| --- | --- | --- |
+| Builder return | `FlowExpression<FlowOutcome>` | Terminal result; return it from the enclosing flow. |
+| Resolved `outcome` | `string` | `"manual-review"` when true; `"ready"` when false. |
+| Resolved `value?` | `unknown` | `"A person should review this"` or `"Continue automatically"` here. |
+
+**Example walkthrough:** `.eq(true)` checks `needsReview`. The selected path calls `output()` with its own outcome name and message. Returning the branch ends the flow; there is no shared step afterward. Use [`if()`](@/api/reference/#flow-if) when the paths should rejoin.
 
 ## parallel — do independent work together
 
@@ -100,7 +220,24 @@ Use [`parallel`](@/api/reference/#flow-parallel) when one piece of work does not
 
 Pass a step ID and an object of named lane callbacks. Each callback receives its own builder and returns a reference. Work within one lane stays sequential; different lanes may run concurrently. This tiny arithmetic example illustrates the result shape; concurrent service calls are a more practical use.
 
-**What comes back:** an object of references with your lane names. With `{ price: 100 }`, the output value is `{ regular: 100, sale: 80 }`. The flow waits for the lanes before using their results. A lane cannot read another lane's private intermediate steps.
+### Input interface
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Unique parallel step ID: `"calculate"`. |
+| `lanes` | Object of `(lane: FlowBuilder<{ price: number }>) => FlowExpression<number>` callbacks | Each key names a lane; each callback returns that lane's result reference. |
+| `display?` | `FlowDisplay` | Optional inspector labels. |
+
+### Return interface
+
+| Member / value | Type | Description |
+| --- | --- | --- |
+| Builder return | Object with the same keys as `lanes` | Each member retains its lane's expression type. |
+| `prices.regular` | `FlowExpression<number>` | Reference to the unchanged price. |
+| `prices.sale` | `FlowExpression<number>` | Reference to the discounted price. |
+| Final `value` for `{ price: 100 }` | `unknown` | `{ regular: 100, sale: 80 }`. |
+
+**Example walkthrough:** both lanes read the same input price through their own builders. `full-price` returns it unchanged, while `sale-price` multiplies it by `0.8`. The flow joins the lanes before resolving both references in the output object. A lane cannot read another lane's private intermediate steps.
 
 ## map — repeat a recipe for each item
 
@@ -108,17 +245,35 @@ Use [`map`](@/api/reference/#flow-map) for a list with a known size limit:
 
 <!-- example: flow-map.ts -->
 
-| Part | What you provide |
-| --- | --- |
-| `items` | An array, or a reference to an array. |
-| `input` | Explicit shared context for every item; use `{}` if nothing is needed. |
-| `maxItems` | Required safety limit, an integer from 1 to 64. A larger input rejects; it is not silently truncated. |
-| `concurrency` | How many items may run at once: 1–16, default 4. |
-| `build` | The callback after the options. Return a reference for one item's result. |
+### Input interface
 
-The item's `input` contains `item` (the current value), `index` (starting at zero), and `context` (the shared `input` you supplied). Use these inside the item recipe instead of reaching into outer steps.
+| Parameter / option | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Unique map ID: `"double"`. |
+| `items` | `readonly number[] \| FlowExpression<readonly number[]>` | Array to process. |
+| `input` | `{ multiplier: number }` | Shared context; may contain references. Use `{}` if none is needed. |
+| `maxItems` | `number` | Required integer 1–64. Larger input rejects instead of truncating. |
+| `concurrency?` | `number` | Maximum simultaneous items: 1–16, default 4. |
+| `build` | `(item: FlowBuilder<{ item: number; index: number; context: { multiplier: number } }>) => FlowExpression<number>` | Describes one item's work. |
+| `display?` | `FlowDisplay` | Optional inspector labels. |
 
-**What comes back:** a reference to an array of results, in **input order**, even if items finish in a different order. `{ numbers: [2, 4, 6] }` produces `[4, 8, 12]`. An empty array produces `[]`.
+The item builder's input has these properties:
+
+| Property | Type in this example | Description |
+| --- | --- | --- |
+| `item` | `number` | Current number from the array. |
+| `index` | `number` | Zero-based position in the original array. |
+| `context` | `{ multiplier: number }` | Resolved shared context. |
+
+### Return interface
+
+| Value | Type | Description |
+| --- | --- | --- |
+| Builder return (`doubled`) | `FlowExpression<number[]>` | Reference to the result array. |
+| Resolved array | `number[]` | `[4, 8, 12]` for `[2, 4, 6]`; `[]` for empty input. |
+| Final run result | `{ runId: string; outcome: string; value?: unknown }` | Outcome `"doubled"`; value is the resolved array. |
+
+**Example walkthrough:** `items` selects the input array, and `input` supplies a multiplier shared by all items. Within each item program, `get("item")` selects its number and `get("context").get("multiplier")` selects the multiplier. The task resolves both before multiplying. Up to two item programs run at once, but the result array preserves the original item order. Explicit context keeps the item program independent of outer step references.
 
 ## loop — repeat until a condition is false
 
@@ -126,15 +281,35 @@ Use [`loop`](@/api/reference/#flow-loop) when the next iteration needs the previ
 
 <!-- example: flow-loop.ts -->
 
-| Part | What you provide |
-| --- | --- |
-| `initial` | Starting state: here, zero. It can also be a reference. |
-| `input` | Explicit shared context for the iterations. |
-| `while` | A callback describing a Boolean condition using the state reference. |
-| `maxIterations` | Required integer from 1 to 64. |
-| `build` | A callback returning the next state reference, with the same state type. |
+### Input interface
 
-An iteration's `input` contains `state`, zero-based `index`, and shared `context`. The condition runs **before** each iteration. Here the state goes `0 → 1 → 2 → 3`, then the condition is false. The output value is `3`. If the initial condition is false, the result is the initial state and no iterations run.
+| Parameter / option | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Unique loop ID: `"count"`. |
+| `initial` | `number \| FlowExpression<number>` | Starting state: `0` here. State must be JSON-compatible. |
+| `input` | `{}` | Shared context; `{}` here. |
+| `while` | `(state: FlowExpression<number>) => FlowExpression<boolean>` | Condition checked before each iteration. |
+| `maxIterations` | `number` | Required integer 1–64. |
+| `build` | `(iteration: FlowBuilder<{ state: number; index: number; context: {} }>) => FlowExpression<number>` | Describes how to calculate the next state. |
+| `display?` | `FlowDisplay` | Optional inspector labels. |
+
+The iteration builder's input has these properties:
+
+| Property | Type in this example | Description |
+| --- | --- | --- |
+| `state` | `number` | State before this iteration. |
+| `index` | `number` | Zero-based iteration number. |
+| `context` | `{}` | Resolved shared context; empty in this example. |
+
+### Return interface
+
+| Value | Type | Description |
+| --- | --- | --- |
+| Builder return (`count`) | `FlowExpression<number>` | Reference to the final state. |
+| Resolved state | `number` | `3`, when `state.lt(3)` first becomes false. |
+| Final run result | `{ runId: string; outcome: string; value?: unknown }` | Outcome `"counted"`, value `3`. |
+
+**Example walkthrough:** `initial` starts the state at zero. `while` uses `.lt(3)` to build the stopping condition. The `increment` task reads the current state and adds one, producing `0 → 1 → 2 → 3`. Before a fourth iteration, the condition is false, so the loop returns `3`. If the initial condition is false, no iterations run and the initial state is returned.
 
 If the condition is still true at the limit, the run rejects with [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror). It does not return a successful partial result. A loop may contain a map; nested loops, nested maps, and loops inside maps are unsupported.
 

@@ -2,6 +2,15 @@
 
 <!-- example: client.tsx -->
 
+**Example walkthrough:** `import.meta.env.DEV` enables the inspector in Vite development builds. `defaultOpen={false}` starts at the launcher, so users open the drawer when they need it. The component is a sibling of the application's main content.
+
+### Rendered output
+
+| Value | Type | Description |
+| --- | --- | --- |
+| Component return | React element or `null` | Nothing during SSR or while disabled; the connected inspector after mounting when enabled. |
+
+
 Mount once near the application root. The component is safe to import during SSR: it renders nothing until mounted and enabled. Its launcher and drawer render into a Shadow DOM boundary under `document.body`.
 
 ## Props

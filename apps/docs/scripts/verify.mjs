@@ -62,8 +62,15 @@ try {
   const github = page.getByRole("link", { name: "GitHub repository", exact: true });
   const stars = page.locator(".github-stars");
   assert.equal(await github.getAttribute("href"), "https://github.com/diegoag64/jev-devtools");
-  assert.equal(await stars.getAttribute("href"), "https://github.com/diegoag64/jev-devtools/stargazers");
-  assert.match(await stars.getAttribute("aria-label"), /^(?:[\d,]+ GitHub stars|Star on GitHub)$/);
+  assert.equal(await stars.getAttribute("href"), null, "The count is not an action");
+  assert.equal(await stars.getAttribute("role"), "img");
+  await github.focus();
+  await page.keyboard.press("Tab");
+  assert.equal(await page.getByRole("button", { name: "Switch color theme" }).evaluate((button) => button === document.activeElement), true, "The statistic is not a tab stop");
+  const countColor = await stars.evaluate((element) => getComputedStyle(element).color);
+  await stars.hover();
+  assert.equal(await stars.evaluate((element) => getComputedStyle(element).color), countColor, "The count has no action hover state");
+  assert.match(await stars.getAttribute("aria-label"), /^(?:[\d,]+ GitHub stars|GitHub star count unavailable)$/);
   assert.ok(!initialRequests.some((url) => new URL(url).hostname.endsWith("github.com")), "GitHub header makes no visitor-side requests");
   for (const theme of ["light", "dark"]) {
     await page.evaluate((theme) => { document.documentElement.dataset.theme = theme; }, theme);
@@ -376,6 +383,10 @@ try {
   // The glossary must be reachable from both prose and code, and search must
   // land on the requested method rather than the start of the long page.
   await page.goto(origin + base + "guides/flow-basics/");
+  const outline = page.getByRole("navigation", { name: "On this page" });
+  await outline.getByRole("link", { name: "map()", exact: true }).click();
+  assert.ok(page.url().endsWith("#map-repeat-a-recipe-for-each-item"), "Compact labels preserve existing section links");
+  await page.screenshot({ path: resolve(evidence, "flow-method-interfaces.png") });
   await page.locator(".code-references").getByRole("link", { name: "flow.map()", exact: true }).click();
   await page.waitForURL("**/api/reference/#flow-map");
   assert.equal(await page.locator("#flow-map").textContent(), "flow.map#");

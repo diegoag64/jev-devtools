@@ -16,6 +16,14 @@ The `triage` definition is built once. `routeMessage()` runs it with new input e
 
 [`run()`](@/api/reference/#flow-run) resolves to `{ runId, outcome, value? }`. In this example, `outcome` is `billing-team` or `support-team`. Your application decides what to do with it. The return value is not inferred as a discriminated union; narrow `value` in application code when needed.
 
+| Returned property | Type | Value in this example |
+| --- | --- | --- |
+| `runId` | `string` | Unique execution ID. |
+| `outcome` | `string` | `"billing-team"` or `"support-team"`. |
+| `value?` | `unknown` | Omitted; the terminal paths only name an outcome. |
+
+**Example walkthrough:** `state: flow.input` supplies the message to the Choice question. `answer("team").choice.eq("billing")` creates the routing condition from the chosen label. `branch()` selects one terminal `output()`; the application can then act on that outcome. Passing `devtools: inspector` records the execution with the same adapter as the SDK client.
+
 ## Choose the right operation
 
 | If you need to…                         | Use               |

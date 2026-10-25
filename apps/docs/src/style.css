@@ -213,15 +213,17 @@ kbd {
 .github-stars {
   gap: 7px;
   font-size: 13px;
+}
+.github-link {
   color: var(--text);
   text-decoration: none;
 }
 .github-stars {
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+  cursor: default;
 }
-.github-link:hover,
-.github-stars:hover {
+.github-link:hover {
   color: var(--accent);
 }
 .theme-toggle,

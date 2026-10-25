@@ -10,6 +10,7 @@ export type Page = {
   description: string;
   group: (typeof groups)[number];
   file: string;
+  tocLabels?: Record<string, string>;
 };
 export const pages: Page[] = [
   {
@@ -50,6 +51,20 @@ export const pages: Page[] = [
     description: "Learn each flow method with a small example, starting with ordinary application code.",
     group: "Guides",
     file: "flow-basics.md",
+    tocLabels: {
+      "your-first-flow": "First flow",
+      "input-read-the-data-you-were-given": "input",
+      "task-run-your-own-code": "task()",
+      "jev-ask-a-question": "jev()",
+      "output-finish-with-a-result": "output()",
+      "if-choose-a-value-then-continue": "if()",
+      "branch-choose-how-to-finish": "branch()",
+      "parallel-do-independent-work-together": "parallel()",
+      "map-repeat-a-recipe-for-each-item": "map()",
+      "loop-repeat-until-a-condition-is-false": "loop()",
+      "give-steps-useful-names": "Step names",
+      "where-to-go-next": "Next steps",
+    },
   },
   {
     slug: "guides/flows",
