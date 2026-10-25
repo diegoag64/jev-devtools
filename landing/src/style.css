@@ -858,9 +858,6 @@ nav a:hover,
     gap: 20px;
     font-size: 11px;
   }
-  .site-header nav > a:first-child {
-    display: none;
-  }
   .nav-github span {
     display: none;
   }

@@ -23,6 +23,10 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ### Changes
 
+#### Changed
+
+- **Landing navigation.** Remove the "Explore the flows" header link and keep Docs visible on mobile. Package APIs are unchanged.
+
 #### Documentation
 
 - **Verified 0.5.0 docs publication.** Publish the reviewed release guidance as GPT Sites version 18 and record its canonical commit, hosting deployment, and matching live version/changelog checks. Package bytes and the landing Site are unchanged. ([#76](https://github.com/diegoag64/jev-devtools/pull/76))

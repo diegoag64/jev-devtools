@@ -18,7 +18,7 @@ const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `
   <header class="site-header wrap">
     <a class="wordmark" href="#" aria-label="JevTools home">${logo}<span>jev<span class="wordmark-light">tools</span><span class="wordmark-dot">.</span></span></a>
-    <nav aria-label="Main navigation"><a href="#flows">Explore the flows</a><a href="${DOCS}">Docs</a><a class="nav-github" href="${GITHUB}" aria-label="Jev DevTools on GitHub">${github}<span>GitHub</span></a></nav>
+    <nav aria-label="Main navigation"><a href="${DOCS}">Docs</a><a class="nav-github" href="${GITHUB}" aria-label="Jev DevTools on GitHub">${github}<span>GitHub</span></a></nav>
   </header>
   <main id="main">
     <section class="hero wrap" aria-labelledby="hero-title">
