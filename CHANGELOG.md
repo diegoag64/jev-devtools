@@ -30,7 +30,7 @@ Map items and loop state now infer resolved values from nested reference templat
 
 #### Fixed
 
-- **Resolved map and loop types.** Map item builders and loop gates, iteration state, body returns and final results now agree with runtime template resolution, including nested objects and arrays.
+- **Resolved map and loop types.** Map item builders and loop gates, iteration state, body returns and final results now agree with runtime template resolution, including nested objects and arrays. ([#85](https://github.com/diegoag64/jev-devtools/pull/85))
 
 ## 0.5.1 — Pending publication (experimental)
 
