@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC) | Highlights                                                                                                 |
 | ------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published   | Shared flow encoding; verified publication records; loop-limit and timeout regression coverage.            |
+| [Unreleased](#unreleased)                   | Not published   | Shared flow encoding; publication records; lifecycle and nested browser regression coverage.            |
 | [0.5.2](#052--october-25-2026-experimental) | 2026-10-25      | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
 | [0.5.1](#051--october-25-2026-experimental) | 2026-10-25      | Task input validation and expression types; setup guidance; release and website maintenance.               |
 | [0.5.0](#050--october-25-2026-experimental) | 2026-10-25      | Replay and comparison; capture reliability/privacy; website and docs.                                      |
@@ -36,6 +36,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 #### Maintenance
 
 - **Flow lifecycle regression coverage.** Assert exact loop body calls, retained iterations and latest completed state, and distinguish task timeouts from cancellation in recorded step errors. Runtime behavior and public APIs are unchanged. ([#95](https://github.com/diegoag64/jev-devtools/pull/95))
+
+- **Nested flow browser coverage.** Extend the existing sample verifier with map-item and loop-iteration navigation, request inspection and selection ownership, maps inside iterations, and shared-camera retention through updates and reopening. No runtime or public API changes.
 
 ## 0.5.2 — October 25, 2026 (experimental)
 
