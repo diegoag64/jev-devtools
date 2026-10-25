@@ -1,5 +1,7 @@
 # Packaging and releases
 
+For the proposed replacement of routine receipt PRs, see the [durable receipt design](durable-receipts.md). It is not active; use this checklist until its implementation and rollout gates pass.
+
 ## Release checklist
 
 Use this checklist for every version. npm publication, the Git tag, and the GitHub release are separate operations. The historical records below are evidence, not a substitute for this checklist. Carry forward authorization already given for this release; if an action is outside that authorization, identify it before proceeding.

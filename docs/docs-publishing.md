@@ -79,7 +79,7 @@ No scheduled refresh or automatic deployment is configured. To decide whether do
 
 For partial failure, resume the existing saved version/deployment when available. A readback failure is incomplete verification, not permission to rebuild or redeploy. Later main commits do not replace the selected artifact. For a rollback, select the previously inspected artifact and verify the deployed manifest against that inspection. Keep npm/tag recovery under the release checklist.
 
-These helpers address preparation and readback errors from the 0.5.2 release. [Issue #77](https://github.com/diegoag64/jev-devtools/issues/77) remains open for the broader investigation of durable external receipt storage, retention, permissions, and recovery. Repository receipts remain the durable record in this workflow; ignored local evidence and expiring Actions artifacts do not replace them.
+These helpers address preparation and readback errors from the 0.5.2 release. The [Issue #77 design recommendation](durable-receipts.md) compares durable external receipt storage, retention, permissions, and recovery, with implementation and rollout gates before changing this workflow. Repository receipts remain the durable record in this workflow; ignored local evidence and expiring Actions artifacts do not replace them.
 
 ## Publication receipt and recovery
 

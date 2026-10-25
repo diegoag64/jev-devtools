@@ -31,6 +31,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **Durable receipt design.** Compare external publication evidence stores and propose release assets, recovery rules, and a staged implementation to remove routine receipt PRs. Current release and docs publication policies remain active until rollout is verified. Related to [#77](https://github.com/diegoag64/jev-devtools/issues/77).
+
 - **0.5.2 publication records.** Record verified npm publication, archive integrity/provenance, fresh registry consumers, and the exact Git tag and GitHub Latest release. Update source installation and API guidance to describe the published version. Hosted docs were subsequently published as Sites version 22 from the merged record commit; see the [publication receipt](docs/docs-publishing.md#publication-receipt-and-recovery). ([#96](https://github.com/diegoag64/jev-devtools/pull/96), [receipt #99](https://github.com/diegoag64/jev-devtools/pull/99))
 
 #### Maintenance
