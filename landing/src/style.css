@@ -400,13 +400,6 @@ nav a span[aria-hidden] {
   color: var(--muted);
   margin: 10px 0 22px;
 }
-.primitive-foot {
-  display: block;
-  margin-top: 23px;
-  font: 7px var(--mono);
-  letter-spacing: 0.1em;
-  color: #9c859f;
-}
 .choice-rows {
   height: 113px;
   padding-top: 3px;
@@ -929,10 +922,6 @@ nav a span[aria-hidden] {
   .primitive > p {
     font-size: 10px;
     min-height: 32px;
-  }
-  .primitive-foot {
-    font-size: 6px;
-    letter-spacing: 0;
   }
   .primitive-disclaimer {
     font-size: 8px;
