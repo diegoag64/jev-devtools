@@ -6,28 +6,32 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## At a glance
 
-| Version                                         | Published (UTC)     | Highlights                                                                                                 |
-| ----------------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                       | Not published       | No changes yet.                                                                                            |
-| [0.5.2](#052--pending-publication-experimental) | Pending publication | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
-| [0.5.1](#051--october-25-2026-experimental)     | 2026-10-25          | Task input validation and expression types; setup guidance; release and website maintenance.               |
-| [0.5.0](#050--october-25-2026-experimental)     | 2026-10-25          | Replay and comparison; capture reliability/privacy; website and docs.                                      |
-| [0.4.1](#041--october-24-2026-experimental)     | 2026-10-24          | CSS isolation; stricter published flow types; approved release workflow.                                   |
-| [0.4.0](#040--october-24-2026-experimental)     | 2026-10-24          | Tasks, maps and loops; six cookbooks; SDK and inspector access changes.                                    |
-| [0.3.0](#030--october-24-2026-experimental)     | 2026-10-24          | Connected flow API; readable diagrams; bundled flow guidance.                                              |
-| [0.2.0](#020--october-23-2026-experimental)     | 2026-10-23          | Faster streaming and rendering; virtualized questions; compact Choice views.                               |
-| [0.1.3](#013--october-23-2026-experimental)     | 2026-10-23          | Isolated drawer styles; diagram pan and zoom; versioned package links.                                     |
-| [0.1.2](#012--october-23-2026-experimental)     | 2026-10-23          | Bundled setup skill; agent prompts; framework recipes.                                                     |
-| [0.1.1](#011--october-23-2026-experimental)     | 2026-10-23          | Installation guidance; complete inline demo; smaller video download.                                       |
-| [0.1.0](#010--october-23-2026-experimental)     | 2026-10-23          | React inspector; Node capture; Next.js integration.                                                        |
+| Version                                     | Published (UTC) | Highlights                                                                                                 |
+| ------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------- |
+| [Unreleased](#unreleased)                   | Not published   | Verified 0.5.2 publication records.                                                                        |
+| [0.5.2](#052--october-25-2026-experimental) | 2026-10-25      | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
+| [0.5.1](#051--october-25-2026-experimental) | 2026-10-25      | Task input validation and expression types; setup guidance; release and website maintenance.               |
+| [0.5.0](#050--october-25-2026-experimental) | 2026-10-25      | Replay and comparison; capture reliability/privacy; website and docs.                                      |
+| [0.4.1](#041--october-24-2026-experimental) | 2026-10-24      | CSS isolation; stricter published flow types; approved release workflow.                                   |
+| [0.4.0](#040--october-24-2026-experimental) | 2026-10-24      | Tasks, maps and loops; six cookbooks; SDK and inspector access changes.                                    |
+| [0.3.0](#030--october-24-2026-experimental) | 2026-10-24      | Connected flow API; readable diagrams; bundled flow guidance.                                              |
+| [0.2.0](#020--october-23-2026-experimental) | 2026-10-23      | Faster streaming and rendering; virtualized questions; compact Choice views.                               |
+| [0.1.3](#013--october-23-2026-experimental) | 2026-10-23      | Isolated drawer styles; diagram pan and zoom; versioned package links.                                     |
+| [0.1.2](#012--october-23-2026-experimental) | 2026-10-23      | Bundled setup skill; agent prompts; framework recipes.                                                     |
+| [0.1.1](#011--october-23-2026-experimental) | 2026-10-23      | Installation guidance; complete inline demo; smaller video download.                                       |
+| [0.1.0](#010--october-23-2026-experimental) | 2026-10-23      | React inspector; Node capture; Next.js integration.                                                        |
 
 ## Unreleased
 
-No changes yet.
+### Changes
 
-## 0.5.2 — Pending publication (experimental)
+#### Documentation
 
-**Pending publication.** This patch release prepares the merged responsive drawer improvements, flow template type fixes, composed-expression limits, and capture warnings, together with documentation and contributor workflow updates. npm publication, the release tag, GitHub release, and corresponding hosted docs publication remain pending.
+- **0.5.2 publication records.** Record verified npm publication, archive integrity/provenance, fresh registry consumers, and the exact Git tag and GitHub Latest release. Update source installation and API guidance to describe the published version. Hosted docs publication remains pending; see the [release record](docs/releases.md#release-052--published-october-25-2026). ([#96](https://github.com/diegoag64/jev-devtools/pull/96))
+
+## 0.5.2 — October 25, 2026 (experimental)
+
+**[Published to npm](https://www.npmjs.com/package/jev-devtools/v/0.5.2) at 21:35:38.942 UTC on October 25, 2026**, from `20e7dc0d9d81285e2c6e17b75dae5c8e37f2d0e4` after [release PR #94](https://github.com/diegoag64/jev-devtools/pull/94). The [approved release workflow](https://github.com/diegoag64/jev-devtools/actions/runs/40235875410) passed, and [GitHub release v0.5.2](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.2) is published. npm latest, archive integrity/provenance, fresh registry consumers, the exact tag, and GitHub Latest were verified. Corresponding hosted docs publication remains pending; see the [release record](docs/releases.md#release-052--published-october-25-2026).
 
 ### Compatibility and upgrade
 

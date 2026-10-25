@@ -9,7 +9,7 @@
 - [API reference](https://docs.jevtools.dev/api/reference/): Inputs, outputs, usage, and exact public declarations.
 - [Hosted Markdown index](https://docs.jevtools.dev/llms.txt): Plain Markdown with expanded examples.
 
-**Source version 0.5.2 is pending publication; npm currently provides 0.5.1.** Hosted sites update separately. Prefer the installed version's bundled skill/declarations and check the changelog before using newer APIs.
+**Version 0.5.2 is published on npm and is the default install.** Hosted sites update separately. Prefer the installed version's bundled skill/declarations and check the changelog before using newer APIs.
 
 ## Set up in an existing app
 
