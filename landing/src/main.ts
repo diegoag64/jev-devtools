@@ -17,7 +17,7 @@ const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `
   <header class="site-header wrap">
     <a class="wordmark" href="#" aria-label="JevTools home">${logo}<span>jev<span class="wordmark-light">tools</span><span class="wordmark-dot">.</span></span></a>
-    <nav aria-label="Main navigation"><a href="#flows">Explore the flows</a><a href="${DOCS}">Documentation ${arrow}</a><a class="nav-github" href="${GITHUB}" aria-label="Jev DevTools on GitHub">${github}<span>GitHub</span></a></nav>
+    <nav aria-label="Main navigation"><a href="#flows">Explore the flows</a><a href="${DOCS}">Docs</a><a class="nav-github" href="${GITHUB}" aria-label="Jev DevTools on GitHub">${github}<span>GitHub</span></a></nav>
   </header>
   <main id="main">
     <section class="hero wrap" aria-labelledby="hero-title">
@@ -61,7 +61,7 @@ app.innerHTML = `
     </section>
     <section class="closing section-band" data-theme="plum"><div class="wrap"><h2>Complex flows.<br /><span>Clear understanding.</span></h2><p>Open source, actively evolving, and ready for your next idea.<br />Explore the docs. Try it in your app. Help shape what’s next.</p><div class="hero-actions"><a class="button primary" href="${DOCS}">Explore the docs ${arrow}</a><a class="text-link" href="${GITHUB}">Build with us ${arrow}</a></div><span class="experimental">Experimental software. APIs may evolve before 1.0.</span></div></section>
   </main>
-  <footer class="site-footer wrap"><a class="wordmark" href="#">${logo}<span>jev<span class="wordmark-light">tools</span><span class="wordmark-dot">.</span></span></a><span>Build in code. Understand in diagrams.</span><nav aria-label="Footer navigation"><a href="${DOCS}">Docs ${arrow}</a><a href="${GITHUB}">GitHub ${arrow}</a><a href="${GITHUB}/blob/main/LICENSE">MIT license ${arrow}</a></nav></footer>
+  <footer class="site-footer wrap"><a class="wordmark" href="#">${logo}<span>jev<span class="wordmark-light">tools</span><span class="wordmark-dot">.</span></span></a><span>Build in code. Understand in diagrams.</span><nav aria-label="Footer navigation"><a href="${DOCS}">Docs</a><a href="${GITHUB}">GitHub</a><a href="${GITHUB}/blob/main/LICENSE">MIT license</a></nav></footer>
 `;
 
 const svg = document.querySelector<SVGSVGElement>("#diagram")!;

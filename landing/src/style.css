@@ -135,10 +135,6 @@ nav a:hover,
 .text-link:hover {
   color: #f495d6;
 }
-nav a span[aria-hidden] {
-  margin-left: 6px;
-  color: #87798b;
-}
 .nav-github {
   display: flex;
   gap: 8px;
@@ -1041,7 +1037,6 @@ nav a span[aria-hidden] {
   background: #100b12;
   border: 1px solid #4a344d;
   border-radius: 9px;
-  box-shadow: 0 20px 90px -45px #b2538c50;
 }
 .drawer-details {
   display: grid;
