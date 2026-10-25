@@ -23,6 +23,12 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ### Changes
 
+#### Changed
+
+- **Landing navigation.** Remove the "Explore the flows" header link and keep Docs visible on mobile. Package APIs are unchanged. ([#78](https://github.com/diegoag64/jev-devtools/pull/78))
+
+- **Website sharing previews.** Add the selected prismatic landing image and documentation image to Open Graph and Twitter metadata, requesting large image cards on both sites. The landing artwork uses a smaller, punctuation-free headline with clear separation between the “y” and “i”. Docs keep page-specific titles and descriptions with one shared image. Package APIs are unchanged; the previews become available after each site's manual publication. ([#78](https://github.com/diegoag64/jev-devtools/pull/78))
+
 #### Documentation
 
 - **Package compatibility and public imports.** Include the `/flow` export in setup guidance and align the docs site, READMEs, and bundled agent instructions on Node, React, SDK, ESM, and the verified TypeScript 5.4+ declaration requirement. Focus setup on the three JavaScript entry points and automatic drawer styling, removing obsolete stylesheet-import guidance. Clarify required peers and server-only boundaries; package APIs and runtime requirements are unchanged. ([#79](https://github.com/diegoag64/jev-devtools/pull/79))

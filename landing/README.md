@@ -21,6 +21,7 @@ Open the printed localhost URL (default `http://127.0.0.1:4190`). Run `npm run b
 - `src/flows.ts`: six self-contained, abbreviated cookbook-inspired illustrations. Values are authored samples, not captured inference. RAG shows three illustrative passages, not the full twelve-item cookbook. Model probabilities are separate from application routing policies.
 - `src/style.css`: landing-only palette, responsive layouts, primitive illustrations, and signal animation.
 - `public/favicon.svg`: local brand mark; no remote fonts, images, analytics, or SDKs are loaded.
+- `index.html` and `public/social/jevtools.png`: Open Graph and Twitter sharing metadata and the selected prismatic sharing image. Both image tags use the public HTTPS URL, and the card metadata requests `summary_large_image`; keep the declared image dimensions and alt text aligned when replacing it. Sharing-image publication follows the manual workflow below.
 
 The designs reference the Jev DevTools drawer and [diagram-motion-lab](https://github.com/diegoag64/diagram-motion-lab). The renderer, graph data, and illustrations are newly authored; no third-party implementation or cookbook datasets are copied.
 
