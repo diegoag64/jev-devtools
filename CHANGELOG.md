@@ -48,6 +48,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **Glossary introductions.** Explain each method and concept before its signature, including generated declarations and supporting types. Docs only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
+
 - **Reference type help and reliable anchors.** Add build-time tooltips for important package types in reference signatures and declarations, with readable contracts, import sources, and property descriptions. Preserve existing URLs while moving method/type link targets off sticky headings so upward jumps reveal the selected card. Docs only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
 
 - **Readable API glossary and page navigation.** Separate API groups and methods visually, label signatures, inputs, returns, and examples, and highlight the current section as you scroll. The glossary outline includes grouped method links; existing deep links and no-JavaScript reading remain available. Docs only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).

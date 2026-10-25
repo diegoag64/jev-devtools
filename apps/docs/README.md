@@ -82,6 +82,8 @@ Complete flow examples must pair the synchronous definition with an explicit `aw
 
 ## Glossary layout and reading position
 
+Start every glossary entry with one or two concise sentences explaining what it does and when to use it, before its signature or declaration. Generated callable declarations reuse the introduction from the matching entry; supporting types require their own description in `type-reference.ts`.
+
 The glossary uses h2 headings for API groups, h3 headings for individual APIs, and h4 headings for Signature, Inputs, Returns, Example, and How it works. The build adds labeled method sections and group headers without changing their permanent IDs. Keep the source Markdown structured this way; do not manually add card markup around methods. Grouped outline links are generated from the same headings. Declarations remain native disclosures, and all groups and method links are available without JavaScript.
 
 The shared outline script marks one link with `aria-current="location"` using the reader's scroll position. It follows native fragment navigation, browser history, and content resizing; it never rewrites the URL or moves keyboard focus. On the glossary it opens the current method's group and scrolls only the outline to keep that link visible. Readers can also expand other groups manually.

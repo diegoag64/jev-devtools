@@ -28,6 +28,8 @@ Code fragments use `inspector` for an adapter, `recorder` for a recorder, `flow`
 
 ### JevDevtools
 
+The React component that adds the inspector drawer to your app. Use it to view requests and flow runs captured by your server adapter.
+
 #### Signature
 
 ```ts
@@ -75,6 +77,8 @@ Import factories from `jev-devtools/server`. All server adapter and recorder run
 
 ### createJevDevtools
 
+Creates the server adapter that connects SDK request capture to the browser inspector. Share one instance between your clients and inspector routes.
+
 #### Signature
 
 ```ts
@@ -116,6 +120,8 @@ The example enables capture and binds inspector access to the browser origin `ht
 
 ### getJevDevtools
 
+Gets or creates a server adapter under a stable key. Use it to preserve the same recorder and history across module reloads in one Node process.
+
 #### Signature
 
 ```ts
@@ -151,6 +157,8 @@ const inspector = getJevDevtools("my-app", () => ({
 The stable `"my-app"` key reuses the adapter during module reloads. The callback supplies configuration only when an adapter for that key does not already exist.
 
 ### adapter.createClient
+
+Creates a TypeSafe SDK client with request recording configured for this adapter. Use it for the calls you want to inspect.
 
 #### Signature
 
@@ -188,6 +196,8 @@ The first argument configures the SDK with a server-side key. The second adds a 
 
 ### adapter.handle
 
+Serves the inspector’s HTTP endpoints from a Web Request. Use it when your framework exposes the request’s actual public URL.
+
 #### Signature
 
 ```ts
@@ -219,6 +229,8 @@ const response = await inspector.handle(request);
 The application passes its incoming Web Request to the adapter and awaits a Web Response. Return that response from your framework’s inspector route.
 
 ### adapter.handleNodeRoute
+
+Serves inspector endpoints in Node frameworks that may expose internal request URLs. It validates the Host header before routing the request.
 
 #### Signature
 
@@ -252,6 +264,8 @@ export const DELETE = GET;
 The route exposes the same handler for GET and DELETE. The adapter checks Host before serving configuration, event streams, or a clear request.
 
 ### adapter.middleware
+
+Connects the inspector endpoints to an Express or Connect-style server. Requests outside the inspector path continue to your application.
 
 #### Signature
 
@@ -287,6 +301,8 @@ Mounting the middleware on `app` preserves the full inspector path. Requests out
 
 ### adapter.run
 
+Runs application work within the recording session selected for an incoming request. Use it when separate users or requests need separate inspection histories.
+
 #### Signature
 
 ```ts
@@ -319,6 +335,8 @@ return inspector.run(request, () => client.systemOne(input));
 The request determines the recording session. The callback performs the SDK call inside that session, and its result becomes the resolved value of `inspector.run()`.
 
 ### adapter.dispose
+
+Shuts down an adapter, stopping capture and closing its event streams. Call it when the server shuts down or you deliberately replace the adapter.
 
 #### Signature
 
@@ -354,6 +372,8 @@ Import `defineJevFlow` from `jev-devtools/flow` on Node. Builder methods describ
 
 ### defineJevFlow
 
+Defines a reusable sequence of tasks, Jev requests, and decisions. The callback builds the recipe synchronously; calling the returned flow’s `run()` executes it.
+
 #### Signature
 
 ```ts
@@ -385,6 +405,8 @@ defineJevFlow<Input>(name: string, build: (flow: FlowBuilder<Input>) => Expressi
 `greet` records the input reference and terminal output synchronously. Calling `tryGreeting()` awaits `greet.run({ name: "Ada" }, ...)` and reads outcome `"greeted"` and value `"Ada"`. The no-inference client needs no key because this definition has no Jev steps.
 
 ### flow.run
+
+Executes a defined flow with concrete input and a client. Await it to receive the selected outcome and resolved output value.
 
 #### Signature
 
@@ -426,6 +448,8 @@ The input object supplies Ada’s name. `client` enables SDK steps and `devtools
 
 ### flow.definition
 
+The static graph describing a flow’s steps and connections. Read it to inspect the recipe or pair it with a captured run when creating a fixture.
+
 #### Signature
 
 ```ts
@@ -455,6 +479,8 @@ console.log(program.definition.name, program.definition.nodes.length);
 Reading `name` and the node count inspects the recipe’s static structure. It does not execute tasks or send requests.
 
 ### flow.input
+
+A reference to the data supplied to the current flow, map item, or loop iteration. Use it to pass input into steps or select individual fields.
 
 #### Signature
 
@@ -487,6 +513,8 @@ const name = flow.input.get("name");
 The `get("name")` call selects a typed field reference. Pass that reference to a task or output to resolve it during execution.
 
 ### flow.task
+
+Adds a step that runs your application code, such as fetching data or transforming a value. Its callback receives resolved inputs and can return a value or a promise.
 
 #### Signature
 
@@ -522,6 +550,8 @@ flow.task<I, O>(id: string, task: FlowTask<I, O>, display?: FlowDisplay): Expres
 `get("name")` selects the input field. The task resolves it before calling `run`, so `name` inside the callback is an ordinary string. The template literal constructs the greeting. `output("greeted", message)` resolves that task result and makes it the final flow value. Calling `tryTask()` awaits `greeting.run({ name: "Ada" }, ...)`, then reads outcome `"greeted"` and value `"Hello, Ada!"` from the finished run.
 
 ### flow.jev
+
+Adds a Jev request step and provides references to its future answers. The request is sent when the flow runs, so later steps can use those answers.
 
 #### Signature
 
@@ -562,6 +592,8 @@ flow.jev(id, { input, request: (resolvedInput) => sdkRequest }, display?): Answe
 
 ### request.answer
 
+Selects one named question’s answer fields as flow references. Use it when a later step needs a specific field, such as a chosen label or numeric result.
+
 #### Signature
 
 ```ts
@@ -596,6 +628,8 @@ const team = result.answer("team").choice; // expression for a Choice result
 
 ### request.answers
 
+A reference to the complete answer object from a Jev step. Use it to pass all answers onward, including questions named dynamically by a request factory.
+
 #### Signature
 
 ```ts
@@ -627,6 +661,8 @@ return flow.output("answers", result.answers);
 Passing the full answer reference to `output()` returns every answer and its SDK metadata in the flow value, rather than extracting one field.
 
 ### flow.if
+
+Chooses between two paths and produces a value for subsequent steps. Use it when the paths should rejoin and the flow should continue.
 
 #### Signature
 
@@ -663,6 +699,8 @@ flow.if<A, B>(id, { when, then, else }, display?): Expression<A | B>
 
 ### flow.branch
 
+Chooses between two paths that each finish the flow with an outcome. Use it when the decision determines how the flow ends.
+
 #### Signature
 
 ```ts
@@ -698,6 +736,8 @@ flow.branch(id, { when, then, else }, display?): Expression<FlowOutcome>
 
 ### flow.parallel
 
+Defines independent lanes of work that run concurrently and then join. Later steps can read each lane’s result by its name.
+
 #### Signature
 
 ```ts
@@ -730,6 +770,8 @@ flow.parallel(id, lanes: { [name: string]: (lane) => Expression<unknown> }, disp
 both lanes read the same input price through their own builders. `full-price` returns it unchanged, while `sale-price` multiplies it by `0.8`. The flow joins the lanes before resolving both references in the output object. A lane cannot read another lane's private intermediate steps. Calling `tryParallel()` awaits `totals.run({ price: 100 }, ...)`, then reads outcome `"priced"` and value `{ regular: 100, sale: 80 }` from the finished run.
 
 ### flow.map
+
+Runs the same steps for every item in an array and collects their results in input order. Use it for repeated work with a bounded number of concurrent items.
 
 #### Signature
 
@@ -770,6 +812,8 @@ flow.map<Item, Context, Output>(id, { items, input, maxItems, concurrency? }, bu
 
 ### flow.loop
 
+Repeats a sequence of steps while a condition is true, carrying updated state between iterations. A required iteration limit bounds how long it can run.
+
 #### Signature
 
 ```ts
@@ -808,6 +852,8 @@ flow.loop<State, Context>(id, { initial, input, while, maxIterations }, build, d
 `initial` starts the state at zero. `while` uses `.lt(3)` to build the stopping condition. The `increment` task reads the current state and adds one, producing `0 → 1 → 2 → 3`. Before a fourth iteration, the condition is false, so the loop returns `3`. If the initial condition is false, no iterations run and the initial state is returned. Calling `tryLoop()` awaits `countToThree.run({}, ...)`, then reads outcome `"counted"` and value `3` from the finished run.
 
 ### flow.output
+
+Defines the end of a flow or branch with a named outcome and optional result data. References in that data resolve when the flow executes.
 
 #### Signature
 
@@ -853,6 +899,8 @@ All these runtime exports come from `jev-devtools/flow`. References must belong 
 
 ### FlowExpression
 
+A typed reference to a value available during flow execution. Builders create these references so later steps can select fields, compare values, and use earlier results.
+
 #### Signature
 
 ```ts
@@ -890,6 +938,8 @@ Use the builder’s owned input reference and select its message field. This avo
 
 ### expression.get
 
+Selects a property from a referenced value. Chain calls to reach nested fields while preserving their types.
+
 #### Signature
 
 ```ts
@@ -921,6 +971,8 @@ const city = flow.input.get("address").get("city");
 The first `get()` selects the nested address object; the second selects its city field. Both selections remain references until the flow evaluates them.
 
 ### expression.eq
+
+Builds a condition that checks whether two scalar values are equal when the flow runs. Use it to compare labels, numbers, booleans, or null.
 
 #### Signature
 
@@ -955,6 +1007,8 @@ The comparison checks whether the resolved count equals 3. Pass the resulting Bo
 
 ### expression.lt
 
+Builds a condition that checks whether a numeric value is below a limit. Use it for thresholds and loop stopping rules.
+
 #### Signature
 
 ```ts
@@ -987,6 +1041,8 @@ const condition = flow.input.get("count").lt(3);
 The comparison is true when the resolved count is below 3. It describes a condition now and evaluates it when the flow runs.
 
 ### expression.gt
+
+Builds a condition that checks whether a numeric value is above a limit. The limit itself does not satisfy the condition.
 
 #### Signature
 
@@ -1021,6 +1077,8 @@ The comparison is true when the resolved count is above 3. Both operands must re
 
 ### expression.gte
 
+Builds a condition that checks whether a numeric value meets or exceeds a limit. Use it when the boundary value should count.
+
 #### Signature
 
 ```ts
@@ -1053,6 +1111,8 @@ const condition = flow.input.get("count").gte(3);
 The comparison includes the boundary: a count of 3 satisfies it. It returns a condition reference for a later decision.
 
 ### all
+
+Combines flow conditions into one condition that requires every check to pass. Use it when several requirements must hold together.
 
 #### Signature
 
@@ -1087,6 +1147,8 @@ The two comparisons describe an inclusive lower bound of 1 and an exclusive uppe
 
 ### any
 
+Combines flow conditions into one condition that passes when at least one check passes. Use it for alternative ways to satisfy a decision.
+
 #### Signature
 
 ```ts
@@ -1120,6 +1182,8 @@ The two comparisons test the endpoints zero and ten. `any()` is true when either
 
 ### not
 
+Reverses a flow condition: true becomes false and false becomes true. Use it when a path should run only if another condition does not hold.
+
 #### Signature
 
 ```ts
@@ -1152,6 +1216,8 @@ const remaining = not(flow.input.get("count").eq(0));
 The equality expression checks for zero; `not()` inverts it so a nonzero count satisfies the condition.
 
 ### FlowLoopLimitError
+
+The error raised when a loop reaches its iteration limit while its condition is still true. Catch it around an awaited run to handle loop exhaustion.
 
 #### Signature
 
@@ -1195,6 +1261,8 @@ The catch block handles only loop exhaustion and rethrows other failures. The fl
 
 ### flowFixture
 
+Builds a replay fixture from a captured flow run and its request traces. It also reports missing responses and capture limitations to review before saving.
+
 #### Signature
 
 ```ts
@@ -1236,6 +1304,8 @@ The map indexes captures by trace ID. `flowFixture()` finds responses linked to 
 
 ### replayClient
 
+Creates a client that supplies saved Jev responses during a flow run. Use it to replay requests without inference calls; application tasks still execute.
+
 #### Signature
 
 ```ts
@@ -1269,6 +1339,8 @@ const result = await program.run(input, { client: replayClient(fixture) });
 The client supplies stored answers for Jev steps while the same recipe executes with the supplied input. Tasks and request factories still execute, so control side effects in replay tests.
 
 ### compareWithFixture
+
+Runs a flow against saved responses and then with the supplied live client, comparing the results. Use it to inspect changes in outcomes, decisions, and answers.
 
 #### Signature
 
@@ -1320,6 +1392,8 @@ The helper first replays the saved fixture, then executes with the supplied clie
 
 ### formatComparison
 
+Turns a fixture comparison into a readable text summary. Use it in logs or reports after running `compareWithFixture()`.
+
 #### Signature
 
 ```ts
@@ -1357,6 +1431,8 @@ Import `JevRecorder` from `jev-devtools/server`. This is for custom integrations
 
 ### JevRecorder
 
+Captures SDK requests and keeps their inspection history in memory. Use it directly when building a custom integration beyond the server adapter.
+
 #### Signature
 
 ```ts
@@ -1390,6 +1466,8 @@ Constructing the recorder sets a global retention bound of 50 traces. The instan
 
 ### recorder.transport
 
+Wraps the SDK’s fetch function to record HTTP attempts. Pair it with `instrument()` to connect those attempts to their logical SDK calls.
+
 #### Signature
 
 ```ts
@@ -1421,6 +1499,8 @@ const sdk = new TypeSafeClient({ apiKey, fetch: recorder.transport(globalThis.fe
 The SDK receives a wrapped `fetch`, so HTTP attempts can be associated with instrumented logical calls. Pair this client with `recorder.instrument()` to record both levels.
 
 ### recorder.instrument
+
+Wraps a TypeSafe client to record its `systemOne` calls with session and display labels. The returned client preserves the SDK’s request and response behavior.
 
 #### Signature
 
@@ -1455,6 +1535,8 @@ The proxy records `systemOne` calls under the local session with the Support lab
 
 ### recorder.snapshot
 
+Reads the retained request history for one session as a detached array. Use it to populate a viewer without changing the stored history.
+
 #### Signature
 
 ```ts
@@ -1486,6 +1568,8 @@ const traces = recorder.snapshot("local");
 The call retrieves a detached copy of the local session’s current history. Reading the array does not clear or mutate recorder storage.
 
 ### recorder.changes
+
+Reads trace updates since a revision, together with the current retained order. Use it to keep a viewer in sync without fetching every trace again.
 
 #### Signature
 
@@ -1523,6 +1607,8 @@ The initial call requests a full view. Passing its revision into the second call
 
 ### recorder.subscribe
 
+Registers a listener for changes to recording sessions. Use the notified session names to decide which snapshots or updates your viewer should read.
+
 #### Signature
 
 ```ts
@@ -1559,6 +1645,8 @@ The listener filters notifications to the local session before reading its snaps
 
 ### recorder.clear
 
+Removes retained traces for one recording session and notifies listeners. Use it to reset inspection history while leaving application work running.
+
 #### Signature
 
 ```ts
@@ -1590,6 +1678,8 @@ recorder.clear("local");
 Only retained traces for the local session are removed. Other session histories and application inference continue.
 
 ### recorder.withFlow
+
+Links captured SDK requests to the flow step executing them. Custom observers use it to establish recording context around a request callback.
 
 #### Signature
 
@@ -1629,6 +1719,8 @@ The wrapper establishes flow linkage around the request callback. `onTrace` stor
 
 ### observer.startFlow
 
+Starts observation of a flow run and supplies the hooks for its updates and requests. The runner calls it automatically when a `devtools` observer is provided.
+
 #### Signature
 
 ```ts
@@ -1663,6 +1755,8 @@ await program.run(input, { client, devtools: inspector }); // runner calls start
 Passing the inspector as `devtools` lets the runner call `startFlow` and manage the returned hooks. Application code does not need to invoke those hooks manually.
 
 ### observer.update
+
+Receives the latest captured run state as execution progresses. Use it in a custom observer to update a viewer or store run information.
 
 #### Signature
 
@@ -1700,6 +1794,8 @@ const hooks = {
 The update hook logs the run ID and status. Its companion request hook calls through immediately; these hooks observe execution rather than implement application steps.
 
 ### observer.request
+
+Wraps a flow’s request callback so an observer can associate its capture with the current step. It must call through synchronously and preserve the callback’s result.
 
 #### Signature
 

@@ -20,10 +20,24 @@ const descriptions: Record<string, string> = {
   FixtureComparison: "Unreleased. Outcome/value/decision/step changes, answer drift, and unredacted live fixture.",
 };
 
+const supportingDescriptions: Record<string, string> = {
+  FlowNode: "One step in a flow’s static graph, including its kind, dependencies, and any nested item program. The inspector uses these nodes to display the recipe.",
+  FlowCondition: "A recorded description of a condition, built from references, literal values, and comparison operators. It lets the inspector display the rule behind a decision.",
+  AnswerValue: "A scalar answer field used in fixture comparisons: a string, number, boolean, or null.",
+  Request: "The flow builder’s request shape, based on the SDK request with state that can contain flow references. The runner resolves that state before sending the request.",
+  AnswerRefs: "The references returned by a Jev step: named answer fields through answer(), and the complete answer object through answers. These values resolve during execution.",
+  Adapter: "The object returned by createJevDevtools(), containing client creation, HTTP handlers, session handling, and flow observation methods.",
+  Ast: "The expression tree that describes how a flow value is read or calculated. It stores inputs, step references, field selections, literals, and operators for evaluation during a run.",
+};
+
 // Read the installed public declarations, never browser-load the compiler or
 // import package internals into a consumer example. Package checks build these
 // declarations before docs verification.
-export function publicTypeReference() {
+export function publicTypeReference(referenceMarkdown: string) {
+  const introductions = new Map(
+    [...referenceMarkdown.matchAll(/^### ([^\n]+)\n\n([^\n]+(?:\n(?!\n)[^\n]+)*)/gm)]
+      .map((match) => [match[1], match[2]]),
+  );
   const modules = ["jev-devtools", "jev-devtools/server", "jev-devtools/flow"];
   const roots = modules.map((name) => fileURLToPath(import.meta.resolve(name)).replace(/\.js$/, ".d.ts"));
   const program = ts.createProgram(roots, { skipLibCheck: true, module: ts.ModuleKind.NodeNext, moduleResolution: ts.ModuleResolutionKind.NodeNext });
@@ -74,7 +88,15 @@ export function publicTypeReference() {
     return `### Type: ${name}\n\n${descriptions[name]}\n\n**Import type from:** ${imports.map((name) => `\x60${name}\x60`).join(" or ")}.\n\n${declaration(node)}`;
   }).join("\n\n") +
     "\n\n## Exact callable declarations\n\nThese expandable declarations preserve the actual generic signatures behind the readable method summaries.\n\n" +
-    callables.map(({ name, node, module }) => `#### ${name} declaration\n\nImport from \x60${module}\x60.\n\n${declaration(node)}`).join("\n\n") +
+    callables.map(({ name, node, module }) => {
+      const introduction = introductions.get(name);
+      if (!introduction || introduction.startsWith("#")) throw new Error(`Add a glossary introduction for ${name}`);
+      return `#### ${name} declaration\n\n${introduction}\n\nImport from \x60${module}\x60.\n\n${declaration(node)}`;
+    }).join("\n\n") +
     "\n\n## Supporting structural types\n\nThese shapes appear inside the public contracts above. They are **not named public exports**; do not import them from package internals. SDK and platform types are defined by their respective packages.\n\n" +
-    [...supporting].map(([name, node]) => `#### ${name} shape\n\n${declaration(node)}`).join("\n\n");
+    [...supporting].map(([name, node]) => {
+      const description = supportingDescriptions[name];
+      if (!description) throw new Error(`Add a supporting-type description for ${name}`);
+      return `#### ${name} shape\n\n${description}\n\n${declaration(node)}`;
+    }).join("\n\n");
 }

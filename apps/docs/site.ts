@@ -82,7 +82,7 @@ function renderOutline(headings: { id: string; title: string; depth: number }[],
 
 async function expandExamples(source: string) {
   if (source.includes("<!-- public-api-types -->"))
-    source = source.replace("<!-- public-api-types -->", publicTypeReference());
+    source = source.replace("<!-- public-api-types -->", publicTypeReference(source));
   const matches = [
     ...source.matchAll(/<!-- example: ([\w-]+\.(?:ts|tsx))( twoslash)? -->/g),
   ];
