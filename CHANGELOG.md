@@ -30,7 +30,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Fixed
 
-- **Flow capture warnings.** Retain and display outcome and condition-rule truncation, redaction, and unavailable-capture warnings, including rule projection limits, nested item runs, and non-JSON merge values. Warnings are separate metadata; user strings are never treated as capture signals. Fixes [#45](https://github.com/diegoag64/jev-devtools/issues/45).
+- **Flow capture warnings.** Retain and display outcome and condition-rule truncation, redaction, and unavailable-capture warnings, including rule projection limits, nested item runs, and non-JSON merge values. Warnings are separate metadata; user strings are never treated as capture signals. Fixes [#45](https://github.com/diegoag64/jev-devtools/issues/45). ([#88](https://github.com/diegoag64/jev-devtools/pull/88))
 
 ## 0.5.1 — Pending publication (experimental)
 
