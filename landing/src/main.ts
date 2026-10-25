@@ -27,7 +27,7 @@ app.innerHTML = `
     <section id="flows" class="flow-stage wrap" aria-label="Animated flow examples" aria-roledescription="carousel">
       <div class="diagram-scroll" tabindex="0" role="region" aria-label="Flow diagram; scroll horizontally on small screens"><svg id="diagram" viewBox="0 0 1140 520" role="img"></svg></div>
       <div class="flow-caption">
-        <div class="flow-caption-copy"><p><span id="flow-number" class="flow-number"></span><span id="flow-name"></span><span class="sample-label">Simulated flow</span></p><p id="flow-description"></p></div>
+        <div class="flow-caption-copy">${flows.map((flow, index) => `<div class="flow-caption-item" aria-hidden="true"><p class="flow-caption-heading"><span class="flow-number">${String(index + 1).padStart(2, "0")} / ${String(flows.length).padStart(2, "0")}</span><span>${escape(flow.label)}</span><span class="sample-label">Simulated flow</span></p><p class="flow-description">${escape(flow.description)}</p></div>`).join("")}</div>
         <div class="playback"><button id="previous" aria-label="Previous flow" title="Previous flow">Previous</button><button id="play" aria-label="Pause animation" title="Pause animation">Ⅱ</button><button id="next" aria-label="Next flow" title="Next flow">Next</button></div>
       </div>
       <p class="mobile-hint">Swipe to explore the diagram <span aria-hidden="true">↔</span></p>
@@ -73,14 +73,15 @@ let frame = 0;
 let inView = true;
 const DURATION = 6.6;
 const CYCLE = 11;
-const escape = (value: string) =>
-  value.replace(
+function escape(value: string) {
+  return value.replace(
     /[&<>"']/g,
     (c) =>
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
         c
       ]!,
   );
+}
 const el = <T extends HTMLElement>(id: string) =>
   document.getElementById(id) as T;
 const icons = { input: "↳", jev: "◈", code: "ƒ", output: "↗" };
@@ -128,10 +129,11 @@ function connection(e: Edge, flow: Flow) {
 let timed: SVGElement[] = [];
 function render() {
   const flow = flows[selected];
-  el("flow-number").textContent =
-    `${String(selected + 1).padStart(2, "0")} / 06`;
-  el("flow-name").textContent = flow.label;
-  el("flow-description").textContent = flow.description;
+  document.querySelectorAll<HTMLElement>(".flow-caption-item").forEach((caption, index) => {
+    const active = index === selected;
+    caption.classList.toggle("is-active", active);
+    caption.setAttribute("aria-hidden", String(!active));
+  });
   svg.innerHTML = `<title>${escape(flow.label)} — simulated flow</title><desc>${escape(flow.description)} ${flow.nodes.map((n) => `${n.title}: ${n.subtitle}${n.muted ? " (inactive path)" : ""}`).join(". ")}. Fixed illustrative data; no inference is performed.</desc>${flow.group ? `<g class="flow-group"><rect x="${flow.group.x}" y="${flow.group.y}" width="${flow.group.w}" height="${flow.group.h}" rx="12"/><text x="${flow.group.x + 20}" y="${flow.group.y + 24}">${flow.group.label}</text></g>` : ""}${flow.edges.map((e) => connection(e, flow)).join("")}${flow.nodes.map(card).join("")}`;
   timed = [...svg.querySelectorAll<SVGElement>("[data-at]")];
   elapsed = reducedMotion.matches || paused ? DURATION : 0;

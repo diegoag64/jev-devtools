@@ -711,16 +711,28 @@ nav a:hover,
   background: radial-gradient(ellipse at center, #5e254c18, transparent 65%);
 }
 .flow-caption {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 550px) max-content;
   align-items: center;
   justify-content: center;
   gap: 35px;
   padding: 6px 0 16px;
 }
 .flow-caption-copy {
-  max-width: 550px;
+  display: grid;
+  min-width: 0;
 }
-.flow-caption-copy > p:first-child {
+/* Overlapping captions reserve the tallest flow's intrinsic height at any
+   viewport or font size, without clipping text or measuring after a switch. */
+.flow-caption-item {
+  grid-area: 1 / 1;
+  min-width: 0;
+  visibility: hidden;
+}
+.flow-caption-item.is-active {
+  visibility: visible;
+}
+.flow-caption-heading {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -737,7 +749,7 @@ nav a:hover,
   border-left: 1px solid #49364e;
   padding-left: 12px;
 }
-#flow-description {
+.flow-description {
   margin-top: 9px;
   color: #9e8ca6;
   font-size: 11px;
@@ -774,12 +786,13 @@ nav a:hover,
     padding-top: 0;
   }
   .flow-caption {
+    grid-template-columns: minmax(0, 1fr) max-content;
     margin: 4px 20px 0;
     padding: 0;
     align-items: flex-start;
     gap: 10px;
   }
-  .flow-caption-copy > p:first-child {
+  .flow-caption-heading {
     flex-wrap: wrap;
     gap: 8px;
     font-size: 11px;
@@ -787,7 +800,7 @@ nav a:hover,
   .sample-label {
     font-size: 7px;
   }
-  #flow-description {
+  .flow-description {
     font-size: 10px;
   }
   .playback {
