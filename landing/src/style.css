@@ -58,21 +58,8 @@ p {
   width: min(1200px, calc(100% - 80px));
   margin-inline: auto;
 }
-.eyebrow {
-  font: 10px var(--mono);
-  letter-spacing: 0.14em;
-  color: var(--pink);
-}
 .mono {
   font-family: var(--mono);
-}
-.status-dot {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--pink);
-  box-shadow: 0 0 10px #e551ba55;
 }
 .skip-link {
   position: absolute;
@@ -151,30 +138,12 @@ nav a span[aria-hidden] {
   padding: 70px 0 22px;
   position: relative;
 }
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  color: #c0aebf;
-  font-size: 9px;
-  letter-spacing: 0.13em;
-  padding: 9px 12px;
-  border: 1px solid #322737;
-  border-radius: 30px;
-}
-.hero-badge:hover {
-  border-color: #875073;
-}
-.hero-badge > span:last-child {
-  color: var(--pink);
-  font-size: 13px;
-}
 .hero h1 {
   font-size: clamp(48px, 6.4vw, 86px);
   letter-spacing: -0.068em;
   font-weight: 600;
   line-height: 1.04;
-  margin: 28px 0 23px;
+  margin: 0 0 23px;
 }
 .hero h1 > span {
   color: #ee9ed5;
@@ -383,7 +352,6 @@ nav a span[aria-hidden] {
   letter-spacing: -1.5px;
   font-size: 38px;
   line-height: 1.15;
-  margin-top: 14px;
 }
 .section-heading > p {
   font-size: 13px;
@@ -587,7 +555,7 @@ nav a span[aria-hidden] {
   font-size: 42px;
   margin-bottom: 22px;
 }
-.integration-copy > p:not(.eyebrow) {
+.integration-copy > p {
   font-size: 14px;
   color: var(--muted);
   line-height: 1.8;
@@ -699,12 +667,12 @@ nav a span[aria-hidden] {
   font-weight: 500;
   letter-spacing: -2.6px;
   line-height: 1.06;
-  margin: 22px 0;
+  margin: 0 0 22px;
 }
 .closing h2 span {
   color: #e6a0d0;
 }
-.closing > p:not(.eyebrow) {
+.closing > p {
   font-size: 14px;
   line-height: 1.8;
   color: var(--muted);
@@ -920,15 +888,10 @@ nav a span[aria-hidden] {
   }
   .hero h1 {
     font-size: clamp(41px, 8.7vw, 65px);
-    margin-top: 26px;
     letter-spacing: -0.06em;
   }
   .hero-description {
     font-size: 14px;
-  }
-  .hero-badge {
-    font-size: 7px;
-    gap: 9px;
   }
   .button {
     padding: 13px 18px;
@@ -994,7 +957,7 @@ nav a span[aria-hidden] {
   .integration h2 {
     font-size: 36px;
   }
-  .integration-copy > p:not(.eyebrow) {
+  .integration-copy > p {
     font-size: 13px;
     max-width: 100%;
   }
@@ -1015,7 +978,7 @@ nav a span[aria-hidden] {
     font-size: 43px;
     letter-spacing: -2px;
   }
-  .closing > p:not(.eyebrow) {
+  .closing > p {
     font-size: 12px;
   }
   .experimental {

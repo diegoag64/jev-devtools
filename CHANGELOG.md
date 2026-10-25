@@ -20,7 +20,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-- Add an isolated Vite landing page under `landing/` for jevtools.dev, with docs/GitHub links, six browser-only animated flow illustrations, primitive previews, and a React integration introduction. Includes keyboard navigation and reduced-motion support. Package APIs, package styles, and deployment configuration are unchanged.
+- Add an isolated Vite landing page under `landing/` for jevtools.dev, with docs/GitHub links, six browser-only animated flow illustrations, primitive previews, and a React integration introduction. Uses a clean hero and section headings without promotional eyebrows. Includes keyboard navigation and reduced-motion support. Package APIs, package styles, and deployment configuration are unchanged.
 
 - Add `compareWithFixture` and `formatComparison` to `jev-devtools/flow`: compare a live client's run with a saved fixture, print the differences for CI logs, and get the live run back as a new fixture. Map items and loop iterations are reported under their composed ids; a step that ran on only one side sets `changed`. Recording observer failures and mutations to run snapshots cannot corrupt the comparison; captured response snapshots also prevent later observer mutations from hiding answer drift or rewriting the live fixture. Tasks run on both sides. ([#32](https://github.com/diegoag64/jev-devtools/pull/32))
 

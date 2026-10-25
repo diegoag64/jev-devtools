@@ -16,7 +16,6 @@ app.innerHTML = `
   </header>
   <main id="main">
     <section class="hero wrap" aria-labelledby="hero-title">
-      <a href="${GITHUB}" class="eyebrow hero-badge"><span class="status-dot"></span> OPEN SOURCE. OPEN TO POSSIBILITY. <span aria-hidden="true">↗</span></a>
       <h1 id="hero-title">Visualize your<br /><span>System One flows.</span></h1>
       <p class="hero-description">Models, primitives, and your code. One clear picture.<br class="desktop-break" /> Make complex Jev flows easy to understand.</p>
       <div class="hero-actions"><a class="button primary" href="${DOCS}">Get started ${arrow}</a><a class="button secondary" href="${GITHUB}">${github} View on GitHub</a></div>
@@ -31,7 +30,7 @@ app.innerHTML = `
       <span id="flow-announcement" class="sr-only" role="status"></span>
     </section>
     <section class="primitives-section wrap" aria-labelledby="primitives-title">
-      <div class="section-heading"><div><p class="eyebrow">SMALL PRIMITIVES. BIG PICTURE.</p><h2 id="primitives-title">Every answer has a shape.</h2></div><p>Inspect what the model returned.<br />Understand what your application did next.</p></div>
+      <div class="section-heading"><div><h2 id="primitives-title">Every answer has a shape.</h2></div><p>Inspect what the model returned.<br />Understand what your application did next.</p></div>
       <div class="primitive-grid">
         <article class="primitive"><div class="primitive-title"><span class="primitive-symbol">◈</span><h3>Choice</h3><span class="mono">01</span></div><p>A distribution over competing options.</p><div class="choice-rows"><div><span>Billing</span><b>76%</b><i style="--value:76%"></i></div><div><span>Delivery</span><b>18%</b><i style="--value:18%"></i></div><div><span>Other</span><b>6%</b><i style="--value:6%"></i></div></div><span class="primitive-foot">ONE QUESTION. DISTINCT POSSIBILITIES.</span></article>
         <article class="primitive"><div class="primitive-title"><span class="primitive-symbol">◐</span><h3>Noul</h3><span class="mono">02</span></div><p>The probability that an answer is yes.</p><div class="noul-value">0.94<span>probability of yes</span></div><div class="noul-track"><i></i></div><div class="scale-labels"><span>No</span><span>Uncertain</span><span>Yes</span></div><span class="primitive-foot">UNCERTAINTY, MADE VISIBLE.</span></article>
@@ -41,7 +40,7 @@ app.innerHTML = `
       <p class="primitive-disclaimer">All values above are illustrative samples, not live model results.</p>
     </section>
     <section class="integration wrap" aria-labelledby="integration-title">
-      <div class="integration-copy"><p class="eyebrow">YOUR APP. A CLEARER VIEW.</p><h2 id="integration-title">Keep your code.<br />See the connections.</h2><p>Mount the React drawer, connect a server adapter, and inspect your Jev requests right where you build. Add connected flows when you need the whole picture.</p><a class="text-link" href="${DOCS}">Find your integration guide ${arrow}</a><div class="integration-tags"><span>React 18 / 19</span><span>Next.js App Router</span></div></div>
+      <div class="integration-copy"><h2 id="integration-title">Keep your code.<br />See the connections.</h2><p>Mount the React drawer, connect a server adapter, and inspect your Jev requests right where you build. Add connected flows when you need the whole picture.</p><a class="text-link" href="${DOCS}">Find your integration guide ${arrow}</a><div class="integration-tags"><span>React 18 / 19</span><span>Next.js App Router</span></div></div>
       <div class="code-window"><div class="code-heading"><span><span class="code-dot"></span> Your application</span><span>React / Vite</span></div><div class="install-command"><code>npm install jev-devtools @typesafe-ai/sdk</code><button id="copy" aria-label="Copy install command" title="Copy install command">Copy</button></div><pre><code><span class="syntax-purple">import</span> { JevDevtools } <span class="syntax-purple">from</span> <span class="syntax-green">'jev-devtools'</span>;
 
 <span class="syntax-purple">export function</span> <span class="syntax-pink">Root</span>() {
@@ -53,7 +52,7 @@ app.innerHTML = `
   );
 }</code></pre><p class="code-note">The browser side is this small. The integration guide covers the server adapter and request capture.</p><span class="sr-only" id="copy-status" role="status"></span></div>
     </section>
-    <section class="closing wrap"><p class="eyebrow">BUILT IN THE OPEN</p><h2>Complex flows.<br /><span>Clear understanding.</span></h2><p>Open source, actively evolving, and ready for your next idea.<br />Explore the docs. Try it in your app. Help shape what’s next.</p><div class="hero-actions"><a class="button primary" href="${DOCS}">Explore the docs ${arrow}</a><a class="text-link" href="${GITHUB}">Build with us ${arrow}</a></div><span class="experimental">Experimental software. APIs may evolve before 1.0.</span></section>
+    <section class="closing wrap"><h2>Complex flows.<br /><span>Clear understanding.</span></h2><p>Open source, actively evolving, and ready for your next idea.<br />Explore the docs. Try it in your app. Help shape what’s next.</p><div class="hero-actions"><a class="button primary" href="${DOCS}">Explore the docs ${arrow}</a><a class="text-link" href="${GITHUB}">Build with us ${arrow}</a></div><span class="experimental">Experimental software. APIs may evolve before 1.0.</span></section>
   </main>
   <footer class="site-footer wrap"><a class="wordmark" href="#">${logo}<span>jev<span class="wordmark-light">tools</span><span class="wordmark-dot">.</span></span></a><span>Build in code. Understand in diagrams.</span><nav aria-label="Footer navigation"><a href="${DOCS}">Docs ${arrow}</a><a href="${GITHUB}">GitHub ${arrow}</a><a href="${GITHUB}/blob/main/LICENSE">MIT license ${arrow}</a></nav></footer>
 `;
