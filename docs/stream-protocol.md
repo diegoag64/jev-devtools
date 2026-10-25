@@ -38,16 +38,28 @@ Authorization, same-origin enforcement, server-derived session scope and capture
 
 The initial full snapshot can still be large. Each changed trace still sends its complete captured state/result, and every delta carries the retained ID order. While the drawer is closed, transport and parsing continue but trace-driven React updates are suspended. Large diagrams still have layout costs. See the [transport comparison in PR #15](https://github.com/diegoag64/jev-devtools/pull/15) and [hidden-drawer comparison in PR #16](https://github.com/diegoag64/jev-devtools/pull/16) for benefits and limits.
 
+## Flow delivery
+
+The separate `/flows/events` endpoint uses version-1 `flows` envelopes with `definitions`, complete run `upserts`, and authoritative retained run `order`. Each connection/reconnection starts with a full snapshot. Later updates include definitions that this reader does not yet know; its knowledge is pruned only after delivering the new order. A clear skipped under backpressure therefore cannot erase definitions that the reader still retains.
+
+Ready readers with the same authorized session, cursor, and definition knowledge share one recorder projection, clone, serialization, and encoding during a synchronous delivery turn. Each Response owns an independent byte buffer. The cache is discarded after that turn; initial snapshots and readers with different state are computed separately. Cancellation releases the reader without changing another reader's definition knowledge.
+
+A stalled reader retains its queued message and a dirty flag, then catches up from its own cursor when it reads again. Intermediate updates may be coalesced, including clear/reuse transitions, but the delivered order and upserts must reconstruct the complete retained state under the existing capture policy. Evicted or cleared runs cannot be resurrected by later observer updates.
+
+Sharing reduces repeated server work for matching viewers, not the size of a run upsert. Each upsert still contains the entire retained nested run, and each viewer still receives its own bytes. Faster serialization can change timer batching and increase the number of intermediate updates delivered. Capture traversal and observer snapshots also run when there are no viewers. The per-value limits below do **not** impose a whole-run byte or heap budget.
+
+[Issue #46](https://github.com/diegoag64/jev-devtools/issues/46) retains the aggregate-budget and finer-grained delta design work. A whole-run budget needs explicit metadata identifying omitted items/steps/values and a decision about final-state completeness; it must not silently remove content or change application execution. Item/step deltas need a negotiated envelope with base/revision validation, replacement/removal rules, definition ordering, and reconnect recovery, plus compatible viewer/fixture consumers. Deltas alone would not bound the initial or final full snapshot. None of those policies or protocol changes is introduced by shared encoding.
+
 ## Flow capture warnings
 
 The separate `/flows/events` stream sends version-1 `flows` envelopes with `definitions`, `upserts`, and authoritative run `order`. Definitions are sent when first needed by a connection; run upserts replace complete records. Both retain optional capture warnings, including nested item definitions and runs:
 
-| Field | Type | Applies to |
-| --- | --- | --- |
-| `FlowNode.conditionCaptureWarnings` | `string[]` (optional) | This node's `conditionRule`, including loop continuation rules. |
-| `FlowRun.captureWarnings` | `string[]` (optional) | This run's `value`, including map item and loop iteration outcomes. |
-| `FlowStep.captureWarnings` | `string[]` (optional) | This step's `data`, including task, merge, and loop state. |
-| `Trace.captureWarnings` | `string[]` | Captured request/response data linked to Jev steps. |
+| Field                               | Type                  | Applies to                                                          |
+| ----------------------------------- | --------------------- | ------------------------------------------------------------------- |
+| `FlowNode.conditionCaptureWarnings` | `string[]` (optional) | This node's `conditionRule`, including loop continuation rules.     |
+| `FlowRun.captureWarnings`           | `string[]` (optional) | This run's `value`, including map item and loop iteration outcomes. |
+| `FlowStep.captureWarnings`          | `string[]` (optional) | This step's `data`, including task, merge, and loop state.          |
+| `Trace.captureWarnings`             | `string[]`            | Captured request/response data linked to Jev steps.                 |
 
 For example, an outcome string of 20,000 characters is captured as 16,000 characters with `captureWarnings: ["Long text truncated in capture."]`; execution still returns all 20,000 characters. A shortened comparison literal carries the same warning in its node's `conditionCaptureWarnings`, while its decision records the full runtime comparison.
 

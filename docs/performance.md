@@ -74,6 +74,24 @@ Like the snapshot comparison, it builds the archived baseline and current packag
 
 The ignored report includes source provenance, raw samples, time through final delivery, time through flow completion (including connection setup), process CPU time, completion heap delta, raw SSE bytes, message counts, and definition counts. A separate normalized payload-byte count replaces timestamps/durations with zero to distinguish content changes from timing-dependent serialization. Heap deltas are allocation pressure, not peak or retained memory. Initial snapshots are included in measurements; seeding retained history is excluded. No timing thresholds run in CI.
 
+## Aggregate flow transport probe
+
+Build the checkout, then run the 64-item map fixture from issue #46 locally:
+
+```sh
+npm run build:package
+BENCH_OUTPUT=benchmarks/results/flow-transport \
+  node --expose-gc benchmarks/flow-transport.mjs
+```
+
+`benchmarks/flow-transport.mjs` uses public package exports with 64 items, concurrency 4, 16,000-character task outputs, and delays of `3 + index % 4` milliseconds. It measures disabled recording, recording without readers, one fast reader, one reader fully stalled until execution finishes, and three fast readers. Each reader validates definition availability, authoritative order, final success, and all retained item task outputs; execution must return all 64 full values. These are in-process Request/Response readers, not bandwidth-limited HTTP clients or a browser.
+
+The script runs one warmup per case and three measured rounds by default, reversing case order on alternate rounds. `BENCH_ROUNDS` accepts 1–20; `BENCH_CASE` selects `disabled`, `no-readers`, `fast-1`, `stalled-1`, or `fast-3`. Run baseline and candidate in separate checkouts with independently installed dependencies/build outputs, alternating variant order in fresh processes. Copy the same benchmark script into both checkouts and retain its hash. The report records the revision, package diff hash, script hash, machine/runtime, raw bytes, amplification relative to the final run, message counts, wall/process CPU time, and heap deltas.
+
+CPU and wall time include same-process reader parsing/validation; task timers make intermediate message counts scheduling-dependent. A CPU reduction can accompany more delivered bytes, so compare both rather than treating byte changes as proof of efficiency or correctness. Completion heap delta is allocation pressure. The post-GC retained heap delta keeps the adapter/history alive but is noisy (including possible negative values from prior allocations); it is neither peak memory nor a leak test. Neither heap measure is a whole-run capture budget.
+
+Collect CPU profiles in separate runs with Node's `--cpu-prof --cpu-prof-dir=benchmarks/results/<profile-directory>` options and summarize with `node benchmarks/profile-summary.mjs <profile>`. Keep profiling separate from timing comparisons. Compare `no-readers` with `disabled` for aggregate observer/capture work, and `fast-3` with `fast-1` for repeated delivery work. These diagnostics add no performance thresholds or benchmark jobs to CI.
+
 ## Expression overhead comparison
 
 To compare normal flow construction and execution against a Git revision:

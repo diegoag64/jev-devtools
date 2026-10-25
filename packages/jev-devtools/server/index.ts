@@ -109,6 +109,73 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
       scheduled = undefined;
     }
   }
+  type EncodedFlow = Encoded & {
+    retainedDefinitionIds: ReadonlySet<string>;
+  };
+  type FlowUpdateFor = (
+    session: string,
+    cursor: number | undefined,
+    knownDefinitions: ReadonlySet<string>,
+  ) => EncodedFlow;
+  type FlowFlush = (updateFor: FlowUpdateFor) => void;
+  const pendingFlows = new Set<FlowFlush>();
+  let scheduledFlows: ReturnType<typeof setImmediate> | undefined;
+  const encodeFlowUpdate: FlowUpdateFor = (
+    session,
+    cursor,
+    knownDefinitions,
+  ) => {
+    const update = flows.changes(session, cursor, knownDefinitions);
+    return {
+      bytes: encoder.encode(
+        `event: flows\ndata: ${JSON.stringify(update.data)}\n\n`,
+      ),
+      revision: update.revision,
+      retainedDefinitionIds: update.retainedDefinitionIds,
+    };
+  };
+  function scheduleFlow(flush: FlowFlush) {
+    pendingFlows.add(flush);
+    if (scheduledFlows) return;
+    scheduledFlows = setImmediate(() => {
+      scheduledFlows = undefined;
+      const batch = [...pendingFlows];
+      pendingFlows.clear();
+      // A lone reader has nothing to share; keep its direct encoding path and
+      // avoid allocating a cache or copying an otherwise unshared buffer.
+      if (batch.length === 1) {
+        batch[0](encodeFlowUpdate);
+        return;
+      }
+      // Scope sharing to this synchronous turn: no snapshots survive a later
+      // update/clear. Different cursors or definition knowledge need their own
+      // projection, even when the authorized session matches.
+      const encoded = new Map<string, EncodedFlow>();
+      const updateFor: FlowUpdateFor = (session, cursor, knownDefinitions) => {
+        const key = JSON.stringify([
+          session,
+          cursor,
+          [...knownDefinitions].sort(),
+        ]);
+        let update = encoded.get(key);
+        if (!update) {
+          update = encodeFlowUpdate(session, cursor, knownDefinitions);
+          encoded.set(key, update);
+        }
+        // Response consumers can mutate/transfer their chunk. Never expose the
+        // cached backing buffer to a reader.
+        return { ...update, bytes: update.bytes.slice() };
+      };
+      for (const deliver of batch) deliver(updateFor);
+    });
+  }
+  function unscheduleFlow(flush: FlowFlush) {
+    pendingFlows.delete(flush);
+    if (!pendingFlows.size && scheduledFlows) {
+      clearImmediate(scheduledFlows);
+      scheduledFlows = undefined;
+    }
+  }
   let disposed = false;
   const enabled = () => options.enabled === true && !disposed;
   const sessionFor = async (request: Request) => {
@@ -154,19 +221,13 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
         start(controller) {
           let closed = false,
             dirty = true,
-            cursor: number | undefined,
-            timer: ReturnType<typeof setImmediate> | undefined;
-          let knownDefinitions = new Set<string>();
-          const flush = () => {
-            timer = undefined;
+            cursor: number | undefined;
+          let knownDefinitions: ReadonlySet<string> = new Set();
+          const flush: FlowFlush = (updateFor) => {
             if (closed || !dirty || (controller.desiredSize ?? 0) <= 0) return;
             try {
-              const update = flows.changes(session, cursor, knownDefinitions);
-              controller.enqueue(
-                encoder.encode(
-                  `event: flows\ndata: ${JSON.stringify(update.data)}\n\n`,
-                ),
-              );
+              const update = updateFor(session, cursor, knownDefinitions);
+              controller.enqueue(update.bytes);
               // Match the browser's pruning after this delivered order. A clear
               // coalesced away under backpressure must not discard reader state.
               knownDefinitions = update.retainedDefinitionIds;
@@ -179,7 +240,8 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
             }
           };
           const wake = () => {
-            if (!closed && dirty && !timer) timer = setImmediate(flush);
+            if (!closed && dirty && (controller.desiredSize ?? 0) > 0)
+              scheduleFlow(flush);
           };
           const unsubscribe = flows.subscribe((sessions) => {
             if (sessions.has(session)) {
@@ -194,9 +256,9 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
           stop = () => {
             if (closed) return;
             closed = true;
-            knownDefinitions.clear();
+            knownDefinitions = new Set();
             unsubscribe();
-            clearImmediate(timer);
+            unscheduleFlow(flush);
             clearInterval(heartbeat);
             request.signal.removeEventListener("abort", stop);
             streams.delete(stop);
@@ -208,7 +270,7 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
           request.signal.addEventListener("abort", stop, { once: true });
           flowPull = wake;
           if (request.signal.aborted) stop();
-          else flush();
+          else flush(encodeFlowUpdate);
         },
         pull() {
           flowPull();
