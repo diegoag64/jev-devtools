@@ -74,22 +74,24 @@ After any uncertain publish outcome, do not dispatch a new publication or rerun 
 
 The independent consumer checks accept `JEV_VERIFY_TARBALL=/absolute/path/to/archive.tgz` to check an inspected archive, or `JEV_VERIFY_VERSION=X.Y.Z` to check a fresh registry installation. Do not set both. Use the verification scripts from the release commit so later regression tests do not incorrectly reject an older release. With neither variable, the existing local pack-and-check behavior is unchanged.
 
-## Release 0.5.0 — preparation
+## Release 0.5.0 — published October 25, 2026
 
-**Pending publication.** Source/package/example versions are prepared as 0.5.0. The [candidate changelog](../CHANGELOG.md#050--pending-publication) groups all changes since 0.4.1 and documents compatibility. There is no approved release commit, npm publication, tag, or GitHub release yet. The final release commit is selected only after this PR merges and its main CI succeeds.
+**[jev-devtools@0.5.0](https://www.npmjs.com/package/jev-devtools/v/0.5.0) was published at 06:30:45.073 UTC on October 25, 2026**, from `64efa4c494a83207e94c67b42f6744802db18c11` after [PR #73](https://github.com/diegoag64/jev-devtools/pull/73) and [main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40168724073) passed. See the [release notes](../CHANGELOG.md#050--october-25-2026-experimental) for compatibility and changes. npm's `latest` is 0.5.0.
 
-Before dispatching the release workflow:
+The [rehearsal](https://github.com/diegoag64/jev-devtools/actions/runs/40168858183) and the [approved publication run](https://github.com/diegoag64/jev-devtools/actions/runs/40169000258) prepared and checked the selected source and candidate. The publish job uploaded the inspected bytes through npm OIDC and successfully verified registry integrity and provenance after processing. The original `finish` job then failed at the consumer type check: the fresh runner had no root TypeScript installation because the job omitted `npm ci`. Export/SSR checks passed before that failure; the subsequent Next.js and GitHub completion steps did not run. The original failed run remains the audit record.
 
-- Review replay/comparison behavior, capture fixes, and privacy defaults in the candidate notes. Keep 0.4.1's published records unchanged.
-- Run the full repository and docs checks, plus `npm --prefix landing ci`, `npm --prefix landing test`, and `npm --prefix landing run build` for the separately locked website. Inspect the package archive; neither website output belongs in npm.
-- Use the normal manually approved release workflow against the reviewed main SHA. A locally prepared candidate archive proves packaging for its own source SHA; the workflow builds and verifies the final merged release candidate separately.
+Recovery downloaded that run's original `release-evidence` artifact, checked its archive/notes hashes, and verified npm availability, integrity, provenance, and latest again. With the verification dependencies installed, fresh registry-installed React and Next.js consumers passed using the release commit's scripts on Node 24.21.0: public exports, flow declarations, React build/SSR, Next development capture/SSE, and production-disabled inspector checks. All used sample responses. No npm upload was repeated and no package bytes were rebuilt for publication. The workflow follow-up adds `npm ci` to `finish` for future releases.
 
-After npm, the exact tag, and the GitHub release are verified:
+The inspected and published archive is `jev-devtools-0.5.0.tgz` (78 files):
 
-- Record the actual UTC publication date and links. Replace the Pending publication heading/table entry with those facts; do not infer the date from this PR's merge.
-- Update the pending-publication/current-0.4.1 notices in the root README, the docs introduction/reference/API guides, the repository integration/Next.js/flow guides, and `llms.txt`. Run `npm run sync:readme-version` and verify remaining `0.4.1` mentions are historical or intentionally version-specific. The npm README and bundled skill deliberately describe version capabilities and link to publication status instead of freezing a pending-publication claim in the immutable archive. The follow-up updates GitHub and hosted docs, not published bytes.
-- Merge the publication-record PR, then manually publish the docs from a reviewed main commit as described in [the policy](docs-publishing.md). Verify `/version.json`, quick start, 0.5.0 API sections, and the changelog.
-- Publish the [landing Site](../landing/README.md#publishing) manually if its copy or assets changed, using its separate project identity and build. Check the `jevtools.dev` → docs → API navigation and install command. A docs deployment does not update the landing Site.
+- SHA-256: `92856be70864fc61752ad0666a21f0ac1afe225a60253f0034baa649ee8e2613`
+- npm integrity: `sha512-ZFQvh8ImqleRBcmbslVelrLwFouqz7GlUzXsrzMuNpUqfZEz61sK9Z0y6myFeGwPswGCCBR+KKFlvLMBXQ4wZw==`
+- Release-notes SHA-256: `75b5b971a2761ea8a8507e2b8d5c43654bad17322187ded64924ba574a8aa76e`
+- [npm provenance](https://registry.npmjs.org/-/npm/v1/attestations/jev-devtools@0.5.0)
+
+The [GitHub release v0.5.0](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.0) was created during recovery at 06:33:23 UTC using the original candidate notes. Its lightweight remote tag resolves exactly to `64efa4c494a83207e94c67b42f6744802db18c11`; it is neither draft nor prerelease, and GitHub's latest-release endpoint returns v0.5.0.
+
+**Follow-up pending:** this publication-record/workflow-fix PR still needs review and merge. Then explicitly request manual docs publication from a reviewed main commit, verify the live version manifest, and record the receipt under [the docs publishing policy](docs-publishing.md). The live docs have not been updated by this recovery. Publish the separate landing Site if its pending copy changes are requested. npm, tag, and GitHub publication are verified, but the overall release remains partially completed until the documentation follow-ups are verified. Do not rerun the original publishing job or republish 0.5.0.
 
 ## Release 0.4.1 — published October 24, 2026
 

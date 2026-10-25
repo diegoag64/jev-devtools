@@ -9,7 +9,7 @@
 - [API reference](https://docs.jevtools.dev/api/reference/): Inputs, outputs, usage, and exact public declarations.
 - [Hosted Markdown index](https://docs.jevtools.dev/llms.txt): Plain Markdown with expanded examples.
 
-This source checkout prepares **0.5.0 (pending publication)**; npm currently serves 0.4.1. Hosted sites update separately. Prefer the installed version's bundled skill/declarations and check the changelog before using newer APIs.
+**0.5.0 is published on npm.** Hosted sites update separately. Prefer the installed version's bundled skill/declarations and check the changelog before using newer APIs.
 
 ## Set up in an existing app
 
@@ -50,6 +50,6 @@ The flow API includes `task()`, runtime `jev()` request factories, `.answers`, `
 - [Structure Recovery](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/structure-recovery/README.md): Tasks, dynamic requests and returning conditionals; four sample-only cases.
 - [Simple Memory](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/simple-memory/README.md): Tasks, dynamic requests, conditionals and loops; four sample-only timelines with customer-scoped run-local memory and an inclusive 50% save gate. No persistent storage.
 
-## Replay and comparison (0.5.0 candidate)
+## Replay and comparison (0.5.0)
 
-`flowFixture` exports captured answers with warnings, `replayClient` reuses them without Jev inference, and `compareWithFixture` compares replay with a supplied client. Tasks still execute; comparison can make live calls and its returned fixture contains unredacted responses. These APIs require the 0.5.0 candidate until publication. Use [the version-matched flow recipe](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) and the installed declarations.
+`flowFixture` exports captured answers with warnings, `replayClient` reuses them without Jev inference, and `compareWithFixture` compares replay with a supplied client. Tasks still execute; comparison can make live calls and its returned fixture contains unredacted responses. These APIs require 0.5.0 or later. Use [the version-matched flow recipe](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) and the installed declarations.

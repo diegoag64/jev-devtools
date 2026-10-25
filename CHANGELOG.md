@@ -8,8 +8,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Changes after the 0.5.0 candidate. |
-| [0.5.0](#050--pending-publication) | Pending publication | Replay and comparison; capture reliability/privacy; website and docs. |
+| [Unreleased](#unreleased) | Not published | Release verification setup and 0.5.0 publication records. |
+| [0.5.0](#050--october-25-2026-experimental) | 2026-10-25 | Replay and comparison; capture reliability/privacy; website and docs. |
 | [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | CSS isolation; stricter published flow types; approved release workflow. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Tasks, maps and loops; six cookbooks; SDK and inspector access changes. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API; readable diagrams; bundled flow guidance. |
@@ -21,11 +21,19 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No changes beyond the 0.5.0 release candidate yet.
+### Changes
 
-## 0.5.0 — Pending publication
+#### Documentation
 
-**Not published to npm.** This candidate brings flow replay and live fixture comparison, capture reliability/privacy improvements, and the JevTools website and documentation. npm's current published release is 0.4.1. Merge and successful CI do not publish a package or deploy either Site; follow the [release checklist](docs/releases.md#release-checklist).
+- **0.5.0 publication records.** Record verified npm publication, archive integrity, registry consumers, and the recovered GitHub release/tag. Update mutable documentation to describe the published APIs. Manual docs publication remains pending.
+
+#### Maintenance
+
+- **Release verification dependencies.** Install locked repository dependencies in the fresh release completion job before registry-consumer checks. This supplies the TypeScript compiler those checks use; it does not rebuild or republish the approved archive. The original 0.5.0 finish job failed because this install was missing.
+
+## 0.5.0 — October 25, 2026 (experimental)
+
+**[Published on npm](https://www.npmjs.com/package/jev-devtools/v/0.5.0)** at 06:30:45.073 UTC from `64efa4c494a83207e94c67b42f6744802db18c11`, after [PR #73](https://github.com/diegoag64/jev-devtools/pull/73). This release adds replay and fixture comparison, capture reliability/privacy improvements, and the website and docs. npm integrity/provenance and fresh registry consumers are verified. The [GitHub release](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.0) and exact-commit tag were completed at 06:33:23 UTC after recovering from a missing verification dependency in the workflow. Both Latest designations are verified. See the [release record](docs/releases.md#release-050--published-october-25-2026); manual docs publication remains pending.
 
 ### Compatibility and upgrade
 

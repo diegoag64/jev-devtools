@@ -30,7 +30,7 @@ The retention limit is global to the recorder, not a per-session allocation. Sna
 
 [`FlowObserver`](@/api/reference/#type-flowobserver) is exported from `jev-devtools/flow`. Its [`startFlow(definition, run)`](@/api/reference/#observer-startflow) can return `{ update(run), request(link, onTrace, callback) }` or `undefined`. Recording is optional; the flow runner owns execution results.
 
-The request hook should call through synchronously to preserve request linkage. Avoid using observer callbacks for application actions. In **0.5.0 (pending publication)**, observer snapshots are detached from execution state and failures are contained; see the [changelog](@/changelog/) for the capture fixes.
+The request hook should call through synchronously to preserve request linkage. Avoid using observer callbacks for application actions. In **0.5.0**, observer snapshots are detached from execution state and failures are contained; see the [changelog](@/changelog/) for the capture fixes.
 
 ## Public type map
 
@@ -50,6 +50,6 @@ The installed package's `lib/src/index.d.ts`, `lib/server/index.d.ts`, and `lib/
 
 ## Replay types
 
-**New in 0.5.0 (pending publication).**
+**New in 0.5.0.**
 
 [`FlowFixture`](@/api/reference/#type-flowfixture) and [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture) are also exported from the root and `/flow` entries. The browser-safe [`flowFixture()`](@/api/reference/#flowfixture) helper builds an export from captured data; Node-only [`replayClient()`](@/api/reference/#replayclient) uses it to supply stored answers to a flow. See [replay reference](@/api/flow/#replay-captured-answers).

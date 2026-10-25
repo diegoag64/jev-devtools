@@ -106,7 +106,7 @@ Structural errors fail during definition. Missing input values and invalid compa
 
 ## Replay captured answers
 
-[`replayClient(fixture)`](@/api/reference/#replayclient) returns an SDK-compatible client for a flow run. Jev steps receive stored answers without a network call or API key. Available in **0.5.0 (pending publication)**; use the [release candidate archive](https://github.com/diegoag64/jev-devtools#try-the-local-playground) until npm publication.
+[`replayClient(fixture)`](@/api/reference/#replayclient) returns an SDK-compatible client for a flow run. Jev steps receive stored answers without a network call or API key. Available in **0.5.0 or later** from [npm](https://www.npmjs.com/package/jev-devtools/v/0.5.0).
 
 Call `await replayExample()` from Node. The definition is synchronous; `await flow.run(...)` executes it using the stored response.
 
@@ -128,7 +128,7 @@ Tasks and request factories execute again. A task can still perform external cal
 
 ## Build a fixture
 
-**New in 0.5.0 (pending publication).**
+**New in 0.5.0.**
 
 [`flowFixture(definition, run, traces)`](@/api/reference/#flowfixture) is available from both `jev-devtools` and `jev-devtools/flow`. Pass the captured flow definition/run and a `ReadonlyMap<string, Trace>` indexed by trace ID. It returns a [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture) with `{ fixture, missing, warnings }`.
 
@@ -150,7 +150,7 @@ Check `missing` for completed steps whose response was unavailable, and `warning
 
 ## Compare a fixture with a live run
 
-**New in 0.5.0 (pending publication).**
+**New in 0.5.0.**
 
 [`compareWithFixture`](@/api/reference/#comparewithfixture) runs the same recipe and input twice: first with saved answers, then with your supplied client. [`formatComparison`](@/api/reference/#formatcomparison) turns the result into readable text. This comparison performs live inference; ordinary [`replayClient`](@/api/reference/#replayclient) does not.
 

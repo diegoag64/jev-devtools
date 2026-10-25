@@ -20,7 +20,7 @@ Mount once near the application root. The component is safe to import during SSR
 | `enabled`                       | `boolean` | `false`             | Opt in to loading and connecting the inspector.                                               |
 | `endpoint`                      | `string`  | `/api/jev-devtools` | Same-origin adapter path. Must match the server.                                              |
 | `defaultOpen`                   | `boolean` | `true`              | Initial expanded state; set false to start at the launcher.                                   |
-| [`redactAdditionalSensitiveData`](@/api/reference/#jevdevtools) | `boolean` | `true`              | **0.5.0 (pending publication).** Mask supported personal fields in the display. Does not remove captured data. |
+| [`redactAdditionalSensitiveData`](@/api/reference/#jevdevtools) | `boolean` | `true`              | **0.5.0.** Mask supported personal fields in the display. Does not remove captured data. |
 
 [`JevDevtoolsProps`](@/api/reference/#type-jevdevtoolsprops) is exported from `jev-devtools` for component wrappers. Production disabling is a runtime opt-in policy, not a promise that every bundler removes inspector assets.
 
@@ -42,4 +42,4 @@ Closing preserves selection, filters, and view state while incoming traces conti
 
 ## Fixture export
 
-The root entry also exports browser-safe [`flowFixture`](@/api/reference/#flowfixture), [`FlowFixture`](@/api/reference/#type-flowfixture), and [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture). See [building a fixture](@/api/flow/#build-a-fixture) for parameters, missing captures, and masking behavior. These exports are new in **0.5.0 (pending publication)**.
+The root entry also exports browser-safe [`flowFixture`](@/api/reference/#flowfixture), [`FlowFixture`](@/api/reference/#type-flowfixture), and [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture). See [building a fixture](@/api/flow/#build-a-fixture) for parameters, missing captures, and masking behavior. These exports are new in **0.5.0**.

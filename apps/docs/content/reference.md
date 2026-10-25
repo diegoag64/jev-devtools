@@ -1,6 +1,6 @@
 Use this page when you know an API name and want its contract. Each method has a permanent heading link, a readable signature, inputs, return value, and usage. Start with [Flows from scratch](@/guides/flow-basics/) if flows are new to you.
 
-These docs describe the **0.5.0 release candidate (pending publication)**. Replay, fixture comparison, and display masking are new in 0.5.0; they are not available in npm 0.4.1. Check the [changelog](@/changelog/) and your installed version.
+These docs describe **0.5.0, available on npm**. Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
 
 <details class="reference-notes">
 <summary>How to read the signatures</summary>
@@ -45,7 +45,7 @@ JevDevtools(props: JevDevtoolsProps): ReactElement | null
 | `enabled?: boolean` | `false` | Opt in to connecting and showing the inspector. |
 | `endpoint?: string` | `/api/jev-devtools` | Same-origin inspector path; match the server. |
 | `defaultOpen?: boolean` | `true` | Open the drawer on its initial mount. |
-| `redactAdditionalSensitiveData?: boolean` | `true` | **0.5.0 (pending publication).** Mask supported personal fields in the display. Captured/streamed values remain unchanged. |
+| `redactAdditionalSensitiveData?: boolean` | `true` | **0.5.0.** Mask supported personal fields in the display. Captured/streamed values remain unchanged. |
 
 Unmounting or disabling closes its subscription. Closing the drawer alone does not stop capture. [React setup](@/api/react/) explains mounting and styling.
 
@@ -1257,7 +1257,7 @@ The catch block handles only loop exhaustion and rethrows other failures. The fl
 
 ## Fixtures and comparison
 
-**New in 0.5.0 (pending publication).** Use the release-candidate archive until npm publication. Fixtures contain captured response bodies, not the original input or executable recipe.
+**New in 0.5.0.** Fixtures contain captured response bodies, not the original input or executable recipe.
 
 ### flowFixture
 
@@ -1715,7 +1715,7 @@ The wrapper establishes flow linkage around the request callback. `onTrace` stor
 
 ## Observer hooks
 
-`FlowObserver` is exported as a type from `jev-devtools/flow`. Pass an implementation as `devtools` to a run; the server adapter already implements it. Observers record execution and must not control application work. Observer failure containment is new in **0.5.0 (pending publication)**.
+`FlowObserver` is exported as a type from `jev-devtools/flow`. Pass an implementation as `devtools` to a run; the server adapter already implements it. Observers record execution and must not control application work. Observer failure containment is new in **0.5.0**.
 
 ### observer.startFlow
 
