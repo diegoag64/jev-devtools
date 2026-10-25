@@ -3,6 +3,7 @@ import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { checkMobileRequests } from "./check-mobile-requests.mjs";
 import { checkShortDrawerControls } from "./check-flow-controls.mjs";
 const origin = process.env.FLOW_URL ?? "http://127.0.0.1:4230";
 const output = process.env.FLOW_RESULTS ?? "benchmarks/results/flows";
@@ -591,6 +592,7 @@ try {
     .getByText("Rule capture: Long text truncated in capture.", { exact: true })
     .waitFor();
   assert.deepEqual(errors, []);
+  await checkMobileRequests({ browser, origin, output });
   await checkShortDrawerControls({ browser, origin, output });
   console.log(
     "Flows verified: first and later step clicks preserve the camera, explicit focus/fit/picker navigation works; floating controls stay fixed, do not initiate panning and fit narrow screens; connected request diagrams, question switching with one preserved camera, parallel wait explanation, outcome paths, untaken nodes, request details, pinned camera/selection across incoming runs and reopening, cancellation, readable capture warnings.",

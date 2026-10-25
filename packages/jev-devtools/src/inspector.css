@@ -172,6 +172,9 @@
   overflow: auto;
   flex: 1;
 }
+.jev-devtools .request-navigation {
+  display: none;
+}
 .jev-devtools .request-row {
   display: flex;
   align-items: center;
@@ -511,6 +514,63 @@
     min-width: 240px;
     padding: 8px 12px;
   }
+  /* Requests use separate list/detail screens so history cannot collapse into
+     the fixed-height strip used by flow runs. CSS keeps desktop split panes. */
+  .jev-devtools .jev-inspector[data-mobile-view="list"] > .request-list {
+    flex: 1;
+  }
+  .jev-devtools .jev-inspector[data-mobile-view="list"] > .request-detail,
+  .jev-devtools .jev-inspector[data-mobile-view="detail"] .list-filters,
+  .jev-devtools .jev-inspector[data-mobile-view="detail"] .request-items {
+    display: none;
+  }
+  .jev-devtools .jev-inspector[data-mobile-view="detail"] > .request-list {
+    flex: none;
+  }
+  .jev-devtools .jev-inspector[data-mobile-view="detail"] .request-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    margin: 6px 12px;
+    text-align: left;
+  }
+  .jev-devtools .jev-inspector[data-mobile-view] .request-items {
+    flex-direction: column;
+  }
+  .jev-devtools .jev-inspector[data-mobile-view] .request-row {
+    flex: none;
+    min-width: 0;
+    min-height: 60px;
+    padding: 12px;
+  }
+  .jev-devtools
+    .jev-inspector[data-mobile-view]
+    .request-row
+    > span:nth-child(2) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .jev-devtools .jev-inspector[data-mobile-view] > .request-detail {
+    overflow: auto;
+  }
+  .jev-devtools
+    .jev-inspector[data-mobile-view]
+    > .request-detail
+    > :is(.detail-header, .detail-meta, .detail-tabs) {
+    flex: none;
+  }
+  .jev-devtools
+    .jev-inspector[data-mobile-view]
+    > .request-detail
+    > .detail-body-flow {
+    /* Let metadata scroll above the diagram instead of clipping its toolbar. */
+    flex: 1 0 auto;
+    min-height: min-content;
+  }
+  .jev-devtools .flow-details-bar > span {
+    display: none;
+  }
   .jev-devtools .detail-header {
     padding: 12px;
   }
@@ -518,6 +578,10 @@
   .jev-devtools .detail-tabs {
     padding-left: 12px;
     padding-right: 12px;
+  }
+  .jev-devtools .detail-tabs {
+    overflow-x: auto;
+    flex-shrink: 0;
   }
   .jev-devtools .detail-body {
     padding: 12px;
