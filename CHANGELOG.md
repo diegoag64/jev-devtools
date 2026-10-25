@@ -27,7 +27,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Performance
 
-- **Shared flow stream encoding.** Matching viewers share the server's flow projection and encoding within each delivery turn, while retaining independent response buffers, session isolation, and reader catch-up state. The version-1 wire format and capture policy are unchanged; whole-run budgets and finer-grained deltas remain follow-up work.
+- **Shared flow stream encoding.** Matching viewers share the server's flow projection and encoding within each delivery turn, while retaining independent response buffers, session isolation, and reader catch-up state. The version-1 wire format and capture policy are unchanged; whole-run budgets and finer-grained deltas remain follow-up work. ([#97](https://github.com/diegoag64/jev-devtools/pull/97))
 
 ## 0.5.2 — Pending publication (experimental)
 
