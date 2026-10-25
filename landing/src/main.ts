@@ -1,4 +1,9 @@
 import "./style.css";
+import {
+  drawerShowcase,
+  flowApiShowcase,
+  setupProductShowcases,
+} from "./product-showcases";
 import { flows, type Card, type Edge, type Flow } from "./flows";
 
 const DOCS = "https://docs.jevtools.dev";
@@ -29,6 +34,7 @@ app.innerHTML = `
       <p class="mobile-hint">Swipe to explore the diagram <span aria-hidden="true">↔</span></p>
       <span id="flow-announcement" class="sr-only" role="status"></span>
     </section>
+    ${drawerShowcase}
     <section class="primitives-section wrap" aria-labelledby="primitives-title">
       <div class="section-heading"><div><h2 id="primitives-title">Every answer has a shape.</h2></div><p>Inspect what the model returned.<br />Understand what your application did next.</p></div>
       <div class="primitive-grid">
@@ -39,6 +45,7 @@ app.innerHTML = `
       </div>
       <p class="primitive-disclaimer">All values above are illustrative samples, not live model results.</p>
     </section>
+    ${flowApiShowcase}
     <section class="integration wrap" aria-labelledby="integration-title">
       <div class="integration-copy"><h2 id="integration-title">Keep your code.<br />See the connections.</h2><p>Mount the React drawer, connect a server adapter, and inspect your Jev requests right where you build. Add connected flows when you need the whole picture.</p><a class="text-link" href="${DOCS}">Find your integration guide ${arrow}</a><div class="integration-tags"><span>React 18 / 19</span><span>Next.js App Router</span></div></div>
       <div class="code-window"><div class="code-heading"><span><span class="code-dot"></span> Your application</span><span>React / Vite</span></div><div class="install-command"><code>npm install jev-devtools @typesafe-ai/sdk</code><button id="copy" aria-label="Copy install command" title="Copy install command">Copy</button></div><pre><code><span class="syntax-purple">import</span> { JevDevtools } <span class="syntax-purple">from</span> <span class="syntax-green">'jev-devtools'</span>;
@@ -225,4 +232,5 @@ el("copy").addEventListener("click", async () => {
     el("copy").textContent = "Copy";
   }, 2400);
 });
+setupProductShowcases();
 render();
