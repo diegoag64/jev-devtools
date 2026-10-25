@@ -8,8 +8,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Explicit flow capture warnings. |
-| [0.5.1](#051--pending-publication-experimental) | Pending publication | Task input validation and expression types; setup guidance; release and website maintenance. |
+| [Unreleased](#unreleased) | Not published | Explicit flow capture warnings; verified 0.5.1 publication records and docs deployment. |
+| [0.5.1](#051--october-25-2026-experimental) | 2026-10-25 | Task input validation and expression types; setup guidance; release and website maintenance. |
 | [0.5.0](#050--october-25-2026-experimental) | 2026-10-25 | Replay and comparison; capture reliability/privacy; website and docs. |
 | [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | CSS isolation; stricter published flow types; approved release workflow. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Tasks, maps and loops; six cookbooks; SDK and inspector access changes. |
@@ -32,9 +32,13 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 - **Flow capture warnings.** Retain and display outcome and condition-rule truncation, redaction, and unavailable-capture warnings, including rule projection limits, nested item runs, and non-JSON merge values. Warnings are separate metadata; user strings are never treated as capture signals. Fixes [#45](https://github.com/diegoag64/jev-devtools/issues/45). ([#88](https://github.com/diegoag64/jev-devtools/pull/88))
 
-## 0.5.1 — Pending publication (experimental)
+#### Documentation
 
-**Pending publication.** This patch release prepares the merged task-input validation, expression typing, and setup documentation fixes. npm publication, the release tag, GitHub release, and updated hosted docs remain pending.
+- **0.5.1 publication records.** Record verified npm publication, archive integrity/provenance, fresh registry consumers, and the exact Git tag and GitHub Latest release. Update source documentation to describe the published fixes and preserve their compatibility notes. Hosted docs were subsequently published as Sites version 21 from the merged record commit; see the [publication receipt](docs/docs-publishing.md#publication-receipt-and-recovery). ([#87](https://github.com/diegoag64/jev-devtools/pull/87), [receipt #89](https://github.com/diegoag64/jev-devtools/pull/89))
+
+## 0.5.1 — October 25, 2026 (experimental)
+
+**[Published on npm](https://www.npmjs.com/package/jev-devtools/v/0.5.1)** at 18:19:01.066 UTC on October 25, 2026 from `c88aea5d615a65bcda1d820b5abc63bb6fbe05e6`, after [PR #83](https://github.com/diegoag64/jev-devtools/pull/83) and [main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40219281499) passed. This patch release includes task-input validation, expression typing, and setup documentation fixes. The [release workflow](https://github.com/diegoag64/jev-devtools/actions/runs/40220097820) verified npm integrity/provenance and fresh registry consumers, then created the [GitHub release](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.1) at 18:20:25 UTC. The tag resolves to the exact published commit; npm latest and GitHub Latest are both verified. See the [release record](docs/releases.md#release-051--published-october-25-2026). The corresponding docs were published and verified at 18:37:34 UTC as Sites version 21; see the [publication receipt](docs/docs-publishing.md#publication-receipt-and-recovery).
 
 ### Compatibility and upgrade
 
