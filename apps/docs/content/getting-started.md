@@ -19,7 +19,6 @@ For TypeScript, use compatible `@types/react` and `@types/node` packages and inc
 | `jev-devtools` | React client boundary: drawer, browser-safe trace types, and capture-to-fixture helpers. Supports SSR. |
 | `jev-devtools/server` | Node only: adapter and recorder. |
 | `jev-devtools/flow` | Node only: define/run flows, replay captured answers, and compare fixtures. |
-| `jev-devtools/styles.css` | Optional compatibility export. The drawer loads its own styles, so setup needs no CSS import. |
 
 Keep `/server`, `/flow`, and API credentials out of client bundles. Internal paths and `jev-devtools/package.json` are not public exports; inspect the installed version through your package manager.
 

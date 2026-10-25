@@ -25,9 +25,8 @@ TypeScript apps need React types matching their React major and Node types compa
 | `jev-devtools` | React drawer, browser-safe trace types, and capture-to-fixture helpers. Supports SSR; render the drawer in the app's client boundary. |
 | `jev-devtools/server` | Node-only adapter and recorder. Keep it out of client bundles. |
 | `jev-devtools/flow` | Node-only flow definitions/execution, replay client, and fixture comparison. Keep it out of client bundles. |
-| `jev-devtools/styles.css` | Optional scoped stylesheet export retained for existing integrations. The drawer injects its own stylesheet, so normal setup needs no CSS import. |
 
-These are the public entry points; `jev-devtools/package.json` and internal paths are not exported. Use the package manager's dependency listing to inspect the installed version. The server options require `origin` even when `enabled: false`; pass the browser origin as shown in the setup example.
+Use these entry points for application code; `jev-devtools/package.json` and internal paths are not exported. Use the package manager's dependency listing to inspect the installed version. The server options require `origin` even when `enabled: false`; pass the browser origin as shown in the setup example.
 
 ## Install in another React project
 
@@ -65,7 +64,7 @@ export function Root() {
 }
 ```
 
-For the complete Next.js App Router setup, see [the Next.js guide](nextjs.md), including `getJevDevtools` for shared history across module reloads and the SDK externalization setting. Mount it in a client component and use `enabled={process.env.NODE_ENV === 'development'}`. The drawer and launcher render inside a `jev-devtools-root` Shadow DOM boundary with their own stylesheet and typography reset. Host rules such as `section`, `button`, or `.eyebrow` cannot style the inspector's internals. The package injects its built CSS into that boundary; existing `jev-devtools/styles.css` imports remain supported, but are not required to style the drawer. Page CSS overrides cannot reach inside the shadow tree. Server rendering produces no inspector markup, and browser code is loaded after mounting when enabled. `enabled` defaults to **false**. Disabled components open no connections. This is a runtime opt-in, not a guarantee that every bundler removes inspector assets from production output.
+For the complete Next.js App Router setup, see [the Next.js guide](nextjs.md), including `getJevDevtools` for shared history across module reloads and the SDK externalization setting. Mount it in a client component and use `enabled={process.env.NODE_ENV === 'development'}`. The drawer and launcher render inside a `jev-devtools-root` Shadow DOM boundary with their own stylesheet and typography reset. Host rules such as `section`, `button`, or `.eyebrow` cannot style the inspector's internals. The package injects its built CSS into that boundary automatically. Page CSS overrides cannot reach inside the shadow tree. Server rendering produces no inspector markup, and browser code is loaded after mounting when enabled. `enabled` defaults to **false**. Disabled components open no connections. This is a runtime opt-in, not a guarantee that every bundler removes inspector assets from production output.
 
 | Prop | Default | Purpose |
 | --- | --- | --- |
@@ -81,14 +80,11 @@ inside a React `<main>` or `<section>`. Global page selectors such as `section`,
 override is needed. The drawer supplies its own styles and resets inherited
 typography. No CSS import is needed to use the component.
 
-Since 0.4.1, the public stylesheet also scopes connected-flow selectors to
-`.jev-devtools` and namespaces their animation, preventing collisions with host
-classes such as `.flow-step`. The drawer suppresses host pseudo-element
-decorations, explicitly resets text direction, and establishes defaults for its
-internal CSS variables. The host reset lives in the shadow stylesheet, leaving
+The drawer suppresses host pseudo-element decorations, explicitly resets text
+direction, and establishes defaults for its internal CSS variables. The host reset
+lives in the shadow stylesheet, leaving
 `<jev-devtools-root>` free of inline reset declarations. Generic app theme
 variables do not control its hint colors.
-These changes preserve the component API and existing CSS imports.
 
 This is CSS encapsulation, not a separate browser document or a security boundary.
 Page JavaScript can still alter the open shadow tree or remove its host, and

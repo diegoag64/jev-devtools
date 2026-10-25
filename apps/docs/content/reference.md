@@ -63,13 +63,14 @@ import { JevDevtools } from "jev-devtools";
 <JevDevtools enabled={import.meta.env.DEV} />;
 ```
 
+<!-- Preserve the former stylesheet deep link beside the component styling guidance. -->
+<a id="styles-css"></a>
+
 #### How it works
 
 The component enables the inspector only in Vite development builds through `import.meta.env.DEV`. Mounting it once gives the application one drawer and one connection.
 
-### styles.css
-
-`import "jev-devtools/styles.css"` loads the public stylesheet export. The built-in drawer includes its styles automatically, so ordinary installations do not need this import. This export is a stylesheet, not a function.
+The drawer injects its own stylesheet into its Shadow DOM; no CSS import is needed.
 
 ## Server adapter
 

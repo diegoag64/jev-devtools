@@ -26,7 +26,7 @@ Mount once near the application root. The component is safe to import during SSR
 
 ## Styles
 
-The drawer injects its own stylesheet. You do not need an import. The [`jev-devtools/styles.css`](@/api/reference/#styles-css) public export remains available for compatibility with existing integrations. Page selectors cannot reach the shadow tree; do not depend on host CSS to customize drawer internals.
+The drawer injects its own stylesheet. No CSS import is needed. Page selectors cannot reach the shadow tree; do not depend on host CSS to customize drawer internals.
 
 Document-level transforms, clipping, and page JavaScript can still affect the host. Shadow DOM is style encapsulation, not a security boundary.
 

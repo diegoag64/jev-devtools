@@ -1,6 +1,6 @@
 # Architecture
 
-The package has four public entry points: the SSR-safe React component (`jev-devtools`), scoped CSS (`jev-devtools/styles.css`), a Node server adapter (`jev-devtools/server`), and the server-only flow API (`jev-devtools/flow`). Browser-safe trace types are exported from the React entry. Server modules and the TypeSafe SDK must never enter the browser bundle.
+Application code uses three JavaScript entry points: the SSR-safe React component (`jev-devtools`), a Node server adapter (`jev-devtools/server`), and the server-only flow API (`jev-devtools/flow`). Browser-safe trace types are exported from the React entry. Server modules and the TypeSafe SDK must never enter the browser bundle.
 
 `createJevDevtools()` owns a bounded in-memory recorder. Its `createClient()` instruments the SDK's `systemOne` calls while preserving APIPromise behavior. AsyncLocalStorage links retries to the logical call. The adapter exposes configuration, SSE snapshots, and scoped clearing; the React drawer handles subscriptions and displays diagrams. There is no network interception or hidden-model reasoning capture.
 
@@ -28,6 +28,6 @@ One Node process/adapter instance, same-origin browser endpoint, memory-only tra
 
 ## Isolated UI and diagram camera
 
-The client drawer portals into an open ShadowRoot on a `jev-devtools-root` host. Its root resets inherited typography and layout, while shadow encapsulation keeps host selectors out of internal cards, headers, and controls. `copy-styles.mjs` emits the embedded stylesheet from the same CSS source as the public stylesheet export. The component loads that embedded stylesheet automatically; consumers do not need a CSS import. The public CSS export remains available for compatibility with existing imports. The host and listeners are removed on unmount, including React Strict Mode cleanup.
+The client drawer portals into an open ShadowRoot on a `jev-devtools-root` host. Its root resets inherited typography and layout, while shadow encapsulation keeps host selectors out of internal cards, headers, and controls. `copy-styles.mjs` embeds `inspector.css` in the component’s JavaScript. The component loads that embedded stylesheet automatically; consumers do not need a CSS import. The host and listeners are removed on unmount, including React Strict Mode cleanup.
 
 The diagram camera uses pointer capture and animation-frame transform updates rather than a scrollable scaled container. Wheel zoom preserves the diagram coordinate beneath the pointer, two-finger pinch also follows its moving midpoint, and Fit considers both viewport dimensions. ResizeObserver refits a fitted view or keeps a manually positioned view centered when the drawer changes size. Camera geometry tests cover full-content fitting, anchored/clamped zoom, and moving pinch.

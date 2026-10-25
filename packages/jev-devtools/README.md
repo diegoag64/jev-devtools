@@ -74,7 +74,7 @@ app.use(inspector.middleware); // Mount at root, before fallback handlers.
 // Call inspector.dispose() on shutdown.
 ```
 
-Only calls through that client are captured. The React component subscribes via same-origin SSE, receiving an initial snapshot followed by changed traces. Older client/server combinations remain compatible through full snapshots. Both sides default to disabled. API keys remain server-side. Browser code is SSR-safe. The drawer uses a Shadow DOM boundary and its own stylesheet so host page selectors cannot alter its internal layout. Existing stylesheet imports remain supported; no Tailwind or shadcn installation is required. Drag the Flow canvas to pan, scroll/pinch to zoom, or use Fit.
+Only calls through that client are captured. The React component subscribes via same-origin SSE, receiving an initial snapshot followed by changed traces. Older client/server combinations remain compatible through full snapshots. Both sides default to disabled. API keys remain server-side. Browser code is SSR-safe. The drawer uses a Shadow DOM boundary and its own stylesheet so host page selectors cannot alter its internal layout. No Tailwind or shadcn installation is required. Drag the Flow canvas to pan, scroll/pinch to zoom, or use Fit.
 
 History is bounded to 50 calls in memory by default. API routes and inspector endpoints must share an adapter instance; distributed processes and edge runtimes are not supported. Without `authorize`, the middleware accepts only loopback connections; Web Request handlers can't see the connection's address, so run those servers on `127.0.0.1`. Captures include bounded/redacted context and answers, not hidden model reasoning.
 
