@@ -447,6 +447,22 @@ try {
     return style.content === "none" ? 0 : new DOMMatrixReadOnly(style.transform).m22;
   });
   const settleScroll = () => page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  const expectAlignedTrack = async (hash) => {
+    await settleScroll();
+    const error = await outline.locator(`a[href="${hash}"]`).evaluate((link) => {
+      const track = link.closest(".toc-methods");
+      const box = track.getBoundingClientRect();
+      const item = link.getBoundingClientRect();
+      const fill = new DOMMatrixReadOnly(getComputedStyle(track, "::before").transform).m22;
+      return box.top + box.height * fill - (item.top + item.height / 2);
+    });
+    assert.ok(Math.abs(error) <= 2, `Progress meets the selected sidebar label at ${hash}; offset ${error}px`);
+  };
+  await expectAlignedTrack("#adapter-handle");
+  const serverGroup = serverTrack.locator("..");
+  await serverGroup.locator("summary").click();
+  await serverGroup.locator("summary").click();
+  await expectAlignedTrack("#adapter-handle");
   const initialProgress = await paintedProgress();
   assert.ok(initialProgress > 0 && initialProgress < 1, "A direct method link initializes partial section progress");
   const progressHash = new URL(page.url()).hash;
@@ -455,6 +471,10 @@ try {
   await expectLocation("#adapter-handle");
   const laterProgress = await paintedProgress();
   assert.ok(laterProgress > initialProgress, "The colored track advances inside a long method");
+  const railBox = await serverTrack.boundingBox();
+  const nextLabel = await serverTrack.locator('a[href="#adapter-handlenoderoute"]').boundingBox();
+  assert.ok(railBox.y + railBox.height * laterProgress < nextLabel.y + nextLabel.height / 2,
+    "Progress remains before the next label while reading the current method");
   await page.screenshot({ path: resolve(evidence, "outline-progress-light.png") });
   await page.locator(".theme-toggle").click();
   await page.screenshot({ path: resolve(evidence, "outline-progress-dark.png") });
@@ -469,8 +489,16 @@ try {
   await page.locator("#flow-definitions-and-steps").evaluate((heading) => heading.scrollIntoView({ block: "start" }));
   await settleScroll();
   assert.equal(await paintedProgress(), 1, "The track is full after leaving the section");
+  await page.setViewportSize({ width: 1280, height: 1050 });
+  for (const hash of ["#createjevdevtools", "#adapter-dispose"]) {
+    await page.goto(origin + base + "api/reference/" + hash);
+    await expectLocation(hash);
+    await expectAlignedTrack(hash);
+  }
+  await page.setViewportSize({ width: 1440, height: 1050 });
   await page.goto(origin + base + "api/reference/#type-flowbuilder");
   await expectLocation("#type-flowbuilder");
+  await expectAlignedTrack("#type-flowbuilder");
   const activeBounds = await outline.locator('[aria-current="location"]').boundingBox();
   assert.ok(activeBounds.y >= 76 && activeBounds.y + activeBounds.height <= 1050,
     "Long groups keep the active method visible in the outline");
