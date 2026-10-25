@@ -425,6 +425,37 @@ try {
   await expectLocation("#flow-map");
   await page.goBack();
   await expectLocation("#flow-task");
+  // Section progress must move within a method, not just on heading changes.
+  await page.goto(origin + base + "api/reference/#adapter-handle");
+  await expectLocation("#adapter-handle");
+  const serverTrack = outline.locator(".toc-group").filter({ has: page.locator('summary a[href="#server-adapter"]') }).locator(".toc-methods");
+  const paintedProgress = () => serverTrack.evaluate((track) => {
+    const style = getComputedStyle(track, "::before");
+    return style.content === "none" ? 0 : new DOMMatrixReadOnly(style.transform).m22;
+  });
+  const settleScroll = () => page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  const initialProgress = await paintedProgress();
+  assert.ok(initialProgress > 0 && initialProgress < 1, "A direct method link initializes partial section progress");
+  const progressHash = new URL(page.url()).hash;
+  await page.evaluate(() => scrollBy(0, 300));
+  await settleScroll();
+  await expectLocation("#adapter-handle");
+  const laterProgress = await paintedProgress();
+  assert.ok(laterProgress > initialProgress, "The colored track advances inside a long method");
+  await page.screenshot({ path: resolve(evidence, "outline-progress-light.png") });
+  await page.locator(".theme-toggle").click();
+  await page.screenshot({ path: resolve(evidence, "outline-progress-dark.png") });
+  await page.locator(".theme-toggle").click();
+  await page.evaluate(() => scrollBy(0, -300));
+  await settleScroll();
+  assert.ok(await paintedProgress() < laterProgress, "The colored track retreats when scrolling upward");
+  assert.equal(new URL(page.url()).hash, progressHash, "Section progress does not change history");
+  await page.locator("#server-adapter").evaluate((heading) => scrollTo(0, scrollY + heading.closest(".reference-group").getBoundingClientRect().top - innerHeight / 2));
+  await settleScroll();
+  assert.ok(await paintedProgress() < 0.001, "The track stays empty before entering the section");
+  await page.locator("#flow-definitions-and-steps").evaluate((heading) => heading.scrollIntoView({ block: "start" }));
+  await settleScroll();
+  assert.equal(await paintedProgress(), 1, "The track is full after leaving the section");
   await page.goto(origin + base + "api/reference/#type-flowbuilder");
   await expectLocation("#type-flowbuilder");
   const activeBounds = await outline.locator('[aria-current="location"]').boundingBox();

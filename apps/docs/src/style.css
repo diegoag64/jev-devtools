@@ -976,9 +976,22 @@ dialog::backdrop {
   font-weight: 600;
 }
 .toc-methods {
+  position: relative;
   border-left: 1px solid var(--line);
   margin: 5px 0 12px 6px;
   padding-left: 8px;
+}
+/* Direct scroll progress has no easing or autonomous animation. Without JS,
+   the base border remains visible and the accent stays empty. */
+.toc-methods::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 -1px;
+  width: 1px;
+  background: var(--accent);
+  transform: scaleY(var(--section-progress, 0));
+  transform-origin: top;
+  pointer-events: none;
 }
 .toc-methods a {
   overflow-wrap: anywhere;

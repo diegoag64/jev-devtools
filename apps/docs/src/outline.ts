@@ -5,6 +5,12 @@ const entries = links.flatMap((link) => {
   return heading ? [{ link, heading }] : [];
 });
 const groups = [...document.querySelectorAll<HTMLDetailsElement>(".toc-group")];
+const progressTracks = groups.flatMap((group) => {
+  const link = group.querySelector<HTMLAnchorElement>("summary a");
+  const track = group.querySelector<HTMLElement>(".toc-methods");
+  const section = link && document.getElementById(decodeURIComponent(link.hash.slice(1)))?.closest(".reference-group");
+  return track && section ? [{ track, section }] : [];
+});
 let active: HTMLAnchorElement | undefined;
 let queued = false;
 
@@ -13,6 +19,14 @@ function update() {
   if (!toc || !entries.length) return;
   // Use the same reading line as native anchor navigation below the header.
   const readingLine = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) + 8;
+  // Update even while the active method stays the same: long entries should
+  // advance the track continuously. Past groups fill; future groups stay empty.
+  for (const { track, section } of progressTracks) {
+    const box = section.getBoundingClientRect();
+    const progress = Math.max(0, Math.min(1, (readingLine - box.top) / Math.max(1, box.height))).toFixed(4);
+    if (track.style.getPropertyValue("--section-progress") !== progress)
+      track.style.setProperty("--section-progress", progress);
+  }
   let current = entries[0];
   for (const entry of entries) {
     if (entry.heading.getBoundingClientRect().top > readingLine) break;

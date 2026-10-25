@@ -48,6 +48,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **Section reading progress.** Fill each glossary outline group’s vertical line as you scroll through its content, including long methods. The fill follows scrolling in either direction and keeps the ordinary line without JavaScript. Docs only. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
+
 - **Straight sidebar markers.** Square the left corners of page-outline highlights so the active-section marker is a straight line. Docs only. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
 
 - **Glossary introductions.** Explain each method and concept before its signature, including generated declarations and supporting types. Docs only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
