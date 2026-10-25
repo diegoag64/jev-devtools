@@ -91,7 +91,7 @@ The inspected and published archive is `jev-devtools-0.5.2.tgz` (78 files):
 
 The [GitHub release v0.5.2](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.2) was published at 21:36:35 UTC on October 25, 2026. Its lightweight remote tag resolves exactly to `20e7dc0d9d81285e2c6e17b75dae5c8e37f2d0e4`; it is neither draft nor prerelease, and GitHub's latest-release endpoint returned v0.5.2. The published notes match the approved candidate notes.
 
-npm publication, the exact tag, and GitHub Latest are verified. **Follow-up pending:** this release-record PR needs review/merge, followed by explicitly requested manual docs publication and live manifest verification under the completion rule above. The immutable npm archive retains its preparation-time README; these source record edits do not rewrite it. Do not republish 0.5.2. No docs or landing Site deployment was performed. Downloaded evidence, registry readback, and logs remain ignored under `benchmarks/results/release-0.5.2/`.
+npm publication, the exact tag, and GitHub Latest are verified. **Follow-up pending:** [release-record PR #96](https://github.com/diegoag64/jev-devtools/pull/96) needs review/merge, followed by explicitly requested manual docs publication and live manifest verification under the completion rule above. The immutable npm archive retains its preparation-time README; these source record edits do not rewrite it. Do not republish 0.5.2. No docs or landing Site deployment was performed. Downloaded evidence, registry readback, and logs remain ignored under `benchmarks/results/release-0.5.2/`.
 
 ## Release 0.5.1 — published October 25, 2026
 
