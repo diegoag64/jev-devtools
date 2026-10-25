@@ -71,8 +71,20 @@ No scheduled refresh or automatic deployment is configured. To decide whether do
 
 Record the canonical commit, source package version, GPT Sites saved version/deployment ID, URL, verified UTC publication date, and a verification summary. Link the CI run and PR when available. Record a failed deployment as failed, not published. If saving succeeded but deployment did not, resume the saved version instead of rebuilding and creating duplicates. A rollback is an explicit manual deployment of a previously successful saved version; verify its live manifest and record the rollback. Never change npm versions or move release tags to repair a docs deployment.
 
-The latest deployment before this policy is the baseline below. It predates `version.json` and used a feature-branch build plus GitHub-main changelog; the next authorized publication should replace it with a verified main-commit snapshot.
+Version 18 is the first publication under this policy. Its live manifest matches the reviewed main commit and embedded changelog. Version 17 remains the historical pre-policy baseline and predates `version.json`.
 
 | Published (UTC) | Source commit / package version | GPT Sites version / deployment | Verification |
 | --- | --- | --- | --- |
 | 2026-10-25 04:48:34 | `8262004dcb047eac9f2bb16086f7c358ba837eae` / `0.4.1` source, with Unreleased docs | 17 / `appgdep_6add8a1d14e08191adb6fab3f90a2649` | Successful public deployment at [docs.jevtools.dev](https://docs.jevtools.dev/); repository/browser checks and dark-palette review passed. Published from [PR #70](https://github.com/diegoag64/jev-devtools/pull/70) before merge. |
+| 2026-10-25 06:45:14 | `c22f7695ac83333fed7b34ea3487ed6b86e4c714` / `0.5.0` | 18 / `appgdep_6adda5748390819195513a58d844721f` | Successful public deployment at [docs.jevtools.dev](https://docs.jevtools.dev/) after [PR #75](https://github.com/diegoag64/jev-devtools/pull/75) and [main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40169944721). Live manifest, changelog hash, setup/API/release pages, both themes, and mobile checks passed. |
+
+Version 18 provenance:
+
+- Canonical source: `c22f7695ac83333fed7b34ea3487ed6b86e4c714`, clean checkout; publication mode, package `0.5.0`.
+- Sites source repository commit: `880c71da6e9a01852e8290759304decc2744c025` (generated deployment output, distinct from canonical source).
+- Saved version ID: `appgprj_6add5705dbec8191b56b1c9555078a2d~appgver_cfd5b02c5f4081919e83c293fc21bf44`.
+- Embedded/live changelog SHA-256: `2a088fc139dde3f18d66e1762bcb1d23d4ef8ef0f188f76ee79953bb33e0bcf9`.
+- Saved archive content hash: `sha256:3d76715ad91c72166ad29415e1a4335bae7231aaf41f6e6aeacb9b8473695c17`.
+- Live [version manifest](https://docs.jevtools.dev/version.json) matched the inspected file exactly. Homepage, quick start, `api/reference/#flow-jev`, and changelog returned HTTP 200; browser smoke checks reported no page errors.
+
+This receipt records the completed deployment after the artifact was saved. It does not rewrite version 18 or its manifest; later receipt-only commits do not require another deployment. The landing Site was not redeployed.
