@@ -31,7 +31,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Fixed
 
-- **Task input symbol keys.** Reject own symbol keys in literal task inputs before template copying can silently discard them, including nested objects and arrays. Literal inputs fail during definition; referenced values retain their runtime rejection before the task callback. String-keyed JSON inputs and SDK request handling are unchanged.
+- **Task input symbol keys.** Reject own symbol keys in literal task inputs before template copying can silently discard them, including nested objects and arrays. Literal inputs fail during definition; referenced values retain their runtime rejection before the task callback. String-keyed JSON inputs and SDK request handling are unchanged. ([#81](https://github.com/diegoag64/jev-devtools/pull/81))
 
 #### Documentation
 
