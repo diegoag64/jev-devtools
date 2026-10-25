@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Release verification setup and 0.5.0 publication records. |
+| [Unreleased](#unreleased) | Not published | README hero; release verification setup and 0.5.0 publication records. |
 | [0.5.0](#050--october-25-2026-experimental) | 2026-10-25 | Replay and comparison; capture reliability/privacy; website and docs. |
 | [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | CSS isolation; stricter published flow types; approved release workflow. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Tasks, maps and loops; six cookbooks; SDK and inspector access changes. |
@@ -24,6 +24,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 ### Changes
 
 #### Documentation
+
+- **README hero.** Replace the root README's looping demo section with a static browser capture of the landing page heading and illustrative hierarchical flow, linked to the website. Include a reproducible capture script. Package APIs and the npm README are unchanged. ([#74](https://github.com/diegoag64/jev-devtools/pull/74))
 
 - **0.5.0 publication records.** Record verified npm publication, archive integrity, registry consumers, and the recovered GitHub release/tag. Update mutable documentation to describe the published APIs. Manual docs publication remains pending. ([#75](https://github.com/diegoag64/jev-devtools/pull/75))
 

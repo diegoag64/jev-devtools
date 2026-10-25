@@ -19,13 +19,7 @@ Works with React and Next.js App Router.
 
 </div>
 
-## See it in motion
-
-![Full 28-second Jev DevTools demo showing sample results, the request drawer, inspection tabs, and animated diagrams.](docs/assets/jev-devtools-preview.gif)
-
-<p align="center">
-  <sub>The complete 28-second sample demo plays above and loops automatically.</sub>
-</p>
+[![Visualize your System One flows. Illustrative hierarchical search: a taxonomy root enters a bounded loop of System One candidate assessment and a code-defined retain-and-expand policy, leading to a selected path.](docs/assets/jevtools-readme-hero.png)](https://jevtools.dev/)
 
 <a id="install-in-another-react-app"></a>
 
