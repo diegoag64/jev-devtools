@@ -69,11 +69,11 @@ No changes beyond the 0.5.0 release candidate yet.
 
 - **Traceable docs publication.** Build content, declarations, and the categorized changelog from one checkout. Emit a source/package-version manifest, reject dirty publication builds, and run browser checks with preview artifacts in CI. Keep GPT Sites deployment manual and separate from merging and npm publication, with an explicit release checklist and publication receipts. ([#70](https://github.com/diegoag64/jev-devtools/pull/70))
 
-- **Website and documentation consolidation.** Make [jevtools.dev](https://jevtools.dev/) and the hosted docs the primary README/package entry points. Align repository guides, the offline setup skill, agent indexes, example archives, and version labels with the 0.5.0 candidate. Preserve repository reference paths and old docs anchors; clearly distinguish pending publication from npm availability.
+- **Website and documentation consolidation.** Make [jevtools.dev](https://jevtools.dev/) and the hosted docs the primary README/package entry points. Align repository guides, the offline setup skill, agent indexes, example archives, and version labels with the 0.5.0 candidate. Preserve repository reference paths and old docs anchors; clearly distinguish pending publication from npm availability. ([#73](https://github.com/diegoag64/jev-devtools/pull/73))
 
 #### Maintenance
 
-- **Landing validation.** Add a separate read-only CI job that installs the landing app’s own lockfile, runs its tests, and builds it on Node 24. Keep website validation separate from package publishing and both manual Site deployments.
+- **Landing validation.** Add a separate read-only CI job that installs the landing app’s own lockfile, runs its tests, and builds it on Node 24. Keep website validation separate from package publishing and both manual Site deployments. ([#73](https://github.com/diegoag64/jev-devtools/pull/73))
 
 - **Drawer CI setup.** Run the React 18/19 drawer CI checks and release preparation on Ubuntu 24.04 using the runner's system libraries and Playwright's pinned Chromium headless shell, skipping per-run system package installation. In drawer CI, reuse matching installed React packages and read the lockfile for version overrides, verifying both React packages before browser checks. Package APIs, verification coverage, release approval, and publishing safeguards are unchanged. ([#64](https://github.com/diegoag64/jev-devtools/pull/64))
 
