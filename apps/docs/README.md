@@ -13,6 +13,12 @@ npm run dev:docs
 
 Open http://127.0.0.1:4185/. Content/example edits regenerate pages and reload the browser; CSS/TypeScript uses Vite HMR. Navigation/compiler changes restart Vite through its config dependencies. `npm run check` builds the package and checks the examples against public declarations. Existing `docs/` guides and links remain intact; `apps/docs/` follows the repository's app workspace convention.
 
+## Initial rendering
+
+Pages load their stylesheet through a render-blocking link in the head, independent of the client module. A small synchronous head script restores the saved theme before content can paint; unavailable storage falls back to the system preference. Keep CSS out of the deferred client entry to avoid development-mode unstyled flashes on full-page navigation.
+
+`npm run verify:docs` also holds external scripts during initial loads and link navigation in Vite development and production preview, checking the visible styling and document canvas for saved/system themes and blocked storage.
+
 ## Author
 
 - Add a Markdown file under `content/`, then register its title, description, group, and slug in `pages.ts`. Omit H1: the shell supplies the page title.

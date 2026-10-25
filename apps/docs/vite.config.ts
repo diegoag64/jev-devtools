@@ -34,8 +34,9 @@ export default defineConfig(async (): Promise<UserConfig> => {
           handler(html, context) {
             return context.server
               ? html.replace(
-                  /src="[^"]*src\/client\.ts"/,
-                  `src="/@fs/${normalizePath(resolve(appRoot, "src/client.ts"))}"`,
+                  /(src|href)="[^"]*src\/(client\.ts|style\.css)"/g,
+                  (_match, attribute: string, file: string) =>
+                    `${attribute}="/@fs/${normalizePath(resolve(appRoot, "src", file))}"`,
                 )
               : html;
           },

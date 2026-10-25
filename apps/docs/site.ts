@@ -12,6 +12,9 @@ import { groups, pages, type Page } from "./pages.js";
 export const appRoot = dirname(fileURLToPath(import.meta.url));
 export const generated = resolve(appRoot, ".generated");
 const repo = "https://github.com/diegoag64/jev-devtools";
+// Run in the head, before styles/content paint; a deferred module is too late
+// when the saved choice differs from the operating system's color scheme.
+const themeScript = `try{const theme=localStorage.getItem("jev-docs-theme");if(theme==="light"||theme==="dark")document.documentElement.dataset.theme=theme;}catch{}`;
 for (const [name, language] of Object.entries({
   typescript,
   javascript,
@@ -98,9 +101,10 @@ export async function generate(base: string) {
     );
     const { html, headings } = await compile(linked);
     const file = resolve(generated, page.slug, "index.html");
-    const entry = relative(dirname(file), resolve(appRoot, "src/client.ts"))
-      .split("\\")
-      .join("/");
+    const source = (name: string) =>
+      relative(dirname(file), resolve(appRoot, "src", name))
+        .split("\\")
+        .join("/");
     const nav = groups
       .map(
         (group) =>
@@ -117,7 +121,7 @@ export async function generate(base: string) {
       p
         ? `<a href="${href(p.slug)}"><small>${label}</small><span>${escape(p.title)} ${label === "Next" ? "→" : ""}</span></a>`
         : "<span></span>";
-    const doc = `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="${escape(page.description)}"><meta name="color-scheme" content="light dark"><title>${escape(page.title)} · Jev DevTools</title><link rel="icon" href="${base}favicon.svg" type="image/svg+xml"></head><body>
+    const doc = `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="${escape(page.description)}"><meta name="color-scheme" content="light dark"><script>${themeScript}</script><link rel="stylesheet" href="${source("style.css")}"><title>${escape(page.title)} · Jev DevTools</title><link rel="icon" href="${base}favicon.svg" type="image/svg+xml"></head><body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="topbar"><a class="brand" href="${base}" aria-label="Jev DevTools home"><span class="brand-mark" aria-hidden="true">j<span>•</span></span><strong>jev<span> / devtools</span></strong></a><span class="docs-label">Documentation</span><button class="search-trigger" type="button" hidden><span>Search documentation</span><kbd>⌘ K</kbd></button><a class="github-link" href="${repo}">GitHub ↗</a><button class="theme-toggle" type="button" aria-label="Switch color theme" hidden>◐</button><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="sidebar" hidden>Menu</button></header>
 <div class="layout"><aside id="sidebar" class="sidebar"><div class="version">Working tree docs <span>pre-1.0</span></div><nav aria-label="Documentation">${nav}</nav><a class="sidebar-footer" href="${repo}/blob/main/CHANGELOG.md">Changelog ↗</a></aside>
@@ -129,7 +133,7 @@ export async function generate(base: string) {
         "",
       )}</nav><div class="toc-note"><span class="status-dot"></span> Local-first inspection<p>Your API keys stay on your server.</p></div></aside></div>
 <dialog id="search-dialog" aria-labelledby="search-title"><div class="search-header"><label id="search-title" for="search-input">Search the docs</label><button type="button" class="close-search" aria-label="Close search">Esc</button></div><input id="search-input" type="search" placeholder="Try ‘Next.js’ or ‘createClient’" autocomplete="off"><p id="search-status" role="status"></p><ul id="search-results"></ul></dialog>
-<script type="module" src="${entry}"></script></body></html>`;
+<script type="module" src="${source("client.ts")}"></script></body></html>`;
     await mkdir(dirname(file), { recursive: true });
     await writeFile(file, doc);
     inputs[page.slug || "index"] = file;

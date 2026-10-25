@@ -1,13 +1,5 @@
-import "./style.css";
-
 const root = document.documentElement;
 const themeButton = document.querySelector<HTMLButtonElement>(".theme-toggle")!;
-try {
-  const theme = localStorage.getItem("jev-docs-theme");
-  if (theme === "light" || theme === "dark") root.dataset.theme = theme;
-} catch {
-  /* Reading docs also works with storage disabled. */
-}
 themeButton.hidden = false;
 themeButton.addEventListener("click", () => {
   const dark = root.dataset.theme

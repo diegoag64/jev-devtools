@@ -6,8 +6,9 @@
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  color: #25272c;
-  background: #fff;
+  /* Match the document canvas to the selected theme before body content paints. */
+  color: var(--text);
+  background: var(--bg);
   --bg: #fff;
   --surface: #f8f9fb;
   --text: #25272c;
