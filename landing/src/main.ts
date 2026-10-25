@@ -23,7 +23,7 @@ app.innerHTML = `
     <section class="hero wrap" aria-labelledby="hero-title">
       <h1 id="hero-title">Visualize your<br /><span>System One flows.</span></h1>
       <p class="hero-description">Models, primitives, and your code. One clear picture.<br class="desktop-break" /> Make complex Jev flows easy to understand.</p>
-      <div class="hero-actions"><a class="button primary" href="${DOCS}">Get started ${arrow}</a><a class="button secondary" href="${GITHUB}">${github} View on GitHub</a></div>
+      <div class="hero-actions"><a class="button primary" href="${DOCS}">Read the Docs</a><a class="button secondary" href="${GITHUB}">${github} View on GitHub</a></div>
     </section>
     <section id="flows" class="flow-stage wrap" aria-label="Animated flow examples" aria-roledescription="carousel">
       <div class="diagram-scroll" tabindex="0" role="region" aria-label="Flow diagram; scroll horizontally on small screens"><svg id="diagram" viewBox="0 0 1140 520" role="img"></svg></div>
