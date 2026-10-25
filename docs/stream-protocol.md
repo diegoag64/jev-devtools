@@ -37,3 +37,24 @@ Authorization, same-origin enforcement, server-derived session scope and capture
 ## Remaining costs
 
 The initial full snapshot can still be large. Each changed trace still sends its complete captured state/result, and every delta carries the retained ID order. While the drawer is closed, transport and parsing continue but trace-driven React updates are suspended. Large diagrams still have layout costs. See the [transport comparison in PR #15](https://github.com/diegoag64/jev-devtools/pull/15) and [hidden-drawer comparison in PR #16](https://github.com/diegoag64/jev-devtools/pull/16) for benefits and limits.
+
+## Flow capture warnings
+
+The separate `/flows/events` stream sends version-1 `flows` envelopes with `definitions`, `upserts`, and authoritative run `order`. Definitions are sent when first needed by a connection; run upserts replace complete records. Both retain optional capture warnings, including nested item definitions and runs:
+
+| Field | Type | Applies to |
+| --- | --- | --- |
+| `FlowNode.conditionCaptureWarnings` | `string[]` (optional) | This node's `conditionRule`, including loop continuation rules. |
+| `FlowRun.captureWarnings` | `string[]` (optional) | This run's `value`, including map item and loop iteration outcomes. |
+| `FlowStep.captureWarnings` | `string[]` (optional) | This step's `data`, including task, merge, and loop state. |
+| `Trace.captureWarnings` | `string[]` | Captured request/response data linked to Jev steps. |
+
+For example, an outcome string of 20,000 characters is captured as 16,000 characters with `captureWarnings: ["Long text truncated in capture."]`; execution still returns all 20,000 characters. A shortened comparison literal carries the same warning in its node's `conditionCaptureWarnings`, while its decision records the full runtime comparison.
+
+Capture limits remain 16,000 characters per string, 150 array entries/general object properties (256 for `criteria`/`probabilities` maps), depth 12, and an approximate 96,000-character traversal budget per capture. Aggregate budgets can shorten individual values below their per-value limits. Observer snapshots can also be unavailable for unsupported non-JSON values; merge and outcome metadata retain that failure explicitly.
+
+Structured condition rules also have a 128-node projection budget. Exceeding it retains `conditionCaptureWarnings` before server capture; it does not change execution. Unsupported rule literals likewise carry an explicit warning.
+
+Warning text is descriptive, not a stable machine-readable enum. A nonempty array means a capture limitation was observed for that field; absence on old captures means unknown, not complete. An empty array means no warning was recorded, not a guarantee of lossless replay. Credential removal and custom redactors returning a changed value produce a redaction warning. Return a replacement from custom redactors rather than mutating objects in place: in-place changes cannot reliably be detected. Display-only personal-data masking is separate from these server warnings.
+
+Consumers must consult metadata rather than interpret user strings such as `[truncated]`, `[redacted]`, or `[capture unavailable]` as control signals. This change does not version or redesign the protocol. Existing captures remain readable; updating both server and drawer enables warning display beside rules and outcome values. The drawer also shows warnings for step data. `flowFixture()` only exports linked Jev response bodies and their trace warnings; it does not export outcome or rule data, so those warnings do not change the fixture format. Replays execute the authored rules again. A future evaluator of recorded rules (such as PR #31) must account for the corresponding rule and value warnings before trusting them.
