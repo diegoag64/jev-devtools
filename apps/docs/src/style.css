@@ -199,10 +199,30 @@ kbd {
   border-radius: 4px;
   padding: 0 5px;
 }
-.github-link {
+.github-links,
+.github-link,
+.github-stars {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.github-links {
+  gap: 12px;
+}
+.github-link,
+.github-stars {
+  gap: 7px;
   font-size: 13px;
   color: var(--text);
   text-decoration: none;
+}
+.github-stars {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.github-link:hover,
+.github-stars:hover {
+  color: var(--accent);
 }
 .theme-toggle,
 .menu-toggle {
@@ -718,8 +738,14 @@ dialog::backdrop {
   .brand {
     font-size: 15px;
   }
-  .github-link {
+  .github-label {
     display: none;
+  }
+  .github-links {
+    gap: 8px;
+  }
+  .github-stars {
+    gap: 4px;
   }
   .search-trigger {
     padding: 6px 9px;
@@ -911,4 +937,11 @@ dialog::backdrop {
 .release-body h4:hover .heading-link,
 .release-body h4:focus-within .heading-link {
   opacity: 1;
+}
+
+/* Leave room for repository links alongside search/theme/menu on small phones. */
+@media (max-width: 480px) {
+  .topbar .brand strong {
+    display: none;
+  }
 }

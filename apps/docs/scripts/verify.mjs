@@ -59,6 +59,23 @@ try {
     !initialRequests.some((url) => url.endsWith("search-index.json")),
     "Search must stay lazy",
   );
+  const github = page.getByRole("link", { name: "GitHub repository", exact: true });
+  const stars = page.locator(".github-stars");
+  assert.equal(await github.getAttribute("href"), "https://github.com/diegoag64/jev-devtools");
+  assert.equal(await stars.getAttribute("href"), "https://github.com/diegoag64/jev-devtools/stargazers");
+  assert.match(await stars.getAttribute("aria-label"), /^(?:[\d,]+ GitHub stars|Star on GitHub)$/);
+  assert.ok(!initialRequests.some((url) => new URL(url).hostname.endsWith("github.com")), "GitHub header makes no visitor-side requests");
+  for (const theme of ["light", "dark"]) {
+    await page.evaluate((theme) => { document.documentElement.dataset.theme = theme; }, theme);
+    for (const width of [1440, 390, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      assert.ok(await github.isVisible() && await stars.isVisible(), "GitHub controls remain visible on phones");
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Header fits ${width}px`);
+      await page.locator(".topbar").screenshot({ path: resolve(evidence, `github-header-${theme}-${width}.png`) });
+    }
+  }
+  await page.evaluate(() => { document.documentElement.dataset.theme = "light"; });
+  await page.setViewportSize({ width: 1440, height: 1050 });
   await page.screenshot({ path: resolve(evidence, "desktop-viewport.png") });
   await page.screenshot({
     path: resolve(evidence, "desktop.png"),

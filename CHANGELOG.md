@@ -48,6 +48,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **GitHub header links.** Show the GitHub logo and a build-time repository star count in the docs header, including compact mobile controls. If GitHub is unavailable, retain a Star link without inventing a count. No package API changes. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
+
 - **Complete API reference and beginner flow guide.** Add a linked glossary for public APIs and exact build-time declarations, plus small checked examples for each flow operation. Connect reference entries from prose and code examples without adding browser dependencies. Documentation only; package behavior is unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
 
 - **Community project notice.** Clarify in the docs footer that Jev DevTools is an independent, open-source community project and is not affiliated with TypeSafe AI. ([#70](https://github.com/diegoag64/jev-devtools/pull/70))

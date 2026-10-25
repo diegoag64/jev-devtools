@@ -7,8 +7,9 @@ import { publicTypeReference } from "./type-reference.js";
 import { codeRenderer } from "./highlight.js";
 import { groups, pages, type Page } from "./pages.js";
 
+import { repositoryURL as repo, renderGitHubLinks } from "./github.js";
+
 export const appRoot = dirname(fileURLToPath(import.meta.url));
-const repo = "https://github.com/diegoag64/jev-devtools";
 // Run in the head, before styles/content paint; a deferred module is too late
 // when the saved choice differs from the operating system's color scheme.
 const themeScript = `try{const theme=localStorage.getItem("jev-docs-theme");if(theme==="light"||theme==="dark")document.documentElement.dataset.theme=theme;}catch{}`;
@@ -75,6 +76,7 @@ export async function generate(
   generated: string,
   changelogSourceMode: "local" | "github" = "local",
 ) {
+  const githubLinks = await renderGitHubLinks();
   const href = (slug: string) => base + (slug ? slug + "/" : "");
   const search: { title: string; group: string; url: string; text: string }[] =
     [];
@@ -124,7 +126,7 @@ export async function generate(
         : "<span></span>";
     const doc = `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="${escape(page.description)}"><meta name="color-scheme" content="light dark"><script>${themeScript}</script><link rel="stylesheet" href="${source("style.css")}"><title>${escape(page.title)} · Jev DevTools</title><link rel="icon" href="${base}favicon.svg" type="image/svg+xml"></head><body>
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="topbar"><a class="brand" href="${base}" aria-label="Jev DevTools home"><span class="brand-mark" aria-hidden="true">j<span>•</span></span><strong>jev<span> / devtools</span></strong></a><span class="docs-label">Documentation</span><button class="search-trigger" type="button" hidden><span>Search documentation</span><kbd>⌘ K</kbd></button><a class="github-link" href="${repo}">GitHub ↗</a><button class="theme-toggle" type="button" aria-label="Switch color theme" hidden>◐</button><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="sidebar" hidden>Menu</button></header>
+<header class="topbar"><a class="brand" href="${base}" aria-label="Jev DevTools home"><span class="brand-mark" aria-hidden="true">j<span>•</span></span><strong>jev<span> / devtools</span></strong></a><span class="docs-label">Documentation</span><button class="search-trigger" type="button" hidden><span>Search documentation</span><kbd>⌘ K</kbd></button>${githubLinks}<button class="theme-toggle" type="button" aria-label="Switch color theme" hidden>◐</button><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="sidebar" hidden>Menu</button></header>
 <div class="layout"><aside id="sidebar" class="sidebar"><div class="version">Working tree docs <span>pre-1.0</span></div><nav aria-label="Documentation">${nav}</nav></aside>
 <main id="main" tabindex="-1"><div class="breadcrumb">Docs <span>/</span> ${page.group}</div><div class="page-heading"><p class="eyebrow">${page.group}</p><h1>${page.title}</h1><p class="lead">${page.description}</p></div>${isChangelog ? `<div class="changelog-source"><a href="${changelogSource}">Source on GitHub ↗</a><p>${changelogStatus}</p></div>` : ""}<article>${html}</article><footer class="article-footer"><a href="${editURL}">Edit this page ↗</a><a href="${base}raw/${page.slug || "introduction"}.md">Read as Markdown</a></footer><nav class="page-nav" aria-label="Previous and next pages">${neighbour(pages[index - 1], "Previous")}${neighbour(pages[index + 1], "Next")}</nav><p class="site-note">Jev DevTools is an independent, open-source community project. It is not affiliated with TypeSafe AI.</p></main>
 <aside class="toc"><nav aria-label="On this page"><p>On this page</p>${headings
@@ -165,6 +167,10 @@ export async function generate(
       text: `${page.description} ${markdown.replace(/<[^>]*>/g, "").replace(/[#*`|]/g, " ")}`,
     });
   }
+  await writeFile(
+    resolve(generated, "public/third-party-notices.txt"),
+    "GitHub Octicons: https://github.com/primer/octicons\n\n" + await readFile(resolve(appRoot, "assets/octicons-LICENSE.txt"), "utf8"),
+  );
   await writeFile(
     resolve(generated, "public/search-index.json"),
     JSON.stringify(search),

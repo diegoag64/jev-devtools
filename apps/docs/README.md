@@ -69,3 +69,7 @@ The original integration, flow, and Next.js documents remain the detailed compan
 - `npm run build:docs` and local development use the working-tree changelog, labeled as a working-tree copy. Changes to the root file trigger a docs reload.
 - **Before publishing**, run `npm run build:docs:publish`. This fetches `main/CHANGELOG.md` from GitHub and embeds it in HTML, raw Markdown, and the search index. Failed fetches or malformed content stop publication builds. The saved date and source appear on the page. The published copy updates only with the next deployment.
 - Publish the resulting `apps/docs/dist/` to the existing public GPT Sites project `appgprj_6add5705dbec8191b56b1c9555078a2d`. Reuse its identity and public audience. The dedicated Sites source checkout stores the generated static files; GitHub remains the editable source. The local deployment checkout and archives live under ignored `benchmarks/results/docs/`.
+
+## GitHub header
+
+The header uses bundled GitHub Octicons and a star count fetched once per build or dev-server process from the public GitHub repository API. It does not make visitor-side GitHub requests. Rebuild/restart to refresh the count. Unavailable or invalid counts fall back to a Star link; zero is a valid count. Icon attribution is retained in `assets/octicons-LICENSE.txt` and the published `third-party-notices.txt`.
