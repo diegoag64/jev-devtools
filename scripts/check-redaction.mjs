@@ -80,7 +80,7 @@ export async function checkRedaction({ page, browser, url, load }) {
 
     await view("Flows");
     await view("Show details");
-    await page.getByText("Captured outcome value", { exact: true }).click();
+    await page.getByText(/^Captured outcome value(?: · Capture warnings)?$/).click();
     const flow = page.locator(".flow-overview-stack");
     await expect(flow).toContainText("browser-public-customer");
     await expect(flow).not.toContainText(personal);

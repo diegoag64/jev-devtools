@@ -54,8 +54,16 @@ export function capture(
   let budget = 96_000;
   const visit = (input: unknown, path: string[], depth: number): Json => {
     const key = (path.at(-1) ?? "").replace(/[-_]/g, "").toLowerCase();
-    if (credentialKeys.has(key)) return "[redacted]";
-    if (redact) input = redact(path, input);
+    if (credentialKeys.has(key)) {
+      warnings.add("Capture contains redacted values.");
+      return "[redacted]";
+    }
+    if (redact) {
+      const redacted = redact(path, input);
+      if (!Object.is(redacted, input))
+        warnings.add("Capture contains redacted values.");
+      input = redacted;
+    }
     budget -= 8 + (path.at(-1)?.length ?? 0);
     if (budget <= 0 || depth > 12) {
       warnings.add("Capture size/depth limit reached.");

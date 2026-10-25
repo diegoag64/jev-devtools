@@ -37,6 +37,8 @@ export type FlowNode = FlowDisplay & {
   merge?: { condition: string; then: string; else: string };
   /** Optional for older captures; Json allows redacted/truncated subtrees. */
   conditionRule?: Json | FlowCondition;
+  /** Capture limitations for conditionRule; absent in older captures. */
+  conditionCaptureWarnings?: string[];
   /** Named concurrent lanes; optional for older captures. */
   lanes?: string[];
   /** Reusable item program; map nesting is not supported in v1. */
@@ -89,6 +91,8 @@ export type FlowRun = {
   steps: Record<string, FlowStep>;
   outcome?: string;
   value?: Json;
+  /** Capture limitations for value, including observer failures; absent in older captures. */
+  captureWarnings?: string[];
   error?: string;
 };
 export type FlowUpdate = {

@@ -301,10 +301,16 @@ const Card = memo(function Card({
               )
             )}
             {node.kind === "loop" && node.conditionRule && (
-              <code>
+              <code title="Full captured rule in step details">
                 Continue while {formatFlowCondition(node.conditionRule)}
               </code>
             )}
+            {node.kind === "loop" &&
+              !!node.conditionCaptureWarnings?.length && (
+                <small className="warning">
+                  Rule capture: {node.conditionCaptureWarnings.join(" ")}
+                </small>
+              )}
             <small>
               Explore {node.kind === "loop" ? "an iteration's" : "an item's"}{" "}
               connected flow below
@@ -336,11 +342,16 @@ const Card = memo(function Card({
                 </span>
               )}
               <span className="flow-condition-label">Requirement</span>
-              <code>
+              <code title="Full captured rule in step details">
                 {node.conditionRule !== undefined
                   ? conditionRequirement(node.conditionRule, inputs ?? [])
                   : node.condition}
               </code>
+              {!!node.conditionCaptureWarnings?.length && (
+                <small className="warning">
+                  Rule capture: {node.conditionCaptureWarnings.join(" ")}
+                </small>
+              )}
             </span>
           )}
         {join && (
@@ -1049,13 +1060,13 @@ export const FlowOverview = memo(function FlowOverview({
                               : "No function data captured yet."}
                         </p>
                       )}
-                      {step.captureWarnings?.map((warning) => (
-                        <p className="muted" key={warning}>
-                          {warning}
-                        </p>
-                      ))}
                     </div>
                   )}
+                  {step.captureWarnings?.map((warning) => (
+                    <p className="warning" key={warning}>
+                      {warning}
+                    </p>
+                  ))}
                   {node.kind === "parallel" && (
                     <p>
                       These paths run at the same time:{" "}
@@ -1086,6 +1097,11 @@ export const FlowOverview = memo(function FlowOverview({
                       ))}
                     </dl>
                   )}
+                  {node.conditionCaptureWarnings?.map((warning) => (
+                    <p className="warning" key={warning}>
+                      Rule capture: {warning}
+                    </p>
+                  ))}
                   {(node.conditionRule !== undefined || node.condition) && (
                     <p>
                       <code>
@@ -1131,7 +1147,17 @@ export const FlowOverview = memo(function FlowOverview({
               )}
               {run.value !== undefined && (
                 <details>
-                  <summary>Captured outcome value</summary>
+                  <summary>
+                    Captured outcome value
+                    {!!run.captureWarnings?.length && (
+                      <span className="warning"> · Capture warnings</span>
+                    )}
+                  </summary>
+                  {run.captureWarnings?.map((warning) => (
+                    <p className="warning" key={warning}>
+                      {warning}
+                    </p>
+                  ))}
                   <JsonBlock value={run.value} />
                 </details>
               )}

@@ -93,7 +93,8 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium --only-shell
+      # Match drawer verification: use ubuntu-24.04's system libraries and the pinned browser.
+      - run: npx playwright install chromium --only-shell
       - run: npm run build:package
       - run: npm run verify:docs
       # Preview artifacts are review evidence, never an automatic deployment.

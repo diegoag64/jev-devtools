@@ -1,6 +1,6 @@
 Use this page when you know an API name and want its contract. Each method has a permanent heading link, a readable signature, inputs, return value, and usage. Start with [Flows from scratch](@/guides/flow-basics/) if flows are new to you.
 
-These docs describe **0.5.1, pending publication**; npm currently provides 0.5.0. Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
+These docs describe **0.5.1, available on npm**. Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
 
 <details class="reference-notes">
 <summary>How to read the signatures</summary>
@@ -517,7 +517,7 @@ The `get("name")` call selects a typed field reference. Pass that reference to a
 
 Adds a step that runs your application code, such as fetching data or transforming a value. Its callback receives resolved inputs and can return a value or a promise.
 
-**0.5.1 (pending publication):** Task inputs reject own symbol keys, including nested objects and arrays. Literal templates fail during definition; referenced values fail when resolved, before the callback runs.
+**0.5.1:** Task inputs reject own symbol keys, including nested objects and arrays. Literal templates fail during definition; referenced values fail when resolved, before the callback runs.
 
 #### Signature
 
@@ -905,7 +905,7 @@ The object groups two previously defined references, `message` and `count`. Both
 
 The short expression snippets below belong inside a synchronous `defineJevFlow()` callback. They build references; use them in a step or terminal `output()`, then await the flow’s `run()` to get actual data. See the [complete expression and execution example](@/api/flow/#collections-and-loops).
 
-All these runtime exports come from `jev-devtools/flow`. References must belong to the same flow and be available in the current execution scope. See [expression scopes](@/api/expressions/#respect-scope).
+All these runtime exports come from `jev-devtools/flow`. References must belong to the same flow and be available in the current execution scope. See [expression scopes](@/api/expressions/#respect-scope). **Unreleased:** construction enforces complete [expression depth and expansion limits](@/api/expressions/#expression-limits), including reused children.
 
 ### FlowExpression
 
@@ -967,7 +967,7 @@ expression.get<K extends keyof T & (string | number)>(
 
 **Input:** a string/number key from the object or array's type. The receiver is the expression before `.get()`; it is not an additional call argument. **Returns:** a reference to that field; chain for nested fields. Missing, inherited, or `undefined` properties fail when execution reaches them. This is field selection, not a general optional chaining mechanism.
 
-**0.5.1 type correction (pending publication):** primitive receivers and unions that may contain primitives are rejected during type checking. Version 0.5.0 can accept these calls in TypeScript but rejects primitive property access at runtime. To compute a string's length, pass the string reference into a task and read `.length` inside its callback.
+**0.5.1 type correction:** primitive receivers and unions that may contain primitives are rejected during type checking. Version 0.5.0 can accept these calls in TypeScript but rejects primitive property access at runtime. To compute a string's length, pass the string reference into a task and read `.length` inside its callback.
 
 #### Returns
 

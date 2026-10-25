@@ -124,3 +124,17 @@ defineJevFlow<{ optional?: number; nullable: number | null; values: number[] }>(
     return f.output("done", selected);
   },
 );
+
+// Capture metadata remains optional for old version-1 records; warnings are text.
+export function inspectCaptureWarnings(
+  run: import("jev-devtools/flow").FlowRun,
+  node: import("jev-devtools/flow").FlowDefinition["nodes"][number],
+) {
+  const outcomeWarnings: string[] | undefined = run.captureWarnings;
+  const ruleWarnings: string[] | undefined = node.conditionCaptureWarnings;
+  // @ts-expect-error warning metadata is not a boolean completeness flag
+  const complete: boolean = run.captureWarnings;
+  // @ts-expect-error warning entries are text, not numeric codes
+  const codes: number[] | undefined = node.conditionCaptureWarnings;
+  return { outcomeWarnings, ruleWarnings, complete, codes };
+}
