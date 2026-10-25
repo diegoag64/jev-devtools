@@ -162,6 +162,8 @@ If the flow executes but details are absent, check: `devtools` passed to `run`, 
 
 To check routing without a key, copy the run's fixture with **Copy fixture** in the Flows run header. Replay it in a test with `flow.run(input, { client: replayClient(fixture) })` from `jev-devtools/flow`. Steps in map items and loop iterations are keyed `parent-id/index/step-id` (map item or loop iteration); tasks run again on replay. A missing-step error names the composed id of the step the fixture lacks; see the [flow guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md#replay-a-run-in-tests) for limits.
 
+To check a prompt or model change against saved cases, use `compareWithFixture(flow, input, fixture, { client })` from `jev-devtools/flow` and print `formatComparison` for each case where `comparison.changed || comparison.answers.some((a) => a.changed)`. Item steps are reported under their composed ids, and tasks run on both sides.
+
 Remove temporary verification routes unless requested as a demo. Report the installed version, integration location, outcomes observed, whether browser checks were performed, and that responses were samples. Never equate sample verification with live-model correctness.
 
 ## Function steps and runtime requests (0.4.0)

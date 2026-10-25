@@ -403,3 +403,50 @@ Replay matches step IDs, the flow name, and question names. It does not check pr
 - A call made outside a flow run.
 
 The drawer reports completed steps it could not include and any capture warnings. Request history is bounded by `limit`, so a large map or loop can evict early item captures; raise `limit` before recording such a run. A failed or cancelled run gives a partial fixture without its failed steps. Fixtures hold the answers supplied to `flowFixture`, so capture truncation and server redaction remain in them. **Copy fixture** also includes the drawer's current display masking controlled by `redactAdditionalSensitiveData`; calling `flowFixture` directly on server captures does not add that display masking. Structural question IDs and Choice labels/probabilities are preserved even when they resemble sensitive field names; sensitive fields inside answer content can still be redacted.
+
+## Compare a live run with a fixture
+
+Unreleased: not in npm 0.4.1 yet.
+
+After you change a prompt or a model, re-run your saved cases with `compareWithFixture` to see what moved. It replays the fixture offline, runs the flow with your client on the same input, and reports the differences:
+
+- `outcome` and `value`, recorded and live.
+- `decisions`: each `branch()` and `if()` either side evaluated. `if()` merges and loop conditions are not decisions.
+- `steps`: Jev steps only one side ran.
+- `answers`: every scalar answer field of the Jev steps both sides ran, such as `noul`, `choice`, `confidence`, `probabilities.refund` or `box.left`. Numeric fields carry a `delta` when both sides and their difference are finite. Infinite values compare exactly, and a difference too large to represent counts as changed. When a request factory generates different question names on each side, a name only one side asked shows `(none)` on the other.
+
+Steps inside map items and loop iterations use the same composed IDs as fixtures, such as `rounds/0/batch/1/assess`. The report prints decisions, then recorded-only steps, then live-only steps, then answers. Each group follows the flow's definition order and walks the items of a map or loop by index, each item in full before the next, whatever order they completed in. When item 1 of a `classify` map takes the other `if()` arm live, the report reads:
+
+```text
+decision classify/1/gate: then -> else
+step classify/1/detail: recorded only
+classify/1/assess.relevant.noul: 0.95 -> 0.30 (-0.65)
+```
+
+A loop that ran an extra iteration live adds lines such as `step rounds/2/ask: live only`.
+
+`tolerance` (default 0) applies only to answer fields. It is an absolute difference, used for every numeric field, so pick it with score and box edges in mind as well as probabilities. A numeric field counts as changed when its delta exceeds it. The value comparison is exact. `changed` is set when the outcome, the value or any decision differs, or when a Jev step ran on only one side, such as a loop that ran a different number of iterations or a map over a different number of items. Answer drift alone does not set it. `formatComparison(comparison)` prints one line per change, or `no changes from fixture`; it cuts values and string answers longer than 160 characters to their length and an excerpt that includes the first difference, while the comparison object keeps them in full.
+
+Tasks run on both sides; the recorded side runs them on the replayed answers. Tasks run whenever either run reaches them, including during replay, so side effects can repeat. A task that calls an outside service makes that call from the recorded side too, so that side is only offline when your tasks are. Tasks never appear in `answers` or `steps`; a task result that changes a condition shows up as a decision change.
+
+A fixture copied from the drawer holds redacted and truncated captures. Redaction or truncation in a fixture can show up as answer drift, or stop the replay when a later step needs the missing value.
+
+Fixtures don't store inputs, so pass the input each case was recorded with. Any failure on the recorded side other than cancellation, such as a missing fixture step, a task that throws, the step budget or a loop limit, rejects as `Fixture replay failed: ...` with the original as `cause`. The live run's errors pass through unchanged. Cancellation and an invalid fixture reject with their own errors. Pass `devtools` to record the live run in the inspector, with linked traces when the live client comes from the same inspector. The replay is never recorded.
+
+```ts
+import { compareWithFixture, formatComparison } from "jev-devtools/flow";
+
+for (const { name, input, fixture } of savedCases) {
+  const comparison = await compareWithFixture(refundFlow, input, fixture, {
+    client: jev,
+    tolerance: 0.05,
+  });
+  // changed covers routing and steps; answers also catch drift above tolerance.
+  if (comparison.changed || comparison.answers.some((a) => a.changed))
+    console.log(`${name}\n${formatComparison(comparison)}`);
+}
+```
+
+Recording observer failures or mutations to run snapshots do not change comparison results. The comparison copies each resolved client response on capture, so an observer that retains a response cannot rewrite the captured answers or live fixture during later run updates.
+
+Save `comparison.liveFixture` to update the case. It is the fixture `flowFixture` builds from the live run, item steps included, with unredacted, untruncated responses, so review it before committing it.

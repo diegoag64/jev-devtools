@@ -29,6 +29,13 @@ export type {
 } from "../src/flow-protocol.js";
 export { replayClient, type FlowFixture } from "./replay.js";
 export { flowFixture, type BuiltFlowFixture } from "../src/flow-fixture.js";
+export {
+  compareWithFixture,
+  formatComparison,
+  type AnswerChange,
+  type ComparableFlow,
+  type FixtureComparison,
+} from "./compare.js";
 
 type Ast =
   | { op: "input" }

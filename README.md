@@ -224,6 +224,8 @@ const result = await review.run(input, { client: replayClient(fixture) });
 assert.equal(result.outcome, 'standard-review');
 ```
 
+Unreleased: not in npm 0.4.1 yet. `compareWithFixture` compares a live run's answers, routing and item steps with a saved fixture.
+
 [Full flow API guide](docs/flows.md) · [Flow recipe for coding agents](packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) · [Release availability](CHANGELOG.md)
 
 ## What you can inspect
