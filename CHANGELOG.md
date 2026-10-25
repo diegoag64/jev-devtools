@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC) | Highlights                                                                                                 |
 | ------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published   | Shared flow encoding; release tooling and durable receipts; lifecycle regression coverage.                 |
+| [Unreleased](#unreleased)                   | Not published   | Shared flow encoding; release tooling and receipts; lifecycle and nested browser regression coverage.      |
 | [0.5.2](#052--october-25-2026-experimental) | 2026-10-25      | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
 | [0.5.1](#051--october-25-2026-experimental) | 2026-10-25      | Task input validation and expression types; setup guidance; release and website maintenance.               |
 | [0.5.0](#050--october-25-2026-experimental) | 2026-10-25      | Replay and comparison; capture reliability/privacy; website and docs.                                      |
@@ -38,6 +38,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 - **Release publication tooling.** Add reusable docs artifact inspection, staging, and live readback helpers, plus a restricted local verification path for existing receipt edits. Replace self-referential pending-merge receipt text with durable PR links. Full CI, explicit publishing authorization, public APIs, and package behavior remain unchanged. Related to [#77](https://github.com/diegoag64/jev-devtools/issues/77). ([#100](https://github.com/diegoag64/jev-devtools/pull/100))
 
 - **Flow lifecycle regression coverage.** Assert exact loop body calls, retained iterations and latest completed state, and distinguish task timeouts from cancellation in recorded step errors. Runtime behavior and public APIs are unchanged. ([#95](https://github.com/diegoag64/jev-devtools/pull/95))
+
+- **Nested flow browser coverage.** Extend the existing sample verifier with map-item and loop-iteration navigation, request inspection, direct child clicks and selection ownership, maps inside iterations, and shared-camera retention through updates and reopening. No runtime or public API changes. ([#98](https://github.com/diegoag64/jev-devtools/pull/98))
 
 ## 0.5.2 — October 25, 2026 (experimental)
 

@@ -7,6 +7,10 @@ import { choice, noul } from "@typesafe-ai/sdk";
 import { defineJevFlow } from "jev-devtools/flow";
 import { createJevDevtools } from "jev-devtools/server";
 import {
+  nestedFlowSamples,
+  nestedFlowTransport,
+} from "./nested-flow-samples.mjs";
+import {
   refundFlow,
   parallelFlow,
   flowTransport,
@@ -123,7 +127,8 @@ const server = createServer((req, res) => {
             if (url.pathname === "/run") {
               const scenario = url.searchParams.get("scenario");
               const flow =
-                scenario === "flow-tasks"
+                nestedFlowSamples.get(scenario) ??
+                (scenario === "flow-tasks"
                   ? taskSelectionFlow
                   : scenario === "flow-warning"
                     ? warningFlow
@@ -135,7 +140,7 @@ const server = createServer((req, res) => {
                           ? parallelFlow
                           : scenario === "flow-large-choice"
                             ? largeChoice
-                            : refundFlow;
+                            : refundFlow);
               if (!flow || running.size > 5) throw new Error("Invalid flow");
               const controller = new AbortController();
               running.add(controller);
@@ -146,33 +151,40 @@ const server = createServer((req, res) => {
                     compression: false,
                     logLevel: "off",
                     retry: { maxRetries: 0 },
-                    fetch: scenario?.startsWith("scale-")
-                      ? async () =>
-                          Response.json({
-                            model: "sample",
-                            answers: { eligible: { type: "noul", noul: 0.9 } },
-                          })
-                      : scenario === "flow-large-choice"
-                        ? async (_url, init) => {
-                            const request = JSON.parse(String(init.body));
-                            return Response.json({
+                    fetch: nestedFlowSamples.has(scenario)
+                      ? nestedFlowTransport
+                      : scenario?.startsWith("scale-")
+                        ? async () =>
+                            Response.json({
                               model: "sample",
-                              answers: request.questions.category
-                                ? {
-                                    category: {
-                                      type: "choice",
-                                      choice: "category-1",
-                                      probabilities: Object.fromEntries(
-                                        Object.keys(categories).map(
-                                          (key, i) => [key, (150 - i) / 11325],
+                              answers: {
+                                eligible: { type: "noul", noul: 0.9 },
+                              },
+                            })
+                        : scenario === "flow-large-choice"
+                          ? async (_url, init) => {
+                              const request = JSON.parse(String(init.body));
+                              return Response.json({
+                                model: "sample",
+                                answers: request.questions.category
+                                  ? {
+                                      category: {
+                                        type: "choice",
+                                        choice: "category-1",
+                                        probabilities: Object.fromEntries(
+                                          Object.keys(categories).map(
+                                            (key, i) => [
+                                              key,
+                                              (150 - i) / 11325,
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    },
-                                  }
-                                : { eligible: { type: "noul", noul: 0.9 } },
-                            });
-                          }
-                        : flowTransport(scenario),
+                                      },
+                                    }
+                                  : { eligible: { type: "noul", noul: 0.9 } },
+                              });
+                            }
+                          : flowTransport(scenario),
                   },
                   { source: "sample", label: flow.definition.name },
                 );
