@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { maps, loops, genericReferences, unionSources, brandedReferences, brandedTemplates } from "./packed-resolved-templates.js";
+import { maps, loops, genericReferences, unionSources, booleans, brandedReferences, brandedTemplates } from "./packed-resolved-templates.js";
 
 const client = { systemOne() { throw new Error("Unexpected inference request"); } };
 
@@ -27,7 +27,7 @@ test("packed loop types and execution agree for gates, next states, and final st
   }
 });
 
-test("packed whole-reference helpers preserve generic values through maps and loops", async () => {
+test("packed generic helpers and scalar inference agree with execution", async () => {
   const { value } = await genericReferences.run({
     values: [1, 2], count: 2, records: [{ id: "first" }, { id: "second" }],
   }, { client });
@@ -40,6 +40,8 @@ test("packed whole-reference helpers preserve generic values through maps and lo
     const result = await unionSources(useReference).run({ values: [1, 2], state: 2 }, { client });
     assert.deepEqual(result.value, { mapped: [1, 2], kept: 2 });
   }
+  const result = await booleans.run(null, { client });
+  assert.deepEqual(result.value, { started: true, stopped: false, compared: [false], kept: false });
 });
 
 test("packed branded scalars remain numeric in whole references and literal templates", async () => {

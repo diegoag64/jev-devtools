@@ -137,6 +137,27 @@ export function unionSources(useReference: boolean) {
   });
 }
 
+function keepBoolean<T extends boolean>(
+  f: FlowBuilder<unknown>, initial: T,
+): FlowExpression<T> {
+  return f.loop("generic-boolean", {
+    initial, input: null, while: (s) => s.eq(initial).eq(false), maxIterations: 1,
+  }, (iteration) => iteration.input.get("state"));
+}
+
+export const booleans = defineJevFlow("boolean-inference", (f) => {
+  const started = f.loop("start", {
+    initial: false, input: null, while: (s) => s.eq(false), maxIterations: 1,
+  }, (iteration) => iteration.task("finish", { input: null, run: () => true }));
+  const stopped = f.loop("stop", {
+    initial: true, input: null, while: (s) => s.eq(true), maxIterations: 1,
+  }, (iteration) => iteration.task("finish", { input: null, run: () => false }));
+  const compared = f.map("compare", {
+    items: [false], input: null, maxItems: 1,
+  }, (item) => item.input.get("item").eq(true));
+  return f.output("done", { started, stopped, compared, kept: keepBoolean(f, false) });
+});
+
 type Count = number & { readonly __brand: "Count" };
 
 export const brandedReferences = defineJevFlow<{ count: Count; values: Count[] }>("branded-references", (f) => {
@@ -209,6 +230,10 @@ function invalidTemplates() {
     }, (iteration) => iteration.task("wrong", { input: null, run: () => ({ count: "text" }) }));
     // @ts-expect-error preserving brands must not make ordinary numbers branded
     const unearnedBrand: FlowExpression<Count> = f.input.get("count");
+    f.loop<false, null>("explicit-false", {
+      initial: false, input: null, while: (s) => s.eq(false), maxIterations: 1,
+    // @ts-expect-error an explicitly selected literal state must not widen
+    }, (iteration) => iteration.task("wrong", { input: null, run: () => true }));
     return f.output("done", { mapped, wrong });
   });
 }

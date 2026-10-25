@@ -448,9 +448,11 @@ export interface FlowBuilder<T> {
     id: string,
     options: {
       // Intersect arrays rather than I so inference preserves scalar brands.
+      // A boolean valueOf shape avoids contextually narrowing [false] to false[].
+      // Object wrappers still fail the runtime JSON validation.
       items:
         | FlowExpression<readonly I[]>
-        | (readonly I[] & readonly (string | number | boolean | null)[]);
+        | (readonly I[] & readonly (string | number | { valueOf(): boolean } | null)[]);
       input: C;
       concurrency?: number;
       maxItems: number;
@@ -483,12 +485,14 @@ export interface FlowBuilder<T> {
     id: string,
     // Infer S from the full initial value before restricting this overload to
     // references/scalars; intersecting S directly would strip scalar brands.
+    // Use the boolean shape to retain ordinary true/false widening. This is an
+    // inference constraint; object wrappers remain invalid JSON state at runtime.
     options: {
       initial: S | FlowExpression<S>;
       input: C;
       while: (state: FlowExpression<NoInfer<S>>) => FlowExpression<boolean>;
       maxIterations: number;
-    } & { initial: FlowExpression<S> | string | number | boolean | null },
+    } & { initial: FlowExpression<S> | string | number | { valueOf(): boolean } | null },
     build: (
       iteration: FlowBuilder<{ state: S; index: number; context: Resolved<C> }>,
     ) => FlowExpression<NoInfer<S>>,
