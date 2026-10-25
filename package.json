@@ -15,9 +15,9 @@
     "replay": "npm run build:package && node --import tsx scripts/replay-fixture.mjs",
     "build:package": "npm run build -w jev-devtools",
     "build": "npm run build:package && npm run build -w @jev-devtools/playground && npm run build:docs",
-    "check": "npm run check:runtime && node scripts/sync-readme-version.mjs --check && npm run build:package && npm run check --workspaces",
+    "check": "npm run check:runtime && npm run check:release-records && node scripts/sync-readme-version.mjs --check && npm run build:package && npm run check --workspaces",
     "sync:readme-version": "node scripts/sync-readme-version.mjs",
-    "test": "npm run build:package && npm test --workspaces && npm run test:release && npm run test:tooling",
+    "test": "npm run build:package && npm test --workspaces && npm run test:release && npm run test:tooling && npm run test:release-tools",
     "test:release": "node --test scripts/release.test.mjs",
     "verify:package": "node scripts/verify-package.mjs",
     "check:playground": "node scripts/check-playground.mjs",
@@ -37,7 +37,11 @@
     "verify:flows": "npm run build:package && node scripts/run-flow-verification.mjs",
     "verify:all": "node scripts/verify-all.mjs",
     "format": "node scripts/format.mjs --write",
-    "format:check": "node scripts/format.mjs"
+    "format:check": "node scripts/format.mjs",
+    "verify:receipts": "node scripts/verify-all.mjs --receipts",
+    "docs:publication": "node scripts/docs-publication.mjs",
+    "test:release-tools": "node --test scripts/docs-publication.test.mjs scripts/receipt-scope.test.mjs",
+    "check:release-records": "node scripts/receipt-scope.mjs"
   },
   "devDependencies": {
     "@types/node": "26.6.5",

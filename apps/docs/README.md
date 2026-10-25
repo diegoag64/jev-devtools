@@ -72,7 +72,7 @@ The hosted site is the primary human documentation. The original integration, fl
 
 - Local development and `npm run build:docs` use the working-tree changelog and emit a labeled `version.json` manifest. The sidebar links to its source package version and build details.
 - **Before an explicitly requested publication**, use a clean, reviewed commit on `main` and run `npm run build:docs:publish`. This rebuilds package declarations, rejects uncommitted/untracked changes, and embeds that checkout's changelog with commit-pinned source links. It does not fetch a different revision from GitHub. Verify the resulting artifact with `npm run verify -w @jev-devtools/docs` without rebuilding it.
-- Follow [the manual publishing policy](../../docs/docs-publishing.md) for triggers, checks, the version manifest, the existing public GPT Sites identity, publication receipts, and recovery. CI validates and retains previews; it never deploys. GitHub remains the editable source. Generated deployment checkouts/archives stay under ignored `benchmarks/results/docs/`.
+- Follow [the manual publishing policy](../../docs/docs-publishing.md) and its `docs:publication` inspection/staging/readback helpers for triggers, checks, the version manifest, the existing public GPT Sites identity, publication receipts, and recovery. CI validates and retains previews; it never deploys. GitHub remains the editable source. Generated deployment checkouts/archives stay under ignored `benchmarks/results/docs/`.
 
 ## GitHub header
 

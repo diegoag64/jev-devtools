@@ -130,6 +130,8 @@ See the [playground guide](apps/playground/README.md) for sample scenarios and t
 
 ## Verification details
 
+Use full verification for code, workflow, dependency, API/reference changes, version preparation, and every publication candidate. Existing receipt corrections can use the constrained path below.
+
 Install Playwright's Chromium once with `npx playwright install chromium --only-shell`, then run `npm run verify:all`. The runner executes formatting, every command below, drawer/flow browser checks, docs verification, and `git diff --check`, stopping on the first failure. It packs once and passes that exact archive to the independent package and Next.js consumers using the existing `JEV_VERIFY_TARBALL` support. It deliberately ignores release-specific tarball/version overrides; use the standalone consumer commands for release verification.
 
 Each run writes separate step logs and `summary.json` under a unique ignored `benchmarks/results/verification/` directory. The summary records the source commit, a SHA-256 of tracked and untracked non-ignored source contents, selected Node/npm/TypeScript versions, the archive hash, and each step's result. The runner rejects success when the source revision or content hash differs between the start and end of verification. It does not monitor intermediate edits: a file changed and restored during the run can escape detection. Keep the checkout unchanged while verification runs. Keep the recorded source hash with any claims made before committing; a report from an older source state is not evidence for new edits.
@@ -150,3 +152,13 @@ npm run verify:nextjs
 `check:playground` compiles the full interactive development UI into a temporary directory. The regular production build intentionally contains only a local-tool notice; it is not a hosted demo.
 
 After `npm run pack:devtools`, you can also run `npm install && npm run dev` inside `examples/react-vite` (port 4183, sample-only).
+
+### Receipt-only verification
+
+Use `npm run verify:receipts` for corrections to observed publication facts or PR links inside existing receipt sections. The command checks the entire branch/worktree against its merge base with `origin/main`, including committed, staged, unstaged, and non-ignored untracked changes. It rejects other paths, file/mode changes, release headings, compatibility/change lists, and instructions outside receipt sections. New release/deployment headings require the full path. The accepted regions are published-release preambles and existing publication-record bullets in `CHANGELOG.md`, published receipt bodies in `docs/releases.md`, and the history table/existing `Version N provenance` blocks in `docs/docs-publishing.md`.
+
+The structural gate cannot decide whether prose is truthful or whether a change inside a receipt alters upgrade guidance. Authors and reviewers must keep this mode limited to observed receipt facts; use `npm run verify:all` for other changes even when they fit inside an accepted region. The classifier is not an authorization or release-completion check.
+
+The lighter path validates local receipt links, formatting, release-tool regressions, the package build needed by docs declarations, docs type checks/tests, the complete docs build/browser suite, and `git diff --check`. Its report identifies `mode: "receipts"`, the comparison base/files, and source hashes; it makes no claim about skipped package/Next.js/drawer/flow tests. Keep source unchanged during verification. Full GitHub CI remains enabled for every PR and main push.
+
+If eligibility fails, run full verification; never narrow the comparison base or hide unrelated edits to force eligibility. Metadata-only PR title/body updates need no new source verification. Adding a PR link to source requires checking the resulting source, with this mode when eligible. Receipt-only edits do not trigger another docs deployment.
