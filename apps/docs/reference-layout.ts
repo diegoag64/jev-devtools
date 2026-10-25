@@ -57,7 +57,11 @@ export function layoutReference(html: string) {
     } else {
       output += closeEntry();
       entryOpen = true;
-      output += `<section class="api-entry" aria-labelledby="${id}"><header class="api-entry-header"><span class="api-kind">${referenceKind(id)}</span>${heading[0]}</header><div class="api-entry-body">${rest}`;
+      // Native anchors must target a stationary box, not a sticky descendant:
+      // upward jumps otherwise use the header's displaced position and skip content.
+      const titleId = `${id}-title`;
+      const title = heading[0].replace(`id="${id}"`, `id="${titleId}"`);
+      output += `<section id="${id}" class="api-entry" aria-labelledby="${titleId}"><header class="api-entry-header"><span class="api-kind">${referenceKind(id)}</span>${title}</header><div class="api-entry-body">${rest}`;
     }
   }
   return output + closeEntry() + closeGroup();

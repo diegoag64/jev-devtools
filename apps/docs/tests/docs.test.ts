@@ -100,10 +100,19 @@ const api = <Panel enabled defaultOpen={false} />;
 const ordinary = <Custom enabled defaultOpen={false} />;`,
       labels: ["Panel", "enabled", "defaultOpen"],
     },
+    {
+      language: "ts",
+      flags: "types",
+      source: `new JevRecorder(options?: CaptureOptions): JevRecorder;
+const options: FlowRunOptions = settings;
+const label = "CaptureOptions"; // FlowRunOptions is mentioned in a comment
+const ordinary: string = "hello";`,
+      labels: ["CaptureOptions", "FlowRunOptions"],
+    },
   ];
   for (const example of cases) {
     const result = await compile(
-      `\x60\x60\x60${example.language} api=core\n${example.source}\n\x60\x60\x60`,
+      `\x60\x60\x60${example.language} ${example.flags ?? "api=core"}\n${example.source}\n\x60\x60\x60`,
     );
     const labels = [
       ...result.html.matchAll(/aria-label="([^"]+): API help"/g),

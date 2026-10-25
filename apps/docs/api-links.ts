@@ -1,6 +1,9 @@
+import { typeHelp } from "./type-help.js";
+
 // Curated receiver-aware help titles map to stable glossary headings.
 // Property help uses its owning API, so generic names such as run are unambiguous.
 export const apiTargets: Record<string, string> = {
+  ...Object.fromEntries(Object.keys(typeHelp).map((name) => [name, name === "FlowExpression" ? "flowexpression" : `type-${name.toLowerCase()}`])),
   "defineJevFlow()": "definejevflow", "flow.input": "flow-input",
   "flow.jev()": "flow-jev", "flow.task()": "flow-task", "flow.branch()": "flow-branch",
   "flow.if()": "flow-if", "flow.output()": "flow-output", "flow.parallel()": "flow-parallel",

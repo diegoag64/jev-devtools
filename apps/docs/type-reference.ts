@@ -1,8 +1,9 @@
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { typeHelp } from "./type-help.js";
 
 const descriptions: Record<string, string> = {
-  JevDevtoolsProps: "Props for the React drawer: enablement, endpoint, initial open state, and display masking.",
+  ...Object.fromEntries(Object.entries(typeHelp).map(([name, help]) => [name, help.description])),
   Trace: "One captured request, its attempts, answers, timing, status, and capture warnings.",
   Snapshot: "Version 1 full trace history message.",
   StreamSnapshot: "Version 2 initial trace history with a revision cursor.",
@@ -10,22 +11,9 @@ const descriptions: Record<string, string> = {
   Json: "The JSON-safe shape used for captured data, which may be redacted or truncated.",
   AnswerView: "Captured SDK answer fields; available fields depend on the question type.",
   QuestionView: "Captured question type, instructions, and criteria.",
-  JevDevtoolsServerOptions: "Server adapter configuration, including CaptureOptions, access checks, and session selection.",
-  CaptureOptions: "Trace retention and captured-value redaction shared by the adapter and recorder.",
-  ClientMetadata: "Optional capture label and sample/live source label; neither changes the SDK transport.",
-  FlowBuilder: "The synchronous recipe-building interface. Its methods return references, not runtime results.",
-  FlowOutcome: "A named terminal outcome and optional value. The value is unknown; narrow it in your app.",
-  FlowRunOptions: "Required SDK-compatible client, optional observer, and cancellation signal.",
-  FlowTask: "Resolved task input, application callback, and optional timeout.",
-  FlowRequestFactory: "Input to resolve before synchronously constructing an SDK request.",
-  TaskContext: "Cancellation signal and identifiers passed as a task callback's second argument.",
-  Resolved: "Recursively replaces expression references in an input shape with their value types.",
-  FlowObserver: "Per-run capture hooks. Return undefined to skip recording; execution belongs to the runner.",
-  FlowDisplay: "Optional title and description for the inspector, not model instructions or business behavior.",
   FlowDefinition: "Static recipe graph, including its identity, name, and node metadata.",
   FlowRun: "Captured execution state, with per-step progress and optional outcome, value, or error.",
   FlowStep: "Captured step state, timing, decisions, trace linkage, and collection/loop progress.",
-  FlowFixture: "Unreleased. Saved Jev response bodies indexed by step ID; no original input or implementation.",
   BuiltFlowFixture: "Unreleased. Exported fixture plus missing capture IDs and warnings to inspect before saving.",
   AnswerChange: "Unreleased. One scalar answer-field comparison; delta exists only for finite numeric differences.",
   ComparableFlow: "Unreleased. A definition and executable run method accepted by compareWithFixture.",

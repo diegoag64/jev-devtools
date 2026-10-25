@@ -6,6 +6,7 @@ import { createTwoslasher } from "twoslash";
 import ts from "typescript";
 import { apiTargets } from "./api-links.js";
 import { apiHovers } from "./api-hovers.js";
+import { typeHovers } from "./type-help.js";
 
 const app = dirname(fileURLToPath(import.meta.url));
 const themes = { light: "github-light", dark: "github-dark" } as const;
@@ -38,6 +39,13 @@ export async function codeRenderer(base = "/") {
     const profile = flags.find((flag) => flag.startsWith("api="))?.slice(4);
     const annotations =
       checked || profile ? apiHovers(text, language, profile) : [];
+    if (flags.includes("types") && ["ts", "tsx", "typescript"].includes(language)) {
+      for (const candidate of typeHovers(text)) {
+        if (!annotations.some((item) => candidate.start < item.end && item.start < candidate.end))
+          annotations.push(candidate);
+      }
+      annotations.sort((a, b) => a.start - b.start);
+    }
     const popups: string[] = [];
     const lang = shiki.getLoadedLanguages().includes(language)
       ? language
@@ -95,7 +103,7 @@ export async function codeRenderer(base = "/") {
           defaultColor: false,
         });
         popups.push(
-          `<div id="${id}" class="type-popup" role="tooltip" hidden><div class="type-popup-label">${escape(help.title)}</div><p>${escape(help.description)}</p>${signature}${
+          `<div id="${id}" class="type-popup" role="tooltip" hidden><div class="type-popup-label">${escape(help.title)}</div><p>${escape(help.description)}</p>${help.importFrom ? `<p>Import from <code>${escape(help.importFrom)}</code></p>` : ""}${signature}${
             help.props
               ? `<dl>${Object.entries(help.props)
                   .map(

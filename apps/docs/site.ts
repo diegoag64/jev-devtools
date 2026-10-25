@@ -51,12 +51,12 @@ export async function compile(markdown: string, base = "/", reference = false) {
         return `<h${depth} id="${id}">${html}<a class="heading-link" href="#${id}" aria-label="Link to ${escape(title)}">#</a></h${depth}>`;
       },
       code({ text, lang }) {
-        return renderCode(text, lang);
+        return renderCode(text, reference ? `${lang ?? "text"} types` : lang);
       },
     },
   });
   const html = await renderer.parse(markdown);
-  return { html: reference ? layoutReference(html) : html, headings };
+  return { html, headings };
 }
 
 function renderOutline(headings: { id: string; title: string; depth: number }[], page: Page) {
@@ -125,6 +125,7 @@ export async function generate(
       (_, path: string) => `](${base}${path})`,
     );
     const { html, headings } = isChangelog ? renderChangelog(linked) : await compile(linked, base, page.slug === "api/reference");
+    const articleHtml = page.slug === "api/reference" ? layoutReference(html) : html;
     const changelogStatus = `Saved ${new Date().toISOString().slice(0, 10)} · ${remoteChangelog ? "GitHub main" : "working-tree copy"}.`;
     const editURL = isChangelog ? `${repo}/edit/main/CHANGELOG.md` : `${repo}/edit/main/apps/docs/content/${page.file}`;
     const file = resolve(generated, page.slug, "index.html");
@@ -152,7 +153,7 @@ export async function generate(
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="topbar"><a class="brand" href="${base}" aria-label="Jev DevTools home"><span class="brand-mark" aria-hidden="true">j<span>•</span></span><strong>jev<span> / devtools</span></strong></a><span class="docs-label">Documentation</span><button class="search-trigger" type="button" hidden><span>Search documentation</span><kbd>⌘ K</kbd></button>${githubLinks}<button class="theme-toggle" type="button" aria-label="Switch color theme" hidden>◐</button><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="sidebar" hidden>Menu</button></header>
 <div class="layout"><aside id="sidebar" class="sidebar"><div class="version">Working tree docs <span>pre-1.0</span></div><nav aria-label="Documentation">${nav}</nav></aside>
-<main id="main" tabindex="-1"><div class="breadcrumb">Docs <span>/</span> ${page.group}</div><div class="page-heading"><p class="eyebrow">${page.group}</p><h1>${page.title}</h1><p class="lead">${page.description}</p></div>${isChangelog ? `<div class="changelog-source"><a href="${changelogSource}">Source on GitHub ↗</a><p>${changelogStatus}</p></div>` : ""}<article${page.slug === "api/reference" ? ' class="api-reference"' : ""}>${html}</article><footer class="article-footer"><a href="${editURL}">Edit this page ↗</a><a href="${base}raw/${page.slug || "introduction"}.md">Read as Markdown</a></footer><nav class="page-nav" aria-label="Previous and next pages">${neighbour(pages[index - 1], "Previous")}${neighbour(pages[index + 1], "Next")}</nav><p class="site-note">Jev DevTools is an independent, open-source community project. It is not affiliated with TypeSafe AI.</p></main>
+<main id="main" tabindex="-1"><div class="breadcrumb">Docs <span>/</span> ${page.group}</div><div class="page-heading"><p class="eyebrow">${page.group}</p><h1>${page.title}</h1><p class="lead">${page.description}</p></div>${isChangelog ? `<div class="changelog-source"><a href="${changelogSource}">Source on GitHub ↗</a><p>${changelogStatus}</p></div>` : ""}<article${page.slug === "api/reference" ? ' class="api-reference"' : ""}>${articleHtml}</article><footer class="article-footer"><a href="${editURL}">Edit this page ↗</a><a href="${base}raw/${page.slug || "introduction"}.md">Read as Markdown</a></footer><nav class="page-nav" aria-label="Previous and next pages">${neighbour(pages[index - 1], "Previous")}${neighbour(pages[index + 1], "Next")}</nav><p class="site-note">Jev DevTools is an independent, open-source community project. It is not affiliated with TypeSafe AI.</p></main>
 <aside class="toc"><nav aria-label="On this page"><p>On this page</p>${renderOutline(headings, page)}</nav></aside></div>
 <dialog id="search-dialog" aria-labelledby="search-title"><div class="search-header"><label id="search-title" for="search-input">Search the docs</label><button type="button" class="close-search" aria-label="Close search">Esc</button></div><input id="search-input" type="search" placeholder="Try ‘Next.js’ or ‘createClient’" autocomplete="off"><p id="search-status" role="status"></p><ul id="search-results"></ul></dialog>
 <script type="module" src="${source("client.ts")}"></script></body></html>`;

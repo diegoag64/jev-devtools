@@ -389,7 +389,7 @@ try {
   await page.screenshot({ path: resolve(evidence, "flow-method-interfaces.png") });
   await page.locator(".code-references").getByRole("link", { name: "flow.map()", exact: true }).click();
   await page.waitForURL("**/api/reference/#flow-map");
-  assert.equal(await page.locator("#flow-map").textContent(), "flow.map#");
+  assert.equal(await page.locator("#flow-map").getByRole("heading", { level: 3 }).textContent(), "flow.map#");
   await page.getByRole("button", { name: "Search documentation" }).click();
   await page.getByRole("searchbox").fill("flow.task");
   await page.locator("#search-results").getByRole("link", { name: "flow.task API reference", exact: true }).focus();
@@ -430,6 +430,73 @@ try {
   const activeBounds = await outline.locator('[aria-current="location"]').boundingBox();
   assert.ok(activeBounds.y >= 76 && activeBounds.y + activeBounds.height <= 1050,
     "Long groups keep the active method visible in the outline");
+  // Upward navigation must target the stationary card, not its displaced
+  // sticky heading. Check both sidebar links and native scrollIntoView.
+  const assertTypeStartVisible = async (reader) => {
+    const entry = reader.getByRole("region", { name: /^Type: JevDevtoolsProps/ });
+    const header = await entry.locator("header").boundingBox();
+    const description = await entry.locator("p").first().boundingBox();
+    const topbar = await reader.locator(".topbar").boundingBox();
+    assert.ok(description.y >= Math.max(header.y + header.height, topbar.y + topbar.height)
+      && description.y + description.height < reader.viewportSize().height,
+      "Upward type navigation reveals the description below both headers");
+  };
+  for (const viaSidebar of [true, false, true]) {
+    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await expectLocation("#supporting-structural-types");
+    if (viaSidebar) {
+      await outline.locator("summary").filter({ hasText: "Public types" }).click();
+      await outline.getByRole("link", { name: "JevDevtoolsProps", exact: true }).click();
+    } else {
+      await page.locator("#type-jevdevtoolsprops").evaluate((target) => target.scrollIntoView({ block: "start" }));
+    }
+    await expectLocation("#type-jevdevtoolsprops");
+    await assertTypeStartVisible(page);
+  }
+  await page.screenshot({ path: resolve(evidence, "type-anchor-after.png") });
+
+  await page.goto(origin + base + "api/reference/#jevrecorder");
+  const recorderEntry = page.getByRole("region", { name: /^JevRecorder/ });
+  const signature = recorderEntry.locator(".code-block").filter({ hasText: "new JevRecorder(options?" });
+  const captureToken = signature.getByRole("button", { name: "CaptureOptions: API help", exact: true });
+  await captureToken.hover();
+  await tooltip.waitFor();
+  assert.match(await tooltip.innerText(), /limit[\s\S]*50[\s\S]*redact/);
+  assert.ok((await tooltip.innerText()).includes("jev-devtools/server"));
+  await page.screenshot({ path: resolve(evidence, "capture-options-help.png") });
+  await page.keyboard.press("Escape");
+  await captureToken.focus();
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Enter");
+  await tooltip.waitFor();
+  await page.keyboard.press("Escape");
+  await signature.getByRole("button", { name: "Copy code", exact: true }).click();
+  assert.equal((await page.evaluate(() => navigator.clipboard.readText())).trim(),
+    "new JevRecorder(options?: CaptureOptions): JevRecorder", "Type help stays out of copied signatures");
+  assert.equal(await signature.getByRole("button", { name: "options: API help", exact: true }).count(), 0);
+
+  await page.goto(origin + base + "api/reference/#type-jevdevtoolsserveroptions");
+  const serverType = page.getByRole("region", { name: /^Type: JevDevtoolsServerOptions/ });
+  await serverType.getByText("Exact TypeScript declaration", { exact: true }).click();
+  await serverType.getByRole("button", { name: "CaptureOptions: API help", exact: true }).hover();
+  await tooltip.waitFor();
+  assert.match(await tooltip.innerText(), /captured copy/);
+  await page.keyboard.press("Escape");
+
+  const typeTouchContext = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const typeTouch = await typeTouchContext.newPage();
+  await typeTouch.goto(origin + base + "api/reference/#jevrecorder");
+  await typeTouch.getByRole("region", { name: /^JevRecorder/ }).getByRole("button", { name: "CaptureOptions: API help", exact: true }).tap();
+  const typeTouchPopup = typeTouch.locator('.type-popup:not([hidden])');
+  await typeTouchPopup.waitFor();
+  const typeBox = await typeTouchPopup.boundingBox();
+  assert.ok(typeBox.x >= 0 && typeBox.x + typeBox.width <= 390 && typeBox.y >= 0 && typeBox.y + typeBox.height <= 844);
+  await typeTouch.screenshot({ path: resolve(evidence, "capture-options-help-mobile.png") });
+  await typeTouch.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+  await typeTouch.locator("#type-jevdevtoolsprops").evaluate((target) => target.scrollIntoView({ block: "start" }));
+  await assertTypeStartVisible(typeTouch);
+  await typeTouchContext.close();
+
   await page.goto(origin + base + "api/reference/#flow-task");
   await expectLocation("#flow-task");
   await page.screenshot({ path: resolve(evidence, "api-glossary.png") });
@@ -512,6 +579,9 @@ try {
   const contract = readable.getByRole("region", { name: /^Type: TaskContext/ });
   await contract.getByText("Exact TypeScript declaration", { exact: true }).click();
   assert.ok((await contract.innerText()).includes("executionId"));
+  await readable.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+  await readable.locator("#type-jevdevtoolsprops").evaluate((target) => target.scrollIntoView({ block: "start" }));
+  await assertTypeStartVisible(readable);
   for (const route of ["api/reference/", "guides/flow-basics/"]) {
     await readable.goto(origin + base + route);
     assert.ok(await readable.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${route} fits mobile without JS`);

@@ -3,6 +3,7 @@ export type Help = {
   signature: string;
   description: string;
   props?: Record<string, string>;
+  importFrom?: string;
 };
 
 // Authored API summaries, not replacement declarations.
