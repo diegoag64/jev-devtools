@@ -39,6 +39,8 @@ Install from npm:
 pnpm add jev-devtools @typesafe-ai/sdk
 ```
 
+Use ESM imports, matching React/React DOM **18.x or 19.x**, Node **22.12+**, and TypeSafe SDK **0.7.x**. TypeScript consumers need **5.4+** and compatible React/Node types. React and React DOM are required package peers even for server-only installations. See [compatibility and all public imports](https://github.com/diegoag64/jev-devtools/blob/main/docs/integration.md#compatibility-and-public-imports); `/server` and `/flow` run only on Node.
+
 To try local changes before a future release:
 
 ```sh

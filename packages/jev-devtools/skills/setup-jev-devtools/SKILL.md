@@ -17,7 +17,21 @@ Inspect the app's package manager/lockfile, React and Node versions, root compon
 - **React with a Node backend, including Vite:** read [references/react-node.md](references/react-node.md). A browser-only app needs a Node server for Jev; the Vite development-server option is local only.
 - **Other Node frameworks:** use the Web Request/Response or middleware API described in the React/Node reference and verify that framework's routing. Do not assume the Next.js recipe applies to Pages Router. Edge runtimes and cross-process/serverless history aggregation are unsupported.
 
-Install `jev-devtools` using the app's existing package manager (npm: `npm install jev-devtools @typesafe-ai/sdk`; pnpm: `pnpm add jev-devtools @typesafe-ai/sdk`; Yarn: `yarn add jev-devtools @typesafe-ai/sdk`; Bun: `bun add jev-devtools @typesafe-ai/sdk`). `@typesafe-ai/sdk` is a peer dependency: keep the app's existing SDK version when it satisfies the peer range. Install in the workspace(s) that actually import it. It is a regular dependency when application modules import it, even though capture/display are development-only. React 18/19 and Node 22.12+ are required. Do not replace the app's framework or upgrade unrelated dependencies to force compatibility.
+Install `jev-devtools` using the app's existing package manager (npm: `npm install jev-devtools @typesafe-ai/sdk`; pnpm: `pnpm add jev-devtools @typesafe-ai/sdk`; Yarn: `yarn add jev-devtools @typesafe-ai/sdk`; Bun: `bun add jev-devtools @typesafe-ai/sdk`). `@typesafe-ai/sdk` is a peer dependency: keep the app's existing SDK version when it satisfies the peer range. Install in the workspace(s) that actually import it. It is a regular dependency when application modules import it, even though capture/display are development-only. Do not replace the app's framework or upgrade unrelated dependencies to force compatibility.
+
+### Consumer compatibility (0.5.0)
+
+| Requirement | Contract |
+| --- | --- |
+| Node.js | 22.12+ for the adapter and flow execution; Edge runtimes are unsupported. |
+| React / React DOM | Matching 18.x or 19.x versions; both remain required peers even for server-only installations. |
+| TypeSafe SDK | `>=0.7.0 <0.8.0`; verified with 0.7.0. |
+| TypeScript | 5.4+ for the public declarations; verified with 5.4.5. The flow API uses built-in `NoInfer`, which 5.3.3 cannot resolve. |
+| Modules | ESM imports with export-aware `Bundler` or `NodeNext` resolution and a matching module setting. There is no CommonJS `require` entry. |
+
+Use React types matching the app's React major, Node types compatible with its runtime/compiler, and DOM types for Web `Request`/`Response` APIs. The packed declarations passed strict checks without `skipLibCheck` using TypeScript 5.4.5, SDK 0.7.0, React 19.3.1, `@types/react` 19.3.0, and `@types/node` 22.10.2. Frameworks and newer type packages can require a newer compiler; preserve compatible app dependencies rather than downgrading to this verification baseline.
+
+Public entries are `jev-devtools` (React and browser-safe capture helpers/types), Node-only `jev-devtools/server` and `jev-devtools/flow`, and optional `jev-devtools/styles.css`. Internal paths and `jev-devtools/package.json` are not exported. Inspect the installed version through the package manager, and read declaration/skill files from disk rather than importing internal package paths. Always supply the browser `origin` to the server adapter, including when `enabled: false`.
 
 ## Optional connected flow API
 

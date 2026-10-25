@@ -1,6 +1,6 @@
 # Jev DevTools
 
-> React request inspector for TypeSafe Jev, with a Node server adapter. Development-only opt-in; React 18/19, Node 22.12+. Custom drawer; TanStack Virtual is used internally for Questions.
+> React request inspector for TypeSafe Jev, with a Node server adapter. Development-only opt-in; React/React DOM 18/19, Node 22.12+, TypeSafe SDK 0.7.x, ESM imports, and TypeScript 5.4+ for declarations. Custom drawer; TanStack Virtual is used internally for Questions.
 
 ## Website and documentation
 
@@ -30,7 +30,7 @@ Use the installed `lib/flow/index.d.ts` as the version-matched API contract. Def
 ## Details and examples
 
 - [Changelog](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/CHANGELOG.md): Published release history and merged, unreleased changes; check before assuming a feature is in the installed version.
-- [Integration API and access controls](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/docs/integration.md)
+- [Integration API, compatibility, public imports, and access controls](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/docs/integration.md)
 - [Next.js details](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/docs/nextjs.md)
 - [Vite sample app](https://github.com/diegoag64/jev-devtools/tree/main/examples/react-vite)
 - [Next.js sample app](https://github.com/diegoag64/jev-devtools/tree/main/examples/nextjs-app)
