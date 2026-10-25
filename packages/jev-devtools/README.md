@@ -4,7 +4,7 @@
 
 A React drawer and Node adapter for inspecting TypeSafe Jev requests with animated diagrams. Includes request history, context, questions, typed answers, transport attempts, and raw snapshots.
 
-**Source version: 0.5.2 — pending publication.** npm currently provides 0.5.1. Check the [release history](https://github.com/diegoag64/jev-devtools/blob/main/CHANGELOG.md) for compatibility notes. To try this release candidate, install the local archive below. **Experimental (pre-1.0).** React 18/19 and Node 22.12+ are supported. APIs may change before 1.0. Verification uses sample responses through the real TypeSafe SDK, not live inference.
+**Published version: [0.5.2](https://www.npmjs.com/package/jev-devtools/v/0.5.2).** The default npm install resolves to 0.5.2. Check the [release history](https://github.com/diegoag64/jev-devtools/blob/main/CHANGELOG.md) for compatibility notes. To try newer source changes, install the local archive below. **Experimental (pre-1.0).** React 18/19 and Node 22.12+ are supported. APIs may change before 1.0. Verification uses sample responses through the real TypeSafe SDK, not live inference.
 
 [Website](https://jevtools.dev/) · [Documentation](https://docs.jevtools.dev/) · [Quick start](https://docs.jevtools.dev/getting-started/) · [API reference](https://docs.jevtools.dev/api/reference/) · [Release history](https://docs.jevtools.dev/changelog/)
 
