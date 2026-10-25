@@ -345,7 +345,7 @@ main {
 .toc a {
   display: block;
   padding: 5px 9px;
-  border-radius: 5px;
+  border-radius: 0 5px 5px 0;
   color: var(--muted);
   text-decoration: none;
   line-height: 1.5;
