@@ -1,14 +1,10 @@
 import type { HeroEffect } from "./types";
-import { prism } from "./effects/prism";
-import { brushed } from "./effects/brushed";
-import { crystal } from "./effects/crystal";
-import { opal } from "./effects/opal";
-import { interference } from "./effects/interference";
+import { createPrism, prism } from "./effects/prism";
 
 export const effects: HeroEffect[] = [
-  { id: "prism", name: "Prism foil · baseline", description: "Your original favorite, unchanged: shifting iridescent facets in blue, violet, rose, and champagne.", paint: prism },
-  { id: "brushed", name: "Brushed foil", description: "A softer metallic finish with fine directional grain and a slow, narrow reflection.", paint: brushed },
-  { id: "crystal", name: "Cut crystal", description: "Angular triangular facets catch a moving light, with tiny glints along their edges.", paint: crystal },
-  { id: "opal", name: "Opal tides", description: "Curved mother-of-pearl contours roll through the letters in pastel, iridescent shells.", paint: opal },
-  { id: "interference", name: "Interference silk", description: "Two crossing color waves form liquid thin-film bands, like light on a soap bubble.", paint: interference },
+  { id: "prism", name: "Original prism · baseline", description: "The original blue, violet, rose, and champagne palette. Every option uses this exact effect and motion.", paint: prism },
+  { id: "rose", name: "Rose quartz", description: "Pink, orchid, and soft rose with a pearly blush reflection. Close to the site's existing accent.", paint: createPrism({ base: "#edb9db", hueStart: 290, hueRange: 60, highlight: "#fff0f6" }) },
+  { id: "ice", name: "Glacier blue", description: "Aquamarine, icy blue, and periwinkle with a cool white reflection.", paint: createPrism({ base: "#b7d9ed", hueStart: 175, hueRange: 65, highlight: "#edfaff" }) },
+  { id: "copper", name: "Peach champagne", description: "Coral, peach, and pale gold with a warm champagne reflection.", paint: createPrism({ base: "#eec2b0", hueStart: 335, hueRange: 70, highlight: "#fff1dc" }) },
+  { id: "jade", name: "Jade & gold", description: "Pale gold, mint, and jade with a soft ivory reflection.", paint: createPrism({ base: "#cddcb2", hueStart: 40, hueRange: 125, highlight: "#fbffe8" }) },
 ];

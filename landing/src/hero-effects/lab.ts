@@ -5,7 +5,7 @@ import { mountHeroEffect } from "./renderer";
 export function mountHeroEffectLab() {
   const target = document.querySelector<HTMLElement>(".hero h1 > span");
   if (!target) return;
-  const key = "jevtools:hero-effect-lab:foil";
+  const key = "jevtools:hero-effect-lab:prism-palettes";
   let saved = "";
   try { saved = sessionStorage.getItem(key) ?? ""; } catch { /* Storage can be unavailable in private contexts. */ }
   let selected = Math.max(0, effects.findIndex(effect => effect.id === saved));
@@ -15,7 +15,7 @@ export function mountHeroEffectLab() {
   panel.className = "hero-lab";
   panel.setAttribute("aria-label", "Temporary hero effect lab");
   panel.innerHTML = `
-    <header><div><strong>Hero effect lab</strong><br><span>Foil collection · local development</span></div><button type="button" data-collapse aria-expanded="true" aria-controls="hero-lab-body">Hide</button></header>
+    <header><div><strong>Hero effect lab</strong><br><span>Prism colors · local development</span></div><button type="button" data-collapse aria-expanded="true" aria-controls="hero-lab-body">Hide</button></header>
     <div id="hero-lab-body">
       <label class="sr-only" for="hero-lab-effect">Hero color effect</label>
       <select id="hero-lab-effect">${effects.map((effect, i) => `<option value="${i}">${i + 1} / ${effects.length} — ${effect.name}</option>`).join("")}</select>
@@ -23,7 +23,7 @@ export function mountHeroEffectLab() {
       <div class="hero-lab-row"><button type="button" data-previous aria-label="Previous hero effect">Previous</button><button type="button" data-pause>Pause</button><button type="button" data-next aria-label="Next hero effect">Next</button></div>
       <div class="hero-lab-row"><label for="hero-lab-speed">Speed</label><input id="hero-lab-speed" type="range" min="0.25" max="2" value="1" step="0.25"><output for="hero-lab-speed">1×</output></div>
       <div class="hero-lab-row"><label><input type="checkbox" data-cycle>Cycle every 10 seconds</label></div>
-      <small>Only the lettering changes. Hide this panel for a clean view.</small>
+      <small>Same facets and motion. Only the colors change.</small>
     </div>`;
   document.body.append(panel);
   const events = new AbortController();

@@ -32,7 +32,7 @@ The hero’s pink phrase uses a CSS-only pearlescent finish: overlapping rose, l
 
 ## Temporary hero effect lab
 
-Local development includes a collapsible picker for five independent color effects: the unchanged Prism foil baseline, Brushed foil, Cut crystal, Opal tides, and Interference silk. It supports cycling, pause, speed, and an optional automatic preview. It is excluded from production builds. [Cleanup and keeping a winner](src/hero-effects/README.md) requires removing one import block and either deleting the folder or retaining only the chosen painter and small renderer.
+Local development includes a collapsible picker for five color palettes for the same Prism foil effect: Original prism, Rose quartz, Glacier blue, Peach champagne, and Jade & gold. Geometry and animation stay identical across palettes. It supports cycling, pause, speed, and an optional automatic preview. It is excluded from production builds. [Cleanup and keeping a winner](src/hero-effects/README.md) requires removing one import block and either deleting the folder or retaining only the chosen painter and small renderer.
 
 ## Section themes
 
