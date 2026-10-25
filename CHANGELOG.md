@@ -25,9 +25,11 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **Verified 0.5.0 docs publication.** Publish the reviewed release guidance as GPT Sites version 18 and record its canonical commit, hosting deployment, and matching live version/changelog checks. Package bytes and the landing Site are unchanged.
+
 - **README hero.** Replace the root README's looping demo section with a static browser capture of the landing page heading and illustrative hierarchical flow, linked to the website. Include a reproducible capture script. Package APIs and the npm README are unchanged. ([#74](https://github.com/diegoag64/jev-devtools/pull/74))
 
-- **0.5.0 publication records.** Record verified npm publication, archive integrity, registry consumers, and the recovered GitHub release/tag. Update mutable documentation to describe the published APIs. Manual docs publication remains pending. ([#75](https://github.com/diegoag64/jev-devtools/pull/75))
+- **0.5.0 publication records.** Record verified npm publication, archive integrity, registry consumers, and the recovered GitHub release/tag. Update mutable documentation to describe the published APIs. Docs version 18 was subsequently deployed and verified; see the publication receipt. ([#75](https://github.com/diegoag64/jev-devtools/pull/75))
 
 #### Maintenance
 
@@ -35,7 +37,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## 0.5.0 — October 25, 2026 (experimental)
 
-**[Published on npm](https://www.npmjs.com/package/jev-devtools/v/0.5.0)** at 06:30:45.073 UTC from `64efa4c494a83207e94c67b42f6744802db18c11`, after [PR #73](https://github.com/diegoag64/jev-devtools/pull/73). This release adds replay and fixture comparison, capture reliability/privacy improvements, and the website and docs. npm integrity/provenance and fresh registry consumers are verified. The [GitHub release](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.0) and exact-commit tag were completed at 06:33:23 UTC after recovering from a missing verification dependency in the workflow. Both Latest designations are verified. See the [release record](docs/releases.md#release-050--published-october-25-2026); manual docs publication remains pending.
+**[Published on npm](https://www.npmjs.com/package/jev-devtools/v/0.5.0)** at 06:30:45.073 UTC from `64efa4c494a83207e94c67b42f6744802db18c11`, after [PR #73](https://github.com/diegoag64/jev-devtools/pull/73). This release adds replay and fixture comparison, capture reliability/privacy improvements, and the website and docs. npm integrity/provenance and fresh registry consumers are verified. The [GitHub release](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.0) and exact-commit tag were completed at 06:33:23 UTC after recovering from a missing verification dependency in the workflow. Both Latest designations are verified. See the [release record](docs/releases.md#release-050--published-october-25-2026); docs version 18 was deployed on October 25 at 06:45:14 UTC, with its live manifest verified against reviewed source `c22f7695ac83333fed7b34ea3487ed6b86e4c714`.
 
 ### Compatibility and upgrade
 
