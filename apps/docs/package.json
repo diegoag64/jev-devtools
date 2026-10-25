@@ -1,0 +1,23 @@
+{
+  "name": "@jev-devtools/docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "check": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "verify": "node scripts/verify.mjs && node scripts/verify-rendering.mjs",
+    "build:publish": "vite build --mode publication"
+  },
+  "devDependencies": {
+    "@shikijs/twoslash": "4.5.0",
+    "@typesafe-ai/sdk": "0.7.0",
+    "jev-devtools": "file:../../packages/jev-devtools",
+    "marked": "18.1.1",
+    "shiki": "4.5.0",
+    "twoslash": "0.3.9",
+    "typescript": "6.0.3"
+  }
+}
