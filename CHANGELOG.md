@@ -34,6 +34,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Changed
 
+- **Simpler diagram footer.** Keep only the pan, zoom, and fit instructions below request diagrams at all screen widths. ([#92](https://github.com/diegoag64/jev-devtools/pull/92))
+
 - **Mobile request navigation.** Show a full-height, searchable request list on small screens; selecting a request opens its details with an **All requests** button to switch back. Retain search, status filters, and selection while navigating, and keep the desktop split view. Hide the selected-step summary beside **Show details** on mobile. Public APIs are unchanged. ([#92](https://github.com/diegoag64/jev-devtools/pull/92))
 
 - **Flow canvas boundary.** Move the step selector beside **Copy fixture** in the run header and darken the diagram viewport so its pan/zoom area is easier to distinguish. Float zoom, Fit, and Focus controls in the canvas’s top-right corner to free vertical space. Header and canvas controls wrap in narrow drawers; public APIs and zoom behavior are unchanged. ([#92](https://github.com/diegoag64/jev-devtools/pull/92))

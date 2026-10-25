@@ -806,10 +806,9 @@
   flex-shrink: 0;
   padding: 8px 16px;
   margin: 0;
-}
-.jev-devtools .lab-gesture-hint {
-  display: block;
   color: #c6a7bd;
+  font-size: 11px;
+  line-height: 1.6;
 }
 .jev-devtools .lab-flow-canvas {
   position: absolute;
