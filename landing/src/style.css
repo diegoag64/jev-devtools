@@ -354,10 +354,6 @@ nav a:hover,
   padding-block: var(--section-space);
 }
 .section-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 30px;
   margin-bottom: 35px;
 }
 .section-heading h2,
@@ -366,11 +362,6 @@ nav a:hover,
   letter-spacing: -1.5px;
   font-size: 38px;
   line-height: 1.15;
-}
-.section-heading > p {
-  font-size: 13px;
-  line-height: 1.8;
-  color: var(--muted);
 }
 .primitive-grid {
   display: grid;
@@ -543,12 +534,6 @@ nav a:hover,
   top: 8px;
   font: 6px var(--mono);
   color: #a98baf;
-}
-.primitive-disclaimer {
-  font: 9px var(--mono);
-  color: #95829b;
-  text-align: right;
-  margin-top: 14px;
 }
 .integration {
   display: grid;
@@ -900,12 +885,7 @@ nav a:hover,
     min-width: 930px;
   }
   .section-heading {
-    display: block;
     margin-bottom: 27px;
-  }
-  .section-heading > p {
-    margin-top: 18px;
-    font-size: 12px;
   }
   .section-heading h2 {
     font-size: 31px;
@@ -925,11 +905,6 @@ nav a:hover,
   .primitive > p {
     font-size: 10px;
     min-height: 32px;
-  }
-  .primitive-disclaimer {
-    font-size: 8px;
-    text-align: left;
-    line-height: 1.6;
   }
   .score-chart {
     gap: 9px;

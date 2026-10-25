@@ -26,7 +26,7 @@ export const flowApiShowcase = `
 <section id="flow-api" class="flow-api-section section-band" data-theme="plum" aria-labelledby="flow-api-title">
   <div class="wrap">
   <div class="product-heading">
-    <h2 id="flow-api-title">Write the flow.<br /><span>Get the diagram.</span></h2>
+    <h2 id="flow-api-title">Code to diagrams<br /><span>via the Flow API</span></h2>
     <div><p>The Flow API turns an explicit TypeScript definition into an inspectable graph. Combine System One requests with your functions, branches, parallel work, maps, and loops—then see how each run unfolded.</p><a class="text-link" href="${flowGuide}">Explore the Flow API</a></div>
   </div>
   <div class="api-comparison">
