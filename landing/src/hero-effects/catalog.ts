@@ -8,5 +8,5 @@ export const effects: HeroEffect[] = [
   { id: "ice", name: "Glacier blue", description: "Aquamarine, icy blue, and periwinkle with a cool white reflection.", paint: createPrism({ base: "#b7d9ed", hueStart: 175, hueRange: 65, highlight: "#edfaff" }) },
   { id: "copper", name: "Peach champagne", description: "Coral, peach, and pale gold with a warm champagne reflection.", paint: createPrism({ base: "#eec2b0", hueStart: 335, hueRange: 70, highlight: "#fff1dc" }) },
   { id: "jade", name: "Jade & gold", description: "Pale gold, mint, and jade with a soft ivory reflection.", paint: jade },
-  { id: "prism-jade", name: "Prism & jade drift", description: "Original prism slowly melts into Jade & gold and back. A gentle 48-second cycle with the same facet motion.", paint: prismJade },
+  { id: "prism-jade", name: "Prism & jade sweep", description: "Jade spreads in from the left; the original prism returns from the right. A rippling edge keeps both colors vivid.", paint: prismJade },
 ];
