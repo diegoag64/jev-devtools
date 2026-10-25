@@ -25,7 +25,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Changed
 
-- **Landing navigation.** Remove the "Explore the flows" header link and keep Docs visible on mobile. Package APIs are unchanged.
+- **Landing navigation.** Remove the "Explore the flows" header link and keep Docs visible on mobile. Package APIs are unchanged. ([#78](https://github.com/diegoag64/jev-devtools/pull/78))
 
 #### Documentation
 
