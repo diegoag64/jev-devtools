@@ -1942,3 +1942,121 @@
     monospace;
   text-align: left;
 }
+
+/* Result lines reserve height so the panel doesn't shift between states. */
+.jev-devtools .flow-what-if {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border: 1px dashed #49324b;
+  border-radius: 6px;
+  background: #211723;
+  max-width: 720px;
+}
+.jev-devtools .flow-what-if-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.jev-devtools .flow-what-if-thresholds {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0;
+}
+.jev-devtools .flow-what-if-thresholds label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.jev-devtools .flow-what-if-thresholds code {
+  color: #f2d7eb;
+  overflow-wrap: anywhere;
+}
+.jev-devtools .flow-what-if-value {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+.jev-devtools .flow-what-if-value input {
+  width: 96px;
+  padding: 5px 8px;
+}
+.jev-devtools .flow-what-if-value input[aria-invalid="true"] {
+  border-color: #f17c78;
+}
+.jev-devtools .flow-what-if-result {
+  display: block;
+  min-height: 6.5em;
+  padding-top: 8px;
+  border-top: 1px solid #49324b;
+}
+.jev-devtools .flow-what-if-result p {
+  min-height: 1.5em;
+  margin: 2px 0;
+}
+.jev-devtools .flow-what-if-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.jev-devtools .flow-what-if-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 4px;
+}
+.jev-devtools .flow-what-if-strip svg {
+  flex: 0 0 auto;
+  overflow: visible;
+}
+.jev-devtools .flow-what-if-strip small {
+  color: #a89bac;
+  font-size: 11px;
+}
+.jev-devtools .flow-what-if-strip .axis {
+  stroke: #302033;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.jev-devtools .flow-what-if-strip .threshold {
+  stroke: #e551ba;
+  stroke-width: 2;
+}
+.jev-devtools .flow-what-if-strip .captured {
+  stroke: #a89bac;
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+  opacity: 0.6;
+}
+.jev-devtools .flow-what-if-strip circle {
+  stroke-width: 1.5;
+}
+.jev-devtools .flow-what-if-strip .pass {
+  fill: #f2d7eb;
+  stroke: #f2d7eb;
+}
+.jev-devtools .flow-what-if-strip .fail {
+  fill: #211723;
+  stroke: #a89bac;
+}
+.jev-devtools .flow-what-if-strip .neutral {
+  fill: #302033;
+  stroke: #a89bac;
+}
+.jev-devtools .flow-what-if-strip .current {
+  stroke: #e551ba;
+  stroke-width: 2;
+}
+.jev-devtools .flow-what-if-strip text {
+  fill: #a89bac;
+  font-size: 9px;
+}
+.jev-devtools .flow-what-if-strip .threshold-caret {
+  fill: #e551ba;
+}

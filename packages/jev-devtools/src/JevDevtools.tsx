@@ -9,6 +9,7 @@ import {
 } from "react";
 import { TraceDiagram } from "./TraceDiagram.js";
 import type { Trace } from "./protocol.js";
+import { useStableArray } from "./use-stable-array.js";
 import { JsonBlock, findImage } from "./TraceContent.js";
 const FlowOverview = lazy(() =>
   import("./FlowOverview.js").then((module) => ({
@@ -224,6 +225,14 @@ export function JevPanel({
   const [selectedRun, setSelectedRun] = useState<string>();
   const run = flows.runs.find((r) => r.id === selectedRun) ?? flows.runs[0];
   const definition = flows.definitions.find((d) => d.id === run?.definitionId);
+  // Keep identity while this definition's runs are unchanged, so updates to
+  // other flows don't rerender the pinned overview.
+  const runsOfDefinition = useStableArray(
+    useMemo(
+      () => flows.runs.filter((r) => r.definitionId === run?.definitionId),
+      [flows.runs, run?.definitionId],
+    ),
+  );
   const [selected, setSelected] = useState<string>();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
@@ -341,6 +350,7 @@ export function JevPanel({
           <FlowOverview
             key={run.id}
             run={run}
+            runs={runsOfDefinition}
             definition={definition}
             traces={traces}
           />
