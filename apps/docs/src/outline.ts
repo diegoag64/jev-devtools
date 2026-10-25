@@ -11,12 +11,23 @@ const progressTracks = groups.flatMap((group) => {
   const section = link && document.getElementById(decodeURIComponent(link.hash.slice(1)))?.closest(".reference-group");
   return track && section ? [{ track, section }] : [];
 });
+const stickyHeaders = [...document.querySelectorAll<HTMLElement>(".api-entry-header")]
+  .map((header) => ({ header, card: header.parentElement! }));
 let active: HTMLAnchorElement | undefined;
 let queued = false;
 
 function update() {
   queued = false;
   if (!toc || !entries.length) return;
+  // Read the responsive sticky inset from CSS. Keep displaced headers square,
+  // including while the next card pushes them away, and restore on scrolling up.
+  if (stickyHeaders.length) {
+    const inset = parseFloat(getComputedStyle(stickyHeaders[0].header).top);
+    const states = stickyHeaders.map(({ header, card }) => ({
+      header, stuck: card.getBoundingClientRect().top + card.clientTop < inset,
+    }));
+    for (const { header, stuck } of states) header.classList.toggle("is-stuck", stuck);
+  }
   // Use the same reading line as native anchor navigation below the header.
   const readingLine = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) + 8;
   // Update even while the active method stays the same: long entries should

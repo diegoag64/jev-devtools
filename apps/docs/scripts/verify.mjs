@@ -405,6 +405,16 @@ try {
   };
   await expectLocation("#flow-task");
   const taskEntry = page.getByRole("region", { name: /^flow.task/ });
+  const checkHeaderCorners = async (entry, square) => {
+    const corners = await entry.locator("header").evaluate(async (header) => {
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const style = getComputedStyle(header);
+      return [parseFloat(style.borderTopLeftRadius), parseFloat(style.borderTopRightRadius)];
+    });
+    assert.ok(corners.every((radius) => square ? radius === 0 : radius > 0),
+      square ? "Sticky headers have square top corners" : "Headers at the card start retain rounded corners");
+  };
+  await checkHeaderCorners(taskEntry, false);
   const taskInputs = taskEntry.getByRole("heading", { name: /^Inputs/, level: 4 });
   await taskInputs.getByRole("link").focus();
   await page.keyboard.press("Enter");
@@ -414,12 +424,15 @@ try {
     "Subsection permalinks clear the sticky method header");
   await page.evaluate(() => window.scrollBy(0, 450));
   await expectLocation("#flow-task");
+  await checkHeaderCorners(taskEntry, true);
+  await page.screenshot({ path: resolve(evidence, "sticky-header-square.png") });
   const hashBeforeScroll = new URL(page.url()).hash;
   await page.locator("#flow-jev").evaluate((heading) => heading.scrollIntoView({ block: "start" }));
   await expectLocation("#flow-jev");
   assert.equal(new URL(page.url()).hash, hashBeforeScroll, "Reading does not rewrite history");
   await page.locator("#flow-task").evaluate((heading) => heading.scrollIntoView({ block: "start" }));
   await expectLocation("#flow-task");
+  await checkHeaderCorners(taskEntry, false);
   await outline.getByRole("link", { name: "map()", exact: true }).click();
   await page.waitForURL("**/#flow-map");
   await expectLocation("#flow-map");
@@ -526,6 +539,14 @@ try {
   await typeTouch.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
   await typeTouch.locator("#type-jevdevtoolsprops").evaluate((target) => target.scrollIntoView({ block: "start" }));
   await assertTypeStartVisible(typeTouch);
+  await typeTouch.goto(origin + base + "api/reference/#flow-task");
+  const mobileTask = typeTouch.getByRole("region", { name: /^flow.task/ });
+  await checkHeaderCorners(mobileTask, false);
+  await typeTouch.evaluate(() => scrollBy(0, 450));
+  await checkHeaderCorners(mobileTask, true);
+  await typeTouch.screenshot({ path: resolve(evidence, "sticky-header-square-mobile.png") });
+  await mobileTask.evaluate((entry) => entry.scrollIntoView({ block: "start" }));
+  await checkHeaderCorners(mobileTask, false);
   await typeTouchContext.close();
 
   await page.goto(origin + base + "api/reference/#flow-task");

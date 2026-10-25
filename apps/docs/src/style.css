@@ -1083,6 +1083,10 @@ dialog::backdrop {
   border-bottom: 1px solid var(--line);
   background: var(--surface);
 }
+/* A displaced header meets the top bar with a flush edge. */
+.api-entry-header.is-stuck {
+  border-radius: 0;
+}
 .api-entry-header h3 {
   flex: 1;
   min-width: 0;
