@@ -1,6 +1,6 @@
 # Next.js and server frameworks
 
-For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/nextjs/). This file is the detailed repository reference for 0.5.0; see the [published release notes](../CHANGELOG.md#050--october-25-2026-experimental).
+For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/nextjs/). This file describes the 0.5.1 release candidate; see the [pending release notes and compatibility changes](../CHANGELOG.md#051--pending-publication-experimental).
 
 Jev DevTools supports Next.js App Router on the **Node.js runtime**. Mount one client component in the root layout, share one server adapter, and expose its Request/Response handler through an optional catch-all route. Calls made with that adapter's client can originate in Route Handlers, Server Actions, or Server Components.
 
@@ -17,7 +17,7 @@ npm install jev-devtools @typesafe-ai/sdk server-only
 To try local changes before a future release, run `npm ci && npm run pack:devtools` from this repository, then in your Next.js app:
 
 ```sh
-npm install /absolute/path/to/jev-devtools-0.5.0.tgz server-only
+npm install /absolute/path/to/jev-devtools-0.5.1.tgz server-only
 ```
 
 Use Node 22.12+ and React 18/19. The App Router example pins Next.js 16.4.2 and React 19.3.1. The broader package's React 18 checks use the Vite consumer; they are not a claim that every Next.js version supports that combination.

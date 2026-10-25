@@ -8,7 +8,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Task input validation and stricter expression types; setup compatibility and README hero; release verification and publication records. |
+| [Unreleased](#unreleased) | Not published | No changes yet. |
+| [0.5.1](#051--pending-publication-experimental) | Pending publication | Task input validation and expression types; setup guidance; release and website maintenance. |
 | [0.5.0](#050--october-25-2026-experimental) | 2026-10-25 | Replay and comparison; capture reliability/privacy; website and docs. |
 | [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | CSS isolation; stricter published flow types; approved release workflow. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Tasks, maps and loops; six cookbooks; SDK and inspector access changes. |
@@ -21,10 +22,17 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
+No changes yet.
+
+## 0.5.1 — Pending publication (experimental)
+
+**Pending publication.** This patch release prepares the merged task-input validation, expression typing, and setup documentation fixes. npm publication, the release tag, GitHub release, and updated hosted docs remain pending.
+
 ### Compatibility and upgrade
 
-- Task input literals containing own symbol keys now throw instead of silently discarding those keys. Remove symbol metadata from task data or represent needed values with string keys; valid JSON inputs and SDK request assets are unaffected.
-- **Primitive expression properties.** `.get()` now requires an object or array receiver, including every member of a union. Calls such as string `.get("length")` or `.get(0)` become TypeScript errors instead of failing only at execution. Move primitive operations into a task callback; object fields, array indexes, array `length`, and runtime missing-value checks retain their behavior.
+- **Supported environments are unchanged.** Node 22.12+, React/React DOM 18 or 19, ESM, and TypeSafe SDK 0.7.x remain supported. The documented TypeScript 5.4+ minimum clarifies the existing declaration requirement. Review the two stricter validation/type rules below before upgrading from 0.5.0.
+- **Task input symbol keys.** Task input literals containing own symbol keys now throw instead of silently discarding those keys. Remove symbol metadata from task data or represent needed values with string keys; valid JSON inputs and SDK request assets are unaffected.
+- **Primitive expression properties.** `.get()` now requires an object or array receiver, including every member of a union. Calls such as string `.get("length")` or `.get(0)` become TypeScript errors instead of failing only at execution. Move primitive operations into a task callback. Generic helpers calling `.get()` must constrain their receiver type with `extends object`; unions must contain only object/array members. Object fields, array indexes, array `length`, and runtime missing-value checks retain their behavior.
 
 ### Changes
 
@@ -42,7 +50,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
-- **Compatibility docs published.** Publish the reviewed import and setup guidance from [PR #79](https://github.com/diegoag64/jev-devtools/pull/79) as GPT Sites version 20, preserving the existing sharing metadata. Record the verified source, deployment, and live checks in the [publication receipt](docs/docs-publishing.md#publication-receipt-and-recovery). Package APIs and npm contents are unchanged.
+- **Compatibility docs published.** Publish the reviewed import and setup guidance from [PR #79](https://github.com/diegoag64/jev-devtools/pull/79) as GPT Sites version 20, preserving the existing sharing metadata. Record the verified source, deployment, and live checks in the [publication receipt](docs/docs-publishing.md#publication-receipt-and-recovery). Package APIs and npm contents are unchanged. ([#80](https://github.com/diegoag64/jev-devtools/pull/80))
 
 - **Package compatibility and public imports.** Include the `/flow` export in setup guidance and align the docs site, READMEs, and bundled agent instructions on Node, React, SDK, ESM, and the verified TypeScript 5.4+ declaration requirement. Focus setup on the three JavaScript entry points and automatic drawer styling, removing obsolete stylesheet-import guidance. Clarify required peers and server-only boundaries; package APIs and runtime requirements are unchanged. ([#79](https://github.com/diegoag64/jev-devtools/pull/79))
 

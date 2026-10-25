@@ -36,7 +36,7 @@ VitePress is a strong lower-maintenance alternative if its Vue-based theme/custo
 
 ## Compatibility and authoring
 
-The pages identify the source version and the published 0.5.0 APIs; hosted snapshots update separately from npm. Checked TypeScript source snippets use public exports. Partial snippets identify their context. Detailed legacy guides remain linked while reference coverage grows. Agent Markdown and the bundled setup skill are a separate reading path, with normal human onboarding first.
+The pages identify the 0.5.1 release candidate, its compatibility changes, and the published 0.5.0 APIs; hosted snapshots update separately from npm. Checked TypeScript source snippets use public exports. Partial snippets identify their context. Detailed legacy guides remain linked while reference coverage grows. Agent Markdown and the bundled setup skill are a separate reading path, with normal human onboarding first.
 
 ## Verification and future work
 
