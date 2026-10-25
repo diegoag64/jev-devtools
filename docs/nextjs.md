@@ -1,6 +1,6 @@
 # Next.js and server frameworks
 
-For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/nextjs/). This file describes the 0.5.1 release candidate; see the [pending release notes and compatibility changes](../CHANGELOG.md#051--pending-publication-experimental).
+For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/nextjs/). This file describes 0.5.1, available on npm; see the [published release notes and compatibility changes](../CHANGELOG.md#051--october-25-2026-experimental).
 
 Jev DevTools supports Next.js App Router on the **Node.js runtime**. Mount one client component in the root layout, share one server adapter, and expose its Request/Response handler through an optional catch-all route. Calls made with that adapter's client can originate in Route Handlers, Server Actions, or Server Components.
 
@@ -8,7 +8,7 @@ The package has no Next.js dependency. `handle(request)` also works with other N
 
 ## Install
 
-The default npm install resolves to 0.5.0; use the archive below to try local source changes. See the [release notes](../CHANGELOG.md). Install in your Next.js app:
+The default npm install resolves to 0.5.1; use the archive below to try local source changes. See the [release notes](../CHANGELOG.md). Install in your Next.js app:
 
 ```sh
 npm install jev-devtools @typesafe-ai/sdk server-only

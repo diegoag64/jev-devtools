@@ -78,6 +78,7 @@ Version 18 is the first publication under this policy. Its live manifest matches
 | 2026-10-25 04:48:34 | `8262004dcb047eac9f2bb16086f7c358ba837eae` / `0.4.1` source, with Unreleased docs | 17 / `appgdep_6add8a1d14e08191adb6fab3f90a2649` | Successful public deployment at [docs.jevtools.dev](https://docs.jevtools.dev/); repository/browser checks and dark-palette review passed. Published from [PR #70](https://github.com/diegoag64/jev-devtools/pull/70) before merge. |
 | 2026-10-25 06:45:14 | `c22f7695ac83333fed7b34ea3487ed6b86e4c714` / `0.5.0` | 18 / `appgdep_6adda5748390819195513a58d844721f` | Successful public deployment at [docs.jevtools.dev](https://docs.jevtools.dev/) after [PR #75](https://github.com/diegoag64/jev-devtools/pull/75) and [main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40169944721). Live manifest, changelog hash, setup/API/release pages, both themes, and mobile checks passed. |
 | 2026-10-25 17:06:05 | `a18927f1b464ee637ba27fabdeba4cc79a6f1ef3` / `0.5.0` | 20 / `appgdep_6ade36f707308191afd630d2daa277f6` | Successful public deployment at [docs.jevtools.dev](https://docs.jevtools.dev/) after [PR #79](https://github.com/diegoag64/jev-devtools/pull/79), preserving the sharing metadata from [PR #78](https://github.com/diegoag64/jev-devtools/pull/78). [Main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40214133830), local checks, publication-artifact verification, live manifest/changelog comparison, search and page smoke checks passed. |
+| 2026-10-25 18:37:34 | `a3294d6a2e9aff7f6758cb3f9ae5034bd0c2767c` / `0.5.1` | 21 / `appgdep_6ade4c66a498819196e64a5c9ff25238` | Successful public deployment at [docs.jevtools.dev](https://docs.jevtools.dev/) after [PR #87](https://github.com/diegoag64/jev-devtools/pull/87) and [main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40221849336). Required local checks, publication-artifact verification, setup/API theme and mobile review, live manifest/changelog comparison, and page smoke checks passed. |
 
 Version 18 provenance:
 
@@ -104,3 +105,18 @@ Version 20 provenance:
 - Live `/version.json` matched the inspected manifest, and `/raw/changelog.md` matched its recorded hash. Homepage, quick start, API reference, changelog, search index, and social image requests succeeded. The `#flow-jev` and `#styles-css` anchors remain present; the quick-start search entry includes `5.4`, `ESM`, public imports, and routing guidance. The deployed imports table was visually checked.
 
 This receipt was recorded after deployment and is not part of the version 20 artifact. No npm package or landing Site was published by this deployment; receipt-only changes do not require another docs deployment. Raw evidence is kept outside Git under `benchmarks/results/docs/publication-79/`.
+
+
+Version 21 provenance:
+
+- Canonical source: `a3294d6a2e9aff7f6758cb3f9ae5034bd0c2767c`, clean reviewed commit reachable from `origin/main`; publication mode, package `0.5.1`. This includes the verified release records and compatibility guidance from PR #87.
+- Sites source repository commit: `def246346bd8aa2b720a650299d4ac5c26e3e206` (generated deployment output, distinct from canonical source).
+- Saved version ID: `appgprj_6add5705dbec8191b56b1c9555078a2d~appgver_ad9529d043fc819198541587be9b6f87`.
+- Deployment ID: `appgdep_6ade4c66a498819196e64a5c9ff25238`; succeeded at `2026-10-25T18:37:34.040436Z`.
+- Embedded/live changelog SHA-256: `1f71f9dd9b4aea12cb5a7d3d9185da75cd103378f75022ccfa8f72ba8a2e13a2`.
+- Saved archive content hash: `sha256:36dd36ce2061c7e890aba9af35adb36d3511e33dbba2bfcb8a95242c3c8ec02b`.
+- Rechecked npm 0.5.1 availability, integrity and `latest`, GitHub Latest, and the exact `v0.5.1` tag at `c88aea5d615a65bcda1d820b5abc63bb6fbe05e6` before publication.
+- Installed locked dependencies on Node 26.7.0 and passed all required repository checks, then built with `npm run build:docs:publish` and verified that exact artifact across 17 pages and rendering checks. Reviewed setup and expression pages in both themes and inspected mobile setup/API captures. All 46 copied build files matched their inspected hashes; packaging did not rebuild them.
+- Live `/version.json` matched the inspected manifest exactly, and `/raw/changelog.md` matched its recorded hash. Homepage, quick start, API reference, and changelog returned HTTP 200; `#flow-jev` remained present. The deployed quick start was visually checked with the 0.5.1 snapshot label.
+
+This receipt records a completed deployment and is not part of the version 21 artifact. Publication status in that immutable snapshot describes its pre-deployment state; this receipt supplies the subsequent outcome. Receipt-only changes do not require another deployment. No npm package or landing Site was published by this deployment. Raw evidence is kept outside Git under `benchmarks/results/docs/publication-87/`.
