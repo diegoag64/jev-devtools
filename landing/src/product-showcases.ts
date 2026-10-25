@@ -2,7 +2,8 @@ const flowGuide =
   "https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md";
 
 export const drawerShowcase = `
-<section id="drawer" class="drawer-showcase wrap" aria-labelledby="drawer-title">
+<section id="drawer" class="drawer-showcase section-band" data-theme="plum" aria-labelledby="drawer-title">
+  <div class="wrap">
   <div class="product-heading">
     <h2 id="drawer-title">Your React app.<br /><span>Jev, in plain sight.</span></h2>
     <div><p>Open the drawer without leaving your app. Follow a request from its input to its answer, inspect the probabilities, and see the details behind every step.</p><a class="text-link" href="https://docs.jevtools.dev">Add the drawer to your app <span aria-hidden="true">↗</span></a></div>
@@ -18,10 +19,12 @@ export const drawerShowcase = `
     <div><h3>Look inside each request</h3><p>Explore questions, returned probabilities, shared context, transport details, and raw captured data.</p></div>
     <div><h3>Follow the connections</h3><p>Move from a request diagram to a connected flow. Pan, zoom, and inspect the steps that produced the result.</p></div>
   </div>
+  </div>
 </section>`;
 
 export const flowApiShowcase = `
-<section id="flow-api" class="flow-api-section wrap" aria-labelledby="flow-api-title">
+<section id="flow-api" class="flow-api-section section-band" data-theme="plum" aria-labelledby="flow-api-title">
+  <div class="wrap">
   <div class="product-heading">
     <h2 id="flow-api-title">Write the flow.<br /><span>Get the diagram.</span></h2>
     <div><p>The Flow API turns an explicit TypeScript definition into an inspectable graph. Combine System One requests with your functions, branches, parallel work, maps, and loops—then see how each run unfolded.</p><a class="text-link" href="${flowGuide}">Explore the Flow API <span aria-hidden="true">↗</span></a></div>
@@ -65,6 +68,7 @@ export const flowApiShowcase = `
       <div class="api-sample-controls" role="group" aria-label="Choose an illustrative flow outcome"><button data-api-sample="approve" aria-pressed="true">Eligible sample <span>0.94</span></button><button data-api-sample="review" aria-pressed="false">Review sample <span>0.62</span></button></div>
       <p id="api-sample-status" role="status"></p>
     </div>
+  </div>
   </div>
 </section>`;
 

@@ -59,7 +59,7 @@ app.innerHTML = `
   );
 }</code></pre><p class="code-note">The browser side is this small. The integration guide covers the server adapter and request capture.</p><span class="sr-only" id="copy-status" role="status"></span></div>
     </section>
-    <section class="closing wrap"><h2>Complex flows.<br /><span>Clear understanding.</span></h2><p>Open source, actively evolving, and ready for your next idea.<br />Explore the docs. Try it in your app. Help shape what’s next.</p><div class="hero-actions"><a class="button primary" href="${DOCS}">Explore the docs ${arrow}</a><a class="text-link" href="${GITHUB}">Build with us ${arrow}</a></div><span class="experimental">Experimental software. APIs may evolve before 1.0.</span></section>
+    <section class="closing section-band" data-theme="plum"><div class="wrap"><h2>Complex flows.<br /><span>Clear understanding.</span></h2><p>Open source, actively evolving, and ready for your next idea.<br />Explore the docs. Try it in your app. Help shape what’s next.</p><div class="hero-actions"><a class="button primary" href="${DOCS}">Explore the docs ${arrow}</a><a class="text-link" href="${GITHUB}">Build with us ${arrow}</a></div><span class="experimental">Experimental software. APIs may evolve before 1.0.</span></div></section>
   </main>
   <footer class="site-footer wrap"><a class="wordmark" href="#">${logo}<span>jev<span class="wordmark-light">tools</span><span class="wordmark-dot">.</span></span></a><span>Build in code. Understand in diagrams.</span><nav aria-label="Footer navigation"><a href="${DOCS}">Docs ${arrow}</a><a href="${GITHUB}">GitHub ${arrow}</a><a href="${GITHUB}/blob/main/LICENSE">MIT license ${arrow}</a></nav></footer>
 `;

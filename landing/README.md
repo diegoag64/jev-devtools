@@ -28,6 +28,10 @@ Diagrams sit directly beneath the hero without an explorer frame, header, or tab
 
 The installation snippet shows only the browser mount. Visitors must follow the linked docs to connect their server adapter. The website itself has no server integration.
 
+## Section themes
+
+Full-width sections use `section-band` with an inner `.wrap` for content alignment. Add `data-theme="plum"` for the alternate aubergine surface (`#211827`), a soft rose glow, lighter muted text, and fine borders; omit it for the default near-black surface. The drawer, Flow API, and closing sections currently alternate with the default sections. Spacing is shared through `--section-space`; visual demos retain their original dark surfaces.
+
 ## Product showcases
 
 The drawer section serves a web-optimized copy of the project-owner-supplied “Screen Recording 2026-10-24 at 2.27.41 PM.mov”: a 31-second skill-suggestion cookbook recording, converted to 1920 × 1066 H.264 MP4 at 30 fps with fast-start enabled. It starts at the beginning and uses native playback controls. There is no autoplay, audio, embedded app, or live transport. A written description accompanies the video. Playback pauses offscreen or when the tab is hidden.
