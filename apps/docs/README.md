@@ -45,6 +45,8 @@ npm run preview -w @jev-devtools/docs
 
 Browser verification uses Playwright Chromium. Install it once with `npx playwright install chromium --only-shell` if it is not already available.
 
+Preview serves the existing `dist/` artifact without regenerating Markdown or rerunning Twoslash; rebuild to include source changes. Verification still generates the site for the build and development server and runs the browser and initial-rendering checks. CI uses the pinned Chromium headless shell with the `ubuntu-24.04` runner's system libraries, matching drawer verification.
+
 Output is `apps/docs/dist/`. Each route has its own `index.html`; use a static host that serves directory indexes, without SPA catch-all rewrites. Raw Markdown and `llms.txt` are generated alongside the site. Search downloads its local index only when opened.
 
 For a subdirectory deployment:
