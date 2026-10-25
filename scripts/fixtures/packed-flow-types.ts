@@ -8,6 +8,56 @@ declare const exact: FlowExpression<number>;
 export const narrowed: FlowExpression<number> = mixed;
 export const widened: FlowExpression<number | string> = exact;
 
+// get() selects fields on object/array values, never primitive properties.
+declare const text: FlowExpression<string>;
+declare const flag: FlowExpression<boolean>;
+declare const objectOrText: FlowExpression<{ length: number } | string>;
+// @ts-expect-error primitive strings do not support property selection
+text.get("length");
+// @ts-expect-error primitive strings do not support index selection
+text.get(0);
+// @ts-expect-error primitive numbers do not support property selection
+exact.get("toString");
+// @ts-expect-error primitive booleans do not support property selection
+flag.get("valueOf");
+// @ts-expect-error every possible receiver must be an object/array
+objectOrText.get("length");
+
+declare const data: FlowExpression<{
+  nested: { label: string; count?: number };
+  values: number[];
+  pair: readonly ["first", 2];
+}>;
+export const nestedLabel: FlowExpression<string> = data
+  .get("nested")
+  .get("label");
+export const optionalCount: FlowExpression<number | undefined> = data
+  .get("nested")
+  .get("count");
+export const arrayItem: FlowExpression<number> = data.get("values").get(0);
+export const arrayLength: FlowExpression<number> = data.get("values").get("length");
+export const tupleItem: FlowExpression<"first"> = data.get("pair").get(0);
+export const tupleLength: FlowExpression<2> = data.get("pair").get("length");
+// @ts-expect-error selecting an optional field must preserve undefined
+export const requiredCount: FlowExpression<number> = optionalCount;
+// @ts-expect-error selecting a field must preserve its value type
+export const numericLabel: FlowExpression<number> = nestedLabel;
+// @ts-expect-error object keys still come from the input shape
+data.get("missing");
+
+declare const objectUnion: FlowExpression<{ value: string } | { value: number }>;
+export const unionField: FlowExpression<string | number> =
+  objectUnion.get("value");
+export function selectField<
+  T extends object,
+  K extends keyof T & (string | number),
+>(
+  value: FlowExpression<T>,
+  key: K,
+): FlowExpression<T[K]> {
+  return value.get(key);
+}
+
 export class Peek extends FlowExpression<number> {
   peek() {
     // @ts-expect-error subclass reads the marker

@@ -77,7 +77,7 @@ export const typeHelp: Record<string, Help> = {
     title: "FlowExpression", importFrom: "jev-devtools/flow",
     description: "A typed reference to a value that becomes available when the flow runs. It is not the value itself and is not a promise to await.",
     signature: "FlowExpression<T>",
-    props: { get: "Select a property from the future value.", "eq / lt / gt / gte": "Build comparisons for flow conditions. These are evaluated during execution." },
+    props: { get: "Select an own field from a future object or array; primitive properties are unsupported.", "eq / lt / gt / gte": "Build comparisons for flow conditions. These are evaluated during execution." },
   },
   FlowBuilder: {
     title: "FlowBuilder", importFrom: "jev-devtools/flow",
