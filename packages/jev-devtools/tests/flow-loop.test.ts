@@ -57,7 +57,7 @@ test("loop tests before execution, carries state sequentially, and succeeds when
       return f.output("done", typed);
     },
   );
-  for (const count of [0, 3]) {
+  for (const count of [0, 1, 3]) {
     seen.length = 0;
     const observer = observe();
     const result = await flow.run(
@@ -65,9 +65,17 @@ test("loop tests before execution, carries state sequentially, and succeeds when
       { client, devtools: observer.devtools },
     );
     assert.equal(result.value, 3);
-    assert.deepEqual(seen, count === 0 ? [0, 1, 2] : []);
+    assert.deepEqual(
+      seen,
+      Array.from({ length: 3 - count }, (_, i) => i),
+    );
     assert.equal(observer.run.steps.count.loop?.stopReason, "condition");
     assert.equal(observer.run.steps.count.collection?.total, 3 - count);
+    assert.equal(observer.run.steps.count.collection?.items.length, 3 - count);
+    assert.deepEqual(observer.run.steps.count.data, {
+      input: { count, secret: "hidden" },
+      output: { count: 3, secret: "hidden" },
+    });
     assert.equal(observer.run.steps.count.decision, false);
     const rule = flow.definition.nodes.find(
       (n) => n.id === "count",
@@ -79,6 +87,7 @@ test("loop limits, failures and cancellation stop continuation and retain the la
   for (const mode of ["limit", "error", "cancel"] as const) {
     const controller = new AbortController();
     let continued = false;
+    const seen: number[] = [];
     const flow = defineJevFlow("stops", (f) => {
       const final = f.loop(
         "repeat",
@@ -92,6 +101,7 @@ test("loop limits, failures and cancellation stop continuation and retain the la
           r.task("advance", {
             input: r.input.get("state"),
             run: (state) => {
+              seen.push(state.count);
               if (state.count === 1 && mode === "error")
                 throw new Error("failed iteration");
               if (state.count === 1 && mode === "cancel") controller.abort();
@@ -122,6 +132,12 @@ test("loop limits, failures and cancellation stop continuation and retain the la
           : /failed iteration/,
     );
     assert.equal(continued, false);
+    assert.deepEqual(seen, [0, 1]);
+    assert.equal(observer.run.steps.repeat.collection?.items.length, 2);
+    assert.deepEqual(observer.run.steps.repeat.data, {
+      input: { count: 0 },
+      output: { count: mode === "limit" ? 2 : 1 },
+    });
     assert.equal(
       observer.run.steps.repeat.collection?.items[0].status,
       "completed",

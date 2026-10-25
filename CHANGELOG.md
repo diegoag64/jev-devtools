@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                         | Published (UTC)     | Highlights                                                                                                 |
 | ----------------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                       | Not published       | No changes yet.                                                                                            |
+| [Unreleased](#unreleased)                       | Not published       | Exact loop-limit and task-timeout regression coverage.                                                     |
 | [0.5.2](#052--pending-publication-experimental) | Pending publication | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
 | [0.5.1](#051--october-25-2026-experimental)     | 2026-10-25          | Task input validation and expression types; setup guidance; release and website maintenance.               |
 | [0.5.0](#050--october-25-2026-experimental)     | 2026-10-25          | Replay and comparison; capture reliability/privacy; website and docs.                                      |
@@ -23,7 +23,11 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No changes yet.
+### Changes
+
+#### Maintenance
+
+- **Flow lifecycle regression coverage.** Assert exact loop body calls, retained iterations and latest completed state, and distinguish task timeouts from cancellation in recorded step errors. Runtime behavior and public APIs are unchanged.
 
 ## 0.5.2 — Pending publication (experimental)
 
