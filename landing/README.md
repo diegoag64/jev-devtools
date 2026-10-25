@@ -30,7 +30,7 @@ The installation snippet shows only the browser mount. Visitors must follow the 
 
 ## Section themes
 
-Full-width sections use `section-band` with an inner `.wrap` for content alignment. Add `data-theme="plum"` for the alternate aubergine surface (`#211827`), a soft rose glow, lighter muted text, and fine borders; omit it for the default near-black surface. The drawer, Flow API, and closing sections currently alternate with the default sections. Spacing is shared through `--section-space`; visual demos retain their original dark surfaces.
+Full-width sections use `section-band` with an inner `.wrap` for content alignment. Add `data-theme="plum"` for the alternate aubergine surface (`#19131e`), a soft rose glow, lighter muted text, and fine borders; omit it for the default near-black surface. The drawer, Flow API, and closing sections currently alternate with the default sections. Spacing is shared through `--section-space`; visual demos retain their original dark surfaces.
 
 ## Product showcases
 

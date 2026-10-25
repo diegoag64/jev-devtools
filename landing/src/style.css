@@ -67,10 +67,10 @@ p {
   padding-block: var(--section-space);
 }
 .section-band[data-theme="plum"] {
-  --section-bg: #211827;
+  --section-bg: #19131e;
   --muted: #b9aabe;
-  --line: #403047;
-  background-image: radial-gradient(ellipse at 15% 0%, #50304c40, transparent 65%);
+  --line: #34283b;
+  background-image: radial-gradient(ellipse at 15% 0%, #50304c26, transparent 65%);
   border-block: 1px solid var(--line);
 }
 .mono {
