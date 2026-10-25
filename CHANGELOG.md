@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC) | Highlights                                                                                                 |
 | ------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published   | Verified 0.5.2 publication records.                                                                        |
+| [Unreleased](#unreleased)                   | Not published   | Verified 0.5.2 publication records; exact loop-limit and task-timeout regression coverage.                 |
 | [0.5.2](#052--october-25-2026-experimental) | 2026-10-25      | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
 | [0.5.1](#051--october-25-2026-experimental) | 2026-10-25      | Task input validation and expression types; setup guidance; release and website maintenance.               |
 | [0.5.0](#050--october-25-2026-experimental) | 2026-10-25      | Replay and comparison; capture reliability/privacy; website and docs.                                      |
@@ -28,6 +28,10 @@ Dates below use UTC and were checked against npm's publication history. The hist
 #### Documentation
 
 - **0.5.2 publication records.** Record verified npm publication, archive integrity/provenance, fresh registry consumers, and the exact Git tag and GitHub Latest release. Update source installation and API guidance to describe the published version. Hosted docs were subsequently published as Sites version 22 from the merged record commit; see the [publication receipt](docs/docs-publishing.md#publication-receipt-and-recovery). ([#96](https://github.com/diegoag64/jev-devtools/pull/96), [receipt #99](https://github.com/diegoag64/jev-devtools/pull/99))
+
+#### Maintenance
+
+- **Flow lifecycle regression coverage.** Assert exact loop body calls, retained iterations and latest completed state, and distinguish task timeouts from cancellation in recorded step errors. Runtime behavior and public APIs are unchanged. ([#95](https://github.com/diegoag64/jev-devtools/pull/95))
 
 ## 0.5.2 — October 25, 2026 (experimental)
 

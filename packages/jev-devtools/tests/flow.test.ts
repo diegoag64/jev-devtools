@@ -1050,6 +1050,18 @@ test("task cancellation and timeout finish promptly, block dependents and ignore
       const before = (await history(inspector)).upserts[0];
       assert.equal(before.status, mode === "cancel" ? "cancelled" : "error");
       assert.equal(
+        before.steps.work.status,
+        mode === "cancel" ? "cancelled" : "error",
+      );
+      assert.equal(
+        before.steps.work.error,
+        mode === "cancel"
+          ? "AbortError"
+          : mode === "timeout"
+            ? "TimeoutError"
+            : "TypeError",
+      );
+      assert.equal(
         before.steps.after.status,
         mode === "cancel" ? "cancelled" : "blocked",
       );
@@ -1075,16 +1087,20 @@ test("task inputs reject symbol keys in literals and references before invoking 
     Object.defineProperty({ visible: 1 }, key, { value: 2 }),
   ]) {
     assert.throws(
-      () => defineJevFlow("literal-symbol", (flow) => {
-        const result = flow.task("task", { input, run });
-        return flow.output("done", result);
-      }),
+      () =>
+        defineJevFlow("literal-symbol", (flow) => {
+          const result = flow.task("task", { input, run });
+          return flow.output("done", result);
+        }),
       { name: "TypeError", message: "Task data cannot contain symbol keys" },
     );
-    const referenced = defineJevFlow<typeof input>("referenced-symbol", (flow) => {
-      const result = flow.task("task", { input: { value: flow.input }, run });
-      return flow.output("done", result);
-    });
+    const referenced = defineJevFlow<typeof input>(
+      "referenced-symbol",
+      (flow) => {
+        const result = flow.task("task", { input: { value: flow.input }, run });
+        return flow.output("done", result);
+      },
+    );
     await assert.rejects(referenced.run(input, { client }), {
       name: "TypeError",
       message: "Task data cannot contain symbol keys",
@@ -1310,7 +1326,8 @@ test("custom observers cannot mutate nested map results or returned application 
       update(run) {
         for (const item of run.steps.items?.collection?.items ?? []) {
           const data = item.run?.steps.work?.data as
-            { input?: { count: number } } | undefined;
+            | { input?: { count: number } }
+            | undefined;
           if (data?.input) {
             data.input.count = 66;
             mutations++;
