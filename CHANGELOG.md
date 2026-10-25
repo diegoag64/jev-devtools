@@ -25,7 +25,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
-- **README hero.** Replace the root README's looping demo section with a static browser capture of the landing page heading and illustrative hierarchical flow, linked to the website. Include a reproducible capture script. Package APIs and the npm README are unchanged.
+- **README hero.** Replace the root README's looping demo section with a static browser capture of the landing page heading and illustrative hierarchical flow, linked to the website. Include a reproducible capture script. Package APIs and the npm README are unchanged. ([#74](https://github.com/diegoag64/jev-devtools/pull/74))
 
 ## 0.5.0 — Pending publication
 
