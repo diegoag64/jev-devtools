@@ -25,7 +25,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
-- **Package compatibility and public imports.** Include the `/flow` export in setup guidance and align the docs site, READMEs, and bundled agent instructions on Node, React, SDK, ESM, and the verified TypeScript 5.4+ declaration requirement. Clarify automatic drawer styling, required peers, and server-only boundaries; package APIs and runtime requirements are unchanged.
+- **Package compatibility and public imports.** Include the `/flow` export in setup guidance and align the docs site, READMEs, and bundled agent instructions on Node, React, SDK, ESM, and the verified TypeScript 5.4+ declaration requirement. Clarify automatic drawer styling, required peers, and server-only boundaries; package APIs and runtime requirements are unchanged. ([#79](https://github.com/diegoag64/jev-devtools/pull/79))
 
 - **Verified 0.5.0 docs publication.** Publish the reviewed release guidance as GPT Sites version 18 and record its canonical commit, hosting deployment, and matching live version/changelog checks. Package bytes and the landing Site are unchanged. ([#76](https://github.com/diegoag64/jev-devtools/pull/76))
 
