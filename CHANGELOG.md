@@ -26,7 +26,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Maintenance
 
-- **Boundary and contract verification.** Require agents to identify affected guarantees, reproduce bugs on current main, and verify composed expressions, resolved template types, capture metadata, and meaningful regressions at their owning boundaries. Keep required repository checks and public package behavior unchanged.
+- **Boundary and contract verification.** Require agents to identify affected guarantees, reproduce bugs on current main, and verify composed expressions, resolved template types, capture metadata, and meaningful regressions at their owning boundaries. Keep required repository checks and public package behavior unchanged. ([#84](https://github.com/diegoag64/jev-devtools/pull/84))
 
 ## 0.5.1 — Pending publication (experimental)
 
