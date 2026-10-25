@@ -48,6 +48,31 @@ try {
       .count(),
     0,
   );
+  // The floating controls stay in viewport space and never initiate a pan.
+  const controls = page.getByRole("group", { name: "Flow canvas controls" });
+  const controlsPosition = await controls.boundingBox();
+  const zoomOutput = page.getByLabel("Flow zoom", { exact: true });
+  const zoomBefore = await zoomOutput.textContent();
+  await controls.getByRole("button", { name: "Zoom flow in", exact: true }).click();
+  await page.waitForTimeout(150);
+  assert.notEqual(await zoomOutput.textContent(), zoomBefore);
+  assert.deepEqual(
+    await controls.boundingBox(), controlsPosition,
+    "Zooming the canvas does not move or scale its controls",
+  );
+  const cameraBeforeControlsDrag = await page
+    .locator(".flow-overview-canvas").getAttribute("style");
+  await page.mouse.move(controlsPosition.x + 12, controlsPosition.y + 3);
+  await page.mouse.down();
+  await page.mouse.move(controlsPosition.x + 27, controlsPosition.y + 18);
+  await page.mouse.up();
+  await page.waitForTimeout(150);
+  assert.equal(
+    await page.locator(".flow-overview-canvas").getAttribute("style"),
+    cameraBeforeControlsDrag,
+    "Dragging control-panel padding does not pan the diagram",
+  );
+  await controls.getByRole("button", { name: "Fit flow", exact: true }).press("Enter");
   await page.selectOption('[aria-label="Flow step"]', "review");
   await review.getByText("94%", { exact: true }).first().waitFor();
   await page.waitForTimeout(150);
@@ -88,6 +113,10 @@ try {
   const initialCamera = await page
     .locator(".flow-overview-canvas")
     .getAttribute("style");
+  assert.deepEqual(
+    await controls.boundingBox(), controlsPosition,
+    "Panning the canvas does not move the floating controls",
+  );
   await page
     .getByRole("button", { name: "Close Jev DevTools", exact: true })
     .click();
@@ -412,8 +441,28 @@ try {
   await page.screenshot({
     path: "benchmarks/results/flows/connected-choice.png",
   });
+  await page.setViewportSize({ width: 375, height: 900 });
+  await page.waitForTimeout(150);
+  const smallCanvas = await canvas.boundingBox();
+  const smallControls = await controls.boundingBox();
+  assert.ok(
+    smallControls.x >= smallCanvas.x && smallControls.y >= smallCanvas.y &&
+      smallControls.x + smallControls.width <= smallCanvas.x + smallCanvas.width &&
+      smallControls.y + smallControls.height <= smallCanvas.y + smallCanvas.height,
+    "Floating controls stay inside the canvas on narrow screens",
+  );
+  for (const control of await controls.getByRole("button").all()) {
+    const box = await control.boundingBox();
+    assert.ok(
+      box.x >= smallControls.x && box.y >= smallControls.y &&
+        box.x + box.width <= smallControls.x + smallControls.width &&
+        box.y + box.height <= smallControls.y + smallControls.height,
+      "Every canvas control stays within the floating panel",
+    );
+  }
+  await page.screenshot({ path: "benchmarks/results/flows/floating-controls-narrow.png" });
   console.log(
-    "Flows verified: connected request diagrams, question switching with one preserved camera, parallel wait explanation, outcome paths, untaken nodes, request details, pinned camera/selection across incoming runs and reopening, cancellation.",
+    "Flows verified: floating controls stay fixed, do not initiate panning and fit narrow screens; connected request diagrams, question switching with one preserved camera, parallel wait explanation, outcome paths, untaken nodes, request details, pinned camera/selection across incoming runs and reopening, cancellation.",
   );
 } finally {
   await browser.close();

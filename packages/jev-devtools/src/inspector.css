@@ -703,10 +703,12 @@
   gap: 8px;
   align-items: center;
 }
-.jev-devtools .lab-flow-toolbar button {
+.jev-devtools .lab-flow-toolbar button,
+.jev-devtools .flow-canvas-controls button {
   font-size: 11px;
 }
-.jev-devtools .lab-flow-toolbar output {
+.jev-devtools .lab-flow-toolbar output,
+.jev-devtools .flow-canvas-controls output {
   font-size: 11px;
   min-width: 35px;
   text-align: center;
@@ -1164,9 +1166,6 @@
 }
 :where(.jev-devtools) .whole-flow > .detail-header {
   flex-wrap: wrap;
-}
-:where(.jev-devtools) .whole-flow > .detail-header,
-:where(.jev-devtools) .whole-flow > .lab-flow-toolbar {
   flex-shrink: 0;
 }
 :where(.jev-devtools) .flow-workspace {
@@ -1241,6 +1240,23 @@
     transparent calc(1px * var(--diagram-grid-weight, 1))
   );
   background-size: 20px 20px;
+}
+.jev-devtools .flow-canvas-controls {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 24px);
+  padding: 8px;
+  border: 1px solid #3b303d;
+  border-radius: 10px;
+  background: #17121b;
+  box-shadow: 0 4px 16px #0006;
+  cursor: default;
 }
 :where(.jev-devtools) .flow-overview-viewport[data-panning] {
   cursor: grabbing;

@@ -806,27 +806,7 @@ export const FlowOverview = memo(function FlowOverview({
           </header>
         )}
         {!inline && <CopyFixtureReport control={fixtureCopy} />}
-        <div className="lab-flow-toolbar">
-          {!inline && (
-            <div>
-              <button
-                aria-label="Zoom flow out"
-                onClick={() => zoomBy(1 / 1.2)}
-              >
-                −
-              </button>
-              <output aria-label="Flow zoom">{zoom}%</output>
-              <button aria-label="Zoom flow in" onClick={() => zoomBy(1.2)}>
-                +
-              </button>
-              <button onClick={fit}>Fit flow</button>
-              <button disabled={!selected} onClick={() => selectStep(selected)}>
-                Focus step
-              </button>
-            </div>
-          )}
-          {inline && stepSelection}
-        </div>
+        {inline && <div className="lab-flow-toolbar">{stepSelection}</div>}
         <div className="flow-workspace">
           <div
             className={
@@ -840,6 +820,29 @@ export const FlowOverview = memo(function FlowOverview({
             aria-label={inline ? "Item flow canvas" : "Flow canvas"}
             role="region"
           >
+            {!inline && (
+              <div
+                className="flow-canvas-controls"
+                role="group"
+                aria-label="Flow canvas controls"
+                data-diagram-controls
+              >
+                <button
+                  aria-label="Zoom flow out"
+                  onClick={() => zoomBy(1 / 1.2)}
+                >
+                  −
+                </button>
+                <output aria-label="Flow zoom">{zoom}%</output>
+                <button aria-label="Zoom flow in" onClick={() => zoomBy(1.2)}>
+                  +
+                </button>
+                <button onClick={fit}>Fit flow</button>
+                <button disabled={!selected} onClick={() => selectStep(selected)}>
+                  Focus step
+                </button>
+              </div>
+            )}
             <div
               ref={inline ? undefined : canvas}
               className="flow-overview-canvas"
