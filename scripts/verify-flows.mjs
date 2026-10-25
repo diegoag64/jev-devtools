@@ -527,8 +527,47 @@ try {
   await page.mouse.click(narrowGap.x, narrowGap.y);
   await waitForDeselect();
   await page.screenshot({ path: "benchmarks/results/flows/background-deselected.png" });
+  // Fresh Flows view with no default request selection: the first click must
+  // behave like every later card click, without a one-time camera jump.
+  const taskPage = await browser.newPage({ viewport: { width: 1710, height: 1000 } });
+  taskPage.on("pageerror", (error) => errors.push(String(error)));
+  await taskPage.goto(origin);
+  await taskPage.getByRole("combobox", { name: "Scenario", exact: true }).selectOption("flow-tasks");
+  await taskPage.getByRole("button", { name: "Run sample flow", exact: true }).click();
+  await taskPage.locator("#status").filter({ hasText: "tasks-done" }).waitFor();
+  await taskPage.getByRole("button", { name: "Open Jev DevTools", exact: true }).click();
+  await taskPage.getByRole("button", { name: "Flows", exact: true }).click();
+  await taskPage.getByRole("button", { name: "Expand Jev drawer", exact: true }).click();
+  await taskPage.getByRole("region", { name: "Flow canvas", exact: true }).waitFor();
+  await taskPage.waitForTimeout(150);
+  const taskCamera = taskPage.locator(".flow-overview-canvas");
+  const overviewCamera = await taskCamera.getAttribute("style");
+  for (const id of ["task-0", "task-1"]) {
+    await taskPage.getByRole("button", { name: `Step ${id}, task, completed`, exact: true }).click();
+    await taskPage.waitForTimeout(150);
+    assert.equal(await taskPage.getByLabel("Flow step", { exact: true }).inputValue(), id);
+    assert.equal(await taskCamera.getAttribute("style"), overviewCamera,
+      "First and subsequent card selections preserve the overview camera");
+  }
+  await taskPage.getByRole("button", { name: "Step task-2, task, completed", exact: true }).press("Enter");
+  await taskPage.waitForTimeout(150);
+  assert.equal(await taskCamera.getAttribute("style"), overviewCamera,
+    "Keyboard step selection also preserves the camera");
+  await taskPage.getByRole("button", { name: "Focus step", exact: true }).click();
+  await taskPage.waitForTimeout(150);
+  assert.notEqual(await taskCamera.getAttribute("style"), overviewCamera,
+    "Explicit Focus still centers the selected step");
+  await taskPage.getByRole("button", { name: "Fit flow", exact: true }).click();
+  await taskPage.waitForTimeout(150);
+  assert.equal(await taskCamera.getAttribute("style"), overviewCamera);
+  await taskPage.getByLabel("Flow step", { exact: true }).selectOption("task-3");
+  await taskPage.waitForTimeout(150);
+  assert.notEqual(await taskCamera.getAttribute("style"), overviewCamera,
+    "The step picker retains its explicit navigation behavior");
+  assert.deepEqual(errors, []);
+  await taskPage.close();
   console.log(
-    "Flows verified: background clicks deselect without moving the camera, card/control clicks and panning retain selection; floating controls stay fixed, do not initiate panning and fit narrow screens; connected request diagrams, question switching with one preserved camera, parallel wait explanation, outcome paths, untaken nodes, request details, pinned camera/selection across incoming runs and reopening, cancellation.",
+    "Flows verified: first and later step clicks preserve the camera, explicit focus/fit/picker navigation works; background clicks deselect without moving the camera, card/control clicks and panning retain selection; floating controls stay fixed, do not initiate panning and fit narrow screens; connected request diagrams, question switching with one preserved camera, parallel wait explanation, outcome paths, untaken nodes, request details, pinned camera/selection across incoming runs and reopening, cancellation.",
   );
 } finally {
   await browser.close();

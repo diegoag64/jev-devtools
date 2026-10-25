@@ -721,12 +721,10 @@ export const FlowOverview = memo(function FlowOverview({
     },
     [preserveCamera],
   );
-  const started = useRef(false);
   const changeCollection = useCallback(
     (id: string, view: CollectionView) => {
       preserveCamera();
       setSelected(id);
-      started.current = true;
       setCollectionViews((previous) => ({ ...previous, [id]: view }));
     },
     [preserveCamera],
@@ -743,14 +741,6 @@ export const FlowOverview = memo(function FlowOverview({
     },
     [preserveCamera],
   );
-  useEffect(() => {
-    if (inline || started.current) return;
-    const first = layout.points.get(selected);
-    if (first) {
-      started.current = true;
-      focusArea(first);
-    }
-  }, [layout, selected, focusArea, inline]);
   const selectStep = (id: string) => {
     setSelected(id);
     const bounds = layout.points.get(id);

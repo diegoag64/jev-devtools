@@ -25,6 +25,7 @@ function App() {
           "flow-parallel",
           "flow-large-choice",
           "flow-content",
+          "flow-tasks",
           "flow-error",
           "flow-cancel",
           "scale-10",

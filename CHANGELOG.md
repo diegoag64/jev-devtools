@@ -38,6 +38,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Fixed
 
+- **Consistent step selection.** Stop automatically focusing the first selected step, including flows with no request steps. Flows start with the normal overview fit, and clicking steps preserves pan and zoom; the step picker and explicit Focus/Fit controls keep their existing behavior. Public APIs are unchanged. ([#92](https://github.com/diegoag64/jev-devtools/pull/92))
+
 - **Select arrow spacing.** Inset dropdown chevrons consistently across drawer selects and reserve space between their labels and arrows. Keep native menus and keyboard interaction, with the system arrow restored in forced-colors mode. Public APIs are unchanged. ([#92](https://github.com/diegoag64/jev-devtools/pull/92))
 
 - **Bound composed expressions.** Account for complete subtree depth and expanded size before recursive validation, projection, and evaluation; cap legacy descriptions independently of the structured rule projection. Fixes [#43](https://github.com/diegoag64/jev-devtools/issues/43). ([#86](https://github.com/diegoag64/jev-devtools/pull/86))
