@@ -449,8 +449,9 @@ pre code {
   padding: 14px;
 }
 .type-popup-label {
-  color: var(--muted);
-  font-size: 11px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
   margin-bottom: 9px;
 }
 .type-popup pre {
@@ -459,15 +460,29 @@ pre code {
   overflow-wrap: anywhere;
   line-height: 1.6;
 }
-.type-popup pre code {
-  font-size: 12px;
-}
 .type-popup p {
-  border-top: 1px solid var(--line);
-  padding-top: 10px;
-  margin: 10px 0 0;
+  margin: 0 0 12px;
   font-size: 13px;
   line-height: 1.6;
+}
+.type-popup dl {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 8px 12px;
+  margin: 12px 0 0;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  font-size: 12px;
+}
+.type-popup dt {
+  font-family: "SFMono-Regular", monospace;
+  font-weight: 600;
+  margin: 0;
+}
+.type-popup dd {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
 }
 blockquote {
   margin: 24px 0;

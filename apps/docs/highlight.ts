@@ -4,6 +4,7 @@ import { createHighlighter } from "shiki";
 import { createTransformerFactory } from "@shikijs/twoslash/core";
 import { createTwoslasher } from "twoslash";
 import ts from "typescript";
+import { flowHovers } from "./flow-hovers.js";
 
 const app = dirname(fileURLToPath(import.meta.url));
 const themes = { light: "github-light", dark: "github-dark" } as const;
@@ -62,18 +63,31 @@ export async function codeRenderer() {
       // Resolve imports beside the checked source. Only the original example
       // is displayed or copied; compiler setup never reaches the page.
       source = `// @filename: examples/${filename}\n// ---cut---\n${text}`;
+      const selected =
+        filename === "flow.ts" ? flowHovers(text) : new Map<number, never>();
       transformers.push(
         createTransformerFactory(twoslasher)({
           renderer: {
             nodeStaticInfo(info, node) {
+              const help = selected.get(info.start);
+              if (!help) return node;
               const id = `type-info-${sequence++}`;
-              const signature = shiki.codeToHtml(info.text, {
+              const signature = shiki.codeToHtml(help.signature, {
                 lang: "ts",
                 themes,
                 defaultColor: false,
               });
               popups.push(
-                `<div id="${id}" class="type-popup" role="tooltip" hidden><div class="type-popup-label">Type information</div>${signature}${info.docs ? `<p>${escape(info.docs)}</p>` : ""}</div>`,
+                `<div id="${id}" class="type-popup" role="tooltip" hidden><div class="type-popup-label">${escape(help.title)}</div><p>${escape(help.description)}</p>${signature}${
+                  help.props
+                    ? `<dl>${Object.entries(help.props)
+                        .map(
+                          ([name, description]) =>
+                            `<dt>${escape(name)}</dt><dd>${escape(description)}</dd>`,
+                        )
+                        .join("")}</dl>`
+                    : ""
+                }</div>`,
               );
               return {
                 type: "element",
@@ -82,7 +96,7 @@ export async function codeRenderer() {
                   class: "type-token",
                   tabindex: 0,
                   role: "button",
-                  "aria-label": `${info.target}: type information`,
+                  "aria-label": `${info.target}: API help`,
                   "aria-describedby": id,
                   "aria-expanded": "false",
                   "data-type-info": id,
@@ -100,6 +114,6 @@ export async function codeRenderer() {
       defaultColor: false,
       transformers,
     });
-    return `<div class="code-block"><div class="code-toolbar"><span>${escape(language)}${interactive ? " · Type hovers" : ""}</span><button type="button" class="copy-code" hidden>Copy code</button></div>${html}</div>${popups.join("")}`;
+    return `<div class="code-block"><div class="code-toolbar"><span>${escape(language)}${interactive ? " · API help" : ""}</span><button type="button" class="copy-code" hidden>Copy code</button></div>${html}</div>${popups.join("")}`;
   };
 }

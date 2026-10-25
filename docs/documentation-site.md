@@ -30,7 +30,7 @@ Every mature reference page should state the import/runtime, the problem solved,
 
 ## Stack decision
 
-Use the repository's Vite and TypeScript with build-only Marked, Shiki, and opt-in Twoslash. Generate one HTML document per page with highlighted code, local links, navigation, and a table of contents. The browser gets CSS and small TypeScript modules. The flow example uses Twoslash to extract real type signatures and JSDoc at build time; a small lazy-loaded module positions the generated tooltips. Content stays readable with JavaScript disabled. Search is a local index loaded on demand; demos are separate chunks.
+Use the repository's Vite and TypeScript with build-only Marked, Shiki, and opt-in Twoslash. Generate one HTML document per page with highlighted code, local links, navigation, and a table of contents. The browser gets CSS and small TypeScript modules. The flow example uses Twoslash to check real types at build time, then render curated help for core API methods and options; a small lazy-loaded module positions the generated tooltips. Content stays readable with JavaScript disabled. Search is a local index loaded on demand; demos are separate chunks.
 
 VitePress is a strong lower-maintenance alternative if its Vue-based theme/customization model becomes desirable. Starlight offers a complete Astro docs system and islands. A React SPA would fit package demos but needs additional prerendering and route/hosting work to provide static documents. This small Vite app honors the requested stack and leaves interactions open, at the cost of owning the shell, search, content pipeline, and accessibility checks. Revisit a docs framework if those responsibilities outgrow the app.
 

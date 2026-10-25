@@ -4,7 +4,7 @@ Flows are optional. Start here once a single request appears in the drawer. Keep
 
 This flow classifies a message and returns the name of a team. It does not send a ticket or perform a business action.
 
-Hover, focus, or tap a dotted symbol to inspect its type. Try `flow`, `classification`, or `branch`. Press Escape to dismiss the tooltip.
+Hover, focus, or tap a dotted API method or option for a short explanation. Try `jev`, `branch`, or `state`. Local variables and example-specific names stay plain code. Press Escape to dismiss the tooltip.
 
 <!-- example: flow.ts twoslash -->
 

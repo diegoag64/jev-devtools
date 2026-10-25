@@ -100,14 +100,17 @@ try {
   ).trim();
   await page.goto(origin + base + "guides/flows/");
   const branch = page.getByRole("button", {
-    name: "branch: type information",
+    name: "branch: API help",
     exact: true,
   });
   const tooltip = page.getByRole("tooltip");
   await branch.hover();
   await tooltip.waitFor();
-  assert.match(await tooltip.innerText(), /Terminal decision/);
-  assert.match(await tooltip.innerText(), /when: FlowExpression<boolean>/);
+  assert.match(await tooltip.innerText(), /choosing one of two paths/);
+  assert.match(
+    await tooltip.innerText(),
+    /The path used when the condition is true/,
+  );
   await tooltip.hover();
   assert.equal(
     await tooltip.isVisible(),
@@ -117,16 +120,39 @@ try {
   await page.screenshot({ path: resolve(evidence, "flow-hover-dark.png") });
   await page.keyboard.press("Escape");
   assert.equal(await tooltip.count(), 0, "Escape dismisses the tooltip");
-  const classification = page
+  for (const name of [
+    "classification",
+    "flow",
+    "message",
+    "team",
+    "billing",
+    "inspector",
+  ]) {
+    assert.equal(
+      await page
+        .getByRole("button", { name: `${name}: API help`, exact: true })
+        .count(),
+      0,
+      `${name} is ordinary example code, not API help`,
+    );
+  }
+  assert.equal(
+    await page
+      .getByRole("button", { name: "jev: API help", exact: true })
+      .count(),
+    1,
+    "The method has help; the imported client variable does not",
+  );
+  const state = page
     .getByRole("button", {
-      name: "classification: type information",
+      name: "state: API help",
       exact: true,
     })
     .first();
-  await classification.scrollIntoViewIfNeeded();
-  await classification.focus();
+  await state.scrollIntoViewIfNeeded();
+  await state.focus();
   await tooltip.waitFor();
-  assert.match(await tooltip.innerText(), /AnswerRefs/);
+  assert.match(await tooltip.innerText(), /Context sent to Jev/);
   await page.keyboard.press("Escape");
   await page.keyboard.press("Enter");
   await tooltip.waitFor();
@@ -149,7 +175,7 @@ try {
   const touchPage = await touch.newPage();
   await touchPage.goto(origin + base + "guides/flows/");
   await touchPage
-    .getByRole("button", { name: "branch: type information", exact: true })
+    .getByRole("button", { name: "branch: API help", exact: true })
     .tap();
   const touchTooltip = touchPage.getByRole("tooltip");
   await touchTooltip.waitFor();
