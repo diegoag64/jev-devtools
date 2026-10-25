@@ -35,7 +35,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Maintenance
 
-- **Release publication tooling.** Add reusable docs artifact inspection, staging, and live readback helpers, plus a restricted local verification path for existing receipt edits. Replace self-referential pending-merge receipt text with durable PR links. Full CI, explicit publishing authorization, public APIs, and package behavior remain unchanged. Related to [#77](https://github.com/diegoag64/jev-devtools/issues/77). ([#100](https://github.com/diegoag64/jev-devtools/pull/100))
+- **Release publication tooling.** Add reusable docs artifact inspection, staging, and live readback helpers, plus a restricted local verification path for existing receipt edits. Check committed, staged, and working changes independently, and reject dangling provenance symlinks before staging writes. Replace self-referential pending-merge receipt text with durable PR links. Full CI, explicit publishing authorization, public APIs, and package behavior remain unchanged. Related to [#77](https://github.com/diegoag64/jev-devtools/issues/77). ([#100](https://github.com/diegoag64/jev-devtools/pull/100))
 
 - **Flow lifecycle regression coverage.** Assert exact loop body calls, retained iterations and latest completed state, and distinguish task timeouts from cancellation in recorded step errors. Runtime behavior and public APIs are unchanged. ([#95](https://github.com/diegoag64/jev-devtools/pull/95))
 

@@ -211,11 +211,12 @@ export function stageArtifact(inspection, destination) {
   );
   if (existsSync(target)) hashFiles(target); // Reject symlinks before replacing generated files.
   const provenance = join(checkout, "source-provenance.json");
-  if (existsSync(provenance))
-    assert.ok(
-      lstatSync(provenance).isFile(),
-      "Provenance must be a regular file",
-    );
+  // lstat also sees dangling symlinks; existsSync follows them and reports absence.
+  const provenanceInfo = lstatSync(provenance, { throwIfNoEntry: false });
+  assert.ok(
+    !provenanceInfo || provenanceInfo.isFile(),
+    "Provenance must be a regular file",
+  );
   const staging = mkdtempSync(join(checkout, ".docs-staging-"));
   try {
     cpSync(inspection.artifact, join(staging, "dist"), { recursive: true });
@@ -234,7 +235,7 @@ export function stageArtifact(inspection, destination) {
     }
     const { manifest } = inspection;
     writeFileSync(
-      provenance,
+      join(staging, "source-provenance.json"),
       JSON.stringify(
         {
           repository,
@@ -249,6 +250,8 @@ export function stageArtifact(inspection, destination) {
         2,
       ) + "\n",
     );
+    // Replace the entry without following a link introduced after validation.
+    renameSync(join(staging, "source-provenance.json"), provenance);
   } finally {
     rmSync(staging, { recursive: true, force: true });
   }

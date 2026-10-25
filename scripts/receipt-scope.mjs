@@ -61,6 +61,9 @@ export function checkReceiptScope(root) {
   const paths = [
     ...new Set(
       [
+        ...git("diff", "--name-only", "--no-renames", "-z", base, "HEAD").split(
+          "\0",
+        ),
         ...git("diff", "--name-only", "--no-renames", "-z", base).split("\0"),
         ...git(
           "diff",
@@ -86,17 +89,20 @@ export function checkReceiptScope(root) {
     );
     const mode = git("ls-files", "--stage", "--", path).split(" ")[0];
     assert.equal(mode, "100644", `${path}: unexpected file mode`);
-    assert.equal(
-      git("diff", "--summary", base, "--", path).trim(),
-      "",
-      `${path}: file additions, deletions, renames or mode changes require verify:all`,
-    );
+    for (const revisions of [[base, "HEAD"], ["--cached", base], [base]]) {
+      assert.equal(
+        git("diff", "--summary", ...revisions, "--", path).trim(),
+        "",
+        `${path}: file additions, deletions, renames or mode changes require verify:all`,
+      );
+    }
     const before = git("show", `${base}:${path}`);
+    const committed = git("show", `HEAD:${path}`);
     const staged = git("show", `:${path}`);
     const after = readFileSync(resolve(root, path), "utf8");
-    // The index can contain a broader edit even when the working file was
-    // restored. Validate each version independently before reporting scope.
-    for (const candidate of [staged, after]) {
+    // Local restorations can hide broader committed or staged edits. Validate
+    // HEAD, index and working contents independently before reporting scope.
+    for (const candidate of [committed, staged, after]) {
       if (candidate === before) continue;
       assertReceiptChange(path, before, candidate);
       checkLocalLinks(root, path, candidate);

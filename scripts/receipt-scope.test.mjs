@@ -16,6 +16,31 @@ const changelog =
 const releases =
   "# Releases\n\n## Release checklist\n\nApproval required.\n\n## Release 0.5.2 — published October 25, 2026\n\nPublished at noon.\n\n## Release 0.5.1 — published October 25, 2026\n\nEarlier.\n\n### Upgrade\n\nKeep this contract.\n";
 
+function receiptFixture(t) {
+  const root = mkdtempSync(join(tmpdir(), "jev-receipt-scope-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const git = (...args) =>
+    execFileSync("git", args, {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    }).trim();
+  const commit = () => {
+    git("add", ".");
+    git("commit", "-qm", "fixture");
+  };
+  mkdirSync(join(root, "docs"));
+  writeFileSync(join(root, "CHANGELOG.md"), changelog);
+  writeFileSync(join(root, "code.js"), "original");
+  git("init", "-q");
+  git("config", "user.name", "Test");
+  git("config", "user.email", "test@example.invalid");
+  git("config", "commit.gpgsign", "false");
+  commit();
+  git("update-ref", "refs/remotes/origin/main", "HEAD");
+  return { root, git, commit };
+}
+
 test("receipt wording rejects self-expiring review claims and retains permanent references", () => {
   assertDurableReceiptWording(
     "Deployment receipt: [PR #99](https://github.com/example/repo/pull/99).",
@@ -104,34 +129,7 @@ test("deployment receipts allow existing history edits but protect publication p
 });
 
 test("scope includes branch commits, staged/unstaged edits, deletions, mode changes and untracked files", (t) => {
-  const root = mkdtempSync(join(tmpdir(), "jev-receipt-scope-"));
-  t.after(() => rmSync(root, { recursive: true, force: true }));
-  const git = (...args) =>
-    execFileSync("git", args, {
-      cwd: root,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"],
-    }).trim();
-  const commit = () => {
-    git("add", ".");
-    git(
-      "-c",
-      "user.name=Test",
-      "-c",
-      "user.email=test@example.invalid",
-      "-c",
-      "commit.gpgsign=false",
-      "commit",
-      "-qm",
-      "fixture",
-    );
-  };
-  mkdirSync(join(root, "docs"));
-  writeFileSync(join(root, "CHANGELOG.md"), changelog);
-  writeFileSync(join(root, "code.js"), "original");
-  git("init", "-q");
-  commit();
-  git("update-ref", "refs/remotes/origin/main", "HEAD");
+  const { root, git, commit } = receiptFixture(t);
   assert.throws(() => checkReceiptScope(root), /No receipt edits/);
   writeFileSync(
     join(root, "CHANGELOG.md"),
@@ -176,6 +174,41 @@ test("scope includes branch commits, staged/unstaged edits, deletions, mode chan
   git("reset", "--quiet", "HEAD", "CHANGELOG.md");
   rmSync(join(root, "CHANGELOG.md"));
   assert.throws(() => checkReceiptScope(root));
+});
+
+test("restored index and working files cannot hide committed code, compatibility or mode changes", async (t) => {
+  for (const kind of ["code", "compatibility", "mode"]) {
+    await t.test(kind, (t) => {
+      const { root, git, commit } = receiptFixture(t);
+      if (kind === "code") {
+        writeFileSync(join(root, "code.js"), "changed");
+        commit();
+      } else if (kind === "compatibility") {
+        writeFileSync(
+          join(root, "CHANGELOG.md"),
+          changelog.replace("Keep Node support.", "Drop Node support."),
+        );
+        commit();
+      } else {
+        git("update-index", "--chmod=+x", "CHANGELOG.md");
+        git("commit", "-qm", "mode change");
+      }
+      const path = kind === "code" ? "code.js" : "CHANGELOG.md";
+      git("restore", "--source=origin/main", "--staged", "--worktree", path);
+      writeFileSync(
+        join(root, "CHANGELOG.md"),
+        changelog.replace("noon", "midnight"),
+      );
+      assert.throws(
+        () => checkReceiptScope(root),
+        kind === "code"
+          ? /code.js/
+          : kind === "compatibility"
+            ? /outside existing receipt/
+            : /mode changes/,
+      );
+    });
+  }
 });
 
 test("receipt links reject missing local targets and anchors", (t) => {

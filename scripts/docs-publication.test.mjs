@@ -10,6 +10,8 @@ import {
   writeFileSync,
   rmSync,
   symlinkSync,
+  existsSync,
+  readlinkSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -229,6 +231,10 @@ test("staging preserves inspected bytes and hosting settings, removes obsolete o
     () => stageArtifact(inspection, f.checkout),
     /checkout has changes/,
   );
+  f.commitAt(f.checkout);
+  assert.equal(stageArtifact(inspection, f.checkout).files, 6);
+  assert.deepEqual(hashFiles(join(f.checkout, "dist")), inspection.files);
+  assert.equal(f.git(f.checkout, "status", "--porcelain"), "");
 });
 
 test("staging rejects changed artifacts, wrong checkout roots and wrong destinations before writing", (t) => {
@@ -277,6 +283,25 @@ test("publication artifacts reject symlinks and staging refuses overlapping sour
     () => stageArtifact({ ...inspection, artifact: inside }, f.checkout),
     /must not overlap/,
   );
+});
+
+test("staging rejects dangling provenance symlinks before changing checkout or external files", (t) => {
+  const f = fixture(t);
+  const provenance = join(f.checkout, "source-provenance.json");
+  const outside = join(f.checkout, "..", "outside.json");
+  symlinkSync("../outside.json", provenance);
+  f.commitAt(f.checkout);
+  assert.equal(existsSync(outside), false);
+  assert.equal(f.git(f.checkout, "status", "--porcelain"), "");
+  const before = hashFiles(join(f.checkout, "dist"));
+  assert.throws(
+    () => stageArtifact(f.inspect(), f.checkout),
+    /Provenance must be a regular file/,
+  );
+  assert.equal(existsSync(outside), false);
+  assert.equal(readlinkSync(provenance), "../outside.json");
+  assert.deepEqual(hashFiles(join(f.checkout, "dist")), before);
+  assert.equal(f.git(f.checkout, "status", "--porcelain"), "");
 });
 
 test("live readback fails on stale manifests, mismatched changelog, missing pages and deep links", async (t) => {
