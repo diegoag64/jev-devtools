@@ -24,6 +24,8 @@ Pages load their stylesheet through a render-blocking link in the head, independ
 - Add a Markdown file under `content/`, then register its title, description, group, and slug in `pages.ts`. Omit H1: the shell supplies the page title.
 - Use site-relative Markdown links such as `[Quick start](@/getting-started/)`. These adapt to `DOCS_BASE`. Use ordinary fragments for headings and absolute URLs for external resources.
 - Include a checked snippet with `<!-- example: server.ts -->`. Sources live in `examples/`, are type-checked, and are expanded in both HTML and downloadable Markdown. Do not execute credential-dependent examples during a docs build.
+- Opt into type hovers with `<!-- example: flow.ts twoslash -->`. Shiki highlights all code at build time; Twoslash analyzes only opted-in examples against their real public imports. It does not execute examples. The docs workspace pins TypeScript 6 (and matching transitive peers) for its compiler API; repository tooling continues to use TypeScript 7.
+- Hover signatures and JSDoc are static HTML outside the copyable code. A small, lazy-loaded browser module handles pointer/focus/touch positioning and dismissal. No compiler, highlighter, or language server ships to the browser.
 - Regular fenced snippets can be partial illustrations; explicitly identify their missing application context. They are not automatically type-checked.
 - Markdown and embedded HTML are trusted repository source, reviewed like code. This compiler is not an untrusted-content sanitizer.
 - Keep headings unique where possible; duplicate heading slugs receive suffixes. Heading IDs are deep links, so preserve them when editing.

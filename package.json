@@ -41,5 +41,13 @@
     "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vite": "8.3.5"
+  },
+  "overrides": {
+    "@shikijs/twoslash": {
+      "typescript": "6.0.3"
+    },
+    "twoslash": {
+      "typescript": "6.0.3"
+    }
   }
 }

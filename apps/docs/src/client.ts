@@ -130,3 +130,5 @@ document.addEventListener("keydown", (event) => {
   }
 });
 if (document.querySelector("[data-demo]")) void import("./demo.js");
+
+if (document.querySelector("[data-type-info]")) void import("./type-hovers.js");

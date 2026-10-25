@@ -408,42 +408,66 @@ pre {
 pre code {
   font-size: 12px;
 }
-.hljs-keyword,
-.hljs-selector-tag,
-.hljs-literal {
-  color: var(--accent);
+/* Shiki emits both palettes at build time; follow the page theme without JS. */
+.shiki,
+.shiki span {
+  color: var(--shiki-light);
 }
-.hljs-string,
-.hljs-attr {
-  color: #187e6c;
-}
-.hljs-title,
-.hljs-built_in,
-.hljs-number {
-  color: #7560bd;
-}
-.hljs-comment {
-  color: var(--muted);
-}
-:root[data-theme="dark"] .hljs-string,
-:root[data-theme="dark"] .hljs-attr {
-  color: #80d5bc;
-}
-:root[data-theme="dark"] .hljs-title,
-:root[data-theme="dark"] .hljs-built_in,
-:root[data-theme="dark"] .hljs-number {
-  color: #c3b1fa;
+:root[data-theme="dark"] .shiki,
+:root[data-theme="dark"] .shiki span {
+  color: var(--shiki-dark);
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .hljs-string,
-  :root:not([data-theme="light"]) .hljs-attr {
-    color: #80d5bc;
+  :root:not([data-theme="light"]) .shiki,
+  :root:not([data-theme="light"]) .shiki span {
+    color: var(--shiki-dark);
   }
-  :root:not([data-theme="light"]) .hljs-title,
-  :root:not([data-theme="light"]) .hljs-built_in,
-  :root:not([data-theme="light"]) .hljs-number {
-    color: #c3b1fa;
-  }
+}
+.type-token {
+  cursor: help;
+  text-decoration: underline dotted var(--muted);
+  text-underline-offset: 4px;
+}
+.type-token:hover,
+.type-token:focus-visible {
+  background: var(--tint);
+  outline: 1px solid var(--accent);
+  border-radius: 2px;
+}
+/* Fixed tooltips escape the code scroller; the client only positions them. */
+.type-popup {
+  position: fixed;
+  z-index: 100;
+  width: min(510px, calc(100vw - 24px));
+  max-height: min(360px, calc(100vh - 24px));
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 12px 36px #0003;
+  padding: 14px;
+}
+.type-popup-label {
+  color: var(--muted);
+  font-size: 11px;
+  margin-bottom: 9px;
+}
+.type-popup pre {
+  padding: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+.type-popup pre code {
+  font-size: 12px;
+}
+.type-popup p {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
 }
 blockquote {
   margin: 24px 0;

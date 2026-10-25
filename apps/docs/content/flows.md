@@ -4,7 +4,9 @@ Flows are optional. Start here once a single request appears in the drawer. Keep
 
 This flow classifies a message and returns the name of a team. It does not send a ticket or perform a business action.
 
-<!-- example: flow.ts -->
+Hover, focus, or tap a dotted symbol to inspect its type. Try `flow`, `classification`, or `branch`. Press Escape to dismiss the tooltip.
+
+<!-- example: flow.ts twoslash -->
 
 The `triage` definition is built once. `routeMessage()` runs it with new input each time. Pass the shared adapter as `devtools` to record the execution and link request traces to steps.
 

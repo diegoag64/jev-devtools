@@ -14,7 +14,7 @@ test("code examples render as text while repeated headings get distinct deep lin
     ["setup", "setup-1"],
   );
   assert.ok(result.html.includes('href="#setup-1"'));
-  assert.ok(result.html.includes("&lt;"));
+  assert.match(result.html, /&(?:lt;|#x3C;)/);
   assert.ok(!result.html.includes("<JevDevtools"));
 });
 
@@ -41,4 +41,15 @@ test("documented replay fixture produces the explained outcome without a key", a
   const result = await replayExample();
   assert.equal(result.outcome, "routed");
   assert.equal(result.value, "billing");
+});
+
+// The docs build must reject invalid opted-in examples instead of publishing
+// convincing hovers for code that no longer matches the public API.
+test("interactive examples fail the build on TypeScript errors", async () => {
+  await assert.rejects(
+    compile(
+      '```ts twoslash file=flow.ts\nconst count: number = "not a number";\n```',
+    ),
+    /not assignable/,
+  );
 });

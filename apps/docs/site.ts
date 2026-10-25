@@ -2,11 +2,7 @@ import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Marked } from "marked";
-import hljs from "highlight.js/lib/core";
-import typescript from "highlight.js/lib/languages/typescript";
-import javascript from "highlight.js/lib/languages/javascript";
-import bash from "highlight.js/lib/languages/bash";
-import json from "highlight.js/lib/languages/json";
+import { codeRenderer } from "./highlight.js";
 import { groups, pages, type Page } from "./pages.js";
 
 export const appRoot = dirname(fileURLToPath(import.meta.url));
@@ -15,16 +11,6 @@ const repo = "https://github.com/diegoag64/jev-devtools";
 // Run in the head, before styles/content paint; a deferred module is too late
 // when the saved choice differs from the operating system's color scheme.
 const themeScript = `try{const theme=localStorage.getItem("jev-docs-theme");if(theme==="light"||theme==="dark")document.documentElement.dataset.theme=theme;}catch{}`;
-for (const [name, language] of Object.entries({
-  typescript,
-  javascript,
-  bash,
-  json,
-}))
-  hljs.registerLanguage(name, language);
-hljs.registerAliases(["ts", "tsx"], { languageName: "typescript" });
-hljs.registerAliases(["js", "jsx"], { languageName: "javascript" });
-hljs.registerAliases(["sh", "shell"], { languageName: "bash" });
 export const escape = (value: string) =>
   value.replace(
     /[&<>"']/g,
@@ -43,6 +29,7 @@ export function normalizeBase(value = "/") {
 export async function compile(markdown: string) {
   const headings: { id: string; title: string; depth: number }[] = [];
   const ids = new Map<string, number>();
+  const renderCode = await codeRenderer();
   const renderer = new Marked({
     renderer: {
       heading({ tokens, depth }) {
@@ -61,11 +48,7 @@ export async function compile(markdown: string) {
         return `<h${depth} id="${id}">${html}<a class="heading-link" href="#${id}" aria-label="Link to ${escape(title)}">#</a></h${depth}>`;
       },
       code({ text, lang }) {
-        const language = lang?.split(/\s/)[0] ?? "text";
-        const code = hljs.getLanguage(language)
-          ? hljs.highlight(text, { language }).value
-          : escape(text);
-        return `<div class="code-block"><div class="code-toolbar"><span>${escape(language)}</span><button type="button" class="copy-code" hidden>Copy code</button></div><pre><code>${code}</code></pre></div>`;
+        return renderCode(text, lang);
       },
     },
   });
@@ -73,13 +56,13 @@ export async function compile(markdown: string) {
 }
 async function expandExamples(source: string) {
   const matches = [
-    ...source.matchAll(/<!-- example: ([\w-]+\.(?:ts|tsx)) -->/g),
+    ...source.matchAll(/<!-- example: ([\w-]+\.(?:ts|tsx))( twoslash)? -->/g),
   ];
   for (const match of matches) {
     const code = await readFile(resolve(appRoot, "examples", match[1]), "utf8");
     source = source.replace(
       match[0],
-      `\n\x60\x60\x60${match[1].endsWith("tsx") ? "tsx" : "ts"}\n${code.trim()}\n\x60\x60\x60\n`,
+      `\n\x60\x60\x60${match[1].endsWith("tsx") ? "tsx" : "ts"}${match[2] ? ` twoslash file=${match[1]}` : ""}\n${code.trim()}\n\x60\x60\x60\n`,
     );
   }
   return source;

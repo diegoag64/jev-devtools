@@ -94,6 +94,83 @@ try {
     path: resolve(evidence, "dark-reference.png"),
     fullPage: true,
   });
+  // Exercise delivered HTML and real interactions, including clean copy output.
+  const flowSource = (
+    await readFile(resolve(app, "examples/flow.ts"), "utf8")
+  ).trim();
+  await page.goto(origin + base + "guides/flows/");
+  const branch = page.getByRole("button", {
+    name: "branch: type information",
+    exact: true,
+  });
+  const tooltip = page.getByRole("tooltip");
+  await branch.hover();
+  await tooltip.waitFor();
+  assert.match(await tooltip.innerText(), /Terminal decision/);
+  assert.match(await tooltip.innerText(), /when: FlowExpression<boolean>/);
+  await tooltip.hover();
+  assert.equal(
+    await tooltip.isVisible(),
+    true,
+    "The tooltip stays open when the pointer enters it",
+  );
+  await page.screenshot({ path: resolve(evidence, "flow-hover-dark.png") });
+  await page.keyboard.press("Escape");
+  assert.equal(await tooltip.count(), 0, "Escape dismisses the tooltip");
+  const classification = page
+    .getByRole("button", {
+      name: "classification: type information",
+      exact: true,
+    })
+    .first();
+  await classification.scrollIntoViewIfNeeded();
+  await classification.focus();
+  await tooltip.waitFor();
+  assert.match(await tooltip.innerText(), /AnswerRefs/);
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Enter");
+  await tooltip.waitFor();
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Copy code", exact: true }).click();
+  assert.equal(
+    (await page.evaluate(() => navigator.clipboard.readText())).trim(),
+    flowSource,
+  );
+  await page.getByRole("button", { name: "Switch color theme" }).click();
+  await branch.hover();
+  await tooltip.waitFor();
+  await page.screenshot({ path: resolve(evidence, "flow-hover-light.png") });
+  await page.keyboard.press("Escape");
+  const touch = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+  });
+  const touchPage = await touch.newPage();
+  await touchPage.goto(origin + base + "guides/flows/");
+  await touchPage
+    .getByRole("button", { name: "branch: type information", exact: true })
+    .tap();
+  const touchTooltip = touchPage.getByRole("tooltip");
+  await touchTooltip.waitFor();
+  const bounds = await touchTooltip.boundingBox();
+  assert.ok(
+    bounds.x >= 0 &&
+      bounds.x + bounds.width <= 390 &&
+      bounds.y >= 0 &&
+      bounds.y + bounds.height <= 844,
+    "Touch tooltip fits the viewport",
+  );
+  await touchPage.screenshot({
+    path: resolve(evidence, "flow-hover-mobile.png"),
+  });
+  await touchPage.getByRole("button", { name: "Copy code", exact: true }).tap();
+  assert.equal(
+    await touchTooltip.count(),
+    0,
+    "Tapping outside dismisses the tooltip",
+  );
+  await touch.close();
   const links = await page
     .locator("#sidebar nav a")
     .evaluateAll((nodes) => nodes.map((n) => n.href));
@@ -165,9 +242,15 @@ try {
     .getByRole("link", { name: "Quick start", exact: true })
     .click();
   assert.ok(readable.url().endsWith("/getting-started/"));
+  await readable.goto(origin + base + "guides/flows/");
+  assert.equal(
+    (await readable.locator(".code-block > pre > code").innerText()).trim(),
+    flowSource,
+    "The complete example stays readable without JavaScript",
+  );
   assert.deepEqual(errors, []);
   console.log(
-    `Verified ${links.length} pages, sample switching, lazy search, keyboard navigation, copy, persistent theme, mobile layout, raw Markdown, 404s, and no-JS reading at base ${base}.`,
+    `Verified ${links.length} pages, sample switching, lazy search, keyboard navigation, copy, persistent theme, mobile layout, raw Markdown, 404s, type hovers (pointer/keyboard/touch), clean copying, and no-JS reading at base ${base}.`,
   );
   console.log(`Screenshots: ${evidence}`);
 } finally {
