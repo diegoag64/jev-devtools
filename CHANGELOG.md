@@ -27,7 +27,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Maintenance
 
-- **Flow lifecycle regression coverage.** Assert exact loop body calls, retained iterations and latest completed state, and distinguish task timeouts from cancellation in recorded step errors. Runtime behavior and public APIs are unchanged.
+- **Flow lifecycle regression coverage.** Assert exact loop body calls, retained iterations and latest completed state, and distinguish task timeouts from cancellation in recorded step errors. Runtime behavior and public APIs are unchanged. ([#95](https://github.com/diegoag64/jev-devtools/pull/95))
 
 ## 0.5.2 — Pending publication (experimental)
 
