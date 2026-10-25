@@ -5,7 +5,7 @@ import { mountHeroEffect } from "./renderer";
 export function mountHeroEffectLab() {
   const target = document.querySelector<HTMLElement>(".hero h1 > span");
   if (!target) return;
-  const key = "jevtools:hero-effect-lab";
+  const key = "jevtools:hero-effect-lab:foil";
   let saved = "";
   try { saved = sessionStorage.getItem(key) ?? ""; } catch { /* Storage can be unavailable in private contexts. */ }
   let selected = Math.max(0, effects.findIndex(effect => effect.id === saved));
@@ -15,7 +15,7 @@ export function mountHeroEffectLab() {
   panel.className = "hero-lab";
   panel.setAttribute("aria-label", "Temporary hero effect lab");
   panel.innerHTML = `
-    <header><div><strong>Hero effect lab</strong><br><span>Temporary · local development</span></div><button type="button" data-collapse aria-expanded="true" aria-controls="hero-lab-body">Hide</button></header>
+    <header><div><strong>Hero effect lab</strong><br><span>Foil collection · local development</span></div><button type="button" data-collapse aria-expanded="true" aria-controls="hero-lab-body">Hide</button></header>
     <div id="hero-lab-body">
       <label class="sr-only" for="hero-lab-effect">Hero color effect</label>
       <select id="hero-lab-effect">${effects.map((effect, i) => `<option value="${i}">${i + 1} / ${effects.length} — ${effect.name}</option>`).join("")}</select>
