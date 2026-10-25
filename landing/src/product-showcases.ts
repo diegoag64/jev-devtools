@@ -6,7 +6,7 @@ export const drawerShowcase = `
   <div class="wrap">
   <div class="product-heading">
     <h2 id="drawer-title">Your React app.<br /><span>Jev, in plain sight.</span></h2>
-    <div><p>Open the drawer without leaving your app. Follow a request from its input to its answer, inspect the probabilities, and see the details behind every step.</p><a class="text-link" href="https://docs.jevtools.dev">Add the drawer to your app <span aria-hidden="true">↗</span></a></div>
+    <div><p>Open the drawer without leaving your app. Follow a request from its input to its answer, inspect the probabilities, and see the details behind every step.</p><a class="text-link" href="https://docs.jevtools.dev">Add the drawer to your app</a></div>
   </div>
   <figure class="drawer-demo">
     <video id="drawer-video" controls playsinline muted preload="metadata" width="1920" height="1066" aria-label="Recorded demo of Jev DevTools in the React playground" aria-describedby="drawer-description">
@@ -27,7 +27,7 @@ export const flowApiShowcase = `
   <div class="wrap">
   <div class="product-heading">
     <h2 id="flow-api-title">Write the flow.<br /><span>Get the diagram.</span></h2>
-    <div><p>The Flow API turns an explicit TypeScript definition into an inspectable graph. Combine System One requests with your functions, branches, parallel work, maps, and loops—then see how each run unfolded.</p><a class="text-link" href="${flowGuide}">Explore the Flow API <span aria-hidden="true">↗</span></a></div>
+    <div><p>The Flow API turns an explicit TypeScript definition into an inspectable graph. Combine System One requests with your functions, branches, parallel work, maps, and loops—then see how each run unfolded.</p><a class="text-link" href="${flowGuide}">Explore the Flow API</a></div>
   </div>
   <div class="api-comparison">
     <div class="api-source code-window">

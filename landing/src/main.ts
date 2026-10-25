@@ -8,7 +8,6 @@ import { flows, type Card, type Edge, type Flow } from "./flows";
 
 const DOCS = "https://docs.jevtools.dev";
 const GITHUB = "https://github.com/diegoag64/jev-devtools";
-const arrow = '<span aria-hidden="true">↗</span>';
 const logo =
   '<svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M7 7h9v9h9v9h-9v-9H7z" stroke="currentColor" stroke-width="1.6"/><circle cx="7" cy="7" r="3" fill="currentColor"/><circle cx="25" cy="25" r="3" fill="currentColor"/></svg>';
 const github =
@@ -29,7 +28,7 @@ app.innerHTML = `
       <div class="diagram-scroll" tabindex="0" role="region" aria-label="Flow diagram; scroll horizontally on small screens"><svg id="diagram" viewBox="0 0 1140 520" role="img"></svg></div>
       <div class="flow-caption">
         <div class="flow-caption-copy"><p><span id="flow-number" class="flow-number"></span><span id="flow-name"></span><span class="sample-label">Simulated flow</span></p><p id="flow-description"></p></div>
-        <div class="playback"><button id="previous" aria-label="Previous flow" title="Previous flow">←</button><button id="play" aria-label="Pause animation" title="Pause animation">Ⅱ</button><button id="next" aria-label="Next flow" title="Next flow">→</button></div>
+        <div class="playback"><button id="previous" aria-label="Previous flow" title="Previous flow">Previous</button><button id="play" aria-label="Pause animation" title="Pause animation">Ⅱ</button><button id="next" aria-label="Next flow" title="Next flow">Next</button></div>
       </div>
       <p class="mobile-hint">Swipe to explore the diagram <span aria-hidden="true">↔</span></p>
       <span id="flow-announcement" class="sr-only" role="status"></span>
@@ -47,7 +46,7 @@ app.innerHTML = `
     </section>
     ${flowApiShowcase}
     <section class="integration wrap" aria-labelledby="integration-title">
-      <div class="integration-copy"><h2 id="integration-title">Keep your code.<br />See the connections.</h2><p>Mount the React drawer, connect a server adapter, and inspect your Jev requests right where you build. Add connected flows when you need the whole picture.</p><a class="text-link" href="${DOCS}">Find your integration guide ${arrow}</a><div class="integration-tags"><span>React 18 / 19</span><span>Next.js App Router</span></div></div>
+      <div class="integration-copy"><h2 id="integration-title">Keep your code.<br />See the connections.</h2><p>Mount the React drawer, connect a server adapter, and inspect your Jev requests right where you build. Add connected flows when you need the whole picture.</p><a class="text-link" href="${DOCS}">Find your integration guide</a><div class="integration-tags"><span>React 18 / 19</span><span>Next.js App Router</span></div></div>
       <div class="code-window"><div class="code-heading"><span><span class="code-dot"></span> Your application</span><span>React / Vite</span></div><div class="install-command"><code>npm install jev-devtools @typesafe-ai/sdk</code><button id="copy" aria-label="Copy install command" title="Copy install command">Copy</button></div><pre><code><span class="syntax-purple">import</span> { JevDevtools } <span class="syntax-purple">from</span> <span class="syntax-green">'jev-devtools'</span>;
 
 <span class="syntax-purple">export function</span> <span class="syntax-pink">Root</span>() {
@@ -59,7 +58,7 @@ app.innerHTML = `
   );
 }</code></pre><p class="code-note">The browser side is this small. The integration guide covers the server adapter and request capture.</p><span class="sr-only" id="copy-status" role="status"></span></div>
     </section>
-    <section class="closing section-band" data-theme="plum"><div class="wrap"><h2>Complex flows.<br /><span>Clear understanding.</span></h2><p>Open source, actively evolving, and ready for your next idea.<br />Explore the docs. Try it in your app. Help shape what’s next.</p><div class="hero-actions"><a class="button primary" href="${DOCS}">Explore the docs ${arrow}</a><a class="text-link" href="${GITHUB}">Build with us ${arrow}</a></div><span class="experimental">Experimental software. APIs may evolve before 1.0.</span></div></section>
+    <section class="closing section-band" data-theme="plum"><div class="wrap"><h2>Complex flows.<br /><span>Clear understanding.</span></h2><p>Open source, actively evolving, and ready for your next idea.<br />Explore the docs. Try it in your app. Help shape what’s next.</p><div class="hero-actions"><a class="button primary" href="${DOCS}">Explore the docs</a><a class="text-link" href="${GITHUB}">Build with us</a></div><span class="experimental">Experimental software. APIs may evolve before 1.0.</span></div></section>
   </main>
   <footer class="site-footer wrap"><p>Jev DevTools is an independent, open-source community project. It is not affiliated with TypeSafe AI.</p></footer>
 `;

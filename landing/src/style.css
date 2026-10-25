@@ -565,9 +565,7 @@ nav a:hover,
   max-width: 390px;
 }
 .text-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 17px;
+  display: inline-block;
   font-size: 12px;
   color: #e7b4d6;
 }
@@ -751,13 +749,13 @@ nav a:hover,
   flex-shrink: 0;
 }
 .playback button {
-  width: 34px;
+  min-width: 34px;
   height: 34px;
-  padding: 0;
+  padding: 0 8px;
   background: transparent;
   color: #a088a7;
-  border-radius: 50%;
-  font-size: 15px;
+  border-radius: 6px;
+  font-size: 12px;
 }
 .playback button:hover {
   background: #251929;
@@ -796,7 +794,7 @@ nav a:hover,
     gap: 0;
   }
   .playback button {
-    width: 29px;
+    min-width: 29px;
     height: 29px;
   }
   .mobile-hint {
