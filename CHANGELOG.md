@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Flow replay and comparison; capture reliability and privacy; documentation site. |
+| [Unreleased](#unreleased) | Not published | Flow replay and comparison; capture reliability and privacy; documentation site; proposed landing page. |
 | [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | CSS isolation; stricter published flow types; approved release workflow. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Tasks, maps and loops; six cookbooks; SDK and inspector access changes. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API; readable diagrams; bundled flow guidance. |
@@ -23,6 +23,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 ### Changes
 
 #### Added
+
+- **Standalone landing page.** Add a standalone Vite landing page under `landing/` for jevtools.dev, linking to the docs and GitHub. Showcase six simulated flow diagrams, System One primitives, a real React drawer recording introduced by “System One Diagrams / Anywhere in your App,” and a Flow API definition with sample branch outcomes. Include responsive section layouts, stable diagram navigation, a “System One / Visualized” closing heading, and a Prism/Jade hero animation with randomized organic transitions and reduced-motion support. Copy and design remain work in progress. The site has isolated dependencies and styles, makes no inference requests, and does not change package APIs. Its Sites manifest retains the public hosting project identity for repeatable publishing; custom-domain routing requires DNS configuration. ([#72](https://github.com/diegoag64/jev-devtools/pull/72))
 
 - **Compare live runs with fixtures.** Add `compareWithFixture` and `formatComparison` to `jev-devtools/flow`: compare a live client's run with a saved fixture, print the differences for CI logs, and get the live run back as a new fixture. Map items and loop iterations are reported under their composed ids; a step that ran on only one side sets `changed`. Recording observer failures and mutations to run snapshots cannot corrupt the comparison; captured response snapshots also prevent later observer mutations from hiding answer drift or rewriting the live fixture. Tasks run on both sides. ([#32](https://github.com/diegoag64/jev-devtools/pull/32))
 
