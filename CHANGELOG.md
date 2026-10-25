@@ -27,7 +27,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 - **Landing navigation.** Remove the "Explore the flows" header link and keep Docs visible on mobile. Package APIs are unchanged. ([#78](https://github.com/diegoag64/jev-devtools/pull/78))
 
-- **Website sharing previews.** Add the selected prismatic landing image and documentation image to Open Graph and Twitter metadata, requesting large image cards on both sites. Docs keep page-specific titles and descriptions with one shared image. Package APIs are unchanged; the previews become available after each site's manual publication. ([#78](https://github.com/diegoag64/jev-devtools/pull/78))
+- **Website sharing previews.** Add the selected prismatic landing image and documentation image to Open Graph and Twitter metadata, requesting large image cards on both sites. The landing artwork uses a smaller headline with clear separation between the “y” and “i”. Docs keep page-specific titles and descriptions with one shared image. Package APIs are unchanged; the previews become available after each site's manual publication. ([#78](https://github.com/diegoag64/jev-devtools/pull/78))
 
 #### Documentation
 
