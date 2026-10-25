@@ -754,6 +754,24 @@ export const FlowOverview = memo(function FlowOverview({
   const trace = step?.traceId
     ? traces.find((t) => t.id === step.traceId)
     : undefined;
+  const stepSelection = (
+    <label className="flow-step-select">
+      Step
+      <select
+        aria-label="Flow step"
+        value={selected}
+        onChange={(e) => selectStep(e.target.value)}
+      >
+        <option value="">Select a step</option>
+        {definition.nodes.map((n) => (
+          <option key={n.id} value={n.id}>
+            {n.title ? `${n.title} (${n.id})` : n.id} ·{" "}
+            {run.steps[n.id]?.status ?? "waiting"}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
   return (
     <div
       className={`flow-overview-stack ${inline ? "flow-inline-overview" : ""}`}
@@ -780,7 +798,10 @@ export const FlowOverview = memo(function FlowOverview({
                   ? ` · ${Math.round(run.durationMs)} ms`
                   : ""}
               </small>
-              <CopyFixtureButton control={fixtureCopy} />
+              <div className="flow-run-controls">
+                {stepSelection}
+                <CopyFixtureButton control={fixtureCopy} />
+              </div>
             </div>
           </header>
         )}
@@ -804,22 +825,7 @@ export const FlowOverview = memo(function FlowOverview({
               </button>
             </div>
           )}
-          <label>
-            Step
-            <select
-              aria-label="Flow step"
-              value={selected}
-              onChange={(e) => selectStep(e.target.value)}
-            >
-              <option value="">Select a step</option>
-              {definition.nodes.map((n) => (
-                <option key={n.id} value={n.id}>
-                  {n.title ? `${n.title} (${n.id})` : n.id} ·{" "}
-                  {run.steps[n.id]?.status ?? "waiting"}
-                </option>
-              ))}
-            </select>
-          </label>
+          {inline && stepSelection}
         </div>
         <div className="flow-workspace">
           <div

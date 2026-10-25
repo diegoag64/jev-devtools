@@ -30,6 +30,10 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ### Changes
 
+#### Changed
+
+- **Flow canvas boundary.** Move the step selector beside **Copy fixture** in the run header and darken the diagram viewport so its pan/zoom area is easier to distinguish. Header controls wrap in narrow drawers; public APIs and zoom behavior are unchanged.
+
 #### Fixed
 
 - **Bound composed expressions.** Account for complete subtree depth and expanded size before recursive validation, projection, and evaluation; cap legacy descriptions independently of the structured rule projection. Fixes [#43](https://github.com/diegoag64/jev-devtools/issues/43). ([#86](https://github.com/diegoag64/jev-devtools/pull/86))

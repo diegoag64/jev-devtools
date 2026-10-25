@@ -668,14 +668,16 @@
   padding: 12px 16px;
   flex-wrap: wrap;
 }
-.jev-devtools .lab-flow-toolbar label {
+.jev-devtools .lab-flow-toolbar label,
+.jev-devtools .flow-step-select {
   display: flex;
   gap: 10px;
   align-items: center;
   font-size: 11px;
   min-width: 0;
 }
-.jev-devtools .lab-flow-toolbar select {
+.jev-devtools .lab-flow-toolbar select,
+.jev-devtools .flow-step-select select {
   width: auto;
   max-width: 240px;
   font-size: 11px;
@@ -1144,6 +1146,9 @@
   min-width: 0;
   overflow: hidden;
 }
+:where(.jev-devtools) .whole-flow > .detail-header {
+  flex-wrap: wrap;
+}
 :where(.jev-devtools) .whole-flow > .detail-header,
 :where(.jev-devtools) .whole-flow > .lab-flow-toolbar {
   flex-shrink: 0;
@@ -1207,6 +1212,7 @@
   outline-offset: -1px;
 }
 :where(.jev-devtools) .flow-overview-viewport {
+  background-color: #08060a;
   position: relative;
   min-height: 0;
   flex: 1 1 0;
@@ -1878,11 +1884,26 @@
   right: -76px;
 }
 .jev-devtools .flow-run-summary {
+  max-width: 100%;
+  margin-left: auto;
   text-align: right;
 }
+.jev-devtools .flow-run-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+.jev-devtools .flow-run-controls .flow-step-select {
+  max-width: 100%;
+}
+.jev-devtools .flow-step-select select {
+  min-width: 0;
+}
 .jev-devtools .flow-fixture-button {
-  display: block;
-  margin: 6px 0 0 auto;
+  flex-shrink: 0;
   /* Keep the header still when the shorter confirmation replaces the label. */
   min-width: 96px;
   font-size: 11px;
