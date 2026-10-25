@@ -27,11 +27,11 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
-- **0.5.2 publication records.** Record verified npm publication, archive integrity/provenance, fresh registry consumers, and the exact Git tag and GitHub Latest release. Update source installation and API guidance to describe the published version. Hosted docs publication remains pending; see the [release record](docs/releases.md#release-052--published-october-25-2026). ([#96](https://github.com/diegoag64/jev-devtools/pull/96))
+- **0.5.2 publication records.** Record verified npm publication, archive integrity/provenance, fresh registry consumers, and the exact Git tag and GitHub Latest release. Update source installation and API guidance to describe the published version. Hosted docs were subsequently published as Sites version 22 from the merged record commit; see the [publication receipt](docs/docs-publishing.md#publication-receipt-and-recovery). ([#96](https://github.com/diegoag64/jev-devtools/pull/96), [receipt #99](https://github.com/diegoag64/jev-devtools/pull/99))
 
 ## 0.5.2 — October 25, 2026 (experimental)
 
-**[Published to npm](https://www.npmjs.com/package/jev-devtools/v/0.5.2) at 21:35:38.942 UTC on October 25, 2026**, from `20e7dc0d9d81285e2c6e17b75dae5c8e37f2d0e4` after [release PR #94](https://github.com/diegoag64/jev-devtools/pull/94). The [approved release workflow](https://github.com/diegoag64/jev-devtools/actions/runs/40235875410) passed, and [GitHub release v0.5.2](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.2) is published. npm latest, archive integrity/provenance, fresh registry consumers, the exact tag, and GitHub Latest were verified. Corresponding hosted docs publication remains pending; see the [release record](docs/releases.md#release-052--published-october-25-2026).
+**[Published to npm](https://www.npmjs.com/package/jev-devtools/v/0.5.2) at 21:35:38.942 UTC on October 25, 2026**, from `20e7dc0d9d81285e2c6e17b75dae5c8e37f2d0e4` after [release PR #94](https://github.com/diegoag64/jev-devtools/pull/94). The [approved release workflow](https://github.com/diegoag64/jev-devtools/actions/runs/40235875410) passed, and [GitHub release v0.5.2](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.2) is published. npm latest, archive integrity/provenance, fresh registry consumers, the exact tag, and GitHub Latest were verified. Hosted docs were published at 21:54:01 UTC as Sites version 22, with the live manifest and changelog verified against the reviewed source; see the [release record](docs/releases.md#release-052--published-october-25-2026).
 
 ### Compatibility and upgrade
 
