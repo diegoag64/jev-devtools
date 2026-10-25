@@ -6,9 +6,31 @@ A reusable React inspector with one root component and a Node server adapter. It
 
 Jev DevTools remains experimental before 1.0. The default npm install resolves to 0.5.0; use the archive below to try local source changes. See the [release notes](../CHANGELOG.md). Verified with sample responses through the real TypeSafe SDK; no live inference was used for verification.
 
+## Compatibility and public imports
+
+These requirements describe the 0.5.0 package. Use the installed package's declarations and bundled setup skill for version-matched guidance.
+
+| Requirement | Supported configuration |
+| --- | --- |
+| Node.js | **22.12+** for the server adapter, flow execution, and repository tooling. Keep API credentials on Node; Edge runtimes are unsupported. |
+| React and React DOM | Matching **18.x or 19.x** versions. Both are required package peers, including in installations that only import the server or flow entry point. |
+| TypeSafe SDK | Install `@typesafe-ai/sdk` **`>=0.7.0 <0.8.0`** in the consuming workspace; verified with **0.7.0**. |
+| TypeScript | **5.4+** for consumer declarations; verified with **5.4.5**. The flow declarations use the built-in [`NoInfer`](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-4.html#the-noinfer-utility-type) type; 5.3.3 fails with `Cannot find name 'NoInfer'`. |
+| Modules | **ESM imports**. The package exposes `import` entries and has no CommonJS `require` entry. Use an ESM Node module or a bundler that understands package exports. |
+
+TypeScript apps need React types matching their React major and Node types compatible with their Node runtime and compiler. Include DOM types for the Web `Request`/`Response` APIs used by the adapter and SDK. Use export-aware module resolution: `Bundler` for a bundler, or `NodeNext` with its matching module setting for Node ESM. A framework or newer `@types/*` release may require a compiler newer than this package's minimum. Compatibility was checked without `skipLibCheck`, using SDK 0.7.0, React 19.3.1, `@types/react` 19.3.0, and `@types/node` 22.10.2; this is a verification baseline, not a requirement to downgrade an existing app's dependencies.
+
+| Public import | Use |
+| --- | --- |
+| `jev-devtools` | React drawer, browser-safe trace types, and capture-to-fixture helpers. Supports SSR; render the drawer in the app's client boundary. |
+| `jev-devtools/server` | Node-only adapter and recorder. Keep it out of client bundles. |
+| `jev-devtools/flow` | Node-only flow definitions/execution, replay client, and fixture comparison. Keep it out of client bundles. |
+
+Use these entry points for application code; `jev-devtools/package.json` and internal paths are not exported. Use the package manager's dependency listing to inspect the installed version. The server options require `origin` even when `enabled: false`; pass the browser origin as shown in the setup example.
+
 ## Install in another React project
 
-Requires React 18 or 19. Use Node 22.12+ for the repository tooling (verified on 24.19). The server adapter requires a Node runtime, not an edge runtime.
+Use the versions and public imports listed under [Compatibility and public imports](#compatibility-and-public-imports). The server adapter and flow execution require Node 22.12+; Edge runtimes are unsupported.
 
 Install from npm:
 
@@ -42,7 +64,7 @@ export function Root() {
 }
 ```
 
-For the complete Next.js App Router setup, see [the Next.js guide](nextjs.md), including `getJevDevtools` for shared history across module reloads and the SDK externalization setting. Mount it in a client component and use `enabled={process.env.NODE_ENV === 'development'}`. The drawer and launcher render inside a `jev-devtools-root` Shadow DOM boundary with their own stylesheet and typography reset. Host rules such as `section`, `button`, or `.eyebrow` cannot style the inspector's internals. The package injects its built CSS into that boundary; existing `jev-devtools/styles.css` imports remain supported, but are not required to style the drawer. Page CSS overrides cannot reach inside the shadow tree. Server rendering produces no inspector markup, and browser code is loaded after mounting when enabled. `enabled` defaults to **false**. Disabled components open no connections. This is a runtime opt-in, not a guarantee that every bundler removes inspector assets from production output.
+For the complete Next.js App Router setup, see [the Next.js guide](nextjs.md), including `getJevDevtools` for shared history across module reloads and the SDK externalization setting. Mount it in a client component and use `enabled={process.env.NODE_ENV === 'development'}`. The drawer and launcher render inside a `jev-devtools-root` Shadow DOM boundary with their own stylesheet and typography reset. Host rules such as `section`, `button`, or `.eyebrow` cannot style the inspector's internals. The package injects its built CSS into that boundary automatically. Page CSS overrides cannot reach inside the shadow tree. Server rendering produces no inspector markup, and browser code is loaded after mounting when enabled. `enabled` defaults to **false**. Disabled components open no connections. This is a runtime opt-in, not a guarantee that every bundler removes inspector assets from production output.
 
 | Prop | Default | Purpose |
 | --- | --- | --- |
@@ -58,14 +80,11 @@ inside a React `<main>` or `<section>`. Global page selectors such as `section`,
 override is needed. The drawer supplies its own styles and resets inherited
 typography. No CSS import is needed to use the component.
 
-Since 0.4.1, the public stylesheet also scopes connected-flow selectors to
-`.jev-devtools` and namespaces their animation, preventing collisions with host
-classes such as `.flow-step`. The drawer suppresses host pseudo-element
-decorations, explicitly resets text direction, and establishes defaults for its
-internal CSS variables. The host reset lives in the shadow stylesheet, leaving
+The drawer suppresses host pseudo-element decorations, explicitly resets text
+direction, and establishes defaults for its internal CSS variables. The host reset
+lives in the shadow stylesheet, leaving
 `<jev-devtools-root>` free of inline reset declarations. Generic app theme
 variables do not control its hint colors.
-These changes preserve the component API and existing CSS imports.
 
 This is CSS encapsulation, not a separate browser document or a security boundary.
 Page JavaScript can still alter the open shadow tree or remove its host, and
@@ -213,6 +232,6 @@ npm run verify:package
 
 Package verification packs the library, installs it into a temporary independent React app, verifies public exports and SSR/disabled behavior, and builds the consumer while asserting that no server recorder or SDK modules enter the browser bundle. Recorder and adapter tests cover response ownership, retries, error/abort, concurrent scopes, redaction, bounded retention, image capture, HTTP/SSE delivery, origin/auth guards, and scoped clearing.
 
-Package exports: `jev-devtools` (React + browser-safe types), `/styles.css` (scoped styles), and `/server` (Node adapter + recorder). Library output is `packages/jev-devtools/lib/`; the playground's production build is separate and intentionally shows only a local-tool notice. No production deployment is included.
+Library output is `packages/jev-devtools/lib/`; the playground's production build is separate and intentionally shows only a local-tool notice. No production deployment is included.
 
 The playground controls live in `apps/playground/src/components/ui/` and are generated from [shadcn/ui](https://ui.shadcn.com/docs/installation/vite), with direct Radix imports and the local `cn` helper. `apps/playground/components.json` configures future additions. Tailwind utilities and theme tokens are in `apps/playground/src/controls.css`; global preflight is omitted to preserve inspector styling. These dependencies are playground-only and are not needed by consumers of the packaged inspector.

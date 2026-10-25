@@ -33,6 +33,8 @@ pnpm add jev-devtools @typesafe-ai/sdk
 
 Requires React **18/19** and Node **22.12+**. **[0.5.0 is available on npm](https://www.npmjs.com/package/jev-devtools/v/0.5.0).** The default install resolves to 0.5.0; use the local archive below to try source changes. APIs remain experimental before 1.0. See the [release status](CHANGELOG.md). Your API key stays on the server. Capture and display are opt-in and disabled by default.
 
+Use ESM imports and TypeSafe SDK **0.7.x**. TypeScript consumers need **5.4+** and compatible React/Node types. See [compatibility and public imports](docs/integration.md#compatibility-and-public-imports), including the Node-only `/server` and `/flow` entry points.
+
 ### React + Node
 
 Mount once near your app's root. The drawer loads its own styles; no CSS import is needed. This example uses Vite's development flag:

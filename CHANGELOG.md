@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | README hero; release verification setup and 0.5.0 publication records. |
+| [Unreleased](#unreleased) | Not published | Setup compatibility and README hero; release verification setup and 0.5.0 publication records. |
 | [0.5.0](#050--october-25-2026-experimental) | 2026-10-25 | Replay and comparison; capture reliability/privacy; website and docs. |
 | [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | CSS isolation; stricter published flow types; approved release workflow. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Tasks, maps and loops; six cookbooks; SDK and inspector access changes. |
@@ -24,6 +24,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 ### Changes
 
 #### Documentation
+
+- **Package compatibility and public imports.** Include the `/flow` export in setup guidance and align the docs site, READMEs, and bundled agent instructions on Node, React, SDK, ESM, and the verified TypeScript 5.4+ declaration requirement. Focus setup on the three JavaScript entry points and automatic drawer styling, removing obsolete stylesheet-import guidance. Clarify required peers and server-only boundaries; package APIs and runtime requirements are unchanged. ([#79](https://github.com/diegoag64/jev-devtools/pull/79))
 
 - **Verified 0.5.0 docs publication.** Publish the reviewed release guidance as GPT Sites version 18 and record its canonical commit, hosting deployment, and matching live version/changelog checks. Package bytes and the landing Site are unchanged. ([#76](https://github.com/diegoag64/jev-devtools/pull/76))
 

@@ -1,4 +1,26 @@
-This walkthrough adds Jev DevTools to an existing React application with a Node server. You need React 18/19, Node 22.12+, and TypeSafe SDK 0.7.x. For the App Router, use the [Next.js guide](@/guides/nextjs/).
+This walkthrough adds Jev DevTools to an existing React application with a Node server. For the App Router, use the [Next.js guide](@/guides/nextjs/).
+
+## Compatibility
+
+| Requirement | Supported configuration |
+| --- | --- |
+| Node.js | **22.12+** for the server adapter and flow execution. Keep credentials on Node; Edge runtimes are unsupported. |
+| React / React DOM | Matching **18.x or 19.x** versions. Both are required peers, including for server-only installations. |
+| TypeSafe SDK | **0.7.x** (at least 0.7.0 and below 0.8.0); verified with **0.7.0**. Install it in the consuming workspace. |
+| TypeScript | **5.4+**; verified with **5.4.5** against the packed package. Flow declarations use `NoInfer`, which older compilers lack. Frameworks and type dependencies may require a newer compiler. |
+| Modules | **ESM imports** through export-aware Node or bundler resolution. The package has no CommonJS `require` entry. |
+
+For TypeScript, use compatible `@types/react` and `@types/node` packages and include DOM types for Web `Request`/`Response` APIs. See the [detailed compatibility baseline](https://github.com/diegoag64/jev-devtools/blob/main/docs/integration.md#compatibility-and-public-imports) for the verified type dependencies and compiler settings.
+
+## Public imports
+
+| Import | Where and why |
+| --- | --- |
+| `jev-devtools` | React client boundary: drawer, browser-safe trace types, and capture-to-fixture helpers. Supports SSR. |
+| `jev-devtools/server` | Node only: adapter and recorder. |
+| `jev-devtools/flow` | Node only: define/run flows, replay captured answers, and compare fixtures. |
+
+Keep `/server`, `/flow`, and API credentials out of client bundles. Internal paths and `jev-devtools/package.json` are not public exports; inspect the installed version through your package manager.
 
 ## 1. Install the package
 
@@ -14,7 +36,7 @@ Already have a TypeSafe client? Replace its construction with the instrumented c
 
 Keep this module on the server. Put `TYPESAFE_API_KEY` in your server environment, never in a `VITE_` or `NEXT_PUBLIC_` variable. This example uses live inference when you call it; it needs a real key. For a no-key first run, use the [independent samples](@/examples/).
 
-The `origin` must be the URL you open in the browser, including scheme, hostname, and port. `localhost` and `127.0.0.1` are different origins.
+The required `origin` must be the URL you open in the browser, including scheme, hostname, and port. Supply it even when capture is disabled. `localhost` and `127.0.0.1` are different origins.
 
 ## 3. Connect the HTTP routes
 

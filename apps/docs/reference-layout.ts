@@ -16,7 +16,6 @@ export const referenceGroups: Record<string, { label: string; source?: string }>
 export function referenceKind(id: string) {
   if (id.startsWith("type-")) return "Type";
   if (id === "jevdevtools") return "Component";
-  if (id === "styles-css") return "Stylesheet";
   if (id === "flowexpression" || id === "jevrecorder") return "Class";
   if (id === "flowlooplimiterror") return "Error";
   if (["flow-input", "flow-definition", "request-answers", "adapter-middleware"].includes(id)) return "Property";
