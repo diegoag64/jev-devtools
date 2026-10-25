@@ -42,3 +42,10 @@ export function createPrism(palette: PrismPalette = original): PaintEffect {
 }
 
 export const prism = createPrism();
+
+export const jade = createPrism({
+  base: "#cddcb2",
+  hueStart: 40,
+  hueRange: 125,
+  highlight: "#fbffe8",
+});
