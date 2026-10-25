@@ -123,4 +123,11 @@ export const pages: Page[] = [
     group: "Resources",
     file: "agents.md",
   },
+  {
+    slug: "changelog",
+    title: "Changelog",
+    description: "Releases, fixes, and changes to Jev DevTools.",
+    group: "Resources",
+    file: "../../../CHANGELOG.md",
+  },
 ];

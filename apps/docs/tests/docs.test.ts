@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { renderChangelog } from "../changelog.js";
 import { compile } from "../site.js";
 import { summarize, count } from "../examples/operations.js";
 import { replayExample } from "../examples/replay.js";
@@ -84,4 +85,34 @@ const ordinary = <Custom enabled defaultOpen={false} />;`,
     ].map((match) => match[1]);
     assert.deepEqual(labels, example.labels);
   }
+});
+
+// The changelog is fetched from GitHub during publication. Preserve its content
+// and links without interpreting embedded markup as executable page content.
+test("changelog releases preserve source anchors and resolve repository links safely", () => {
+  const result = renderChangelog(`# Changelog
+
+Introductory context.
+
+## Unreleased
+
+- A pending change.
+
+## 1.2.3 — October 25, 2026 (experimental)
+
+### Changes
+
+- Read the [release notes](docs/releases.md#release).
+- [Unsafe](javascript:alert%281%29)
+
+<script>alert('injected')</script>
+`);
+  assert.ok(result.html.includes('id="123--october-25-2026-experimental"'));
+  assert.ok(result.html.includes('href="https://github.com/diegoag64/jev-devtools/blob/main/docs/releases.md#release"'));
+  assert.ok(result.html.includes("Not published to npm"));
+  assert.ok(result.html.includes("A pending change."));
+  assert.ok(result.html.includes("Introductory context."));
+  assert.ok(!result.html.includes("<script>"));
+  assert.ok(!result.html.includes('href="javascript:'));
+  assert.throws(() => renderChangelog("<html>Gateway error</html>"), /Invalid changelog/);
 });

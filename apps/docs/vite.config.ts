@@ -5,11 +5,14 @@ import {
   type UserConfig,
 } from "vite";
 import { resolve } from "node:path";
-import { appRoot, generated, generate, normalizeBase } from "./site.js";
+import { appRoot, generate, normalizeBase } from "./site.js";
 
-export default defineConfig(async (): Promise<UserConfig> => {
+export default defineConfig(async ({ mode, command }): Promise<UserConfig> => {
   const base = normalizeBase(process.env.DOCS_BASE);
-  const input = await generate(base);
+  const changelogSource = mode === "publication" ? "github" : "local";
+  // A running preview must not overwrite a publication or subdirectory build.
+  const generated = resolve(appRoot, ".generated", `${command}-${changelogSource}-${base.replaceAll("/", "_")}`);
+  const input = await generate(base, generated, changelogSource);
   return {
     root: generated,
     base,
@@ -45,10 +48,12 @@ export default defineConfig(async (): Promise<UserConfig> => {
           server.watcher.add([
             resolve(appRoot, "content"),
             resolve(appRoot, "examples"),
+            resolve(appRoot, "../../CHANGELOG.md"),
           ]);
           let pending = Promise.resolve();
           server.watcher.on("all", (_event, file) => {
             if (
+              normalizePath(file) !== normalizePath(resolve(appRoot, "../../CHANGELOG.md")) &&
               !["content", "examples"].some((folder) =>
                 normalizePath(file).startsWith(
                   normalizePath(resolve(appRoot, folder)) + "/",
@@ -58,7 +63,7 @@ export default defineConfig(async (): Promise<UserConfig> => {
               return;
             pending = pending
               .then(async () => {
-                await generate(base);
+                await generate(base, generated, changelogSource);
                 server.ws.send({ type: "full-reload" });
               })
               .catch((error) => server.config.logger.error(String(error)));

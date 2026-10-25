@@ -29,7 +29,8 @@
     "bench:compare": "node benchmarks/compare.mjs",
     "dev:docs": "npm run dev -w @jev-devtools/docs",
     "build:docs": "npm run build -w @jev-devtools/docs",
-    "verify:docs": "npm run build:docs && npm run verify -w @jev-devtools/docs"
+    "verify:docs": "npm run build:docs && npm run verify -w @jev-devtools/docs",
+    "build:docs:publish": "npm run build:publish -w @jev-devtools/docs"
   },
   "devDependencies": {
     "@types/node": "26.6.5",

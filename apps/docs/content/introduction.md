@@ -8,7 +8,7 @@ Jev DevTools brings your TypeSafe requests into view: the context you sent, the 
 <p class="demo-caption">Illustrative sample · Fixed answers, no inference calls. Connections show data structure, not model reasoning.</p>
 </div>
 
-## A small addition to your app
+## Easy to integrate
 
 Keep using the TypeSafe SDK. Create your client through the Node adapter, then mount one React component. The drawer connects to your server and handles request history, reconnection, and inspection.
 
@@ -20,7 +20,7 @@ npm install jev-devtools @typesafe-ai/sdk
 
 The component includes its own styles. No provider or CSS import is required. Follow the [quick start](@/getting-started/) to wire up the server before opening it.
 
-## Find your next step
+## Next steps
 
 - **New to the package?** [Quick start](@/getting-started/) takes you from installation to a captured request.
 - **Using Next.js?** [The App Router guide](@/guides/nextjs/) covers the server and client boundaries.

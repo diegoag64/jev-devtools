@@ -20,7 +20,7 @@ These are selected useful patterns, not a benchmark or popularity ranking. The r
 - Getting started: introduction, quick start, how the client/recorder/drawer fit together.
 - Guides: Next.js, connected flows, privacy/access, troubleshooting; later dedicated Vite proxy and custom viewer guides.
 - API reference: React component and styles, server adapter, flow builder, expressions, recorder and public types.
-- Resources: independent examples and cookbooks, coding-agent guidance, changelog link.
+- Resources: independent examples and cookbooks, coding-agent guidance, integrated changelog.
 
 Every mature reference page should state the import/runtime, the problem solved, a minimal valid example, parameters/defaults, return value, errors/lifecycle, compatibility, and related tasks. Avoid dumping declarations without explaining when to use them. Advanced operations need their own runnable examples as the reference expands.
 
@@ -42,4 +42,4 @@ The pages track the working tree and explicitly label unreleased changes; npm 0.
 
 Build output and browser checks should cover deep links, subdirectory paths, search, keyboard controls, no-JavaScript reading, responsive layouts, and example typing. Static hosting should serve directory indexes and real 404s. Do not add a server or live inference to the docs by default.
 
-Before public hosting: choose the canonical URL, add sitemap/social metadata, decide whether working-tree docs should be versioned, complete field-level API coverage and more runnable advanced examples, and settle whether legacy guides become redirects or stay companion references. There is no deployment in this change.
+Before public hosting: choose the canonical URL, add sitemap/social metadata, decide whether working-tree docs should be versioned, complete field-level API coverage and more runnable advanced examples, and settle whether legacy guides become redirects or stay companion references. The static site is hosted on GPT Sites at https://docs.jevtools.dev. The publication build fetches the current changelog from GitHub main and renders it into the site; visitors do not fetch GitHub or load a Markdown parser.

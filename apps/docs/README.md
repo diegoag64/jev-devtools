@@ -32,7 +32,7 @@ Pages load their stylesheet through a render-blocking link in the head, independ
 - Add interactions in `src/` and dynamically import them only on pages that need them. The introduction demo uses fixed fixtures and no network inference.
 - Keep current-working-tree and published behavior distinct. Avoid declaring unreleased APIs available in the published npm version.
 
-## Build and future hosting
+## Build and hosting
 
 ```sh
 npm run build:docs
@@ -51,10 +51,18 @@ DOCS_BASE=/docs/ npm run build:docs
 DOCS_BASE=/docs/ npm run preview -w @jev-devtools/docs
 ```
 
-Open `/docs/` on the preview server. The base must start and end with `/`; only simple path segments are accepted. No hosting configuration or deployment is included yet. Choose the final origin before adding canonical URLs, sitemap, or social metadata. Missing routes should retain the host's 404 response.
+Open `/docs/` on the preview server. The base must start and end with `/`; only simple path segments are accepted. The public site is hosted on GPT Sites at https://docs.jevtools.dev. Choose canonical URL, sitemap, and social metadata deliberately when adding them. Missing routes should retain the host's 404 response.
 
 ## Content direction and next steps
 
 See [the research and architecture notes](../../docs/documentation-site.md). This first pass includes onboarding, framework/privacy/troubleshooting guides, an overview of every public entry point and runtime operation, example links, and a separate agent page. It is not an exhaustive field-by-field SDK or wire-protocol manual. Prioritize independently runnable examples for each advanced operation and expand options/results/error sections as feedback arrives.
 
 The original integration, flow, and Next.js documents remain the detailed companion references. If promoting this site to the canonical source, migrate those sections deliberately and replace duplicates with links in the same PR.
+
+## Changelog and publishing
+
+`/changelog/` renders `CHANGELOG.md` into release sections with dates, unreleased status, source links, and GitHub-compatible anchors. The overview table is collapsible; all source notes remain available. Relative links resolve against the GitHub repository. There is no separate manually maintained changelog content file and no browser fetch or Markdown parser.
+
+- `npm run build:docs` and local development use the working-tree changelog, labeled as a working-tree copy. Changes to the root file trigger a docs reload.
+- **Before publishing**, run `npm run build:docs:publish`. This fetches `main/CHANGELOG.md` from GitHub and embeds it in HTML, raw Markdown, and the search index. Failed fetches or malformed content stop publication builds. The saved date and source appear on the page. The published copy updates only with the next deployment.
+- Publish the resulting `apps/docs/dist/` to the existing public GPT Sites project `appgprj_6add5705dbec8191b56b1c9555078a2d`. Reuse its identity and public audience. The dedicated Sites source checkout stores the generated static files; GitHub remains the editable source. The local deployment checkout and archives live under ignored `benchmarks/results/docs/`.

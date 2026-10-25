@@ -356,6 +356,23 @@ try {
       200,
     );
   }
+  // The published changelog is a readable static document, including release
+  // anchors from GitHub and source-relative links; no visitor fetch is needed.
+  await page.goto(origin + base + "changelog/");
+  await page.getByRole("heading", { name: "0.4.1", exact: false }).waitFor();
+  await page.locator(".release-overview summary").click();
+  await page.locator(".release-overview").getByRole("link", { name: "0.4.1", exact: true }).click();
+  assert.ok(page.url().endsWith("#041--october-24-2026-experimental"));
+  assert.ok(await page.getByRole("link", { name: "release verification and recovery record" }).count());
+  assert.equal(
+    await page.getByRole("link", { name: "release verification and recovery record" }).getAttribute("href"),
+    "https://github.com/diegoag64/jev-devtools/blob/main/docs/releases.md#release-041--published-october-24-2026",
+  );
+  await page.goto(origin + base + "changelog/");
+  await page.screenshot({ path: resolve(evidence, "changelog-desktop.png") });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: resolve(evidence, "changelog-mobile.png") });
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "Changelog fits mobile");
   assert.equal(
     (await page.goto(origin + base + "missing-page/")).status(),
     404,
@@ -398,6 +415,9 @@ try {
     flowSource,
     "The complete example stays readable without JavaScript",
   );
+  await readable.goto(origin + base + "changelog/");
+  await readable.getByRole("heading", { name: "Unreleased", exact: false }).waitFor();
+  assert.ok((await readable.locator("article").innerText()).includes("Not published to npm"));
   assert.deepEqual(errors, []);
   console.log(
     `Verified ${links.length} pages, sample switching, lazy search, keyboard navigation, copy, persistent theme, mobile layout, raw Markdown, 404s, type hovers (pointer/keyboard/touch), clean copying, and no-JS reading at base ${base}.`,
