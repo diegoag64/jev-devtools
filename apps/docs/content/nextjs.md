@@ -2,8 +2,8 @@ Use the App Router on the **Node.js runtime**. The drawer belongs in a Client Co
 
 ## Install and configure
 
-```sh
-npm install jev-devtools @typesafe-ai/sdk server-only
+```sh install
+pnpm add jev-devtools @typesafe-ai/sdk server-only
 ```
 
 Merge the SDK externalization into your existing `next.config.mjs`:

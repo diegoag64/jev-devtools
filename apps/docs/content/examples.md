@@ -1,6 +1,6 @@
 ## Run without an API key
 
-The independent consumer apps use the real SDK with fixed responses. They are useful for verifying an installation before connecting live inference.
+The independent consumer apps use the real SDK with fixed responses. They are useful for verifying an installation before connecting live inference. The checkout commands below use the repository’s npm lockfile and packing scripts.
 
 ```sh
 # From a repository checkout, with Node 22.12+:

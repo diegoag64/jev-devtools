@@ -53,6 +53,52 @@ try {
   const initialRequests = [];
   page.on("request", (r) => initialRequests.push(r.url()));
   assert.equal((await page.goto(origin + base)).status(), 200);
+  // Install commands are a copyable user contract, including framework extras.
+  const install = page.locator("[data-install]");
+  const variants = [["pnpm", "pnpm add"], ["npm", "npm install"], ["Yarn", "yarn add"], ["Bun", "bun add"]];
+  for (const [route, packages] of [["", "jev-devtools @typesafe-ai/sdk"], ["getting-started/", "jev-devtools @typesafe-ai/sdk"], ["guides/nextjs/", "jev-devtools @typesafe-ai/sdk server-only"]]) {
+    await page.goto(origin + base + route);
+    await install.getByRole("tab", { name: route ? "Bun" : "pnpm", selected: true, exact: true }).waitFor();
+    for (const [manager, prefix] of variants) {
+      await install.getByRole("tab", { name: manager, exact: true }).click();
+      assert.equal(await install.getByRole("tabpanel").count(), 1);
+      assert.equal((await install.getByRole("tabpanel").innerText()).trim(), `${prefix} ${packages}`);
+      await install.getByRole("button", { name: "Copy command", exact: true }).click();
+      assert.equal(await page.evaluate(() => navigator.clipboard.readText()), `${prefix} ${packages}`,
+        "Copy contains only the selected command, including all required packages");
+    }
+  }
+  await install.getByRole("tab", { name: "Bun", exact: true }).focus();
+  for (const [key, label] of [["Home", "pnpm"], ["ArrowRight", "npm"], ["End", "Bun"], ["ArrowLeft", "Yarn"]]) {
+    await page.keyboard.press(key);
+    assert.equal(await install.getByRole("tab", { name: label, selected: true, exact: true }).evaluate((tab) => tab === document.activeElement), true);
+  }
+  await page.reload();
+  await install.getByRole("tab", { name: "Yarn", selected: true, exact: true }).waitFor();
+  await install.getByRole("tab", { name: "pnpm", exact: true }).click();
+  for (const theme of ["light", "dark"]) {
+    await page.evaluate((theme) => { document.documentElement.dataset.theme = theme; }, theme);
+    await install.screenshot({ path: resolve(evidence, `install-tabs-${theme}.png`) });
+  }
+  await page.setViewportSize({ width: 320, height: 844 });
+  for (const [manager] of variants) assert.ok(await install.getByRole("tab", { name: manager, exact: true }).isVisible());
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "Install controls fit a narrow phone");
+  await install.screenshot({ path: resolve(evidence, "install-tabs-mobile.png") });
+  await page.setViewportSize({ width: 1440, height: 1050 });
+  await page.evaluate(() => { document.documentElement.dataset.theme = "light"; });
+
+  const unavailableStorage = await browser.newContext();
+  await unavailableStorage.addInitScript(() => {
+    Storage.prototype.getItem = () => { throw new Error("Storage unavailable"); };
+    Storage.prototype.setItem = () => { throw new Error("Storage unavailable"); };
+  });
+  const storagePage = await unavailableStorage.newPage();
+  await storagePage.goto(origin + base + "getting-started/");
+  await storagePage.getByRole("tab", { name: "pnpm", selected: true, exact: true }).waitFor();
+  await storagePage.getByRole("tab", { name: "Bun", exact: true }).click();
+  assert.equal((await storagePage.getByRole("tabpanel").innerText()).trim(), "bun add jev-devtools @typesafe-ai/sdk");
+  await unavailableStorage.close();
+  await page.goto(origin + base);
   await page.getByRole("button", { name: "Delivery sample" }).click();
   assert.equal(await page.locator("[data-result]").textContent(), "Delivery");
   assert.ok(
@@ -575,6 +621,9 @@ try {
   await typeTouch.screenshot({ path: resolve(evidence, "sticky-header-square-mobile.png") });
   await mobileTask.evaluate((entry) => entry.scrollIntoView({ block: "start" }));
   await checkHeaderCorners(mobileTask, false);
+  await typeTouch.goto(origin + base + "getting-started/");
+  await typeTouch.getByRole("tab", { name: "Bun", exact: true }).tap();
+  assert.equal((await typeTouch.getByRole("tabpanel").innerText()).trim(), "bun add jev-devtools @typesafe-ai/sdk");
   await typeTouchContext.close();
 
   await page.goto(origin + base + "api/reference/#flow-task");
@@ -647,6 +696,8 @@ try {
     .getByRole("link", { name: "Quick start", exact: true })
     .click();
   assert.ok(readable.url().endsWith("/getting-started/"));
+  assert.equal((await readable.locator("[data-install]").getByRole("tabpanel").innerText()).trim(), "pnpm add jev-devtools @typesafe-ai/sdk");
+  assert.equal(await readable.getByRole("tablist", { name: "Package manager" }).count(), 0, "Without JS, show the default command without inert tabs");
   await readable.goto(origin + base + "guides/flows/");
   assert.equal(
     (await readable.locator(".code-block > pre > code").innerText()).trim(),

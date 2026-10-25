@@ -25,17 +25,18 @@ for (const button of document.querySelectorAll<HTMLButtonElement>(
   ".copy-code",
 )) {
   button.hidden = false;
+  const copyLabel = button.textContent;
   button.addEventListener("click", async () => {
     try {
-      await navigator.clipboard.writeText(
-        button.closest(".code-block")!.querySelector("code")!.textContent ?? "",
-      );
+      const block = button.closest(".code-block")!;
+      const code = block.querySelector(".install-panel:not([hidden]) code") ?? block.querySelector("code");
+      await navigator.clipboard.writeText(code?.textContent ?? "");
       button.textContent = "Copied!";
     } catch {
       button.textContent = "Select code to copy";
     }
     setTimeout(() => {
-      button.textContent = "Copy code";
+      button.textContent = copyLabel;
     }, 2200);
   });
 }
@@ -137,3 +138,5 @@ document.addEventListener("keydown", (event) => {
 if (document.querySelector("[data-demo]")) void import("./demo.js");
 
 if (document.querySelector("[data-type-info]")) void import("./type-hovers.js");
+
+if (document.querySelector("[data-install]")) void import("./install.js");

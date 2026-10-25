@@ -2,8 +2,8 @@ This walkthrough adds Jev DevTools to an existing React application with a Node 
 
 ## 1. Install the package
 
-```sh
-npm install jev-devtools @typesafe-ai/sdk
+```sh install
+pnpm add jev-devtools @typesafe-ai/sdk
 ```
 
 Already have a TypeSafe client? Replace its construction with the instrumented client below. Your existing `systemOne` calls keep their SDK behavior.

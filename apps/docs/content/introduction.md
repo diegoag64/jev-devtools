@@ -12,8 +12,8 @@ Jev DevTools brings your TypeSafe requests into view: the context you sent, the 
 
 Keep using the TypeSafe SDK. Create your client through the Node adapter, then mount one React component. The drawer connects to your server and handles request history, reconnection, and inspection.
 
-```sh
-npm install jev-devtools @typesafe-ai/sdk
+```sh install
+pnpm add jev-devtools @typesafe-ai/sdk
 ```
 
 <!-- example: client.tsx -->

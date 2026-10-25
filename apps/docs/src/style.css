@@ -384,6 +384,37 @@ h3:hover .heading-link,
     monospace;
   color: var(--muted);
 }
+.install-toolbar {
+  height: auto;
+  min-height: 43px;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  padding: 0 12px;
+}
+.install-tabs {
+  display: flex;
+  gap: 2px;
+}
+.install-tabs button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 11px 7px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+}
+.install-tabs button:hover {
+  color: var(--text);
+}
+.install-tabs button[aria-selected="true"] {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.install-tabs button:focus-visible,
+.install-panel:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
 .copy-code {
   background: none;
   border: 0;

@@ -7,6 +7,7 @@ import ts from "typescript";
 import { apiTargets } from "./api-links.js";
 import { apiHovers } from "./api-hovers.js";
 import { typeHovers } from "./type-help.js";
+import { renderInstall } from "./install-block.js";
 
 const app = dirname(fileURLToPath(import.meta.url));
 const themes = { light: "github-light", dark: "github-dark" } as const;
@@ -35,6 +36,12 @@ export async function codeRenderer(base = "/") {
   const popupIds = new Map<string, string>();
   return (text: string, meta = "text") => {
     const [language, ...flags] = meta.split(/\s+/);
+    if (flags.includes("install")) {
+      if (!["sh", "bash", "shell"].includes(language)) throw new Error("Install fences must use a shell language.");
+      return renderInstall(text, (command) => shiki.codeToHtml(command, {
+        lang: "bash", themes, defaultColor: false,
+      }), `install-${sequence++}`);
+    }
     const checked = flags.includes("twoslash");
     const profile = flags.find((flag) => flag.startsWith("api="))?.slice(4);
     const annotations =
