@@ -182,6 +182,9 @@ export async function checkNestedFlows({ browser, origin, output }) {
       const inner = child(expansion);
       await question(inner, kind === "map" ? "map-amber" : "round-1");
       await selected(root, id, kind);
+      // Start on a different child so a missing or misrouted click cannot pass.
+      await inner.picker.selectOption("marker");
+      await selected(inner, "marker", "task");
       await page.getByRole("button", { name: "Fit flow", exact: true }).click();
       await settled(root);
       const camera = () =>
@@ -195,6 +198,9 @@ export async function checkNestedFlows({ browser, origin, output }) {
           exact: true,
         })
         .click();
+      // inspect() changes selection itself; assert the click's result first.
+      await selected(inner, "check", "jev");
+      await selected(root, id, kind);
       await inspect(inner, kind === "map" ? "map-amber" : "round-1");
       await selected(root, id, kind);
       assert.equal(
