@@ -424,7 +424,6 @@ pre code {
   }
 }
 .type-token {
-  cursor: help;
   text-decoration: underline dotted var(--muted);
   text-underline-offset: 4px;
 }
