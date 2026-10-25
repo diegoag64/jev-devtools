@@ -6,7 +6,7 @@ This walkthrough adds Jev DevTools to an existing React application with a Node 
 | --- | --- |
 | Node.js | **22.12+** for the server adapter and flow execution. Keep credentials on Node; Edge runtimes are unsupported. |
 | React / React DOM | Matching **18.x or 19.x** versions. Both are required peers, including for server-only installations. |
-| TypeSafe SDK | **0.7.x** (`>=0.7.0 <0.8.0`); verified with **0.7.0**. Install it in the consuming workspace. |
+| TypeSafe SDK | **0.7.x** (at least 0.7.0 and below 0.8.0); verified with **0.7.0**. Install it in the consuming workspace. |
 | TypeScript | **5.4+**; verified with **5.4.5** against the packed package. Flow declarations use `NoInfer`, which older compilers lack. Frameworks and type dependencies may require a newer compiler. |
 | Modules | **ESM imports** through export-aware Node or bundler resolution. The package has no CommonJS `require` entry. |
 
