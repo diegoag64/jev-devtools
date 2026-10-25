@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | No changes yet. |
+| [Unreleased](#unreleased) | Not published | Explicit flow capture warnings. |
 | [0.5.1](#051--pending-publication-experimental) | Pending publication | Task input validation and expression types; setup guidance; release and website maintenance. |
 | [0.5.0](#050--october-25-2026-experimental) | 2026-10-25 | Replay and comparison; capture reliability/privacy; website and docs. |
 | [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | CSS isolation; stricter published flow types; approved release workflow. |
@@ -22,7 +22,15 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No changes yet.
+### Compatibility and upgrade
+
+- **Flow capture metadata.** Optional warning arrays extend version-1 records; older captures remain readable, but absent metadata cannot establish completeness. Update both server and drawer to see the new warnings. Execution values and decisions are unchanged.
+
+### Changes
+
+#### Fixed
+
+- **Flow capture warnings.** Retain and display outcome and condition-rule truncation, redaction, and unavailable-capture warnings, including rule projection limits, nested item runs, and non-JSON merge values. Warnings are separate metadata; user strings are never treated as capture signals. Fixes [#45](https://github.com/diegoag64/jev-devtools/issues/45).
 
 ## 0.5.1 — Pending publication (experimental)
 

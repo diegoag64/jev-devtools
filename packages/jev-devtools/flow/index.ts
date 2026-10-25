@@ -297,10 +297,14 @@ function conditionRule(
   ast: Ast,
   requests: Set<string>,
   tasks: Set<string>,
-): FlowCondition {
+): Pick<FlowNode, "conditionRule" | "conditionCaptureWarnings"> {
   let remaining = 128;
+  const warnings = new Set<string>();
   const visit = (node: Ast): FlowCondition => {
-    if (--remaining < 0) return { op: "literal", value: "[rule truncated]" };
+    if (--remaining < 0) {
+      warnings.add("Rule projection limit reached.");
+      return { op: "literal", value: "[rule truncated]" };
+    }
     if (node.op === "input" || node.op === "ref" || node.op === "get") {
       const path: string[] = [];
       let base: Ast = node;
@@ -347,17 +351,20 @@ function conditionRule(
             : {}),
       };
     }
-    if (node.op === "literal")
+    if (node.op === "literal") {
+      const scalar =
+        node.value === null ||
+        typeof node.value === "string" ||
+        typeof node.value === "boolean" ||
+        (typeof node.value === "number" && Number.isFinite(node.value));
+      if (!scalar) warnings.add("Rule literal capture unavailable.");
       return {
         op: "literal",
-        value:
-          node.value === null ||
-          typeof node.value === "string" ||
-          typeof node.value === "boolean" ||
-          (typeof node.value === "number" && Number.isFinite(node.value))
-            ? (node.value as string | number | boolean | null)
-            : "[value unavailable]",
+        value: scalar
+          ? (node.value as string | number | boolean | null)
+          : "[value unavailable]",
       };
+    }
     const args: FlowCondition[] = [];
     for (const arg of node.args) {
       args.push(visit(arg));
@@ -365,7 +372,8 @@ function conditionRule(
     }
     return { op: node.op, args };
   };
-  return visit(ast);
+  const rule = visit(ast);
+  return { conditionRule: rule, conditionCaptureWarnings: [...warnings] };
 }
 function evaluate(
   ast: Ast,
@@ -814,10 +822,9 @@ export function defineJevFlow<T>(
             return { ...ast, args: ast.args.map(referenceState) };
           return ast;
         };
-        node.conditionRule = conditionRule(
-          referenceState(when.ast),
-          new Set(),
-          new Set([id]),
+        Object.assign(
+          node,
+          conditionRule(referenceState(when.ast), new Set(), new Set([id])),
         );
         return new FlowExpression({ op: "ref", id }, owner) as never;
       },
@@ -828,16 +835,21 @@ export function defineJevFlow<T>(
         step.when = paths.when;
         const node = nodes.find((n) => n.id === id)!;
         node.condition = describe(paths.when.ast);
-        node.conditionRule = conditionRule(
-          paths.when.ast,
-          new Set(nodes.filter((n) => n.kind === "jev").map((n) => n.id)),
-          new Set(
-            nodes
-              .filter(
-                (n) =>
-                  n.kind === "task" || n.kind === "merge" || n.kind === "loop",
-              )
-              .map((n) => n.id),
+        Object.assign(
+          node,
+          conditionRule(
+            paths.when.ast,
+            new Set(nodes.filter((n) => n.kind === "jev").map((n) => n.id)),
+            new Set(
+              nodes
+                .filter(
+                  (n) =>
+                    n.kind === "task" ||
+                    n.kind === "merge" ||
+                    n.kind === "loop",
+                )
+                .map((n) => n.id),
+            ),
           ),
         );
         step.then = block(
@@ -885,16 +897,21 @@ export function defineJevFlow<T>(
           throw new Error("branch requires a condition expression");
         const node = nodes.find((n) => n.id === id)!;
         node.condition = describe(paths.when.ast);
-        node.conditionRule = conditionRule(
-          paths.when.ast,
-          new Set(nodes.filter((n) => n.kind === "jev").map((n) => n.id)),
-          new Set(
-            nodes
-              .filter(
-                (n) =>
-                  n.kind === "task" || n.kind === "merge" || n.kind === "loop",
-              )
-              .map((n) => n.id),
+        Object.assign(
+          node,
+          conditionRule(
+            paths.when.ast,
+            new Set(nodes.filter((n) => n.kind === "jev").map((n) => n.id)),
+            new Set(
+              nodes
+                .filter(
+                  (n) =>
+                    n.kind === "task" ||
+                    n.kind === "merge" ||
+                    n.kind === "loop",
+                )
+                .map((n) => n.id),
+            ),
           ),
         );
         step.then = block(
@@ -1011,6 +1028,7 @@ export function defineJevFlow<T>(
     Object.freeze(node.path);
     if (node.lanes) Object.freeze(node.lanes);
     freezeRule(node.conditionRule);
+    freezeRule(node.conditionCaptureWarnings);
     freezeRule(node.itemDefinition);
     Object.freeze(node);
   }
@@ -1071,55 +1089,84 @@ export function defineJevFlow<T>(
       }
       // Data objects are replaced, never mutated by execution. Keep detached
       // copies stable so the recorder can reuse its captures on unrelated updates.
-      const observerData = new WeakMap<object, Json>();
-      const snapshotData = (value: unknown): Json => {
+      const observerData = new WeakMap<
+        object,
+        { data: Json; warnings: string[] }
+      >();
+      const snapshotData = (value: unknown) => {
         if (value && typeof value === "object" && observerData.has(value))
           return observerData.get(value)!;
         let snapshot: Json;
+        const warnings: string[] = [];
         try {
           snapshot = observerSnapshot(value);
         } catch {
           // Direct flow outputs may be non-JSON; only their capture is unavailable.
           snapshot = "[capture unavailable]";
+          warnings.push("Observer capture unavailable.");
         }
+        const captured = { data: snapshot, warnings };
         if (value && typeof value === "object")
-          observerData.set(value, snapshot);
-        return snapshot;
+          observerData.set(value, captured);
+        return captured;
       };
       const emit = () => {
         try {
           if (observer) {
             const { value, steps, ...metadata } = run;
+            const outcome =
+              value !== undefined ? snapshotData(value) : undefined;
             observer.update({
               ...structuredClone(metadata),
               steps: Object.fromEntries(
-                Object.entries(steps).map(([id, step]) => [
-                  id,
-                  {
-                    ...step,
-                    ...(step.data !== undefined
-                      ? { data: snapshotData(step.data) }
-                      : {}),
-                    ...(step.loop ? { loop: { ...step.loop } } : {}),
-                    ...(step.captureWarnings
-                      ? { captureWarnings: [...step.captureWarnings] }
-                      : {}),
-                    ...(step.collection
-                      ? {
-                          collection: {
-                            ...step.collection,
-                            // Child runs have already crossed this snapshot boundary.
-                            // Copy mutable collection metadata, reuse detached children.
-                            items: step.collection.items.map((item) => ({
-                              ...item,
-                            })),
-                          },
-                        }
-                      : {}),
-                  },
-                ]),
+                Object.entries(steps).map(([id, step]) => {
+                  const data =
+                    step.data !== undefined
+                      ? snapshotData(step.data)
+                      : undefined;
+                  return [
+                    id,
+                    {
+                      ...step,
+                      ...(data ? { data: data.data } : {}),
+                      ...(step.loop ? { loop: { ...step.loop } } : {}),
+                      ...(data || step.captureWarnings
+                        ? {
+                            captureWarnings: [
+                              ...new Set([
+                                ...(step.captureWarnings ?? []),
+                                ...(data?.warnings ?? []),
+                              ]),
+                            ],
+                          }
+                        : {}),
+                      ...(step.collection
+                        ? {
+                            collection: {
+                              ...step.collection,
+                              // Child runs have already crossed this snapshot boundary.
+                              // Copy mutable collection metadata, reuse detached children.
+                              items: step.collection.items.map((item) => ({
+                                ...item,
+                              })),
+                            },
+                          }
+                        : {}),
+                    },
+                  ];
+                }),
               ),
-              ...(value !== undefined ? { value: snapshotData(value) } : {}),
+              ...(outcome
+                ? {
+                    value: outcome.data,
+                    captureWarnings: [
+                      ...new Set([
+                        ...(run.captureWarnings ?? []),
+                        ...outcome.warnings,
+                      ]),
+                    ],
+                  }
+                : {}),
             });
           }
         } catch {
@@ -1476,6 +1523,7 @@ export function defineJevFlow<T>(
                 state.data = { output: jsonSnapshot(value) };
               } catch {
                 state.data = "Selected value could not be captured as JSON.";
+                state.captureWarnings = ["Selected value capture unavailable."];
               }
             } else if (step.kind === "branch" || step.kind === "if") {
               const decision = evaluate(step.when!.ast, data, values);

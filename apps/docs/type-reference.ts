@@ -12,7 +12,7 @@ const descriptions: Record<string, string> = {
   AnswerView: "Captured SDK answer fields; available fields depend on the question type.",
   QuestionView: "Captured question type, instructions, and criteria.",
   FlowDefinition: "Static recipe graph, including its identity, name, and node metadata.",
-  FlowRun: "Captured execution state, with per-step progress and optional outcome, value, or error.",
+  FlowRun: "Captured execution state, with per-step progress and optional outcome, value, capture warnings, or error.",
   FlowStep: "Captured step state, timing, decisions, trace linkage, and collection/loop progress.",
   BuiltFlowFixture: "Unreleased. Exported fixture plus missing capture IDs and warnings to inspect before saving.",
   AnswerChange: "Unreleased. One scalar answer-field comparison; delta exists only for finite numeric differences.",
@@ -21,7 +21,7 @@ const descriptions: Record<string, string> = {
 };
 
 const supportingDescriptions: Record<string, string> = {
-  FlowNode: "One step in a flow’s static graph, including its kind, dependencies, and any nested item program. The inspector uses these nodes to display the recipe.",
+  FlowNode: "One step in a flow’s static graph, including its kind, dependencies, and any nested item program. Optional conditionCaptureWarnings describe limitations in captured conditionRule data. The inspector uses these nodes to display the recipe.",
   FlowCondition: "A recorded description of a condition, built from references, literal values, and comparison operators. It lets the inspector display the rule behind a decision.",
   AnswerValue: "A scalar answer field used in fixture comparisons: a string, number, boolean, or null.",
   Request: "The flow builder’s request shape, based on the SDK request with state that can contain flow references. The runner resolves that state before sending the request.",

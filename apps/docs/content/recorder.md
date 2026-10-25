@@ -42,6 +42,20 @@ The request hook should call through synchronously to preserve request linkage. 
 
 Use `import type` for data-only contracts. `/server` and `/flow` runtime imports belong on Node. Root protocol types are browser-safe.
 
+## Flow capture warnings
+
+| Field | Type | Describes |
+| --- | --- | --- |
+| `FlowRun.captureWarnings` | `string[]` (optional) | Captured outcome `value`. |
+| `FlowNode.conditionCaptureWarnings` | `string[]` (optional) | Captured `conditionRule`. |
+| `FlowStep.captureWarnings` | `string[]` (optional) | Captured task, merge, or loop `data`. |
+
+These warnings survive the flow stream, including nested item runs. The drawer displays them beside the affected values. A 20,000-character outcome or rule literal is capped at 16,000 characters with a warning, while runtime values and decisions remain full. Arrays/general objects retain at most 150 entries, also subject to depth 12 and an approximate 96,000-character capture budget.
+
+Absent metadata in older captures means unknown completeness. Do not classify arbitrary user strings as redaction or truncation markers. Redactors should return replacements; in-place mutations cannot reliably produce warning metadata. Replay fixtures contain Jev response bodies and their trace warnings, not outcome/rule data. See the [full capture metadata contract](https://github.com/diegoag64/jev-devtools/blob/main/docs/stream-protocol.md#flow-capture-warnings).
+
+Structured condition rules also have a 128-node projection budget. Exceeding it retains `conditionCaptureWarnings` before server capture; it does not change execution. Unsupported rule literals likewise carry an explicit warning.
+
 ## Version-matched declarations
 
 The installed package's `lib/src/index.d.ts`, `lib/server/index.d.ts`, and `lib/flow/index.d.ts` are the precise contracts for that version. The [API glossary](@/api/reference/#public-types) includes exact public declarations and their supporting shapes. Additional stream semantics are documented in the [stream protocol](https://github.com/diegoag64/jev-devtools/blob/main/docs/stream-protocol.md) and installed declarations.
