@@ -74,6 +74,23 @@ Like the snapshot comparison, it builds the archived baseline and current packag
 
 The ignored report includes source provenance, raw samples, time through final delivery, time through flow completion (including connection setup), process CPU time, completion heap delta, raw SSE bytes, message counts, and definition counts. A separate normalized payload-byte count replaces timestamps/durations with zero to distinguish content changes from timing-dependent serialization. Heap deltas are allocation pressure, not peak or retained memory. Initial snapshots are included in measurements; seeding retained history is excluded. No timing thresholds run in CI.
 
+## Expression overhead comparison
+
+To compare normal flow construction and execution against a Git revision:
+
+```sh
+BENCH_OUTPUT=benchmarks/results/expression-overhead \
+  node benchmarks/flow-expressions.mjs BASE_COMMIT [CANDIDATE_COMMIT]
+```
+
+The candidate defaults to committed `HEAD`; uncommitted runtime changes are excluded. Both revisions are archived and installed with independent locked dependencies and build outputs. The current benchmark script is copied into each archive so both use identical workloads through public exports. Setup may download npm dependencies; measured work makes no network or inference calls.
+
+The four workloads are a simple branch (three steps), a branch with ordinary reused conditions (three steps), six local tasks followed by a branch (nine steps), and two SDK calls with immediate local sample responses followed by a branch (five steps). Both routes and returned values are checked. Each workload measures synchronous definition construction, awaited execution without recording, and execution with the real recorder retaining 50 runs and no readers. These are normal-size expressions; the suite does not measure over-budget rejection or simulate inference latency.
+
+Run without competing builds or benchmarks. Eight rounds by default (`BENCH_ROUNDS=1`–`20`) alternate baseline/candidate order in sequential fresh Node processes. Each case/phase has two warmup batches and five measured batches, with GC outside the timed intervals. Batches contain 2,000 definitions, 2,000 unrecorded runs (500 for sample SDK), or 200 recorded runs. Definition construction is normally paid once when defining a reusable flow, not on every request.
+
+The ignored JSON report records commits, dependency-lock/source/script hashes, machine and Node details, raw wall/process-CPU microseconds per operation, and variability across process medians. Paired percentage changes compare matching rounds; report absolute costs too. This is a warmed local throughput comparison, not a cold-start, memory, browser, or production-latency benchmark. No timing thresholds run in CI.
+
 ## Report in the PR
 
 Include:
