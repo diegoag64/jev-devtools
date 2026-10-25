@@ -24,4 +24,4 @@ The first options factory passed to [`getJevDevtools()`](@/api/reference/#getjev
 
 ## Data looks incomplete
 
-Captures are bounded and can be redacted or truncated. Known credentials cannot be recovered from the inspection copy. The display-masking prop (new in 0.5.0, pending publication) can reveal supported personal fields only if those fields were retained by the server. Use the Questions picker or Raw view for large collections; browser Find does not cover unmounted virtualized cards.
+Captures are bounded and can be redacted or truncated. Known credentials cannot be recovered from the inspection copy. The display-masking prop (new in 0.5.0) can reveal supported personal fields only if those fields were retained by the server. Use the Questions picker or Raw view for large collections; browser Find does not cover unmounted virtualized cards.

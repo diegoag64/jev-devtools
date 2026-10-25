@@ -31,7 +31,7 @@ Mount the React drawer, connect a server adapter, and make Jev calls through its
 pnpm add jev-devtools @typesafe-ai/sdk
 ```
 
-Requires React **18/19** and Node **22.12+**. **0.5.0 is pending publication.** The badge shows this checkout’s version; the default install still resolves to the latest published release (currently 0.4.1). Use the local archive below to try 0.5.0 before publication. APIs remain experimental before 1.0. See the [release status](CHANGELOG.md). Your API key stays on the server. Capture and display are opt-in and disabled by default.
+Requires React **18/19** and Node **22.12+**. **[0.5.0 is available on npm](https://www.npmjs.com/package/jev-devtools/v/0.5.0).** The default install resolves to 0.5.0; use the local archive below to try source changes. APIs remain experimental before 1.0. See the [release status](CHANGELOG.md). Your API key stays on the server. Capture and display are opt-in and disabled by default.
 
 ### React + Node
 
@@ -211,14 +211,14 @@ Define once in a Node module and run per request. Typed answer references can fe
 
 **New in 0.4.0:** server function steps (`task`), runtime request factories, bounded collections (`map`), conditional paths that rejoin (`if`), and stateful iteration (`loop`). Combine them with sequential requests, parallel lanes, terminal branches, and named outcomes to inspect complex flows such as passage assessment and hierarchical classification. Numeric conditions also support strict greater-than with `.gt()`.
 
-**New in 0.5.0 (pending publication).** To test routing without a key, press **Copy fixture** on a run in the drawer and replay the saved JSON with `replayClient` from `jev-devtools/flow`. Jev calls replay with no network access or API key. Map items and loop iterations replay from their own answers; tasks run again and may call outside services.
+**New in 0.5.0.** To test routing without a key, press **Copy fixture** on a run in the drawer and replay the saved JSON with `replayClient` from `jev-devtools/flow`. Jev calls replay with no network access or API key. Map items and loop iterations replay from their own answers; tasks run again and may call outside services.
 
 ```ts
 const result = await review.run(input, { client: replayClient(fixture) });
 assert.equal(result.outcome, 'standard-review');
 ```
 
-**New in 0.5.0 (pending publication).** `compareWithFixture` compares a live run's answers, routing and item steps with a saved fixture.
+**New in 0.5.0.** `compareWithFixture` compares a live run's answers, routing and item steps with a saved fixture.
 
 [Full flow API guide](docs/flows.md) · [Flow recipe for coding agents](packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) · [Release availability](CHANGELOG.md)
 
@@ -299,7 +299,7 @@ Start at [jevtools.dev](https://jevtools.dev/) for the product overview and [doc
 | Work with a coding agent | [Agent guide](https://docs.jevtools.dev/agents/) · [Bundled setup skill](packages/jev-devtools/skills/setup-jev-devtools/SKILL.md) |
 | Check versions and changes | [Formatted changelog](https://docs.jevtools.dev/changelog/) · [Repository release history](CHANGELOG.md) |
 
-The hosted site is a separately published snapshot; check its version and the repository changelog when trying this release candidate. The detailed [integration](docs/integration.md), [Next.js](docs/nextjs.md), and [flow](docs/flows.md) guides remain available as repository references; runnable examples live in [cookbooks](cookbooks/README.md).
+The hosted site is a separately published snapshot; check its version and the repository changelog when comparing it with your installed package. The detailed [integration](docs/integration.md), [Next.js](docs/nextjs.md), and [flow](docs/flows.md) guides remain available as repository references; runnable examples live in [cookbooks](cookbooks/README.md).
 
 For repository setup, layout, and verification, see [Contributing](CONTRIBUTING.md). Changes use feature branches and PRs; merging, publishing, and deployment require explicit authorization. [Architecture](docs/architecture.md) · [Release process](docs/releases.md)
 

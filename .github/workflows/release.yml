@@ -155,6 +155,8 @@ jobs:
         with:
           node-version: '24'
       - run: npm install --global npm@11.19.0
+      # Each job has a fresh checkout; consumer type checks use the root TypeScript install.
+      - run: npm ci
       - uses: actions/download-artifact@v4
         with:
           name: npm-publication

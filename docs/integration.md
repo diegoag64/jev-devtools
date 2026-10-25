@@ -1,10 +1,10 @@
 # Jev DevTools integration
 
-For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/getting-started/). This file is the detailed repository reference for the 0.5.0 release candidate; [publication is pending](../CHANGELOG.md).
+For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/getting-started/). This file is the detailed repository reference for 0.5.0; see the [published release notes](../CHANGELOG.md#050--october-25-2026-experimental).
 
 A reusable React inspector with one root component and a Node server adapter. It uses Diagram Motion Lab's rounded outline cards, curved connections, pink flowing dots, and probability bars. The drawer contains searchable request history and Flow, Questions, Context, Transport, and Raw views.
 
-Jev DevTools remains experimental before 1.0. The default npm install currently resolves to 0.4.1; use the archive below for the 0.5.0 candidate. See the [release notes](../CHANGELOG.md). Verified with sample responses through the real TypeSafe SDK; no live inference was used for verification.
+Jev DevTools remains experimental before 1.0. The default npm install resolves to 0.5.0; use the archive below to try local source changes. See the [release notes](../CHANGELOG.md). Verified with sample responses through the real TypeSafe SDK; no live inference was used for verification.
 
 ## Install in another React project
 

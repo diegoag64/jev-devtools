@@ -1,8 +1,8 @@
 # Define and inspect connected Jev calls
 
-For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/flow-basics/). This file is the detailed repository reference for the 0.5.0 release candidate; [publication is pending](../CHANGELOG.md).
+For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/flow-basics/). This file is the detailed repository reference for 0.5.0; see the [published release notes](../CHANGELOG.md#050--october-25-2026-experimental).
 
-The flow API includes function steps, runtime requests, collections, returning conditionals, loops, replay, and fixture comparison. Replay and comparison are new in **0.5.0 (pending publication)**. Existing single-request integrations remain supported; adopting flows is optional. For publication status, check the [changelog](../CHANGELOG.md).
+The flow API includes function steps, runtime requests, collections, returning conditionals, loops, replay, and fixture comparison. Replay and comparison are new in **0.5.0**. Existing single-request integrations remain supported; adopting flows is optional. For publication status, check the [changelog](../CHANGELOG.md).
 
 Start with the [integration guide](integration.md) or [Next.js setup](nextjs.md) to mount the drawer and expose the shared inspector. For coding agents, the [bundled flow recipe](../packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) includes a complete parallel-checks → decision → branch example and no-key verification. It ships with npm for offline, version-matched use.
 
@@ -339,7 +339,7 @@ Try the [hierarchical classification cookbook](../cookbooks/hierarchical-classif
 
 ## Replay a run in tests
 
-**New in 0.5.0 (pending publication).**
+**New in 0.5.0.**
 
 ### Copy a fixture from DevTools
 
@@ -408,7 +408,7 @@ The drawer reports completed steps it could not include and any capture warnings
 
 ## Compare a live run with a fixture
 
-**New in 0.5.0 (pending publication).**
+**New in 0.5.0.**
 
 After you change a prompt or a model, re-run your saved cases with `compareWithFixture` to see what moved. It replays the fixture offline, runs the flow with your client on the same input, and reports the differences:
 

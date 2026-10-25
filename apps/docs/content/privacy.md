@@ -15,7 +15,7 @@ const inspector = createJevDevtools({
 
 Import [`createJevDevtools`](@/api/reference/#createjevdevtools) from `jev-devtools/server`. The callback changes the captured copy, not SDK inputs or application values. Known credential fields are always redacted; extend the policy for your own sensitive data. Field-name redaction does not detect every secret in prose, URLs, images, or unusual field names.
 
-> **New in 0.5.0 (pending publication):** expanded credential aliases and the default-on [`redactAdditionalSensitiveData`](@/api/reference/#jevdevtools) prop are included in the release candidate. Display masking leaves values in server capture memory, the event stream, and browser memory. Use server-side redaction when data must never reach the browser.
+> **New in 0.5.0:** expanded credential aliases and the default-on [`redactAdditionalSensitiveData`](@/api/reference/#jevdevtools) prop are available in the published package. Display masking leaves values in server capture memory, the event stream, and browser memory. Use server-side redaction when data must never reach the browser.
 
 ## Control who can inspect
 

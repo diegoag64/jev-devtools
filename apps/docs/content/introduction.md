@@ -43,7 +43,7 @@ The inspector records calls through your instrumented client. It does not discov
 
 Use **React 18 or 19**, **Node 22.12+**, and **TypeSafe SDK 0.7.x**. The server adapter and flow runner need Node; they do not run in a browser or edge runtime. History is bounded and in memory.
 
-> These pages describe the **0.5.0 release candidate (pending publication)**. npm currently serves **0.4.1**. New 0.5.0 APIs are labeled; use a candidate archive to try them before publication. Check the [changelog](@/changelog/) and your installed version. The package is experimental before 1.0.
+> These pages describe **0.5.0, available on npm**. New 0.5.0 APIs are labeled. Check the [changelog](@/changelog/) and your installed version. The package is experimental before 1.0.
 
 ## Find a method or learn flows
 
