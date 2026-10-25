@@ -22,7 +22,7 @@ const flowHelp = {
     title: "flow.jev()",
     signature: "flow.jev(id, { state, questions }, display?)",
     description:
-      "Add a Jev request step. It returns references to answers you can use in later steps.",
+      "Define a Jev request step synchronously. Returns future-answer references, not a promise. The request runs and is awaited when you call program.run().",
     props: {
       id: "A unique step ID within this flow.",
       state:
@@ -67,7 +67,7 @@ const flowHelp = {
     title: "program.run()",
     signature: "program.run(input, { client, devtools?, signal? })",
     description:
-      "Execute the flow with new input. Resolves to { runId, outcome, value? }.",
+      "Start the flow with new input and await its steps, including SDK requests. Use await to read { runId, outcome, value? }.",
     props: {
       input: "Data matching the input type declared in defineJevFlow.",
       client: "The TypeSafe-compatible client that executes Jev requests.",

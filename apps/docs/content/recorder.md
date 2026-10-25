@@ -2,9 +2,11 @@ Most applications should use the [server adapter](@/api/server/). Reach for [`Je
 
 ## JevRecorder
 
+Creating and instrumenting the client does not send a request. Call `await recordMessage("I was charged twice.")` from your Node handler to make a live request, wait for its answer, and inspect the recorded trace.
+
 <!-- example: recorder.ts -->
 
-**Example walkthrough:** the recorder retains up to 50 traces. `transport()` observes HTTP attempts, while `instrument()` observes logical `systemOne` calls and assigns their session and label. The subscriber filters notifications to the local session, then reads a detached snapshot. Call `unsubscribe()` during cleanup.
+**Example walkthrough:** the recorder retains up to 50 traces. `transport()` observes HTTP attempts, while `instrument()` observes logical `systemOne` calls and assigns their session and label. The subscriber filters notifications to the local session, then reads a detached snapshot. `recordMessage()` awaits the instrumented SDK call, reads its chosen team, then reads the recorder snapshot. Call `unsubscribe()` during cleanup.
 
 
 [`instrument`](@/api/reference/#recorder-instrument) observes logical calls; [`transport`](@/api/reference/#recorder-transport) observes HTTP attempts. Pair them to preserve both views. The instrumented proxy preserves the original SDK promise and response helpers. This example needs a real key when you call `client.systemOne()`.

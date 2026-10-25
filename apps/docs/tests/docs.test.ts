@@ -2,17 +2,18 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { renderChangelog } from "../changelog.js";
 import { compile } from "../site.js";
-import { summarize, count } from "../examples/operations.js";
+import { tryOperations, count } from "../examples/operations.js";
 import { replayExample } from "../examples/replay.js";
 import { tryGreeting } from "../examples/first-flow.js";
-import { greeting } from "../examples/flow-task.js";
-import { delivery } from "../examples/flow-if.js";
-import { route } from "../examples/flow-branch.js";
-import { totals } from "../examples/flow-parallel.js";
-import { doubleEach } from "../examples/flow-map.js";
-import { countToThree } from "../examples/flow-loop.js";
-import { classify } from "../examples/flow-jev.js";
-import { customQuestion } from "../examples/flow-factory.js";
+import { tryTask } from "../examples/flow-task.js";
+import { delivery, tryDelivery } from "../examples/flow-if.js";
+import { route, tryBranch } from "../examples/flow-branch.js";
+import { tryParallel } from "../examples/flow-parallel.js";
+import { doubleEach, tryMap } from "../examples/flow-map.js";
+import { tryLoop } from "../examples/flow-loop.js";
+import { tryClassify } from "../examples/flow-jev.js";
+import { tryCustomQuestion } from "../examples/flow-factory.js";
+import { tryJoin } from "../examples/flow-join.js";
 import { FlowLoopLimitError, replayClient } from "jev-devtools/flow";
 
 test("code examples render as text while repeated headings get distinct deep links", async () => {
@@ -37,21 +38,22 @@ test("documented task examples return the explained values and report loop exhau
   const first = await tryGreeting();
   assert.equal(first.outcome, "greeted");
   assert.equal(first.value, "Ada");
-  assert.equal((await greeting.run({ name: "Ada" }, { client })).value, "Hello, Ada!");
+  assert.equal((await tryTask()).value, "Hello, Ada!");
   for (const express of [true, false])
-    assert.equal((await delivery.run({ express }, { client })).value,
+    assert.equal((await (express ? tryDelivery() : delivery.run({ express }, { client }))).value,
       `Delivery in ${express ? 1 : 5} day(s)`);
   for (const needsReview of [true, false])
-    assert.equal((await route.run({ needsReview }, { client })).outcome,
+    assert.equal((await (needsReview ? tryBranch() : route.run({ needsReview }, { client }))).outcome,
       needsReview ? "manual-review" : "ready");
-  assert.deepEqual((await totals.run({ price: 100 }, { client })).value, { regular: 100, sale: 80 });
-  assert.deepEqual((await doubleEach.run({ numbers: [2, 4, 6] }, { client })).value, [4, 8, 12]);
+  assert.deepEqual((await tryParallel()).value, { regular: 100, sale: 80 });
+  assert.deepEqual((await tryMap()).value, [4, 8, 12]);
   assert.deepEqual((await doubleEach.run({ numbers: [] }, { client })).value, []);
-  assert.equal((await countToThree.run({}, { client })).value, 3);
-  const result = await summarize.run({ values: [2, 4] }, { client });
+  assert.equal((await tryLoop()).value, 3);
+  const { summary: result, counted } = await tryOperations();
+  assert.deepEqual((await tryJoin()).value, { left: 4, right: 9 });
   assert.equal(result.outcome, "summary");
   assert.deepEqual(result.value, { total: 12, label: "Large: 12" });
-  assert.deepEqual((await count.run({ target: 3 }, { client })).value, {
+  assert.deepEqual(counted.value, {
     value: 3,
     target: 3,
   });
@@ -162,10 +164,6 @@ test("beginner Jev examples resolve named answers and factory answer objects", a
   const stored = (flow: string, step: string) => replayClient({
     version: 1, flow, steps: { [step]: { model: "jev-sample", answers } },
   });
-  assert.equal((await classify.run({ message: "A duplicate charge" }, {
-    client: stored("classify", "ask-team"),
-  })).value, "billing");
-  assert.deepEqual((await customQuestion.run({ message: "A duplicate charge" }, {
-    client: stored("custom-question", "ask"),
-  })).value, answers);
+  assert.equal((await tryClassify(stored("classify", "ask-team"))).value, "billing");
+  assert.deepEqual((await tryCustomQuestion(stored("custom-question", "ask"))).value, answers);
 });

@@ -283,7 +283,7 @@ inspector.dispose();
 
 ## Flow definitions and steps
 
-Import `defineJevFlow` from `jev-devtools/flow` on Node. Builder methods describe work synchronously; they do not execute it. See [Flows from scratch](@/guides/flow-basics/) for a complete, small example of every operation.
+Import `defineJevFlow` from `jev-devtools/flow` on Node. Builder methods describe work synchronously; they do not execute it. The complete examples below pair each definition with an async function that awaits its `run()` and reads the result. Call that function from Node to execute the example. See [Flows from scratch](@/guides/flow-basics/) for a complete, small example of every operation.
 
 ### defineJevFlow
 
@@ -307,14 +307,9 @@ defineJevFlow<Input>(name: string, build: (flow: FlowBuilder<Input>) => Expressi
 | definition | `FlowDefinition` | Static graph. |
 | run | `(input: Input, options: FlowRunOptions) => Promise<FlowOutcome & { runId: string }>` | Executes a fresh run. |
 
-```ts api=core
-import { defineJevFlow } from "jev-devtools/flow";
-const program = defineJevFlow<{ name: string }>("hello", (flow) =>
-  flow.output("greeted", flow.input.get("name")),
-);
-```
+<!-- example: first-flow.ts -->
 
-**Example walkthrough:** The input type requires a name. `get("name")` selects it without reading a runtime value yet; `output("greeted", ...)` describes the terminal result. Calling `program.run()` later performs the execution.
+**Example walkthrough:** `greet` records the input reference and terminal output synchronously. Calling `tryGreeting()` awaits `greet.run({ name: "Ada" }, ...)` and reads outcome `"greeted"` and value `"Ada"`. The no-inference client needs no key because this definition has no Jev steps.
 
 ### flow.run
 
@@ -386,6 +381,8 @@ A reference to the current recipe input, not its actual runtime value. **Returns
 | --- | --- | --- |
 | Property value | `FlowExpression<Input>` | Reference to the current flow, item, or iteration input. |
 
+Inside a synchronous `defineJevFlow()` callback; these references resolve when you await the flow’s `run()`. See the [complete definition and execution](@/guides/flow-basics/#input-read-the-data-you-were-given).
+
 ```ts api=expressions
 const name = flow.input.get("name");
 ```
@@ -417,14 +414,9 @@ flow.task<I, O>(id: string, task: FlowTask<I, O>, display?: FlowDisplay): Expres
 | Builder return | `FlowExpression<Awaited<O>>` | Reference to the callback result. |
 | Resolved value | `Awaited<O>` | Actual callback result after awaiting it, if needed. |
 
-```ts api=parallel
-const greeting = flow.task("greet", {
-  input: flow.input.get("name"),
-  run: (name) => `Hello, ${name}!`,
-});
-```
+<!-- example: flow-task.ts -->
 
-**Example walkthrough:** The task resolves the input name before invoking the callback. The template literal builds a greeting, and `greeting` holds a reference to that string for subsequent steps.
+**Example walkthrough:** `get("name")` selects the input field. The task resolves it before calling `run`, so `name` inside the callback is an ordinary string. The template literal constructs the greeting. `output("greeted", message)` resolves that task result and makes it the final flow value. Calling `tryTask()` awaits `greeting.run({ name: "Ada" }, ...)`, then reads outcome `"greeted"` and value `"Hello, Ada!"` from the finished run.
 
 ### flow.jev
 
@@ -453,14 +445,11 @@ flow.jev(id, { input, request: (resolvedInput) => sdkRequest }, display?): Answe
 | answers | `FlowExpression<{ [K in keyof Q]: ResultFor<Q[K]> }>` | Reference to all answers. |
 | Resolved answer fields | `SDK ResultFor<Q[K]> fields` | Actual field values for the selected SDK question type. |
 
-```ts api=parallel
-const result = flow.jev("classify", {
-  state: flow.input,
-  questions: { team: choice("Which team?", { billing: null, support: null }) },
-}); // choice is imported from @typesafe-ai/sdk
-```
+**Define now, request later.** `flow.jev()` returns future-answer references, not a promise. `await classify.run(...)` executes the request and waits for its answer. Call `tryClassify(jev)` with the client from the [server setup](@/api/server/).
 
-**Example walkthrough:** The SDK’s `choice()` helper defines two allowed team labels. The flow supplies its input as request context and exposes the answer through `result` for later steps.
+<!-- example: flow-jev.ts -->
+
+**Example walkthrough:** `state: flow.input` sends the message as context. The SDK's `choice()` helper defines the allowed teams and their descriptions. `answer("team").choice` selects the model's chosen label, and `output()` returns it. `tryClassify()` supplies a concrete message to `await classify.run(...)`. After the request finishes, `result.outcome` is `"classified"` and `result.value` contains the chosen team. The selected team is not predetermined.
 
 ### request.answer
 
@@ -481,6 +470,8 @@ result.answer<Name extends keyof Questions>(name: Name): AnswerFieldReferences
 | Value / member | Type | Description |
 | --- | --- | --- |
 | Return | `Object of FlowExpression fields` | Each result field is an expression with its SDK-defined value type. |
+
+Inside a synchronous `defineJevFlow()` callback; these references resolve when you await the flow’s `run()`. See the [complete definition and execution](@/guides/flow-basics/#jev-ask-a-question).
 
 ```ts
 const team = result.answer("team").choice; // expression for a Choice result
@@ -503,6 +494,8 @@ The full resolved SDK answer object, useful when a factory generates question na
 | Value / member | Type | Description |
 | --- | --- | --- |
 | Property value | `FlowExpression<{ [K in keyof Q]: ResultFor<Q[K]> }>` | Reference to the complete answer object. |
+
+Inside a synchronous `defineJevFlow()` callback; these references resolve when you await the flow’s `run()`. See the [complete definition and execution](@/guides/flow-basics/#jev-ask-a-question).
 
 ```ts api=parallel
 return flow.output("answers", result.answers);
@@ -535,15 +528,9 @@ flow.if<A, B>(id, { when, then, else }, display?): Expression<A | B>
 | Builder return | `FlowExpression<A \| B>` | Reference to the selected path’s result. |
 | Resolved value | `A \| B` | Value from the executed path, available to later steps. |
 
-```ts api=parallel
-const days = flow.if("speed", {
-  when: flow.input.get("express").eq(true),
-  then: (path) => path.task("fast", { input: 1, run: (n) => n }),
-  else: (path) => path.task("regular", { input: 5, run: (n) => n }),
-});
-```
+<!-- example: flow-if.ts -->
 
-**Example walkthrough:** The condition compares the express flag with true. The selected task returns either 1 or 5; `days` makes that value available to shared steps after the decision.
+**Example walkthrough:** `.eq(true)` turns the `express` reference into a condition. Each path uses a task to supply a number. After the paths join, the shared `describe` task receives the selected number and formats the delivery message. This shared continuation is why the example uses `if()` rather than `branch()`. Calling `tryDelivery()` awaits `delivery.run({ express: true }, ...)`, then reads outcome `"estimated"` and value `"Delivery in 1 day(s)"` from the finished run.
 
 ### flow.branch
 
@@ -570,15 +557,9 @@ flow.branch(id, { when, then, else }, display?): Expression<FlowOutcome>
 | Resolved outcome | `string` | Name returned by the selected terminal path. |
 | Resolved value? | `unknown` | Optional resolved value returned by that path. |
 
-```ts api=parallel
-return flow.branch("route", {
-  when: flow.input.get("needsReview").eq(true),
-  then: (path) => path.output("review"),
-  else: (path) => path.output("ready"),
-});
-```
+<!-- example: flow-branch.ts -->
 
-**Example walkthrough:** The condition selects one terminal path. Each path returns a distinct outcome, so returning the branch completes the flow instead of joining into shared work.
+**Example walkthrough:** `.eq(true)` checks `needsReview`. The selected path calls `output()` with its own outcome name and message. Returning the branch ends the flow; there is no shared step afterward. Use [`if()`](@/api/reference/#flow-if) when the paths should rejoin. Calling `tryBranch()` awaits `route.run({ needsReview: true }, ...)`, then reads outcome `"manual-review"` and value `"A person should review this"` from the finished run.
 
 ### flow.parallel
 
@@ -603,15 +584,9 @@ flow.parallel(id, lanes: { [name: string]: (lane) => Expression<unknown> }, disp
 | Builder return | `Object with the lane keys` | Each member preserves its lane’s expression type. |
 | Resolved lane values | `Each lane’s result type` | Available through the named references after the join. |
 
-```ts api=parallel
-const results = flow.parallel("prices", {
-  regular: (lane) => lane.task("full", { input: 100, run: (n) => n }),
-  sale: (lane) => lane.task("discount", { input: 80, run: (n) => n }),
-});
-return flow.output("priced", { regular: results.regular, sale: results.sale });
-```
+<!-- example: flow-parallel.ts -->
 
-**Example walkthrough:** The named lanes produce independent prices. The output object resolves `results.regular` and `results.sale` after the lanes join, yielding `{ regular: 100, sale: 80 }`.
+**Example walkthrough:** both lanes read the same input price through their own builders. `full-price` returns it unchanged, while `sale-price` multiplies it by `0.8`. The flow joins the lanes before resolving both references in the output object. A lane cannot read another lane's private intermediate steps. Calling `tryParallel()` awaits `totals.run({ price: 100 }, ...)`, then reads outcome `"priced"` and value `{ regular: 100, sale: 80 }` from the finished run.
 
 ### flow.map
 
@@ -642,15 +617,9 @@ flow.map<Item, Context, Output>(id, { items, input, maxItems, concurrency? }, bu
 | Builder return | `FlowExpression<Output[]>` | Reference to the result array. |
 | Resolved value | `Output[]` | One result per item, in original input order. |
 
-```ts api=parallel
-const doubled = flow.map("double", { items: [2, 4], input: {}, maxItems: 10 },
-  (item) => item.task("multiply", {
-    input: item.input.get("item"), run: (n) => n * 2,
-  }),
-);
-```
+<!-- example: flow-map.ts -->
 
-**Example walkthrough:** Each item program selects its own number and multiplies it by two in a task. For `[2, 4]`, the resolved array is `[4, 8]` in the same order. The bound rejects inputs above ten items.
+**Example walkthrough:** `items` selects the input array, and `input` supplies a multiplier shared by all items. Within each item program, `get("item")` selects its number and `get("context").get("multiplier")` selects the multiplier. The task resolves both before multiplying. Up to two item programs run at once, but the result array preserves the original item order. Explicit context keeps the item program independent of outer step references. Calling `tryMap()` awaits `doubleEach.run({ numbers: [2, 4, 6] }, ...)`, then reads outcome `"doubled"` and value `[4, 8, 12]` from the finished run.
 
 ### flow.loop
 
@@ -681,15 +650,9 @@ flow.loop<State, Context>(id, { initial, input, while, maxIterations }, build, d
 | Builder return | `FlowExpression<State>` | Reference to the final state. |
 | Resolved value | `State` | State when the condition becomes false; initial state if no iterations run. |
 
-```ts api=parallel
-const final = flow.loop("count", {
-  initial: 0, input: {}, while: (state) => state.lt(3), maxIterations: 3,
-}, (iteration) => iteration.task("increment", {
-  input: iteration.input.get("state"), run: (n) => n + 1,
-}));
-```
+<!-- example: flow-loop.ts -->
 
-**Example walkthrough:** The loop starts at zero and checks `.lt(3)` before each iteration. The task increments the state; after it reaches three, the condition is false and the loop resolves to `3`.
+**Example walkthrough:** `initial` starts the state at zero. `while` uses `.lt(3)` to build the stopping condition. The `increment` task reads the current state and adds one, producing `0 → 1 → 2 → 3`. Before a fourth iteration, the condition is false, so the loop returns `3`. If the initial condition is false, no iterations run and the initial state is returned. Calling `tryLoop()` awaits `countToThree.run({}, ...)`, then reads outcome `"counted"` and value `3` from the finished run.
 
 ### flow.output
 
@@ -715,6 +678,8 @@ flow.output(name: string, value?: unknown, display?: FlowDisplay): Expression<Fl
 | Resolved outcome | `string` | The supplied name. |
 | Resolved value? | `unknown` | The supplied value with nested references resolved. |
 
+Inside a synchronous `defineJevFlow()` callback; these references resolve when you await the flow’s `run()`. See the [complete definition and execution](@/guides/flow-basics/#output-finish-with-a-result).
+
 ```ts api=parallel
 return flow.output("done", { message, count });
 ```
@@ -722,6 +687,8 @@ return flow.output("done", { message, count });
 **Example walkthrough:** The object groups two previously defined references, `message` and `count`. Both are resolved into ordinary values under outcome `"done"`; naming the outcome performs no external action.
 
 ## Expressions and conditions
+
+The short expression snippets below belong inside a synchronous `defineJevFlow()` callback. They build references; use them in a step or terminal `output()`, then await the flow’s `run()` to get actual data. See the [complete expression and execution example](@/api/flow/#collections-and-loops).
 
 All these runtime exports come from `jev-devtools/flow`. References must belong to the same flow and be available in the current execution scope. See [expression scopes](@/api/expressions/#respect-scope).
 

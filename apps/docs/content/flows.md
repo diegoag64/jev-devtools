@@ -10,7 +10,7 @@ Hover, focus, or tap a dotted API method or option for a short explanation. Try 
 
 <!-- example: flow.ts twoslash -->
 
-The `triage` definition is built once. `routeMessage()` runs it with new input each time. Pass the shared adapter as `devtools` to record the execution and link request traces to steps.
+The `triage` definition is built synchronously once; its `jev()` call creates answer references without sending a request. `routeMessage()` uses `await triage.run(...)` to send the request, wait for the selected path, and read the outcome. Call `await routeMessage("I was charged twice.")` from your Node handler. Pass the shared adapter as `devtools` to record the execution and link request traces to steps.
 
 ## Read the returned outcome
 

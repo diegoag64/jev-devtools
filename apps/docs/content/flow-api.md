@@ -4,6 +4,8 @@ New to flows? Start with [Flows from scratch](@/guides/flow-basics/), which intr
 
 Import from `jev-devtools/flow` in Node code. [`defineJevFlow<Input>()`](@/api/reference/#definejevflow) accepts a name and a synchronous builder callback, and returns a definition with [`run(input, options)`](@/api/reference/#flow-run). The callback returns [`flow.output()`](@/api/reference/#flow-output) or a terminal [`flow.branch()`](@/api/reference/#flow-branch).
 
+`flow.jev()` creates future-answer references synchronously. The `await triage.run(...)` call inside `routeMessage()` performs the request and waits for the outcome. Call `await routeMessage("I was charged twice.")` from your Node handler.
+
 <!-- example: flow.ts -->
 
 **Example walkthrough:** the `classify` Jev step asks which team should handle the message. `.answer("team").choice.eq("billing")` turns that answer into a branch condition. Each path returns a terminal team name. `routeMessage()` executes the recipe with the instrumented client and shared inspector.
@@ -63,22 +65,16 @@ Path callbacks build both possible paths synchronously; only the selected path e
 
 [`parallel(id, lanes, display?)`](@/api/reference/#flow-parallel) takes a named object of lane callbacks. Each lane returns an expression. The result is an object of joined expressions with matching names. Work inside a lane is sequential; lanes are concurrent. A sibling lane's private intermediate references are not available to other lanes.
 
-```ts api=parallel
-const results = flow.parallel("load", {
-  left: (lane) => lane.task("left-value", { input: 2, run: (n) => n * 2 }),
-  right: (lane) => lane.task("right-value", { input: 3, run: (n) => n * 3 }),
-});
-return flow.output("joined", { left: results.left, right: results.right });
-```
+<!-- example: flow-join.ts -->
 
-**Example walkthrough:** the left lane doubles `2` and the right lane triples `3`. The joined references are passed into `output()`, producing `{ left: 4, right: 9 }`. The lane computations are independent; neither reads the other's private steps.
+**Example walkthrough:** the left lane doubles `2` and the right lane triples `3`. The joined references are passed into `output()`, producing `{ left: 4, right: 9 }`. The lane computations are independent; neither reads the other's private steps. `tryJoin()` starts the run and waits for both lanes before reading the output.
 
 | Returned member | Type | Resolved value in this example |
 | --- | --- | --- |
 | `results.left` | `FlowExpression<number>` | `4`. |
 | `results.right` | `FlowExpression<number>` | `9`. |
 
-This fragment belongs inside a [`defineJevFlow()`](@/api/reference/#definejevflow) callback. For a complete request-based example, see the [full flow guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md#parallel-calls-and-the-join).
+The builder describes both lanes synchronously; the task callbacks run when `tryJoin()` awaits execution. For a request-based example, see the [full flow guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md#parallel-calls-and-the-join).
 
 ## Collections and loops
 
@@ -86,7 +82,7 @@ This fragment belongs inside a [`defineJevFlow()`](@/api/reference/#definejevflo
 
 [`loop(id, { initial, input, while, maxIterations }, build, display?)`](@/api/reference/#flow-loop) tests the state condition before each iteration. Its builder input is `{ state, index, context }`; return the next state. It returns the final state after the condition becomes false. If the condition still holds at the iteration limit, it throws [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror).
 
-These complete definitions demonstrate application-owned tasks without inference:
+Call `tryOperations()` from Node to run both definitions below. Its two `await` calls execute application-owned tasks without inference and read the resolved results:
 
 <!-- example: operations.ts -->
 
@@ -109,6 +105,8 @@ Structural errors fail during definition. Missing input values and invalid compa
 ## Replay captured answers (unreleased)
 
 [`replayClient(fixture)`](@/api/reference/#replayclient) returns an SDK-compatible client for a flow run. Jev steps receive stored answers without a network call or API key. This is not in npm 0.4.1 yet.
+
+Call `await replayExample()` from Node. The definition is synchronous; `await flow.run(...)` executes it using the stored response.
 
 <!-- example: replay.ts -->
 

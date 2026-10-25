@@ -1,10 +1,12 @@
 A flow is a recipe your server follows: take some input, run steps, and return a named result. You can use ordinary application code, ask Jev questions, or combine both. You do not need to understand graphs to write one.
 
-This guide starts with a flow that makes **no network requests**. Each example is a complete definition with its own import. Keep these files on your Node server. If you have not connected the drawer yet, start with the [quick start](@/getting-started/).
+This guide starts with a flow that makes **no network requests**. Each example includes its imports, a flow definition, and an async function that runs it and reads the result. Call that function from your Node code; importing the example does not execute the flow. Keep these files on your Node server. If you have not connected the drawer yet, start with the [quick start](@/getting-started/).
 
 The interface tables use the types from each example. The [API glossary](@/api/reference/) contains the generic signatures for other input and result types. A builder return is a reference created while defining the recipe; a resolved value is the actual data produced during execution.
 
 ## Your first flow
+
+**Define first, run later.** The callback passed to [`defineJevFlow()`](@/api/reference/#definejevflow) runs synchronously to describe the steps. It does not execute tasks or send model requests. [`await flowName.run(input, options)`](@/api/reference/#flow-run) starts an execution, waits for its steps, and gives your application ordinary result data. Keep the builder callback synchronous; put `await` in the function that runs the flow.
 
 <!-- example: first-flow.ts -->
 
@@ -84,13 +86,17 @@ Use [`task`](@/api/reference/#flow-task) for calculations, database reads, or ca
 | Resolved task value | `string` | `"Hello, Ada!"` when `name` is `"Ada"`. |
 | Final run result | `{ runId: string; outcome: string; value?: unknown }` | Outcome `"greeted"`, value `"Hello, Ada!"`. |
 
-**Example walkthrough:** `get("name")` selects the input field. The task resolves it before calling `run`, so `name` inside the callback is an ordinary string. The template literal constructs the greeting. `output("greeted", message)` resolves that task result and makes it the final flow value.
+**Example walkthrough:** `get("name")` selects the input field. The task resolves it before calling `run`, so `name` inside the callback is an ordinary string. The template literal constructs the greeting. `output("greeted", message)` resolves that task result and makes it the final flow value. Calling `tryTask()` awaits `greeting.run({ name: "Ada" }, ...)`, then reads outcome `"greeted"` and value `"Hello, Ada!"` from the finished run.
 
 A task callback can also accept a second argument containing `signal`, `runId`, `stepId`, and `executionId`. Pass its signal to cancellable work such as `fetch`. A timeout or cancellation cannot undo a payment, database write, or other side effect. Tasks do not retry automatically.
 
 ## jev — ask a question
 
-Use [`jev`](@/api/reference/#flow-jev) when you need a model answer rather than a calculation:
+Use [`jev`](@/api/reference/#flow-jev) when you need a model answer rather than a calculation.
+
+**`flow.jev()` defines the request; `classify.run()` executes it.** The builder adds a request to the definition and returns references to future answers. It does not return a promise or send the request. Below, `await classify.run(...)` starts the flow; the runner sends the SDK request and waits for the answer before resolving the output.
+
+Call `tryClassify(jev)` with the client from the [server setup](@/api/server/). This makes a live request and requires a server-side API key. The chosen team depends on the model response:
 
 <!-- example: flow-jev.ts -->
 
@@ -114,11 +120,11 @@ Use [`jev`](@/api/reference/#flow-jev) when you need a model answer rather than 
 | `result.answers` | `FlowExpression` of the full answer object | All named SDK answers, including their metadata. |
 | Final run result | `{ runId: string; outcome: string; value?: unknown }` | Outcome `"classified"`; value is the selected team. |
 
-**Example walkthrough:** `state: flow.input` sends the message as context. The SDK's `choice()` helper defines the allowed teams and their descriptions. `answer("team").choice` selects the model's chosen label, and `output()` returns it. Defining this flow does not send a request; executing it with a live client does. The selected team is not predetermined.
-
-A live run requires an SDK client and server-side API key.
+**Example walkthrough:** `state: flow.input` sends the message as context. The SDK's `choice()` helper defines the allowed teams and their descriptions. `answer("team").choice` selects the model's chosen label, and `output()` returns it. `tryClassify()` supplies a concrete message to `await classify.run(...)`. After the request finishes, `result.outcome` is `"classified"` and `result.value` contains the chosen team. The selected team is not predetermined.
 
 `choice` comes from the TypeSafe SDK. [`flow.jev`](@/api/reference/#flow-jev) connects that SDK request to the flow. If you need to construct a question using a resolved string, use the factory form:
+
+Call `tryCustomQuestion(jev)` with the same server client. The request factory runs during execution after its input resolves, but the factory itself must return synchronously.
 
 <!-- example: flow-factory.ts -->
 
@@ -181,7 +187,7 @@ Use [`if`](@/api/reference/#flow-if) when two paths should rejoin before the flo
 | Resolved `days` | `number` | `1` for express delivery; otherwise `5`. |
 | Final run result | `{ runId: string; outcome: string; value?: unknown }` | Outcome `"estimated"`; value `"Delivery in 1 day(s)"` or `"Delivery in 5 day(s)"`. |
 
-**Example walkthrough:** `.eq(true)` turns the `express` reference into a condition. Each path uses a task to supply a number. After the paths join, the shared `describe` task receives the selected number and formats the delivery message. This shared continuation is why the example uses `if()` rather than `branch()`.
+**Example walkthrough:** `.eq(true)` turns the `express` reference into a condition. Each path uses a task to supply a number. After the paths join, the shared `describe` task receives the selected number and formats the delivery message. This shared continuation is why the example uses `if()` rather than `branch()`. Calling `tryDelivery()` awaits `delivery.run({ express: true }, ...)`, then reads outcome `"estimated"` and value `"Delivery in 1 day(s)"` from the finished run.
 
 Both callbacks describe their paths when the definition is built. Only the selected path's **steps** run. Put application work inside tasks, not directly inside the path-building callbacks. Do not use JavaScript `if (flow.input...)`: a reference is an object, not a resolved Boolean.
 
@@ -210,7 +216,7 @@ The options are `when`, `then`, and `else`, like [`if`](@/api/reference/#flow-if
 | Resolved `outcome` | `string` | `"manual-review"` when true; `"ready"` when false. |
 | Resolved `value?` | `unknown` | `"A person should review this"` or `"Continue automatically"` here. |
 
-**Example walkthrough:** `.eq(true)` checks `needsReview`. The selected path calls `output()` with its own outcome name and message. Returning the branch ends the flow; there is no shared step afterward. Use [`if()`](@/api/reference/#flow-if) when the paths should rejoin.
+**Example walkthrough:** `.eq(true)` checks `needsReview`. The selected path calls `output()` with its own outcome name and message. Returning the branch ends the flow; there is no shared step afterward. Use [`if()`](@/api/reference/#flow-if) when the paths should rejoin. Calling `tryBranch()` awaits `route.run({ needsReview: true }, ...)`, then reads outcome `"manual-review"` and value `"A person should review this"` from the finished run.
 
 ## parallel — do independent work together
 
@@ -237,7 +243,7 @@ Pass a step ID and an object of named lane callbacks. Each callback receives its
 | `prices.sale` | `FlowExpression<number>` | Reference to the discounted price. |
 | Final `value` for `{ price: 100 }` | `unknown` | `{ regular: 100, sale: 80 }`. |
 
-**Example walkthrough:** both lanes read the same input price through their own builders. `full-price` returns it unchanged, while `sale-price` multiplies it by `0.8`. The flow joins the lanes before resolving both references in the output object. A lane cannot read another lane's private intermediate steps.
+**Example walkthrough:** both lanes read the same input price through their own builders. `full-price` returns it unchanged, while `sale-price` multiplies it by `0.8`. The flow joins the lanes before resolving both references in the output object. A lane cannot read another lane's private intermediate steps. Calling `tryParallel()` awaits `totals.run({ price: 100 }, ...)`, then reads outcome `"priced"` and value `{ regular: 100, sale: 80 }` from the finished run.
 
 ## map — repeat a recipe for each item
 
@@ -273,7 +279,7 @@ The item builder's input has these properties:
 | Resolved array | `number[]` | `[4, 8, 12]` for `[2, 4, 6]`; `[]` for empty input. |
 | Final run result | `{ runId: string; outcome: string; value?: unknown }` | Outcome `"doubled"`; value is the resolved array. |
 
-**Example walkthrough:** `items` selects the input array, and `input` supplies a multiplier shared by all items. Within each item program, `get("item")` selects its number and `get("context").get("multiplier")` selects the multiplier. The task resolves both before multiplying. Up to two item programs run at once, but the result array preserves the original item order. Explicit context keeps the item program independent of outer step references.
+**Example walkthrough:** `items` selects the input array, and `input` supplies a multiplier shared by all items. Within each item program, `get("item")` selects its number and `get("context").get("multiplier")` selects the multiplier. The task resolves both before multiplying. Up to two item programs run at once, but the result array preserves the original item order. Explicit context keeps the item program independent of outer step references. Calling `tryMap()` awaits `doubleEach.run({ numbers: [2, 4, 6] }, ...)`, then reads outcome `"doubled"` and value `[4, 8, 12]` from the finished run.
 
 ## loop — repeat until a condition is false
 
@@ -309,7 +315,7 @@ The iteration builder's input has these properties:
 | Resolved state | `number` | `3`, when `state.lt(3)` first becomes false. |
 | Final run result | `{ runId: string; outcome: string; value?: unknown }` | Outcome `"counted"`, value `3`. |
 
-**Example walkthrough:** `initial` starts the state at zero. `while` uses `.lt(3)` to build the stopping condition. The `increment` task reads the current state and adds one, producing `0 → 1 → 2 → 3`. Before a fourth iteration, the condition is false, so the loop returns `3`. If the initial condition is false, no iterations run and the initial state is returned.
+**Example walkthrough:** `initial` starts the state at zero. `while` uses `.lt(3)` to build the stopping condition. The `increment` task reads the current state and adds one, producing `0 → 1 → 2 → 3`. Before a fourth iteration, the condition is false, so the loop returns `3`. If the initial condition is false, no iterations run and the initial state is returned. Calling `tryLoop()` awaits `countToThree.run({}, ...)`, then reads outcome `"counted"` and value `3` from the finished run.
 
 If the condition is still true at the limit, the run rejects with [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror). It does not return a successful partial result. A loop may contain a map; nested loops, nested maps, and loops inside maps are unsupported.
 

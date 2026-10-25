@@ -1,4 +1,4 @@
-import { TypeSafeClient } from "@typesafe-ai/sdk";
+import { choice, TypeSafeClient } from "@typesafe-ai/sdk";
 import { JevRecorder } from "jev-devtools/server";
 
 export const recorder = new JevRecorder({ limit: 50 });
@@ -16,3 +16,16 @@ export const unsubscribe = recorder.subscribe((sessions) => {
   }
 });
 // Call unsubscribe() when the subscriber is no longer needed.
+
+// Call await recordMessage("I was charged twice.") from your Node handler.
+export async function recordMessage(message: string) {
+  const result = await client.systemOne({
+    state: { message },
+    questions: {
+      team: choice("Which team can help?", { billing: null, support: null }),
+    },
+  });
+  console.log(result.answers.team.choice); // The model's selected team
+  console.log(recorder.snapshot("local")); // The recorded request
+  return result;
+}

@@ -40,7 +40,7 @@ For a Vite-only local example, the [independent React + Vite app](https://github
 
 ## 5. Make a request
 
-Call this function from an existing application HTTP handler:
+Call `await classifyMessage("I was charged twice.")` from an existing application HTTP handler. Unlike the flow builder’s `flow.jev()`, the SDK’s `jev.systemOne()` starts a request immediately; await it to read the answer:
 
 <!-- example: request.ts -->
 

@@ -2,6 +2,8 @@
 
 [`FlowExpression<T>`](@/api/reference/#flowexpression) represents a typed value that will be resolved during a run. Obtain one from [`flow.input`](@/api/reference/#flow-input), a task result, an answer field, or a joined operation. You usually do not construct the class directly.
 
+Inside the synchronous `defineJevFlow()` callback:
+
 ```ts api=expressions
 const message = flow.input.get("message");
 const answer = classification.answer("team").choice;
@@ -10,7 +12,7 @@ const isBilling = answer.eq("billing");
 
 **Example walkthrough:** `get("message")` selects the input message. `answer("team").choice` selects a previous Choice answer. `.eq("billing")` describes a Boolean comparison that will be evaluated when the flow runs.
 
-This fragment assumes a flow input with `message` and an earlier request named `classification` with a Choice question `team`. See the [complete flow example](@/guides/flows/).
+This fragment assumes a flow input with `message` and an earlier request named `classification` with a Choice question `team`. See the [complete flow example](@/guides/flows/) for the surrounding definition and `await triage.run(...)` call. The runner resolves the answer and evaluates the comparison during that awaited execution.
 
 ## Select and compare
 
@@ -35,6 +37,8 @@ Each comparison accepts a literal or compatible expression. Optional or nullable
 
 Import [`all`](@/api/reference/#all), [`any`](@/api/reference/#any), and [`not`](@/api/reference/#not) from `jev-devtools/flow`:
 
+Inside the synchronous `defineJevFlow()` callback:
+
 ```ts api=expressions
 const shouldReview = all(
   eligibility.answer("eligible").noul.gte(0.9),
@@ -45,6 +49,8 @@ const shouldReview = all(
 **Example walkthrough:** `.gte(0.9)` checks the eligibility threshold. `.gt(0.2)` checks the risk threshold, and `not()` inverts that second condition. `all()` requires both conditions to hold. These thresholds are explicitly authored application policy.
 
 This fragment assumes earlier requests named `eligibility` and `risk`. The thresholds are example application policy, not TypeSafe defaults. [`all`](@/api/reference/#all) requires every condition, [`any`](@/api/reference/#any) requires at least one, and [`not`](@/api/reference/#not) inverts one Boolean expression.
+
+To execute conditions like these, pass the reference to a step or `output()` and await the flow’s `run()`. The [complete operations example](@/api/flow/#collections-and-loops) shows `all()` and `not()` inside a definition, followed by `await summarize.run(...)` and the resolved result.
 
 All operands are evaluated. A missing reference remains an error even when another operand would normally short-circuit JavaScript evaluation. There is no arbitrary predicate callback or `eval` in the expression API.
 

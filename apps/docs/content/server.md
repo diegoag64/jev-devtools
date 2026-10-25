@@ -4,7 +4,7 @@ Create one independent adapter for a Node process whose lifecycle you own.
 
 <!-- example: server.ts -->
 
-**Example walkthrough:** the adapter enables inspection only in development and checks requests against the browser's origin. `createClient()` wraps the SDK client so its requests use the same recording history as the inspector routes. The key stays in this server module.
+**Example walkthrough:** the adapter enables inspection only in development and checks requests against the browser's origin. `createClient()` wraps the SDK client so its requests use the same recording history as the inspector routes. The key stays in this server module. Creating the client does not send a request. Use it in an [awaited SDK call](@/getting-started/#5-make-a-request) or pass it to an [awaited flow run](@/guides/flow-basics/#jev-ask-a-question).
 
 ### Return interface
 

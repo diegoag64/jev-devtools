@@ -55,3 +55,20 @@ export const count = defineJevFlow<{ target: number }>("count", (flow) => {
   );
   return flow.output("counted", finalState);
 });
+
+// This flow has no Jev steps: no API key or network access is needed.
+const noInference = {
+  systemOne() { throw new Error("This example does not call Jev"); },
+};
+
+// Call tryOperations() from Node. Each await starts and waits for a fresh run.
+export async function tryOperations() {
+  const summary = await summarize.run({ values: [2, 4] }, { client: noInference });
+  console.log(summary.outcome); // "summary"
+  console.log(summary.value); // { total: 12, label: "Large: 12" }
+
+  const counted = await count.run({ target: 3 }, { client: noInference });
+  console.log(counted.outcome); // "counted"
+  console.log(counted.value); // { value: 3, target: 3 }
+  return { summary, counted };
+}

@@ -35,9 +35,11 @@ export async function replayExample() {
       },
     },
   };
-  return flow.run(
+  const result = await flow.run(
     { message: "I was charged twice." },
     { client: replayClient(fixture) },
   );
-  // outcome: "routed", value: "billing". No key or inference call.
+  console.log(result.outcome); // "routed"
+  console.log(result.value); // "billing" from the fixture; no inference call
+  return result;
 }

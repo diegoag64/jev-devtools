@@ -3,7 +3,7 @@ import { choice } from "@typesafe-ai/sdk";
 import { jev } from "./server.js";
 
 export async function classifyMessage(message: string) {
-  return jev.systemOne({
+  const result = await jev.systemOne({
     state: { message },
     questions: {
       team: choice("Which team can help?", {
@@ -13,4 +13,6 @@ export async function classifyMessage(message: string) {
       }),
     },
   });
+  console.log(result.answers.team.choice); // The selected team from the SDK response
+  return result;
 }

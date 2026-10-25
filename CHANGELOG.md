@@ -48,6 +48,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **Define and run flow examples.** Pair flow definitions with awaited execution, concrete inputs, and resolved results throughout the docs. Explain before request examples that `flow.jev()` builds references while `run()` sends and awaits requests. Documentation only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
+
 - **Clearer method contracts.** Show input and return interfaces in tables, explain the operations used in each example, shorten flow navigation labels without changing section links, and present GitHub stars as a passive count. Documentation and docs UI only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
 
 - **GitHub header links.** Show the GitHub logo and a build-time repository star count in the docs header, including compact mobile controls. If GitHub is unavailable, retain a Star link without inventing a count. No package API changes. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
