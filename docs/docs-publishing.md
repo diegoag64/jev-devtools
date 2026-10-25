@@ -77,6 +77,7 @@ Version 18 is the first publication under this policy. Its live manifest matches
 | --- | --- | --- | --- |
 | 2026-10-25 04:48:34 | `8262004dcb047eac9f2bb16086f7c358ba837eae` / `0.4.1` source, with Unreleased docs | 17 / `appgdep_6add8a1d14e08191adb6fab3f90a2649` | Successful public deployment at [docs.jevtools.dev](https://docs.jevtools.dev/); repository/browser checks and dark-palette review passed. Published from [PR #70](https://github.com/diegoag64/jev-devtools/pull/70) before merge. |
 | 2026-10-25 06:45:14 | `c22f7695ac83333fed7b34ea3487ed6b86e4c714` / `0.5.0` | 18 / `appgdep_6adda5748390819195513a58d844721f` | Successful public deployment at [docs.jevtools.dev](https://docs.jevtools.dev/) after [PR #75](https://github.com/diegoag64/jev-devtools/pull/75) and [main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40169944721). Live manifest, changelog hash, setup/API/release pages, both themes, and mobile checks passed. |
+| 2026-10-25 17:06:05 | `a18927f1b464ee637ba27fabdeba4cc79a6f1ef3` / `0.5.0` | 20 / `appgdep_6ade36f707308191afd630d2daa277f6` | Successful public deployment at [docs.jevtools.dev](https://docs.jevtools.dev/) after [PR #79](https://github.com/diegoag64/jev-devtools/pull/79), preserving the sharing metadata from [PR #78](https://github.com/diegoag64/jev-devtools/pull/78). [Main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40214133830), local checks, publication-artifact verification, live manifest/changelog comparison, search and page smoke checks passed. |
 
 Version 18 provenance:
 
@@ -88,3 +89,18 @@ Version 18 provenance:
 - Live [version manifest](https://docs.jevtools.dev/version.json) matched the inspected file exactly. Homepage, quick start, `api/reference/#flow-jev`, and changelog returned HTTP 200; browser smoke checks reported no page errors.
 
 This receipt records the completed deployment after the artifact was saved. It does not rewrite version 18 or its manifest; later receipt-only commits do not require another deployment. The landing Site was not redeployed.
+
+
+Version 20 provenance:
+
+- Canonical source: `a18927f1b464ee637ba27fabdeba4cc79a6f1ef3`, clean reviewed `main` checkout; publication mode, package `0.5.0`. This includes the compatibility/import guidance and search correction from PR #79, plus the existing sharing metadata from PR #78.
+- Previous live version 19 identified `6889778311dbe4b58a1fce2040762e0bd38f7dbf` as its canonical source. That commit is an ancestor of the selected main commit; its social image and metadata were preserved.
+- Sites source repository commit: `4df96e40589a4a3bd504966db3b123460c4bb7b5` (generated deployment output, distinct from canonical source).
+- Saved version ID: `appgprj_6add5705dbec8191b56b1c9555078a2d~appgver_085be35dd7e88191ad4cba40629e20b2`.
+- Deployment ID: `appgdep_6ade36f707308191afd630d2daa277f6`; succeeded at `2026-10-25T17:06:05.648345Z`.
+- Embedded/live changelog SHA-256: `7adcbacae6de66c7f957cf07af8d5a152bd3b715bc3e84537e743b3d77d00ddc`.
+- Saved archive content hash: `sha256:5343ffbb7b73858be6e68382222f9af99bd0e67afb358add11e1168adb977b4a`.
+- Installed locked dependencies and passed all repository-required checks, then built with `npm run build:docs:publish` and verified that exact publication artifact. Setup and API pages were reviewed in both themes and at a 390px mobile width. The copied deployment artifact matched all 46 built file hashes and was packaged without rebuilding.
+- Live `/version.json` matched the inspected manifest, and `/raw/changelog.md` matched its recorded hash. Homepage, quick start, API reference, changelog, search index, and social image requests succeeded. The `#flow-jev` and `#styles-css` anchors remain present; the quick-start search entry includes `5.4`, `ESM`, public imports, and routing guidance. The deployed imports table was visually checked.
+
+This receipt was recorded after deployment and is not part of the version 20 artifact. No npm package or landing Site was published by this deployment; receipt-only changes do not require another docs deployment. Raw evidence is kept outside Git under `benchmarks/results/docs/publication-79/`.
