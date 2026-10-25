@@ -217,6 +217,13 @@ Define once in a Node module and run per request. Typed answer references can fe
 
 **New in 0.4.0:** server function steps (`task`), runtime request factories, bounded collections (`map`), conditional paths that rejoin (`if`), and stateful iteration (`loop`). Combine them with sequential requests, parallel lanes, terminal branches, and named outcomes to inspect complex flows such as passage assessment and hierarchical classification. Numeric conditions also support strict greater-than with `.gt()`.
 
+Unreleased: not in npm 0.4.1 yet. To test routing without a key, press **Copy fixture** on a run in the drawer and replay the saved JSON with `replayClient` from `jev-devtools/flow`. Jev calls replay with no network access or API key. Map items and loop iterations replay from their own answers; tasks run again and may call outside services.
+
+```ts
+const result = await review.run(input, { client: replayClient(fixture) });
+assert.equal(result.outcome, 'standard-review');
+```
+
 [Full flow API guide](docs/flows.md) · [Flow recipe for coding agents](packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) · [Release availability](CHANGELOG.md)
 
 ## What you can inspect

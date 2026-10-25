@@ -334,3 +334,72 @@ An iteration can contain tasks, Jev requests, `if()`, parallel lanes and **one l
 In the drawer, a **Loop** card shows completed iterations, the continuation rule and its stop reason. Choose **Iteration → View Flow** to reveal that iteration’s complete connected diagram underneath. Previous/next iteration arrows preserve the parent graph and camera. A collection within the selected iteration can expose its own item flow. Initial/latest states and the condition’s captured incoming values are available in Details; each iteration’s returned state is its captured outcome. Captures remain bounded/redacted, so a large state may be truncated in the inspector even though runtime execution uses the full value. Request links include both iteration and item paths and retain distinct execution IDs. New loop metadata extends version-1 records; use the matching updated drawer and server.
 
 Try the [hierarchical classification cookbook](../cookbooks/hierarchical-classification/README.md), including beam recovery, deterministic paths, a zero-iteration leaf, and an intentional iteration-limit failure.
+
+## Replay a run in tests
+
+Unreleased: not in npm 0.4.1 yet.
+
+### Copy a fixture from DevTools
+
+Open **Flows**, select a finished run, then click **Copy fixture** in the run header. On success the button briefly animates and says **Copied**, then returns to **Copy fixture** after two seconds. Reduced-motion preferences disable the animation. If clipboard access is unavailable, a read-only JSON field appears for manual copying; focusing it selects the JSON. Copying is disabled while a run is pending or has no completed Jev requests.
+
+A fixture saves the responses of completed Jev requests, not every diagram node. One response can contain several answers. For example, the refund flow records two entries: `triage` holds its category answer, and `review` holds both eligibility and risk. Conditions, tasks and flow outputs are recomputed when you replay the flow. This tests your application logic against known answers; it does not test model quality or new prompts.
+
+Warnings about failed/cancelled runs, missing responses and capture issues remain visible so you know when an export is partial. Only successful captured responses are included; see the limitations below before relying on a fixture as a complete reproduction.
+
+Changing the displayed capture data or masking settings clears previous copy feedback and fallback JSON. Click **Copy fixture** again to export the current view. A clipboard operation already in progress cannot restore the old fallback or replace a newer copy result; data already sent to the system clipboard is not retracted.
+
+### One-command playground replay
+
+After clicking **Copy fixture**, run this from the repository root on macOS:
+
+```sh
+npm run replay -- --clipboard
+```
+
+The command builds the local package, selects the flow by its fixture name, and prints the input, outcome and output value. No playground server or API key is needed. It supports the refund, parallel review and synthetic skill-shortlist examples; cookbook and custom flows still need their own definition and input with `replayClient` below. This helper runs local sample tasks and rejects unexpected `fetch` calls.
+
+For a saved fixture (all platforms), or to check an expected outcome:
+
+```sh
+npm run replay -- benchmarks/results/my-fixture.json --expect approve
+# Alternatively, read JSON from stdin:
+pbpaste | npm run replay -- - --expect approve
+```
+
+`--expect` exits with code 1 if the outcome differs. For example, changing the refund fixture's `steps.review.answers.risky.noul` from `0.1` to `0.9` routes to `manual-review` and fails `--expect approve`. Missing answers and partial fixtures also fail with an explanation; failed requests are not replayed as recorded errors.
+
+Fixtures do not include the original input. By default this helper uses `{ "message": "I was charged twice and need a refund." }`. To reproduce your original input, save its JSON to a file and add `--input path/to/input.json` (an object with a string `message`). Run `npm run replay -- --help` for options. The result prints in the terminal; this command does not add a run to the drawer.
+
+### Use the replay client in your own tests
+
+**Copy fixture** in a run's header exports the retained answers of its completed Jev steps as JSON, including steps inside map items and loop iterations. Save it with your tests and run the flow with `replayClient` from `jev-devtools/flow`. Jev calls replay with no network access or API key. Map items and loop iterations replay from their own answers; tasks run again and may call outside services.
+
+The fixture does not contain the flow code, a diagram, or the original input. When sharing a fixture, also share the flow implementation (ideally its Git commit) and input. The `flow` name is an identifier checked during execution, not a file path or code download; `version: 1` identifies the fixture format, not the code revision. You explicitly import the implementation and call its `run()` method; the playground helper adds a small lookup of its three supported flow definitions by name. Each Jev call is then matched to `steps` by its step ID, such as `triage` or `review`. The diagram comes from the flow definition and run events, not from reconstructing code out of the fixture.
+
+```ts
+import { readFileSync } from "node:fs";
+import { replayClient, type FlowFixture } from "jev-devtools/flow";
+
+const fixture: FlowFixture = JSON.parse(
+  readFileSync(new URL("./refund-approve.json", import.meta.url), "utf8"),
+);
+
+const result = await refundFlow.run(input, { client: replayClient(fixture) });
+assert.equal(result.outcome, "approve");
+```
+
+Each Jev step is answered with `fixture.steps[stepId]`, in any order and across parallel lanes and concurrent items. Steps inside a map item or loop iteration use the same ID as their request link: `parent-id/index/step-id`, where the parent is the map or loop and the index is the item or iteration (from 0). A map inside a loop composes both, so the `assess` step of the second item in the first iteration of `rounds` is `rounds/0/batch/1/assess`. `fixture.flow` is always the root flow's name.
+
+Conditions, `if()` arms, map item counts and loop conditions still evaluate the replayed answers, so a test covers the flow's own routing. `if()` merges are not fixture entries. Tasks are never fixture entries: they run locally on replay with the replayed values, so a task that calls a provider or other service still makes that call. Runtime request factories also run, and replay checks the question names they generate.
+
+You can write a fixture by hand to mock Jev by step ID: `{ version: 1, flow, steps }` with one response body (`{ model, answers }`) per step. In code, `flowFixture(definition, run, traces)` from `jev-devtools` or `jev-devtools/flow` returns `{ fixture, missing, warnings }`; save `fixture` as JSON.
+
+Replay matches step IDs, the flow name, and question names. It does not check prompts or state, and SDK request validation still applies. Each mismatch rejects with a plain error:
+
+- A fixture from another flow: `Fixture was recorded from flow "A" but is replaying flow "B".`
+- A step with no response: `Fixture has no response for step "x". The run took a route the fixture didn't record, or that step's capture was missing when the fixture was copied.` More items or iterations than the capture had also end here, naming the composed ID.
+- Answers missing a requested question, naming the step and the questions. Re-record the fixture after changing a flow's requests.
+- A call made outside a flow run.
+
+The drawer reports completed steps it could not include and any capture warnings. Request history is bounded by `limit`, so a large map or loop can evict early item captures; raise `limit` before recording such a run. A failed or cancelled run gives a partial fixture without its failed steps. Fixtures hold the answers supplied to `flowFixture`, so capture truncation and server redaction remain in them. **Copy fixture** also includes the drawer's current display masking controlled by `redactAdditionalSensitiveData`; calling `flowFixture` directly on server captures does not add that display masking. Structural question IDs and Choice labels/probabilities are preserved even when they resemble sensitive field names; sensitive fields inside answer content can still be redacted.

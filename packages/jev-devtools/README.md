@@ -115,6 +115,8 @@ const result = await review.run({ message: 'Please review my ticket.' }, {
 
 Define once in a Node module and run per request. Use `flow.parallel` for concurrent named lanes; downstream calls wait for every lane to succeed. `flow.branch` is terminal in its block; use `flow.if` when selected values feed shared downstream work. Tasks execute application code on Node with JSON-compatible inputs/results; maps and loops have explicit bounds. Runs have SDK retries and cooperative cancellation, with bounded in-memory inspector history. They do not provide durable or distributed execution. Keep the 0.4.0 server and drawer together to inspect its new step kinds.
 
+Unreleased: not in npm 0.4.1 yet. **Copy fixture** in the drawer saves a run as JSON, and `replayClient(fixture)` from `jev-devtools/flow` replays its Jev calls in tests with no network access or API key; tasks run again.
+
 [Full flow guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md) · [AI flow recipe](https://github.com/diegoag64/jev-devtools/blob/main/packages/jev-devtools/skills/setup-jev-devtools/references/flows.md)
 
 To have your coding agent add a flow after installation:

@@ -31,6 +31,13 @@ export async function checkStyleIsolation({ page, load, close, open, settle }) {
           <button class="flow-step selected" data-status="completed">Host step</button>
           <div class="flow-condition-rule"><code>Host condition</code></div>
           <div class="flow-item-content host-animation">Host animation</div>
+          <div class="flow-run-summary">Host summary</div>
+          <button class="flow-fixture-button">Host copy</button>
+          <div class="flow-fixture">
+            <p>Host report</p>
+            <details open><summary>Host details</summary><ul><li>Host item</li></ul></details>
+            <textarea>Host text</textarea>
+          </div>
         </div>
       </section>
       <div class="jev-devtools" id="scoped-style-control">
@@ -48,10 +55,11 @@ export async function checkStyleIsolation({ page, load, close, open, settle }) {
       const properties = [
         "display", "position", "padding", "margin", "border", "borderRadius",
         "backgroundColor", "color", "font", "width", "height", "overflow",
-        "flex", "gap", "opacity", "transform", "animationName",
+        "flex", "gap", "opacity", "transform", "animationName", "textAlign",
+        "maxWidth", "maxHeight", "listStyle", "overflowWrap",
       ];
       const section = main.querySelector("section");
-      return [section, ...section.querySelectorAll("div, button, span, code")].map(
+      return [section, ...section.querySelectorAll("*")].map(
         (element) => Object.fromEntries(
           properties.map((p) => [p, getComputedStyle(element)[p]]),
         ),

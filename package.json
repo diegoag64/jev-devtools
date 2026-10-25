@@ -12,6 +12,7 @@
   },
   "scripts": {
     "dev": "npm run build:package && npm run dev -w @jev-devtools/playground",
+    "replay": "npm run build:package && node --import tsx scripts/replay-fixture.mjs",
     "build:package": "npm run build -w jev-devtools",
     "build": "npm run build:package && npm run build -w @jev-devtools/playground && npm run build:docs",
     "check": "node scripts/sync-readme-version.mjs --check && npm run build:package && npm run check --workspaces",

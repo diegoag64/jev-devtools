@@ -43,7 +43,8 @@
 }
 .jev-devtools button,
 .jev-devtools input,
-.jev-devtools select {
+.jev-devtools select,
+.jev-devtools textarea {
   font: inherit;
   color: inherit;
   border: 1px solid #3b303d;
@@ -66,7 +67,7 @@
 .jev-devtools button:hover:not(:disabled) {
   border-color: #e551ba;
 }
-.jev-devtools :is(button, input, select, summary):focus-visible {
+.jev-devtools :is(button, input, select, textarea, summary):focus-visible {
   outline: 2px solid #e551ba;
   outline-offset: 3px;
 }
@@ -1867,4 +1868,77 @@
 }
 :where(.jev-devtools) .flow-item-next {
   right: -76px;
+}
+.jev-devtools .flow-run-summary {
+  text-align: right;
+}
+.jev-devtools .flow-fixture-button {
+  display: block;
+  margin: 6px 0 0 auto;
+  /* Keep the header still when the shorter confirmation replaces the label. */
+  min-width: 96px;
+  font-size: 11px;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+.jev-devtools .flow-fixture-button[data-copied] {
+  border-color: #e551ba;
+  background: #382035;
+  animation: jev-fixture-copied 200ms ease-out;
+}
+@keyframes jev-fixture-copied {
+  from {
+    transform: scale(0.96);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jev-devtools .flow-fixture-button {
+    transition: none;
+  }
+  .jev-devtools .flow-fixture-button[data-copied] {
+    animation: none;
+  }
+}
+.jev-devtools .flow-fixture {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  gap: 4px;
+  padding: 0 24px;
+  text-align: right;
+}
+.jev-devtools .flow-fixture p {
+  margin: 0;
+  max-width: 360px;
+  font-size: 11px;
+}
+.jev-devtools .flow-fixture details {
+  max-width: 360px;
+  font-size: 11px;
+}
+.jev-devtools .flow-fixture details ul {
+  max-height: 120px;
+  margin: 4px 0 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  font-family: "JetBrains Mono", monospace;
+  overflow-wrap: anywhere;
+}
+.jev-devtools .flow-fixture details ul:focus-visible {
+  outline: 2px solid #e551ba;
+  outline-offset: 2px;
+}
+.jev-devtools .flow-fixture textarea {
+  width: 360px;
+  max-width: 100%;
+  height: 120px;
+  padding: 8px;
+  font:
+    11px "JetBrains Mono",
+    monospace;
+  text-align: left;
 }

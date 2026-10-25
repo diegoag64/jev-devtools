@@ -19,6 +19,7 @@ import {
   observeRequest,
   runCallback,
 } from "./runtime.js";
+import { stepContext } from "./step-context.js";
 import type { Json } from "../src/protocol.js";
 export type {
   FlowDisplay,
@@ -26,6 +27,8 @@ export type {
   FlowRun,
   FlowStep,
 } from "../src/flow-protocol.js";
+export { replayClient, type FlowFixture } from "./replay.js";
+export { flowFixture, type BuiltFlowFixture } from "../src/flow-fixture.js";
 
 type Ast =
   | { op: "input" }
@@ -206,11 +209,17 @@ export type FlowRunOptions = {
 };
 // Nested programs share a reservation budget without exposing execution internals in the API.
 const executionBudgets = new WeakMap<FlowRunOptions, { used: number }>();
+// Item steps reach the replay client under the root run, root flow name and
+// composed link id, with or without devtools.
+type ItemScope = { runId: string; flow: string; prefix: string };
+const itemScopes = new WeakMap<FlowRunOptions, ItemScope>();
 function withBudget(
   options: FlowRunOptions,
   budget: { used: number },
+  scope: ItemScope,
 ): FlowRunOptions {
   executionBudgets.set(options, budget);
+  itemScopes.set(options, scope);
   return options;
 }
 function definitionSize(definition: FlowDefinition): number {
@@ -1026,6 +1035,11 @@ export function defineJevFlow<T>(
       const started = performance.now(),
         values = new Map<string, unknown>();
       const budget = executionBudgets.get(options) ?? { used: nodes.length };
+      const scope = itemScopes.get(options) ?? {
+        runId: run.id,
+        flow: name,
+        prefix: "",
+      };
       const reserve = (count: number) => {
         if (budget.used + count > 1024)
           throw new RangeError("Flow exceeds 1024 expanded steps");
@@ -1159,9 +1173,18 @@ export function defineJevFlow<T>(
               abortCheck();
               const call = () => {
                 abortCheck();
-                return options.client.systemOne(request, {
-                  signal: controller.signal,
-                });
+                return stepContext.run(
+                  {
+                    runId: scope.runId,
+                    stepId: scope.prefix + step.id,
+                    executionId: state.executionId,
+                    flow: scope.flow,
+                  },
+                  () =>
+                    options.client.systemOne(request, {
+                      signal: controller.signal,
+                    }),
+                );
               };
               const link = {
                 runId: run.id,
@@ -1299,6 +1322,7 @@ export function defineJevFlow<T>(
                       },
                     },
                     budget,
+                    { ...scope, prefix: `${scope.prefix}${step.id}/${index}/` },
                   ),
                 );
                 abortCheck();
@@ -1388,6 +1412,10 @@ export function defineJevFlow<T>(
                           },
                         },
                         budget,
+                        {
+                          ...scope,
+                          prefix: `${scope.prefix}${step.id}/${index}/`,
+                        },
                       ),
                     );
                     results[index] = result.value;
