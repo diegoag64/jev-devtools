@@ -67,7 +67,7 @@ These are authoring and review requirements. There is no automated PR-descriptio
 
 ## Keep the docs current
 
-Use [jevtools.dev](https://jevtools.dev/) as the product entry point and [docs.jevtools.dev](https://docs.jevtools.dev/) as the primary human documentation. `README.md` and the npm README introduce the package and link to those sites. `apps/docs/content/` owns guided explanations and the API glossary; `docs/integration.md`, `docs/nextjs.md`, and `docs/flows.md` retain detailed repository references and stable paths. The bundled setup skill owns offline, installed-version agent guidance; `llms.txt` indexes it. Package declarations remain the exact API contract, and `CHANGELOG.md` owns publication facts. Update affected companion guidance in the API PR instead of adding another standalone tutorial.
+Use [jevtools.dev](https://jevtools.dev/) as the product entry point and [docs.jevtools.dev](https://docs.jevtools.dev/) as the primary human documentation. `README.md` and the npm README introduce the package and link to those sites. `apps/docs/content/` owns guided explanations and the API glossary; `docs/integration.md`, `docs/nextjs.md`, and `docs/flows.md` retain detailed repository references and stable paths. The bundled setup skill owns offline, installed-version agent guidance; `llms.txt` indexes it. Package declarations remain the exact API contract, and `CHANGELOG.md` owns reviewed change and compatibility history. GitHub release notes record verified publication and deployment results. Update affected companion guidance in the API PR instead of adding another standalone tutorial.
 
 Update the glossary, checked examples, curated hover descriptions, relevant guides, and changelog in the same PR as public API changes. Run `npm run verify:docs` for docs or API changes. The CI `docs` job validates browser behavior and uploads a review preview; it never deploys. Follow [the manual docs publishing policy](docs/docs-publishing.md) for when to publish, selecting one reviewed commit, checking `version.json`, and recording GPT Sites deployment results. Publication requires an explicit maintainer request; CI, a merge, npm publication, or task completion does not authorize it. For method sections, follow the [method documentation style](apps/docs/README.md#method-documentation-style).
 
@@ -168,6 +168,8 @@ npm run verify:nextjs
 After `npm run pack:devtools`, you can also run `npm install && npm run dev` inside `examples/react-vite` (port 4183, sample-only).
 
 ### Receipt-only verification
+
+This path is for optional corrections to historical source records. Routine releases record results in GitHub release notes and do not require receipt-only PRs.
 
 Use `npm run verify:receipts` for corrections to observed publication facts or PR links inside existing receipt sections. The command checks the entire branch/worktree against its merge base with `origin/main`, including committed, staged, unstaged, and non-ignored untracked changes. It rejects other paths, file/mode changes, release headings, compatibility/change lists, and instructions outside receipt sections. New release/deployment headings require the full path. The accepted regions are published-release preambles and existing publication-record bullets in `CHANGELOG.md`, published receipt bodies in `docs/releases.md`, and the history table/existing `Version N provenance` blocks in `docs/docs-publishing.md`.
 
