@@ -162,11 +162,14 @@ type Request<Q extends Questions> = Omit<SystemOneRequest<Q>, "state"> & {
 export type Resolved<T> =
   T extends FlowExpression<infer V>
     ? V
-    : T extends readonly unknown[]
-      ? { [K in keyof T]: Resolved<T[K]> }
-      : T extends object
+    // Branded primitives can extend object but remain scalar runtime values.
+    : T extends string | number | boolean | null | undefined
+      ? T
+      : T extends readonly unknown[]
         ? { [K in keyof T]: Resolved<T[K]> }
-        : T;
+        : T extends object
+          ? { [K in keyof T]: Resolved<T[K]> }
+          : T;
 export type TaskContext = {
   signal: AbortSignal;
   runId: string;
@@ -488,11 +491,16 @@ export interface FlowBuilder<T> {
     task: FlowTask<I, O>,
     display?: FlowDisplay,
   ): FlowExpression<Awaited<O>>;
-  /** Execute a reusable item program with bounded concurrency; return results in input order. */
+  /** References and scalar arrays already carry their resolved item type. */
   map<I, C, O>(
     id: string,
     options: {
-      items: FlowExpression<readonly I[]> | readonly I[];
+      // Intersect arrays rather than I so inference preserves scalar brands.
+      // A boolean valueOf shape avoids contextually narrowing [false] to false[].
+      // Object wrappers still fail the runtime JSON validation.
+      items:
+        | FlowExpression<readonly I[]>
+        | (readonly I[] & readonly (string | number | { valueOf(): boolean } | null)[]);
       input: C;
       concurrency?: number;
       maxItems: number;
@@ -502,20 +510,62 @@ export interface FlowBuilder<T> {
     ) => FlowExpression<O>,
     display?: FlowDisplay,
   ): FlowExpression<O[]>;
-  /** Pre-test loop with JSON state, explicit context and a required iteration limit. */
+  /** Execute a reusable program over resolved items; return results in input order. */
+  map<I, C, O>(
+    id: string,
+    options: {
+      items: FlowExpression<readonly I[]> | readonly I[];
+      input: C;
+      concurrency?: number;
+      maxItems: number;
+    },
+    build: (
+      item: FlowBuilder<{
+        item: Resolved<I>;
+        index: number;
+        context: Resolved<C>;
+      }>,
+    ) => FlowExpression<O>,
+    display?: FlowDisplay,
+  ): FlowExpression<O[]>;
+  /** References and scalar initial values preserve their generic state type. */
   loop<S, C>(
     id: string,
+    // Infer S from the full initial value before restricting this overload to
+    // references/scalars; intersecting S directly would strip scalar brands.
+    // Use the boolean shape to retain ordinary true/false widening. This is an
+    // inference constraint; object wrappers remain invalid JSON state at runtime.
     options: {
       initial: S | FlowExpression<S>;
       input: C;
       while: (state: FlowExpression<NoInfer<S>>) => FlowExpression<boolean>;
       maxIterations: number;
-    },
+    } & { initial: FlowExpression<S> | string | number | { valueOf(): boolean } | null },
     build: (
       iteration: FlowBuilder<{ state: S; index: number; context: Resolved<C> }>,
     ) => FlowExpression<NoInfer<S>>,
     display?: FlowDisplay,
   ): FlowExpression<S>;
+  /** Pre-test loop over resolved JSON state, with explicit context and an iteration limit. */
+  loop<S, C>(
+    id: string,
+    options: {
+      initial: S | FlowExpression<S>;
+      input: C;
+      while: (
+        state: FlowExpression<NoInfer<Resolved<S>>>,
+      ) => FlowExpression<boolean>;
+      maxIterations: number;
+    },
+    build: (
+      iteration: FlowBuilder<{
+        state: Resolved<S>;
+        index: number;
+        context: Resolved<C>;
+      }>,
+    ) => FlowExpression<NoInfer<Resolved<S>>>,
+    display?: FlowDisplay,
+  ): FlowExpression<Resolved<S>>;
   /** Execute one value-returning path, then continue with its typed result. */
   if<A, B>(
     id: string,
