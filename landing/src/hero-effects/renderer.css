@@ -1,8 +1,6 @@
-/* Only attached by the experimental renderer; native text remains accessible. */
+/* The canvas is decorative; the original heading remains accessible. */
 .hero h1 > span.hero-effect-active {
   position: relative;
-  background: none;
-  animation: none;
   color: transparent;
 }
 .hero-effect-canvas {

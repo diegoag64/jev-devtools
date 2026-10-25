@@ -1,4 +1,6 @@
 import "./style.css";
+import { mountHeroEffect } from "./hero-effects/renderer";
+import { createHeroPainter } from "./hero-effects/effects/prism-jade";
 import {
   drawerShowcase,
   flowApiShowcase,
@@ -236,7 +238,8 @@ el("copy").addEventListener("click", async () => {
 setupProductShowcases();
 render();
 
-// TEMPORARY: delete this block and src/hero-effects/ to remove the effect lab.
-if (import.meta.env.DEV) {
-  void import("./hero-effects/lab").then(({ mountHeroEffectLab }) => mountHeroEffectLab());
-}
+const disposeHeroEffect = mountHeroEffect(
+  document.querySelector<HTMLElement>(".hero h1 > span")!,
+  createHeroPainter(),
+);
+if (import.meta.hot) import.meta.hot.dispose(disposeHeroEffect);

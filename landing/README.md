@@ -28,11 +28,11 @@ Diagrams sit directly beneath the hero without an explorer frame, header, or tab
 
 The installation snippet shows only the browser mount. Visitors must follow the linked docs to connect their server adapter. The website itself has no server integration.
 
-The hero’s pink phrase uses a CSS-only pearlescent finish: overlapping rose, lilac, and warm pearl color pools drift over 18 seconds, then reverse smoothly. Only the text fill animates. Reduced-motion and forced-color preferences restore solid text; unsupported text clipping also retains the original pink.
+## Hero color animation
 
-## Temporary hero transition lab
+The hero uses the chosen Prism foil and Jade & gold treatment in development and production. Each 32-second color takeover randomly picks a transition different from the previous one: left-to-right, right-to-left, sides-to-center, center-to-sides, or scattered spots. The mask stays fixed throughout that takeover; a new mask begins only when the incoming palette is fully revealed. Facet motion stays continuous, and only narrow local edges blend.
 
-Local development includes a collapsible transition picker for the chosen Prism foil + Jade & gold treatment. Compare left-to-right, right-to-left, sides-to-center, center-to-sides, and scattered spots, with the same organic feathering and 64-second loop. Switching types preserves the animation position. Scrub the loop or use Half takeover for immediate comparisons; pause, speed, and optional cycling are available. It is excluded from production builds. [Cleanup and keeping a winner](src/hero-effects/README.md) remains isolated to one import block and the experiment folder.
+`src/hero-effects/transition-cycle.ts` owns palette timing and transition selection. The painters, bounded working canvases, and native-text mask live alongside it. Animation suspends offscreen and in hidden tabs; reduced motion freezes the field, forced colors restores native text, and unavailable canvas/letter-spacing support retains solid pink. No experiment picker, alternate palette catalog, or CSS pearl animation remains. `npm test` verifies the takeover boundary and non-repeating random selection.
 
 ## Section themes
 

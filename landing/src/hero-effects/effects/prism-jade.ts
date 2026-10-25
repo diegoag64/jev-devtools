@@ -1,8 +1,6 @@
 import type { PaintEffect } from "../types";
 import { jade, prism } from "./prism";
-
-export const TRANSITION_DURATION = 64;
-export type TransitionKind = "left-to-right" | "right-to-left" | "sides-in" | "center-out" | "spots";
+import { createTransitionCycle } from "../transition-cycle";
 
 const MASK_WIDTH = 256;
 const MASK_HEIGHT = 48;
@@ -61,9 +59,12 @@ function getSpotArrivals() {
   return field;
 }
 
-export function createPrismJade(kind: TransitionKind = "left-to-right"): PaintEffect {
+export function createHeroPainter(): PaintEffect {
+  const cycle = createTransitionCycle();
+  const palettes = { prism, jade };
   return (ctx, w, h, t) => {
-    prism(ctx, w, h, t);
+    const { kind, from, to, progress } = cycle(t);
+    palettes[from](ctx, w, h, t);
     // Two bounded working surfaces; the shared renderer owns all scheduling.
     if (!mask) {
       mask = document.createElement("canvas");
@@ -76,7 +77,6 @@ export function createPrismJade(kind: TransitionKind = "left-to-right"): PaintEf
     }
     if (!maskContext || !layerContext || !layer) return;
 
-    const progress = (1 - Math.cos(t * Math.PI * 2 / TRANSITION_DURATION)) / 2;
     const spots = kind === "spots" ? getSpotArrivals() : undefined;
     for (let y = 0; y < MASK_HEIGHT; y++) {
       const v = y / (MASK_HEIGHT - 1);
@@ -93,7 +93,8 @@ export function createPrismJade(kind: TransitionKind = "left-to-right"): PaintEf
             : u;
           const broad = noise(u * 4.8 + t * 0.012, v * 1.6 + t * 0.018);
           const detail = noise(u * 11 - t * 0.008 + 7, v * 3.6 + 11);
-          arrival = 0.02 + direction * 0.66 + broad * 0.24 + detail * 0.08;
+          // Finish every feathered edge before changing masks at the endpoint.
+          arrival = Math.max(0.04, Math.min(0.96, 0.02 + direction * 0.66 + broad * 0.24 + detail * 0.08));
         }
         // Feather only a small neighborhood of each boundary. The rest of each
         // palette stays opaque, avoiding the gray whole-text crossfade midpoint.
@@ -114,12 +115,10 @@ export function createPrismJade(kind: TransitionKind = "left-to-right"): PaintEf
     }
     layerContext.setTransform(2, 0, 0, 2, 0, 0);
     layerContext.clearRect(0, 0, w, h);
-    jade(layerContext, w, h, t);
+    palettes[to](layerContext, w, h, t);
     layerContext.globalCompositeOperation = "destination-in";
     layerContext.drawImage(mask, 0, 0, w, h);
     layerContext.globalCompositeOperation = "source-over";
     ctx.drawImage(layer, 0, 0, width, height, 0, 0, w, h);
   };
 }
-
-export const prismJade = createPrismJade();

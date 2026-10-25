@@ -10,7 +10,8 @@
     "dev": "vite --host 127.0.0.1 --port 4190",
     "check": "tsc --noEmit",
     "build": "npm run check && vite build",
-    "preview": "vite preview --host 127.0.0.1 --port 4190"
+    "preview": "vite preview --host 127.0.0.1 --port 4190",
+    "test": "node --experimental-strip-types --test test/*.test.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2",

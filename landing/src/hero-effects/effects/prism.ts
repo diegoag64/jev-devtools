@@ -1,5 +1,5 @@
 import { wave, type PaintEffect } from "../types";
-export type PrismPalette = {
+type PrismPalette = {
   base: string;
   hueStart: number;
   hueRange: number;
@@ -14,7 +14,7 @@ const original: PrismPalette = {
 };
 
 // Every palette shares the exact same geometry, timing, and gradient stops.
-export function createPrism(palette: PrismPalette = original): PaintEffect {
+function createPrism(palette: PrismPalette = original): PaintEffect {
   return (ctx, w, h, t) => {
     ctx.fillStyle = palette.base;
     ctx.fillRect(0, 0, w, h);
