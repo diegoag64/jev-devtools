@@ -7,12 +7,14 @@ import {
 import { resolve } from "node:path";
 import { appRoot, generate, normalizeBase } from "./site.js";
 
-export default defineConfig(async ({ mode, command }): Promise<UserConfig> => {
+export default defineConfig(async ({ mode, command, isPreview }): Promise<UserConfig> => {
   const base = normalizeBase(process.env.DOCS_BASE);
   const buildMode = mode === "publication" ? "publication" : "working-tree";
   // A running preview must not overwrite a publication or subdirectory build.
   const generated = resolve(appRoot, ".generated", `${command}-${buildMode}-${base.replaceAll("/", "_")}`);
-  const input = await generate(base, generated, buildMode);
+  // Preview serves dist as built; regenerating sources repeats all Twoslash work
+  // without changing the artifact being verified (and can fail on newer sources).
+  const input = isPreview ? undefined : await generate(base, generated, buildMode);
   return {
     root: generated,
     base,

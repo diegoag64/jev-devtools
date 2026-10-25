@@ -42,7 +42,9 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Maintenance
 
-- **Reproducible contributor verification.** Add a pinned development runtime and formatter, a complete local verification command with source/archive provenance, and CI-connected sample flow browser checks. Document capture owners so upstream projection and snapshot losses remain visible during maintenance. Package runtime requirements and public APIs are unchanged.
+- **Reproducible contributor verification.** Add a pinned development runtime and formatter, a complete local verification command with source/archive provenance, and CI-connected sample flow browser checks. Document capture owners so upstream projection and snapshot losses remain visible during maintenance. Package runtime requirements and public APIs are unchanged. ([#91](https://github.com/diegoag64/jev-devtools/pull/91))
+
+- **Faster docs verification.** Serve the built preview without repeating documentation generation and reuse the CI runner's browser system libraries. Existing build, development, and browser checks remain enabled; package APIs are unchanged. ([#90](https://github.com/diegoag64/jev-devtools/pull/90))
 
 - **Local expression benchmarks.** Add a reproducible comparison of normal flow construction and execution, with isolated installs, alternating process order, local sample SDK responses, and recorder-on/off cases. ([#86](https://github.com/diegoag64/jev-devtools/pull/86))
 
