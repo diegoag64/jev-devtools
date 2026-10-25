@@ -30,7 +30,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Fixed
 
-- **Bound composed expressions.** Account for complete subtree depth and expanded size before recursive validation, projection, and evaluation; cap legacy descriptions independently of the structured rule projection. Fixes [#43](https://github.com/diegoag64/jev-devtools/issues/43).
+- **Bound composed expressions.** Account for complete subtree depth and expanded size before recursive validation, projection, and evaluation; cap legacy descriptions independently of the structured rule projection. Fixes [#43](https://github.com/diegoag64/jev-devtools/issues/43). ([#86](https://github.com/diegoag64/jev-devtools/pull/86))
 
 ## 0.5.1 — Pending publication (experimental)
 
