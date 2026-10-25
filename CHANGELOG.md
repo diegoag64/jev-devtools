@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | No changes yet. |
+| [Unreleased](#unreleased) | Not published | Complete composed-expression limits. |
 | [0.5.1](#051--pending-publication-experimental) | Pending publication | Task input validation and expression types; setup guidance; release and website maintenance. |
 | [0.5.0](#050--october-25-2026-experimental) | 2026-10-25 | Replay and comparison; capture reliability/privacy; website and docs. |
 | [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | CSS isolation; stricter published flow types; approved release workflow. |
@@ -22,7 +22,15 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No changes yet.
+### Compatibility and upgrade
+
+- **Composed expression limits.** Expressions now reject depth greater than 80 or more than 4,096 expanded nodes during construction, including repeated uses of a shared child. Split larger generated logic into task results or smaller steps. Accepted expressions retain their semantics and public types; long legacy condition descriptions now end with `[condition truncated]` within a 4,096-code-unit cap.
+
+### Changes
+
+#### Fixed
+
+- **Bound composed expressions.** Account for complete subtree depth and expanded size before recursive validation, projection, and evaluation; cap legacy descriptions independently of the structured rule projection. Fixes [#43](https://github.com/diegoag64/jev-devtools/issues/43).
 
 ## 0.5.1 — Pending publication (experimental)
 

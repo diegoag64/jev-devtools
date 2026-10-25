@@ -898,7 +898,7 @@ The object groups two previously defined references, `message` and `count`. Both
 
 The short expression snippets below belong inside a synchronous `defineJevFlow()` callback. They build references; use them in a step or terminal `output()`, then await the flow’s `run()` to get actual data. See the [complete expression and execution example](@/api/flow/#collections-and-loops).
 
-All these runtime exports come from `jev-devtools/flow`. References must belong to the same flow and be available in the current execution scope. See [expression scopes](@/api/expressions/#respect-scope).
+All these runtime exports come from `jev-devtools/flow`. References must belong to the same flow and be available in the current execution scope. See [expression scopes](@/api/expressions/#respect-scope). **Unreleased:** construction enforces complete [expression depth and expansion limits](@/api/expressions/#expression-limits), including reused children.
 
 ### FlowExpression
 

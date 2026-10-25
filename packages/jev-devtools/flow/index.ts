@@ -45,16 +45,35 @@ type Ast =
   | { op: "eq" | "lt" | "gt" | "gte" | "all" | "any" | "not"; args: Ast[] };
 const owners = new WeakMap<object, object>();
 const builderIds = new WeakMap<object, Set<string>>();
-function freezeAst(ast: Ast, depth = 0): void {
+type AstBudget = { depth: number; nodes: number };
+const astBudgets = new WeakMap<Ast, AstBudget>();
+function freezeAst(ast: Ast, depth = 0): AstBudget {
   if (depth > 80) throw new Error("Expression nesting exceeds 80");
-  if (Object.isFrozen(ast)) return;
-  if (ast.op === "get") freezeAst(ast.from, depth + 1);
+  const cached = astBudgets.get(ast);
+  if (cached) {
+    if (depth + cached.depth > 80)
+      throw new Error("Expression nesting exceeds 80");
+    return cached;
+  }
+  const budget: AstBudget = { depth: 0, nodes: 1 };
+  const include = (child: Ast) => {
+    const childBudget = freezeAst(child, depth + 1);
+    budget.depth = Math.max(budget.depth, childBudget.depth + 1);
+    // Visitors expand each occurrence, even when multiple operands share a child.
+    budget.nodes += childBudget.nodes;
+    if (budget.nodes > 4096)
+      throw new Error("Expression size exceeds 4096 expanded nodes");
+  };
+  if (ast.op === "get") include(ast.from);
   if ("args" in ast) {
     if (ast.args.length > 256) throw new Error("Too many condition operands");
-    for (const child of ast.args) freezeAst(child, depth + 1);
+    for (const child of ast.args) include(child);
     Object.freeze(ast.args);
   }
   Object.freeze(ast);
+  // Frozen caller-supplied ASTs still need validation; only our cache is trusted.
+  astBudgets.set(ast, budget);
+  return budget;
 }
 declare const valueTypeBrand: unique symbol;
 /** Inspectable expression, not an application callback. Use get() for input fields. */
@@ -287,11 +306,32 @@ const inspectAst = (ast: Ast, ref: (id: string) => void): void => {
   else if ("args" in ast) ast.args.forEach((a) => inspectAst(a, ref));
 };
 function describe(ast: Ast): string {
-  if (ast.op === "input") return "input";
-  if (ast.op === "ref") return ast.id;
-  if (ast.op === "get") return `${describe(ast.from)}.${ast.key}`;
-  if (ast.op === "literal") return "[literal]";
-  return `${ast.op}(${ast.args.map(describe).join(", ")})`;
+  const limit = 4096;
+  const chunks: string[] = [];
+  let remaining = limit;
+  const append = (text: string): boolean => {
+    chunks.push(text.slice(0, remaining));
+    const fits = text.length <= remaining;
+    remaining -= Math.min(text.length, remaining);
+    return fits;
+  };
+  const visit = (node: Ast): boolean => {
+    if (node.op === "input") return append("input");
+    if (node.op === "ref") return append(node.id);
+    if (node.op === "get")
+      return visit(node.from) && append(".") && append(node.key);
+    if (node.op === "literal") return append("[literal]");
+    if (!append(node.op) || !append("(")) return false;
+    for (let i = 0; i < node.args.length; i++) {
+      if (i > 0 && !append(", ")) return false;
+      if (!visit(node.args[i])) return false;
+    }
+    return append(")");
+  };
+  const complete = visit(ast);
+  const text = chunks.join("");
+  const marker = "[condition truncated]";
+  return complete ? text : text.slice(0, limit - marker.length) + marker;
 }
 function conditionRule(
   ast: Ast,

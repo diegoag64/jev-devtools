@@ -67,3 +67,11 @@ All operands are evaluated. A missing reference remains an error even when anoth
 ## Respect scope
 
 A reference belongs to its definition and available execution scope. Do not use a reference from another flow, an untaken branch, or a sibling parallel lane. Return a value from [`if`](@/api/reference/#flow-if) or [`parallel`](@/api/reference/#flow-parallel) to make it available after the join. Pass explicit context into map and loop programs.
+
+## Expression limits
+
+**Unreleased:** construction enforces depth 80 and 4,096 expanded nodes per expression, including ordinary composition and reused children. A leaf has depth 0 and counts as one node; each field selection, literal, reference, and operation also counts. Reusing a child counts its complete size at every occurrence. The existing per-operation limit is 256 operands.
+
+For example, 80 `not()` calls around Boolean `flow.input` fit; the 81st throws. Starting from that input, eleven `e = all(e, e)` doublings contain 4,095 expanded nodes; a twelfth throws. Split larger generated logic into tasks or smaller steps. Within these limits, all operands still evaluate, and references keep their scope and missing-value checks.
+
+Legacy condition text is limited to 4,096 UTF-16 code units, including `[condition truncated]` when shortened. Structured rules keep their existing 128-node projection budget. Neither display limit changes the accepted expression's runtime result. See [flow limits](@/api/flow/#limits-and-errors) for the separate step and run budgets.

@@ -100,6 +100,8 @@ A loop can contain a map. Nested maps, nested loops, and loops inside maps are u
 
 IDs must be unique across the whole definition, including untaken branches and lanes: 1–80 letters, digits, `_`, or `-`, starting with a letter or digit. Output names are node IDs too. Definitions allow 256 nodes, 16 nested blocks, and a run-wide budget of 1,024 expanded nodes.
 
+**Unreleased:** each expression is limited to depth 80 and 4,096 expanded nodes, counting reused children at every occurrence; an operation accepts at most 256 operands. These limits apply during construction, including composition. Legacy condition text is capped at 4,096 UTF-16 code units with an explicit truncation suffix; execution retains the full accepted expression. See [expression limits](@/api/expressions/#expression-limits).
+
 Structural errors fail during definition. Missing input values and invalid comparisons fail when execution reaches them. [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror) is exported for bounded-loop handling. For exact collection/concurrency/timeout limits, execution errors, and cancellation behavior, consult the [detailed guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md) and installed declarations.
 
 <a id="replay-captured-answers-unreleased"></a>
