@@ -252,6 +252,7 @@ const plain = (v: unknown): v is Record<string, unknown> =>
 function mapValue(
   value: unknown,
   ref: (expr: FlowExpression<unknown>) => unknown,
+  rejectSymbolKeys = false,
   seen = new Set<object>(),
   depth = 0,
 ): unknown {
@@ -260,14 +261,17 @@ function mapValue(
   if (typeof value === "function")
     throw new Error("Flow values cannot contain callbacks");
   if (!Array.isArray(value) && !plain(value)) return value; // Preserve SDK assets.
+  // Task templates must reject keys that copying would otherwise silently discard.
+  if (rejectSymbolKeys && Object.getOwnPropertySymbols(value).length)
+    throw new TypeError("Task data cannot contain symbol keys");
   if (seen.has(value)) throw new Error("Cyclic flow value");
   seen.add(value);
   const result = Array.isArray(value)
-    ? value.map((v) => mapValue(v, ref, seen, depth + 1))
+    ? value.map((v) => mapValue(v, ref, rejectSymbolKeys, seen, depth + 1))
     : Object.fromEntries(
         Object.entries(value).map(([k, v]) => [
           k,
-          mapValue(v, ref, seen, depth + 1),
+          mapValue(v, ref, rejectSymbolKeys, seen, depth + 1),
         ]),
       );
   seen.delete(value);
@@ -666,7 +670,7 @@ export function defineJevFlow<T>(
             task.timeoutMs > 2_147_483_647)
         )
           throw new Error("Task timeoutMs must be a positive 32-bit integer");
-        const frozen = mapValue(task.input, (expr) => expr);
+        const frozen = mapValue(task.input, (expr) => expr, true);
         const step = add(id, "task", frozen, display);
         step.input = frozen;
         step.task = task.run as Step["task"];
@@ -1224,7 +1228,7 @@ export function defineJevFlow<T>(
               abortCheck();
             } else if (step.kind === "task") {
               const input = jsonSnapshot(
-                mapValue(step.input, (e) => evaluate(e.ast, data, values)),
+                mapValue(step.input, (e) => evaluate(e.ast, data, values), true),
               );
               state.data = { input };
               emit();

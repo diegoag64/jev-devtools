@@ -1063,6 +1063,35 @@ test("task cancellation and timeout finish promptly, block dependents and ignore
   }
 });
 
+test("task inputs reject symbol keys in literals and references before invoking callbacks", async () => {
+  const key = Symbol("hidden");
+  const symbolObject = { visible: 1, [key]: 2 };
+  const client = new TypeSafeClient(options(transport));
+  const run = () => assert.fail("Invalid input reached the task callback");
+  for (const input of [
+    symbolObject,
+    { nested: [symbolObject] },
+    Object.assign([1], { [key]: 2 }),
+    Object.defineProperty({ visible: 1 }, key, { value: 2 }),
+  ]) {
+    assert.throws(
+      () => defineJevFlow("literal-symbol", (flow) => {
+        const result = flow.task("task", { input, run });
+        return flow.output("done", result);
+      }),
+      { name: "TypeError", message: "Task data cannot contain symbol keys" },
+    );
+    const referenced = defineJevFlow<typeof input>("referenced-symbol", (flow) => {
+      const result = flow.task("task", { input: { value: flow.input }, run });
+      return flow.output("done", result);
+    });
+    await assert.rejects(referenced.run(input, { client }), {
+      name: "TypeError",
+      message: "Task data cannot contain symbol keys",
+    });
+  }
+});
+
 test("task data and generated request validation fail before downstream SDK dispatch", async () => {
   let dispatched = 0;
   const client = new TypeSafeClient(

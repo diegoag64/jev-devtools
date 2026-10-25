@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Setup compatibility and README hero; release verification setup and 0.5.0 publication records. |
+| [Unreleased](#unreleased) | Not published | Task input validation; setup compatibility and README hero; release verification and publication records. |
 | [0.5.0](#050--october-25-2026-experimental) | 2026-10-25 | Replay and comparison; capture reliability/privacy; website and docs. |
 | [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | CSS isolation; stricter published flow types; approved release workflow. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Tasks, maps and loops; six cookbooks; SDK and inspector access changes. |
@@ -29,6 +29,10 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 - **Website sharing previews.** Add the selected prismatic landing image and documentation image to Open Graph and Twitter metadata, requesting large image cards on both sites. The landing artwork uses a smaller, punctuation-free headline with clear separation between the “y” and “i”. Docs keep page-specific titles and descriptions with one shared image. Package APIs are unchanged; the previews become available after each site's manual publication. ([#78](https://github.com/diegoag64/jev-devtools/pull/78))
 
+#### Fixed
+
+- **Task input symbol keys.** Reject own symbol keys in literal task inputs before template copying can silently discard them, including nested objects and arrays. Literal inputs fail during definition; referenced values retain their runtime rejection before the task callback. String-keyed JSON inputs and SDK request handling are unchanged.
+
 #### Documentation
 
 - **Package compatibility and public imports.** Include the `/flow` export in setup guidance and align the docs site, READMEs, and bundled agent instructions on Node, React, SDK, ESM, and the verified TypeScript 5.4+ declaration requirement. Focus setup on the three JavaScript entry points and automatic drawer styling, removing obsolete stylesheet-import guidance. Clarify required peers and server-only boundaries; package APIs and runtime requirements are unchanged. ([#79](https://github.com/diegoag64/jev-devtools/pull/79))
@@ -42,6 +46,10 @@ Dates below use UTC and were checked against npm's publication history. The hist
 #### Maintenance
 
 - **Release verification dependencies.** Install locked repository dependencies in the fresh release completion job before registry-consumer checks. This supplies the TypeScript compiler those checks use; it does not rebuild or republish the approved archive. The original 0.5.0 finish job failed because this install was missing. ([#75](https://github.com/diegoag64/jev-devtools/pull/75))
+
+### Compatibility and upgrade
+
+- Task input literals containing own symbol keys now throw instead of silently discarding those keys. Remove symbol metadata from task data or represent needed values with string keys; valid JSON inputs and SDK request assets are unaffected.
 
 ## 0.5.0 — October 25, 2026 (experimental)
 
