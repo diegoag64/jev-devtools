@@ -185,7 +185,7 @@ try {
     git("rev-parse", "HEAD").trim() !== report.revision
   ) {
     throw new Error(
-      "Source changed during verification; rerun on the final candidate.",
+      "Source revision or contents differ between the start and end of verification; rerun with the checkout unchanged.",
     );
   }
   report.status = "passed";
