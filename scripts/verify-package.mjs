@@ -83,6 +83,14 @@ await cp(
   join(root, "scripts/fixtures/packed-flow-types.ts"),
   join(types, "flow.ts"),
 );
+await cp(
+  join(root, "scripts/fixtures/packed-resolved-templates.ts"),
+  join(types, "packed-resolved-templates.ts"),
+);
+await cp(
+  join(root, "scripts/fixtures/packed-resolved-templates.test.mjs"),
+  join(types, "packed-resolved-templates.test.mjs"),
+);
 // No skipLibCheck: it would also skip the archive's own declarations.
 await writeFile(
   join(types, "tsconfig.json"),
@@ -93,10 +101,10 @@ await writeFile(
       module: "ESNext",
       moduleResolution: "Bundler",
       strict: true,
-      noEmit: true,
+      noEmitOnError: true,
       types: [],
     },
-    files: ["flow.ts"],
+    files: ["flow.ts", "packed-resolved-templates.ts"],
   }),
 );
 execFileSync(
@@ -105,6 +113,11 @@ execFileSync(
   { cwd: consumer, stdio: "inherit" },
 );
 console.log("Packed flow types: passed");
+execFileSync(
+  process.execPath,
+  ["--test", join(types, "packed-resolved-templates.test.mjs")],
+  { cwd: consumer, stdio: "inherit" },
+);
 npm(["run", "build"], { cwd: consumer, stdio: "inherit" });
 console.log(`Independent consumer ready: ${consumer}`);
 console.log(`Installable package: ${tarball}`);

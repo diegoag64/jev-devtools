@@ -791,10 +791,11 @@ flow.map<Item, Context, Output>(id, { items, input, maxItems, concurrency? }, bu
 | `options.input` | `Context` |
 | `options.maxItems` | `number` |
 | `options.concurrency?` | `number` |
-| `build` | `(item: FlowBuilder<{ item: Item; index: number; context: Resolved<Context> }>) => FlowExpression<Output>` |
+| `build` (whole-array reference or scalar array) | `(item: FlowBuilder<{ item: Item; index: number; context: Resolved<Context> }>) => FlowExpression<Output>` |
+| `build` (literal/template) | `(item: FlowBuilder<{ item: Resolved<Item>; index: number; context: Resolved<Context> }>) => FlowExpression<Output>` |
 | `display?` | `FlowDisplay` |
 
-**Inputs:** array/reference `items`; shared context `input`; required integer `maxItems` from 1–64; `concurrency` from 1–16 (default 4). `build(item)` receives `FlowBuilder<{ item: Item; index: number; context: Resolved<Context> }>` and returns a value reference.
+**Inputs:** literal array, whole-array reference, or nested reference template `items`; shared context `input`; required integer `maxItems` from 1–64; `concurrency` from 1–16 (default 4). For whole-array references and scalar arrays, `build(item)` preserves the existing `Item` payload, including generic types. Nested templates resolve each item to `Resolved<Item>`. Branded primitives remain scalar values. The builder returns a value reference. For `items: [flow.input.get("count")]`, the item reference is `FlowExpression<number>` and a task receiving it gets a number.
 
 **Returns:** results in original item order; empty input returns an empty array. Exceeding `maxItems` rejects instead of truncating. Use explicit context rather than outer references inside the item program. No nested maps or loops inside maps. [Complete beginner example](@/guides/flow-basics/#map-repeat-a-recipe-for-each-item).
 
@@ -820,7 +821,10 @@ Repeats a sequence of steps while a condition is true, carrying updated state be
 #### Signature
 
 ```ts
+// Whole-state reference or scalar: preserves State, including generic payloads.
 flow.loop<State, Context>(id, { initial, input, while, maxIterations }, build, display?): Expression<State>
+// Object/array template initial state: resolves nested references.
+flow.loop<State, Context>(id, { initial, input, while, maxIterations }, build, display?): Expression<Resolved<State>>
 ```
 
 #### Inputs
@@ -830,12 +834,14 @@ flow.loop<State, Context>(id, { initial, input, while, maxIterations }, build, d
 | `id` | `string` |
 | `options.initial` | `State \| FlowExpression<State>` |
 | `options.input` | `Context` |
-| `options.while` | `(state: FlowExpression<State>) => FlowExpression<boolean>` |
+| `options.while` (whole-state reference or scalar) | `(state: FlowExpression<State>) => FlowExpression<boolean>` |
+| `options.while` (literal/template) | `(state: FlowExpression<Resolved<State>>) => FlowExpression<boolean>` |
 | `options.maxIterations` | `number` |
-| `build` | `(iteration: FlowBuilder<{ state: State; index: number; context: Resolved<Context> }>) => FlowExpression<State>` |
+| `build` (whole-state reference or scalar) | `(iteration: FlowBuilder<{ state: State; index: number; context: Resolved<Context> }>) => FlowExpression<State>` |
+| `build` (literal/template) | `(iteration: FlowBuilder<{ state: Resolved<State>; index: number; context: Resolved<Context> }>) => FlowExpression<Resolved<State>>` |
 | `display?` | `FlowDisplay` |
 
-**Inputs:** JSON state/reference `initial`; explicit shared context `input`; `while(state)` returning a Boolean expression of that state; required `maxIterations` integer 1–64. `build(iteration)` gets `{ state, index, context }` through its builder input and returns the next state reference of the same type.
+**Inputs:** JSON state/reference `initial`; explicit shared context `input`; `while(state)` returning a Boolean expression of that state; required `maxIterations` integer 1–64. `build(iteration)` gets `{ state, index, context }` through its builder input and returns the next state reference with the same resolved shape. Literal state, whole-state references, and nested object/array templates are supported. Whole-state references and scalar initial values preserve their payload without remapping it; literal/template state resolves nested references while preserving branded primitives. The initial state determines the body return type. For `initial: { count: flow.input.get("count") }`, both the gate and iteration select `count` as `FlowExpression<number>`; a task receiving that state uses ordinary numeric operations on `state.count`.
 
 **Returns:** final state when the pre-iteration condition becomes false (possibly the initial state). If still true at the limit, rejects with `FlowLoopLimitError`. Nested loops are unsupported; a loop can contain a map. [Beginner example](@/guides/flow-basics/#loop-repeat-until-a-condition-is-false).
 
@@ -843,8 +849,9 @@ flow.loop<State, Context>(id, { initial, input, while, maxIterations }, build, d
 
 | Value / member | Type | Description |
 | --- | --- | --- |
-| Builder return | `FlowExpression<State>` | Reference to the final state. |
-| Resolved value | `State` | State when the condition becomes false; initial state if no iterations run. |
+| Builder return (whole-state reference or scalar) | `FlowExpression<State>` | Reference to the final state, preserving the initial payload type. |
+| Builder return (literal/template) | `FlowExpression<Resolved<State>>` | Reference to the final resolved state. |
+| Resolved value | `State` for whole-state references/scalars; `Resolved<State>` for templates | State when the condition becomes false; initial state if no iterations run. |
 
 #### Example
 
