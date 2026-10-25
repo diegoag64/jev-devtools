@@ -60,6 +60,22 @@ IDs must be unique across the whole definition, including untaken branches and l
 
 Structural errors fail during definition. Missing input values and invalid comparisons fail when execution reaches them. `FlowLoopLimitError` is exported for bounded-loop handling. For exact collection/concurrency/timeout limits, execution errors, and cancellation behavior, consult the [detailed guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md) and installed declarations.
 
+## Replay captured answers (unreleased)
+
+`replayClient(fixture)` returns an SDK-compatible client for a flow run. Jev steps receive stored answers without a network call or API key. This is not in npm 0.4.1 yet.
+
+<!-- example: replay.ts -->
+
+A `FlowFixture` contains `{ version: 1, flow, steps }`. It contains responses, not the original input or flow implementation. Replay checks the flow name, step IDs, and requested question names; it does not validate prompts or state. Missing responses reject rather than calling live inference. Map/loop steps use composed IDs such as `rounds/0/batch/1/assess`.
+
+Tasks and request factories execute again. A task can still perform external calls or side effects, so use controlled tasks when replaying in tests. Failed or cancelled captures are partial fixtures, not replays of recorded failures. See the [replay guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md#replay-a-run-in-tests) for fixture copying and the repository CLI.
+
+## Build a fixture (unreleased)
+
+`flowFixture(definition, run, traces)` is available from both `jev-devtools` and `jev-devtools/flow`. Pass the captured flow definition/run and a `ReadonlyMap<string, Trace>` indexed by trace ID. It returns a `BuiltFlowFixture` with `{ fixture, missing, warnings }`.
+
+Check `missing` for completed steps whose response was unavailable, and `warnings` for capture limitations before saving `fixture` as JSON. Server redaction and truncation remain in the fixture. The drawer's **Copy fixture** also applies its current display masking; calling this helper directly does not add display masking.
+
 ## Related types
 
-`FlowBuilder`, `FlowRunOptions`, `FlowOutcome`, `FlowTask`, `FlowRequestFactory`, `TaskContext`, and `Resolved` describe builder and execution contracts. `FlowDefinition`, `FlowRun`, `FlowStep`, `FlowDisplay`, and `FlowObserver` describe inspection data and callbacks. See [recorder and types](@/api/recorder/).
+`FlowBuilder`, `FlowRunOptions`, `FlowOutcome`, `FlowTask`, `FlowRequestFactory`, `TaskContext`, and `Resolved` describe builder and execution contracts. `FlowDefinition`, `FlowRun`, `FlowStep`, `FlowDisplay`, and `FlowObserver` describe inspection data and callbacks. `FlowFixture` and `BuiltFlowFixture` describe replay data (unreleased). See [recorder and types](@/api/recorder/).

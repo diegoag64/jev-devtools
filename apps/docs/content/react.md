@@ -28,3 +28,7 @@ Closing preserves selection, filters, and view state while incoming traces conti
 ## Browser-safe types
 
 `Trace`, `Snapshot`, `StreamSnapshot`, `TraceDelta`, `Json`, `AnswerView`, and `QuestionView` are exported from the root entry point. They describe captured protocol data, which may be redacted or truncated. See [recorder and types](@/api/recorder/) for advanced integrations.
+
+## Fixture export (unreleased)
+
+The root entry also exports browser-safe `flowFixture`, `FlowFixture`, and `BuiltFlowFixture`. See [building a fixture](@/api/flow/#build-a-fixture-unreleased) for parameters, missing captures, and masking behavior. These exports are not in npm 0.4.1.

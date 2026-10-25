@@ -77,6 +77,7 @@ input:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 4px;
 }
+/* Keep JS-only controls hidden until enhanced, even when their layout rule uses flex. */
 [hidden] {
   display: none !important;
 }

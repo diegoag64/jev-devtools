@@ -40,3 +40,7 @@ Use `import type` for data-only contracts. `/server` and `/flow` runtime imports
 ## Version-matched declarations
 
 The installed package's `lib/src/index.d.ts`, `lib/server/index.d.ts`, and `lib/flow/index.d.ts` are the precise contracts for that version. This starter reference introduces all public entry points and runtime operations; detailed field-by-field protocol documentation remains in the [stream protocol](https://github.com/diegoag64/jev-devtools/blob/main/docs/stream-protocol.md) and installed declarations.
+
+## Replay types (unreleased)
+
+`FlowFixture` and `BuiltFlowFixture` are also exported from the root and `/flow` entries. The browser-safe `flowFixture()` helper builds an export from captured data; Node-only `replayClient()` uses it to supply stored answers to a flow. See [replay reference](@/api/flow/#replay-captured-answers-unreleased).
