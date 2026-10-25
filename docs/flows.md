@@ -1,12 +1,12 @@
 # Define and inspect connected Jev calls
 
-For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/flow-basics/). This file describes 0.5.1, available on npm; see the [published release notes and compatibility changes](../CHANGELOG.md#051--october-25-2026-experimental).
+For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/flow-basics/). This file describes the 0.5.2 release candidate; see the [pending release notes and compatibility changes](../CHANGELOG.md#052--pending-publication-experimental).
 
 The flow API includes function steps, runtime requests, collections, returning conditionals, loops, replay, and fixture comparison. Replay and comparison are new in **0.5.0**. Existing single-request integrations remain supported; adopting flows is optional. For publication status, check the [changelog](../CHANGELOG.md).
 
 Start with the [integration guide](integration.md) or [Next.js setup](nextjs.md) to mount the drawer and expose the shared inspector. For coding agents, the [bundled flow recipe](../packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) includes a complete parallel-checks → decision → branch example and no-key verification. It ships with npm for offline, version-matched use.
 
-The examples below import `@typesafe-ai/sdk` question helpers; declare it as a direct dependency in the server workspace (0.5.1 requires SDK `>=0.7.0 <0.8.0`, verified with 0.7.0). Keep API keys and both `/server` and `/flow` imports in Node code.
+The examples below import `@typesafe-ai/sdk` question helpers; declare it as a direct dependency in the server workspace (0.5.2 requires SDK `>=0.7.0 <0.8.0`, verified with 0.7.0). Keep API keys and both `/server` and `/flow` imports in Node code.
 
 `jev-devtools/flow` is a TypeScript/Node entry point. A definition builds an inspectable, bounded graph once; each `run()` executes an independent instance. This is an in-process helper for Jev calls and application-owned function steps. Tasks can execute server code with side effects; the runner does not provide durable execution or rollback.
 
@@ -25,18 +25,29 @@ const client = inspector.createClient({ apiKey: process.env.TYPESAFE_API_KEY });
 const refundFlow = defineJevFlow<Ticket>("refund-review", (flow) => {
   const triage = flow.jev("triage", {
     state: flow.input,
-    questions: { category: choice("Refund request?", { refund: null, other: null }) },
+    questions: {
+      category: choice("Refund request?", { refund: null, other: null }),
+    },
   });
   return flow.branch("refund-request", {
     when: triage.answer("category").choice.eq("refund"),
     then: (branch) => {
       const review = branch.jev("review", {
-        state: { ticket: flow.input, category: triage.answer("category").choice },
+        state: {
+          ticket: flow.input,
+          category: triage.answer("category").choice,
+        },
         questions: { eligible: noul("Eligible?"), risky: noul("Risky?") },
       });
       return branch.branch("approval", {
-        when: all(review.answer("eligible").noul.gte(0.9), review.answer("risky").noul.lt(0.2)),
-        then: (path) => path.output("approve", { eligibility: review.answer("eligible").noul }),
+        when: all(
+          review.answer("eligible").noul.gte(0.9),
+          review.answer("risky").noul.lt(0.2),
+        ),
+        then: (path) =>
+          path.output("approve", {
+            eligibility: review.answer("eligible").noul,
+          }),
         else: (path) => path.output("manual-review"),
       });
     },
@@ -44,11 +55,14 @@ const refundFlow = defineJevFlow<Ticket>("refund-review", (flow) => {
   });
 });
 const abortController = new AbortController();
-const result = await refundFlow.run({ message: "Please refund my duplicate charge." }, {
-  client,
-  devtools: inspector,
-  signal: abortController.signal, // optional
-});
+const result = await refundFlow.run(
+  { message: "Please refund my duplicate charge." },
+  {
+    client,
+    devtools: inspector,
+    signal: abortController.signal, // optional
+  },
+);
 // { runId, outcome: "approve", value: { eligibility: 0.94 } }
 // Your application decides what to do with the outcome. No refund is executed.
 ```
@@ -62,7 +76,7 @@ Mount the existing `<JevDevtools enabled={...} />` and serve the inspector endpo
 - Scalar references support `.eq(value)`. Numeric references support `.lt(value)`, `.gt(value)`, and `.gte(value)`. `all`, `any`, and `not` compose Boolean expressions. There is no `eval`, arbitrary predicate callback, or CEL interpreter. All operands are evaluated; a missing value is an error even if another operand would short-circuit. Equality requires matching scalar types; ordering requires finite numbers.
 - `branch(id, { when, then, else })` is terminal in its block. Both synchronous callbacks build possible paths; exactly one executes. Each path must return its terminal `output()` or nested `branch()`. For paths that return values and continue into shared work, use `flow.if()`.
 - `output(name, value?)` returns a named outcome and optional resolved value. Output names are also node IDs, so they must be unique across the definition. This is data, not an action.
-- **Unreleased expression limits:** expressions allow depth 80 (a leaf has depth 0), at most 256 operands per operation, and 4,096 expanded nodes per expression. Every input, result reference, literal, field selection, and operation counts as a node; reused children count again for each occurrence. Limits are checked during construction, before definition visitors or execution. For example, 80 `not()` wrappers around Boolean `flow.input` fit; the 81st throws. Eleven `e = all(e, e)` doublings of that input contain 4,095 nodes; the twelfth throws. Split larger generated logic into task results or smaller steps. These expression budgets are separate from flow-step and capture limits. Legacy condition descriptions retain at most 4,096 UTF-16 code units including a `[condition truncated]` suffix when needed; accepted expressions still evaluate in full.
+- **0.5.2 expression limits (pending publication):** expressions allow depth 80 (a leaf has depth 0), at most 256 operands per operation, and 4,096 expanded nodes per expression. Every input, result reference, literal, field selection, and operation counts as a node; reused children count again for each occurrence. Limits are checked during construction, before definition visitors or execution. For example, 80 `not()` wrappers around Boolean `flow.input` fit; the 81st throws. Eleven `e = all(e, e)` doublings of that input contain 4,095 nodes; the twelfth throws. Split larger generated logic into task results or smaller steps. These expression budgets are separate from flow-step and capture limits. Legacy condition descriptions retain at most 4,096 UTF-16 code units including a `[condition truncated]` suffix when needed; accepted expressions still evaluate in full.
 - IDs are unique across the whole definition, including untaken paths and parallel lanes: 1–80 letters, digits, `_`, or `-`, starting with a letter or digit. Definitions are limited to 256 nodes, including map/loop templates, and 16 nested blocks. Runs share a 1,024-expanded-node budget. Use `flow.loop()` for bounded stateful iteration.
 
 Definitions are synchronous and make no SDK calls. Plain request/value templates are copied at definition time. Treat SDK asset instances as immutable. References from another definition, a sibling lane, or a branch-local scope cannot be used outside their available scope. Structural validation happens while defining, before any run can dispatch; input-dependent missing values and invalid comparisons fail when reached during execution.
@@ -76,27 +90,39 @@ Function steps and runtime request factories are included in **0.4.0**. Existing
 `task(id, { input, run, timeoutMs? }, display?)` executes a server function after its dependencies. Nested references in `input` resolve to ordinary values. The callback's return type becomes a typed `FlowExpression`, so its fields can feed another task, request, condition, or output. The optional third argument uses the same static `title` and `description` as other steps.
 
 ```ts
-const shortlist = flow.task("shortlist", {
-  input: { probabilities: ranking.answer("skills").probabilities, limit: 3 },
-  run: ({ probabilities, limit }) => Object.entries(probabilities)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, limit)
-    .map(([name]) => name),
-}, {
-  title: "Keep the top skills",
-  description: "Application code sorts the probabilities before another assessment.",
-});
+const shortlist = flow.task(
+  "shortlist",
+  {
+    input: { probabilities: ranking.answer("skills").probabilities, limit: 3 },
+    run: ({ probabilities, limit }) =>
+      Object.entries(probabilities)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, limit)
+        .map(([name]) => name),
+  },
+  {
+    title: "Keep the top skills",
+    description:
+      "Application code sorts the probabilities before another assessment.",
+  },
+);
 
-const selection = flow.jev("select", {
-  input: { message: flow.input.get("message"), skills: shortlist },
-  request: ({ message, skills }) => ({
-    state: { message, skills },
-    questions: {
-      selected: choice("Which skill fits best?",
-        Object.fromEntries(skills.map((name) => [name, null]))),
-    },
-  }),
-}, { title: "Assess the shortlist" });
+const selection = flow.jev(
+  "select",
+  {
+    input: { message: flow.input.get("message"), skills: shortlist },
+    request: ({ message, skills }) => ({
+      state: { message, skills },
+      questions: {
+        selected: choice(
+          "Which skill fits best?",
+          Object.fromEntries(skills.map((name) => [name, null])),
+        ),
+      },
+    }),
+  },
+  { title: "Assess the shortlist" },
+);
 
 return flow.output("suggestion", selection.answer("selected").choice);
 ```
@@ -108,20 +134,24 @@ Factory inputs use the same JSON-compatible snapshot contract as tasks. Construc
 Tasks may be synchronous or asynchronous. The second callback argument is `TaskContext`: `{ signal, runId, stepId, executionId }`. A task can call a remote service with ordinary server code:
 
 ```ts
-const evaluation = flow.task("external-evaluation", {
-  input: { document: flow.input.get("document") },
-  timeoutMs: 30_000,
-  run: async (input, { signal }) => {
-    const response = await fetch(serviceUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-      signal,
-    });
-    if (!response.ok) throw new Error("Evaluation failed");
-    return response.json();
+const evaluation = flow.task(
+  "external-evaluation",
+  {
+    input: { document: flow.input.get("document") },
+    timeoutMs: 30_000,
+    run: async (input, { signal }) => {
+      const response = await fetch(serviceUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+        signal,
+      });
+      if (!response.ok) throw new Error("Evaluation failed");
+      return response.json();
+    },
   },
-}, { title: "External evaluation" });
+  { title: "External evaluation" },
+);
 ```
 
 `serviceUrl` and any credentials belong to trusted server configuration. Functions/closures are never serialized to the browser or uploaded for remote execution. Keep Jev calls in `flow.jev()` when they need their own linked request diagram; arbitrary calls hidden inside a task are not automatically modeled as child flow steps.
@@ -155,10 +185,15 @@ All builder methods accept an optional final display argument: `{ title, descrip
 Use it to explain the purpose of a request, a condition, a parallel join, or an outcome:
 
 ```ts
-path.output("ready-output", { eligibility: checks.eligibility }, {
-  title: "Ready for approval",
-  description: "Readiness is at least 90%. Return the checks to the application for its next action.",
-});
+path.output(
+  "ready-output",
+  { eligibility: checks.eligibility },
+  {
+    title: "Ready for approval",
+    description:
+      "Readiness is at least 90%. Return the checks to the application for its next action.",
+  },
+);
 ```
 
 For an output with no value, pass `undefined` as the second argument. The same pattern works with `jev(id, request, display)`, `branch(id, paths, display)`, and `parallel(id, lanes, display)`. `FlowDisplay` is exported from `jev-devtools/flow`.
@@ -176,17 +211,27 @@ Steps in a block are sequential. Explicit named lanes overlap; their result refe
 ```ts
 const reviewFlow = defineJevFlow<Ticket>("parallel-review", (flow) => {
   const checks = flow.parallel("checks", {
-    eligibility: (lane) => lane.jev("eligibility", {
-      state: flow.input,
-      questions: { eligible: noul("Eligible?") },
-    }).answer("eligible").noul,
-    risk: (lane) => lane.jev("risk", {
-      state: flow.input,
-      questions: { risky: noul("Risky?") },
-    }).answer("risky").noul,
+    eligibility: (lane) =>
+      lane
+        .jev("eligibility", {
+          state: flow.input,
+          questions: { eligible: noul("Eligible?") },
+        })
+        .answer("eligible").noul,
+    risk: (lane) =>
+      lane
+        .jev("risk", {
+          state: flow.input,
+          questions: { risky: noul("Risky?") },
+        })
+        .answer("risky").noul,
   });
   const decision = flow.jev("combined", {
-    state: { ticket: flow.input, eligibility: checks.eligibility, risk: checks.risk },
+    state: {
+      ticket: flow.input,
+      eligibility: checks.eligibility,
+      risk: checks.risk,
+    },
     questions: { ready: noul("Ready?") },
   });
   return flow.output("reviewed", { readiness: decision.answer("ready").noul });
@@ -250,24 +295,31 @@ Incoming values are read from linked, retained Jev captures and respect their re
 `map(id, options, buildItem, display?)` runs the same item program over an array produced at runtime. The callback builds a template once; it does not execute application work during definition.
 
 ```ts
-const assessed = flow.map("assess-passages", {
-  items: retrieved, // FlowExpression<Passage[]> or an ordinary array
-  input: { query: flow.input.get("query") }, // explicit shared context
-  concurrency: 4, // default 4; 1–16
-  maxItems: 12, // required; 1–64; exceeding it fails without truncating
-}, (item) => {
-  const request = item.jev("assess", {
-    state: {
-      query: item.input.get("context").get("query"),
-      passage: item.input.get("item"),
-    },
-    questions: { relevant: noul("Is the passage relevant to the query?") },
-  });
-  return item.task("result", {
-    input: { passage: item.input.get("item"), relevance: request.answer("relevant").noul },
-    run: (value) => value,
-  });
-});
+const assessed = flow.map(
+  "assess-passages",
+  {
+    items: retrieved, // FlowExpression<Passage[]> or an ordinary array
+    input: { query: flow.input.get("query") }, // explicit shared context
+    concurrency: 4, // default 4; 1–16
+    maxItems: 12, // required; 1–64; exceeding it fails without truncating
+  },
+  (item) => {
+    const request = item.jev("assess", {
+      state: {
+        query: item.input.get("context").get("query"),
+        passage: item.input.get("item"),
+      },
+      questions: { relevant: noul("Is the passage relevant to the query?") },
+    });
+    return item.task("result", {
+      input: {
+        passage: item.input.get("item"),
+        relevance: request.answer("relevant").noul,
+      },
+      run: (value) => value,
+    });
+  },
+);
 // assessed is a typed FlowExpression<Array<{ passage: Passage; relevance: number }>>.
 ```
 
@@ -290,20 +342,31 @@ Try the [RAG passage cookbook](../cookbooks/rag-passages/README.md) for a twelve
 Use `flow.if(id, { when, then, else }, display?)` when one path should produce a value and **both paths continue into shared work**. `flow.branch()` still ends its block with a named outcome. Returning conditionals and strict `.gt()` comparisons are included in **0.4.0**.
 
 ```ts
-const selected = flow.if("choose-extractor", {
-  when: assessment.get("maxFieldProbability").gt(0.7),
-  then: path => path.task("strong", {
-    input: { document: path.input.get("document") },
-    run: ({ document }, { signal }) => extractWithStrongModel(document, signal),
-  }, { title: "Run the stronger extractor" }),
-  else: () => cheapRecord, // An existing in-scope expression is valid too.
-}, {
-  title: "Escalate a flagged field",
-  description: "Use a stronger extractor only when a field flag is above 70%.",
-});
+const selected = flow.if(
+  "choose-extractor",
+  {
+    when: assessment.get("maxFieldProbability").gt(0.7),
+    then: (path) =>
+      path.task(
+        "strong",
+        {
+          input: { document: path.input.get("document") },
+          run: ({ document }, { signal }) =>
+            extractWithStrongModel(document, signal),
+        },
+        { title: "Run the stronger extractor" },
+      ),
+    else: () => cheapRecord, // An existing in-scope expression is valid too.
+  },
+  {
+    title: "Escalate a flagged field",
+    description:
+      "Use a stronger extractor only when a field flag is above 70%.",
+  },
+);
 const formatted = flow.task("format-record", {
   input: selected,
-  run: record => formatRecord(record),
+  run: (record) => formatRecord(record),
 });
 return flow.output("final-record", formatted);
 ```
@@ -325,15 +388,21 @@ New `if` and `merge` kinds extend the version-1 flow records; use the matching u
 `flow.loop(id, { initial, input, while, maxIterations }, buildIteration, display?)` returns the final state as `FlowExpression<S>` for a whole-state reference or scalar, or `FlowExpression<Resolved<S>>` for literal/template state. Whole-state references and scalar initial values preserve generic payloads; template resolution preserves branded primitives. Included in **0.4.0**.
 
 ```ts
-const final = flow.loop("count", {
-  initial: { count: 0 },
-  input: { increment: 1 },
-  while: state => state.get("count").lt(3),
-  maxIterations: 3,
-}, iteration => iteration.task("advance", {
-  input: iteration.input,
-  run: ({ state, context }) => ({ count: state.count + context.increment }),
-}), { title: "Count up to three" });
+const final = flow.loop(
+  "count",
+  {
+    initial: { count: 0 },
+    input: { increment: 1 },
+    while: (state) => state.get("count").lt(3),
+    maxIterations: 3,
+  },
+  (iteration) =>
+    iteration.task("advance", {
+      input: iteration.input,
+      run: ({ state, context }) => ({ count: state.count + context.increment }),
+    }),
+  { title: "Count up to three" },
+);
 return flow.output("done", final);
 ```
 

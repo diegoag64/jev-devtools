@@ -1,6 +1,6 @@
 Use this page when you know an API name and want its contract. Each method has a permanent heading link, a readable signature, inputs, return value, and usage. Start with [Flows from scratch](@/guides/flow-basics/) if flows are new to you.
 
-These docs describe **0.5.1, available on npm**. Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
+These docs describe the **0.5.2 release candidate, pending publication**; npm currently provides 0.5.1. Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
 
 <details class="reference-notes">
 <summary>How to read the signatures</summary>
@@ -40,20 +40,20 @@ JevDevtools(props: JevDevtoolsProps): ReactElement | null
 
 #### Inputs
 
-| Input prop | Default | Meaning |
-| --- | --- | --- |
-| `enabled?: boolean` | `false` | Opt in to connecting and showing the inspector. |
-| `endpoint?: string` | `/api/jev-devtools` | Same-origin inspector path; match the server. |
-| `defaultOpen?: boolean` | `true` | Open the drawer on its initial mount. |
-| `redactAdditionalSensitiveData?: boolean` | `true` | **0.5.0.** Mask supported personal fields in the display. Captured/streamed values remain unchanged. |
+| Input prop                                | Default             | Meaning                                                                                              |
+| ----------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------- |
+| `enabled?: boolean`                       | `false`             | Opt in to connecting and showing the inspector.                                                      |
+| `endpoint?: string`                       | `/api/jev-devtools` | Same-origin inspector path; match the server.                                                        |
+| `defaultOpen?: boolean`                   | `true`              | Open the drawer on its initial mount.                                                                |
+| `redactAdditionalSensitiveData?: boolean` | `true`              | **0.5.0.** Mask supported personal fields in the display. Captured/streamed values remain unchanged. |
 
 Unmounting or disabling closes its subscription. Closing the drawer alone does not stop capture. [React setup](@/api/react/) explains mounting and styling.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `React element or null` | Nothing during SSR/disabled state; the mounted inspector when enabled. |
+| Value / member | Type                    | Description                                                            |
+| -------------- | ----------------------- | ---------------------------------------------------------------------- |
+| Return         | `React element or null` | Nothing during SSR/disabled state; the mounted inspector when enabled. |
 
 #### Example
 
@@ -64,6 +64,7 @@ import { JevDevtools } from "jev-devtools";
 ```
 
 <!-- Preserve the former stylesheet deep link beside the component styling guidance. -->
+
 <a id="styles-css"></a>
 
 #### How it works
@@ -90,29 +91,32 @@ Creates an independent adapter and its in-memory histories. **Returns:** an obje
 
 #### Inputs
 
-| Input | Default | Meaning |
-| --- | --- | --- |
-| `origin: string` | Required | Exact browser origin, including port. |
-| `enabled?: boolean` | `false` | Enable recording and HTTP endpoints. |
-| `endpoint?: string` | `/api/jev-devtools` | Absolute path without query or fragment. |
-| `limit?: number` | `50` | Global trace retention; clamped to 1–200. |
-| `redact?: (path: string[], value: unknown) => unknown` | None | Transform the captured copy before storage/delivery. |
-| `authorize?: (request: Request) => boolean | Promise<boolean>` | None | Access check; required for enabled non-loopback origins. |
-| `getSession?: (request: Request) => string | Promise<string>` | `"local"` | Trusted recording scope, nonempty and at most 200 characters. |
+| Input                                                  | Default             | Meaning                                              |
+| ------------------------------------------------------ | ------------------- | ---------------------------------------------------- | ------------------------------------------------------------- |
+| `origin: string`                                       | Required            | Exact browser origin, including port.                |
+| `enabled?: boolean`                                    | `false`             | Enable recording and HTTP endpoints.                 |
+| `endpoint?: string`                                    | `/api/jev-devtools` | Absolute path without query or fragment.             |
+| `limit?: number`                                       | `50`                | Global trace retention; clamped to 1–200.            |
+| `redact?: (path: string[], value: unknown) => unknown` | None                | Transform the captured copy before storage/delivery. |
+| `authorize?: (request: Request) => boolean             | Promise<boolean>`   | None                                                 | Access check; required for enabled non-loopback origins.      |
+| `getSession?: (request: Request) => string             | Promise<string>`    | `"local"`                                            | Trusted recording scope, nonempty and at most 200 characters. |
 
 Invalid origin/path configuration throws; enabled non-loopback origins without authorization throw. Share this instance between inference and inspector routes. [Access guide](@/guides/privacy/).
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `Adapter` | Independent adapter with client, routing, session, observer, and disposal methods. |
+| Value / member | Type      | Description                                                                        |
+| -------------- | --------- | ---------------------------------------------------------------------------------- |
+| Return         | `Adapter` | Independent adapter with client, routing, session, observer, and disposal methods. |
 
 #### Example
 
 ```ts api=core
 import { createJevDevtools } from "jev-devtools/server";
-const inspector = createJevDevtools({ enabled: true, origin: "http://localhost:3000" });
+const inspector = createJevDevtools({
+  enabled: true,
+  origin: "http://localhost:3000",
+});
 ```
 
 #### How it works
@@ -131,25 +135,26 @@ getJevDevtools(key: string, createOptions: () => JevDevtoolsServerOptions): Adap
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `key` | `string` |
-| `createOptions` | `() => JevDevtoolsServerOptions` |
+| Parameter / option | Type                             |
+| ------------------ | -------------------------------- |
+| `key`              | `string`                         |
+| `createOptions`    | `() => JevDevtoolsServerOptions` |
 
 **Inputs:** a nonblank app-specific key and synchronous options factory. **Returns:** the same adapter for that key in the same Node realm; calls the factory only when creating it. The first options win until disposal or process restart. Empty keys throw. Histories are not shared across processes. Use this for module reloads in [Next.js](@/guides/nextjs/).
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `Adapter` | Existing adapter for the key, or a newly created adapter. |
+| Value / member | Type      | Description                                               |
+| -------------- | --------- | --------------------------------------------------------- |
+| Return         | `Adapter` | Existing adapter for the key, or a newly created adapter. |
 
 #### Example
 
 ```ts api=core
 import { getJevDevtools } from "jev-devtools/server";
 const inspector = getJevDevtools("my-app", () => ({
-  enabled: true, origin: "http://localhost:3000",
+  enabled: true,
+  origin: "http://localhost:3000",
 }));
 ```
 
@@ -169,18 +174,18 @@ inspector.createClient(options: SDKClientOptions, metadata?: ClientMetadata): Ty
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `options` | `SDKClientOptions` |
-| `metadata?` | `ClientMetadata` |
+| Parameter / option | Type               |
+| ------------------ | ------------------ |
+| `options`          | `SDKClientOptions` |
+| `metadata?`        | `ClientMetadata`   |
 
 **Inputs:** TypeSafe client constructor options (including your server-side key or custom `fetch`); optional `{ label?, source? }` defaults to `"Jev request"` and `"live"`. **Returns:** a client that records `systemOne` calls when enabled, otherwise an ordinary SDK client. Other SDK methods are not instrumented. Setting `source: "sample"` changes a label, not the transport or billing behavior.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `TypeSafeClient` | SDK client; instrumented when the adapter is enabled. |
+| Value / member | Type             | Description                                           |
+| -------------- | ---------------- | ----------------------------------------------------- |
+| Return         | `TypeSafeClient` | SDK client; instrumented when the adapter is enabled. |
 
 #### Example
 
@@ -207,17 +212,17 @@ inspector.handle(request: Request): Promise<Response>
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `request` | `Request` |
+| Parameter / option | Type      |
+| ------------------ | --------- |
+| `request`          | `Request` |
 
 **Input:** a Web Request with the actual public URL. **Returns:** configuration JSON, an event stream, a clear response, or an HTTP error. Forward the base path and all subpaths. Disabled/unmatched routes return 404; origin/auth failures return 403. Authorizer/session callback errors can reject, so let your framework handle errors. A Web Request provides no socket address: bind to loopback or configure authorization.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `Promise<Response>` | Resolves to an HTTP response; includes HTTP error responses. |
+| Value / member | Type                | Description                                                  |
+| -------------- | ------------------- | ------------------------------------------------------------ |
+| Return         | `Promise<Response>` | Resolves to an HTTP response; includes HTTP error responses. |
 
 #### Example
 
@@ -241,17 +246,17 @@ inspector.handleNodeRoute(request: Request): Promise<Response>
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `request` | `Request` |
+| Parameter / option | Type      |
+| ------------------ | --------- |
+| `request`          | `Request` |
 
 **Input:** a Node framework's Web Request, including its actual `Host` header. **Returns:** the same response contract as `handle`, after checking Host against the configured authority and normalizing internal URLs. Forwarded host headers are not trusted. See the [Next.js route example](@/guides/nextjs/#expose-the-optional-catch-all-route).
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `Promise<Response>` | Response after Host validation and URL normalization. |
+| Value / member | Type                | Description                                           |
+| -------------- | ------------------- | ----------------------------------------------------- |
+| Return         | `Promise<Response>` | Response after Host validation and URL normalization. |
 
 #### Example
 
@@ -276,19 +281,19 @@ inspector.middleware(req: IncomingMessage, res: ServerResponse, next: () => void
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `req` | `IncomingMessage` |
-| `res` | `ServerResponse` |
-| `next` | `() => void` |
+| Parameter / option | Type              |
+| ------------------ | ----------------- |
+| `req`              | `IncomingMessage` |
+| `res`              | `ServerResponse`  |
+| `next`             | `() => void`      |
 
 **Inputs:** Node HTTP request/response and continuation. **Returns:** a promise completing response handling, or calls `next()` for unrelated paths. Mount at the root without stripping the inspector prefix. Without `authorize`, enabled endpoints require a loopback socket. Route errors are contained as HTTP 500 or a destroyed response.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `Promise<void>` | Completes after response handling or calls next for an unrelated path. |
+| Value / member | Type            | Description                                                            |
+| -------------- | --------------- | ---------------------------------------------------------------------- |
+| Return         | `Promise<void>` | Completes after response handling or calls next for an unrelated path. |
 
 #### Example
 
@@ -312,18 +317,18 @@ inspector.run<T>(request: Request, callback: () => T | Promise<T>): Promise<T>
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `request` | `Request` |
-| `callback` | `() => T \| Promise<T>` |
+| Parameter / option | Type                    |
+| ------------------ | ----------------------- |
+| `request`          | `Request`               |
+| `callback`         | `() => T \| Promise<T>` |
 
 **Inputs:** the application's authenticated request and work callback. **Returns:** the callback's resolved result; failures propagate. Chooses the recording scope through `getSession` for the callback's asynchronous work. It does not authorize the application action. Needed when using custom sessions.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `Promise<T>` | Resolves to the application callback’s result; callback errors propagate. |
+| Value / member | Type         | Description                                                               |
+| -------------- | ------------ | ------------------------------------------------------------------------- |
+| Return         | `Promise<T>` | Resolves to the application callback’s result; callback errors propagate. |
 
 #### Example
 
@@ -353,9 +358,9 @@ Takes no arguments. Disables capture/endpoints and closes active streams. Shared
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `void` | No data is returned. |
+| Value / member | Type   | Description          |
+| -------------- | ------ | -------------------- |
+| Return         | `void` | No data is returned. |
 
 #### Example
 
@@ -383,19 +388,19 @@ defineJevFlow<Input>(name: string, build: (flow: FlowBuilder<Input>) => Expressi
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `name` | `string` |
-| `build` | `(flow: FlowBuilder<Input>) => FlowExpression<FlowOutcome>` |
+| Parameter / option | Type                                                        |
+| ------------------ | ----------------------------------------------------------- |
+| `name`             | `string`                                                    |
+| `build`            | `(flow: FlowBuilder<Input>) => FlowExpression<FlowOutcome>` |
 
 **Inputs:** a nonblank flow name of at most 100 characters, and a synchronous builder callback. Return the terminal `output` or `branch`. **Returns:** `{ definition, run }`, a reusable recipe. No SDK request is sent during definition. Invalid IDs, scopes, nesting, or terminal structure throw immediately.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| definition | `FlowDefinition` | Static graph. |
-| run | `(input: Input, options: FlowRunOptions) => Promise<FlowOutcome & { runId: string }>` | Executes a fresh run. |
+| Value / member | Type                                                                                  | Description           |
+| -------------- | ------------------------------------------------------------------------------------- | --------------------- |
+| definition     | `FlowDefinition`                                                                      | Static graph.         |
+| run            | `(input: Input, options: FlowRunOptions) => Promise<FlowOutcome & { runId: string }>` | Executes a fresh run. |
 
 #### Example
 
@@ -419,27 +424,30 @@ program.run(input: Input, options: FlowRunOptions): Promise<{ runId: string; out
 
 #### Inputs
 
-| Option | Meaning |
-| --- | --- |
-| `client` | Required client with SDK-compatible `systemOne`, even for task-only flows. |
-| `devtools?` | Optional `FlowObserver`, usually your server adapter. |
-| `signal?` | Optional `AbortSignal` to cancel the run. |
+| Option      | Meaning                                                                    |
+| ----------- | -------------------------------------------------------------------------- |
+| `client`    | Required client with SDK-compatible `systemOne`, even for task-only flows. |
+| `devtools?` | Optional `FlowObserver`, usually your server adapter.                      |
+| `signal?`   | Optional `AbortSignal` to cancel the run.                                  |
 
 **Returns:** a fresh run ID, selected outcome name, and optional resolved value. `value` is `unknown`, not an inferred discriminated union. Errors and cancellation reject the promise. Tasks must cooperate with their signal; there is no rollback or automatic retry.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `Promise<FlowOutcome & { runId: string }>` | Await to receive the fields below. |
-| runId | `string` | Unique execution ID. |
-| outcome | `string` | Selected terminal outcome name. |
-| value? | `unknown` | Resolved output value; narrow its type in application code. |
+| Value / member | Type                                       | Description                                                 |
+| -------------- | ------------------------------------------ | ----------------------------------------------------------- |
+| Return         | `Promise<FlowOutcome & { runId: string }>` | Await to receive the fields below.                          |
+| runId          | `string`                                   | Unique execution ID.                                        |
+| outcome        | `string`                                   | Selected terminal outcome name.                             |
+| value?         | `unknown`                                  | Resolved output value; narrow its type in application code. |
 
 #### Example
 
 ```ts
-const result = await program.run({ name: "Ada" }, { client, devtools: inspector });
+const result = await program.run(
+  { name: "Ada" },
+  { client, devtools: inspector },
+);
 console.log(result.outcome, result.value);
 ```
 
@@ -465,8 +473,8 @@ A description of the recipe, to treat as read-only: version, ID, name, and nodes
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
+| Value / member | Type             | Description                                                    |
+| -------------- | ---------------- | -------------------------------------------------------------- |
 | Property value | `FlowDefinition` | Version, identity, name, and graph nodes. No work is executed. |
 
 #### Example
@@ -497,8 +505,8 @@ A reference to the current recipe input, not its actual runtime value. **Returns
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
+| Value / member | Type                    | Description                                              |
+| -------------- | ----------------------- | -------------------------------------------------------- |
 | Property value | `FlowExpression<Input>` | Reference to the current flow, item, or iteration input. |
 
 Inside a synchronous `defineJevFlow()` callback; these references resolve when you await the flow’s `run()`. See the [complete definition and execution](@/guides/flow-basics/#input-read-the-data-you-were-given).
@@ -527,22 +535,22 @@ flow.task<I, O>(id: string, task: FlowTask<I, O>, display?: FlowDisplay): Expres
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `id` | `string` |
-| `task.input` | `I` |
-| `task.run` | `(input: Resolved<I>, context: TaskContext) => O \| Promise<O>` |
-| `task.timeoutMs?` | `number` |
-| `display?` | `FlowDisplay` |
+| Parameter / option | Type                                                            |
+| ------------------ | --------------------------------------------------------------- |
+| `id`               | `string`                                                        |
+| `task.input`       | `I`                                                             |
+| `task.run`         | `(input: Resolved<I>, context: TaskContext) => O \| Promise<O>` |
+| `task.timeoutMs?`  | `number`                                                        |
+| `display?`         | `FlowDisplay`                                                   |
 
 **Inputs:** unique step ID; `input` containing values/references; `run(resolvedInput, context)` returning a value or promise; optional `timeoutMs` integer from 1 to 2,147,483,647. Context has `signal`, `runId`, `stepId`, `executionId`. **Returns:** a reference to the awaited callback result. Failure rejects the flow. Timeouts cancel the wait and signal work; they cannot forcibly stop non-cooperating side effects. [Beginner example](@/guides/flow-basics/#task-run-your-own-code).
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Builder return | `FlowExpression<Awaited<O>>` | Reference to the callback result. |
-| Resolved value | `Awaited<O>` | Actual callback result after awaiting it, if needed. |
+| Value / member | Type                         | Description                                          |
+| -------------- | ---------------------------- | ---------------------------------------------------- |
+| Builder return | `FlowExpression<Awaited<O>>` | Reference to the callback result.                    |
+| Resolved value | `Awaited<O>`                 | Actual callback result after awaiting it, if needed. |
 
 #### Example
 
@@ -565,11 +573,11 @@ flow.jev(id, { input, request: (resolvedInput) => sdkRequest }, display?): Answe
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `id` | `string` |
-| `request` | `SDK request with expression-capable state, or FlowRequestFactory<I, Q>` |
-| `display?` | `FlowDisplay` |
+| Parameter / option | Type                                                                     |
+| ------------------ | ------------------------------------------------------------------------ |
+| `id`               | `string`                                                                 |
+| `request`          | `SDK request with expression-capable state, or FlowRequestFactory<I, Q>` |
+| `display?`         | `FlowDisplay`                                                            |
 
 **Inputs:** unique ID and either a normal SDK request whose `state` may contain nested expressions, or a factory configuration. The factory's `input` is resolved first, then its synchronous `request` callback returns an SDK request. Use tasks for async preparation. The request's `questions` define named SDK question types; other SDK request options are passed through.
 
@@ -577,11 +585,11 @@ flow.jev(id, { input, request: (resolvedInput) => sdkRequest }, display?): Answe
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| answer(name) | `Object of typed answer-field expressions` | Selects one question’s fields, such as choice or noul. |
-| answers | `FlowExpression<{ [K in keyof Q]: ResultFor<Q[K]> }>` | Reference to all answers. |
-| Resolved answer fields | `SDK ResultFor<Q[K]> fields` | Actual field values for the selected SDK question type. |
+| Value / member         | Type                                                  | Description                                             |
+| ---------------------- | ----------------------------------------------------- | ------------------------------------------------------- |
+| answer(name)           | `Object of typed answer-field expressions`            | Selects one question’s fields, such as choice or noul.  |
+| answers                | `FlowExpression<{ [K in keyof Q]: ResultFor<Q[K]> }>` | Reference to all answers.                               |
+| Resolved answer fields | `SDK ResultFor<Q[K]> fields`                          | Actual field values for the selected SDK question type. |
 
 **Define now, request later.** `flow.jev()` returns future-answer references, not a promise. `await classify.run(...)` executes the request and waits for its answer. Call `tryClassify(jev)` with the client from the [server setup](@/api/server/).
 
@@ -605,17 +613,17 @@ result.answer<Name extends keyof Questions>(name: Name): AnswerFieldReferences
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `name` | `A key of the request’s Questions type` |
+| Parameter / option | Type                                    |
+| ------------------ | --------------------------------------- |
+| `name`             | `A key of the request’s Questions type` |
 
 **Input:** a known question name. **Returns:** an object whose answer fields are typed expressions: e.g. `.choice` for Choice, `.noul` for Noul, `.score` for Score, or `.box` for Box; other SDK result fields are available according to the question type. Calling `answer` does not send another request. Static unknown questions fail during definition; generated questions must exist when executed. A Noul is a probability of true, not a confidence score.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `Object of FlowExpression fields` | Each result field is an expression with its SDK-defined value type. |
+| Value / member | Type                              | Description                                                         |
+| -------------- | --------------------------------- | ------------------------------------------------------------------- |
+| Return         | `Object of FlowExpression fields` | Each result field is an expression with its SDK-defined value type. |
 
 Inside a synchronous `defineJevFlow()` callback; these references resolve when you await the flow’s `run()`. See the [complete definition and execution](@/guides/flow-basics/#jev-ask-a-question).
 
@@ -647,8 +655,8 @@ The full resolved SDK answer object, useful when a factory generates question na
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
+| Value / member | Type                                                  | Description                              |
+| -------------- | ----------------------------------------------------- | ---------------------------------------- |
 | Property value | `FlowExpression<{ [K in keyof Q]: ResultFor<Q[K]> }>` | Reference to the complete answer object. |
 
 Inside a synchronous `defineJevFlow()` callback; these references resolve when you await the flow’s `run()`. See the [complete definition and execution](@/guides/flow-basics/#jev-ask-a-question).
@@ -675,22 +683,22 @@ flow.if<A, B>(id, { when, then, else }, display?): Expression<A | B>
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `id` | `string` |
-| `paths.when` | `FlowExpression<boolean>` |
-| `paths.then` | `(path: FlowBuilder<Input>) => FlowExpression<A>` |
-| `paths.else` | `(path: FlowBuilder<Input>) => FlowExpression<B>` |
-| `display?` | `FlowDisplay` |
+| Parameter / option | Type                                              |
+| ------------------ | ------------------------------------------------- |
+| `id`               | `string`                                          |
+| `paths.when`       | `FlowExpression<boolean>`                         |
+| `paths.then`       | `(path: FlowBuilder<Input>) => FlowExpression<A>` |
+| `paths.else`       | `(path: FlowBuilder<Input>) => FlowExpression<B>` |
+| `display?`         | `FlowDisplay`                                     |
 
 **Inputs:** a Boolean expression `when`; `then(path)` and `else(path)` callbacks each returning a value reference. **Returns:** the chosen value reference so later shared steps can continue. Both callbacks build synchronously, only the selected path executes. Use the provided path builder; do not return terminal outputs here. [Beginner example](@/guides/flow-basics/#if-choose-a-value-then-continue).
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Builder return | `FlowExpression<A \| B>` | Reference to the selected path’s result. |
-| Resolved value | `A \| B` | Value from the executed path, available to later steps. |
+| Value / member | Type                     | Description                                             |
+| -------------- | ------------------------ | ------------------------------------------------------- |
+| Builder return | `FlowExpression<A \| B>` | Reference to the selected path’s result.                |
+| Resolved value | `A \| B`                 | Value from the executed path, available to later steps. |
 
 #### Example
 
@@ -712,22 +720,22 @@ flow.branch(id, { when, then, else }, display?): Expression<FlowOutcome>
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `id` | `string` |
-| `paths.when` | `FlowExpression<boolean>` |
+| Parameter / option       | Type                                                        |
+| ------------------------ | ----------------------------------------------------------- |
+| `id`                     | `string`                                                    |
+| `paths.when`             | `FlowExpression<boolean>`                                   |
 | `paths.then, paths.else` | `(path: FlowBuilder<Input>) => FlowExpression<FlowOutcome>` |
-| `display?` | `FlowDisplay` |
+| `display?`               | `FlowDisplay`                                               |
 
 **Inputs:** Boolean `when`; two callbacks returning `output` or another terminal `branch`. **Returns:** the terminal result reference. Return it from the containing flow/path. No steps may follow this terminal decision. Use `if` to rejoin instead. [Beginner example](@/guides/flow-basics/#branch-choose-how-to-finish).
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Builder return | `FlowExpression<FlowOutcome>` | Terminal result reference. |
-| Resolved outcome | `string` | Name returned by the selected terminal path. |
-| Resolved value? | `unknown` | Optional resolved value returned by that path. |
+| Value / member   | Type                          | Description                                    |
+| ---------------- | ----------------------------- | ---------------------------------------------- |
+| Builder return   | `FlowExpression<FlowOutcome>` | Terminal result reference.                     |
+| Resolved outcome | `string`                      | Name returned by the selected terminal path.   |
+| Resolved value?  | `unknown`                     | Optional resolved value returned by that path. |
 
 #### Example
 
@@ -749,20 +757,20 @@ flow.parallel(id, lanes: { [name: string]: (lane) => Expression<unknown> }, disp
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `id` | `string` |
-| `lanes` | `Named builder callbacks, each returning a FlowExpression` |
-| `display?` | `FlowDisplay` |
+| Parameter / option | Type                                                       |
+| ------------------ | ---------------------------------------------------------- |
+| `id`               | `string`                                                   |
+| `lanes`            | `Named builder callbacks, each returning a FlowExpression` |
+| `display?`         | `FlowDisplay`                                              |
 
 **Inputs:** a nonempty object of named lane callbacks, each returning a value expression. Lane names follow step ID naming rules. **Returns:** an object preserving lane names and their expression types. Lanes run concurrently; steps within a lane are sequential. Sibling intermediate results are private. A failure cancels sibling work cooperatively. [Beginner example](@/guides/flow-basics/#parallel-do-independent-work-together).
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Builder return | `Object with the lane keys` | Each member preserves its lane’s expression type. |
-| Resolved lane values | `Each lane’s result type` | Available through the named references after the join. |
+| Value / member       | Type                        | Description                                            |
+| -------------------- | --------------------------- | ------------------------------------------------------ |
+| Builder return       | `Object with the lane keys` | Each member preserves its lane’s expression type.      |
+| Resolved lane values | `Each lane’s result type`   | Available through the named references after the join. |
 
 #### Example
 
@@ -784,16 +792,16 @@ flow.map<Item, Context, Output>(id, { items, input, maxItems, concurrency? }, bu
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `id` | `string` |
-| `options.items` | `readonly Item[] \| FlowExpression<readonly Item[]>` |
-| `options.input` | `Context` |
-| `options.maxItems` | `number` |
-| `options.concurrency?` | `number` |
-| `build` (whole-array reference or scalar array) | `(item: FlowBuilder<{ item: Item; index: number; context: Resolved<Context> }>) => FlowExpression<Output>` |
-| `build` (literal/template) | `(item: FlowBuilder<{ item: Resolved<Item>; index: number; context: Resolved<Context> }>) => FlowExpression<Output>` |
-| `display?` | `FlowDisplay` |
+| Parameter / option                              | Type                                                                                                                 |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `id`                                            | `string`                                                                                                             |
+| `options.items`                                 | `readonly Item[] \| FlowExpression<readonly Item[]>`                                                                 |
+| `options.input`                                 | `Context`                                                                                                            |
+| `options.maxItems`                              | `number`                                                                                                             |
+| `options.concurrency?`                          | `number`                                                                                                             |
+| `build` (whole-array reference or scalar array) | `(item: FlowBuilder<{ item: Item; index: number; context: Resolved<Context> }>) => FlowExpression<Output>`           |
+| `build` (literal/template)                      | `(item: FlowBuilder<{ item: Resolved<Item>; index: number; context: Resolved<Context> }>) => FlowExpression<Output>` |
+| `display?`                                      | `FlowDisplay`                                                                                                        |
 
 **Inputs:** literal array, whole-array reference, or nested reference template `items`; shared context `input`; required integer `maxItems` from 1–64; `concurrency` from 1–16 (default 4). For whole-array references and scalar arrays, `build(item)` preserves the existing `Item` payload, including generic types. Nested templates resolve each item to `Resolved<Item>`. Branded primitives remain scalar values. The builder returns a value reference. For `items: [flow.input.get("count")]`, the item reference is `FlowExpression<number>` and a task receiving it gets a number.
 
@@ -801,10 +809,10 @@ flow.map<Item, Context, Output>(id, { items, input, maxItems, concurrency? }, bu
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Builder return | `FlowExpression<Output[]>` | Reference to the result array. |
-| Resolved value | `Output[]` | One result per item, in original input order. |
+| Value / member | Type                       | Description                                   |
+| -------------- | -------------------------- | --------------------------------------------- |
+| Builder return | `FlowExpression<Output[]>` | Reference to the result array.                |
+| Resolved value | `Output[]`                 | One result per item, in original input order. |
 
 #### Example
 
@@ -829,17 +837,17 @@ flow.loop<State, Context>(id, { initial, input, while, maxIterations }, build, d
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `id` | `string` |
-| `options.initial` | `State \| FlowExpression<State>` |
-| `options.input` | `Context` |
-| `options.while` (whole-state reference or scalar) | `(state: FlowExpression<State>) => FlowExpression<boolean>` |
-| `options.while` (literal/template) | `(state: FlowExpression<Resolved<State>>) => FlowExpression<boolean>` |
-| `options.maxIterations` | `number` |
-| `build` (whole-state reference or scalar) | `(iteration: FlowBuilder<{ state: State; index: number; context: Resolved<Context> }>) => FlowExpression<State>` |
-| `build` (literal/template) | `(iteration: FlowBuilder<{ state: Resolved<State>; index: number; context: Resolved<Context> }>) => FlowExpression<Resolved<State>>` |
-| `display?` | `FlowDisplay` |
+| Parameter / option                                | Type                                                                                                                                 |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`                                              | `string`                                                                                                                             |
+| `options.initial`                                 | `State \| FlowExpression<State>`                                                                                                     |
+| `options.input`                                   | `Context`                                                                                                                            |
+| `options.while` (whole-state reference or scalar) | `(state: FlowExpression<State>) => FlowExpression<boolean>`                                                                          |
+| `options.while` (literal/template)                | `(state: FlowExpression<Resolved<State>>) => FlowExpression<boolean>`                                                                |
+| `options.maxIterations`                           | `number`                                                                                                                             |
+| `build` (whole-state reference or scalar)         | `(iteration: FlowBuilder<{ state: State; index: number; context: Resolved<Context> }>) => FlowExpression<State>`                     |
+| `build` (literal/template)                        | `(iteration: FlowBuilder<{ state: Resolved<State>; index: number; context: Resolved<Context> }>) => FlowExpression<Resolved<State>>` |
+| `display?`                                        | `FlowDisplay`                                                                                                                        |
 
 **Inputs:** JSON state/reference `initial`; explicit shared context `input`; `while(state)` returning a Boolean expression of that state; required `maxIterations` integer 1–64. `build(iteration)` gets `{ state, index, context }` through its builder input and returns the next state reference with the same resolved shape. Literal state, whole-state references, and nested object/array templates are supported. Whole-state references and scalar initial values preserve their payload without remapping it; literal/template state resolves nested references while preserving branded primitives. The initial state determines the body return type. For `initial: { count: flow.input.get("count") }`, both the gate and iteration select `count` as `FlowExpression<number>`; a task receiving that state uses ordinary numeric operations on `state.count`.
 
@@ -847,11 +855,11 @@ flow.loop<State, Context>(id, { initial, input, while, maxIterations }, build, d
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Builder return (whole-state reference or scalar) | `FlowExpression<State>` | Reference to the final state, preserving the initial payload type. |
-| Builder return (literal/template) | `FlowExpression<Resolved<State>>` | Reference to the final resolved state. |
-| Resolved value | `State` for whole-state references/scalars; `Resolved<State>` for templates | State when the condition becomes false; initial state if no iterations run. |
+| Value / member                                   | Type                                                                        | Description                                                                 |
+| ------------------------------------------------ | --------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Builder return (whole-state reference or scalar) | `FlowExpression<State>`                                                     | Reference to the final state, preserving the initial payload type.          |
+| Builder return (literal/template)                | `FlowExpression<Resolved<State>>`                                           | Reference to the final resolved state.                                      |
+| Resolved value                                   | `State` for whole-state references/scalars; `Resolved<State>` for templates | State when the condition becomes false; initial state if no iterations run. |
 
 #### Example
 
@@ -873,21 +881,21 @@ flow.output(name: string, value?: unknown, display?: FlowDisplay): Expression<Fl
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `name` | `string` |
-| `value?` | `unknown` |
-| `display?` | `FlowDisplay` |
+| Parameter / option | Type          |
+| ------------------ | ------------- |
+| `name`             | `string`      |
+| `value?`           | `unknown`     |
+| `display?`         | `FlowDisplay` |
 
 **Inputs:** outcome name (also a unique node ID), optional literal/reference or nested value, optional display metadata. **Returns:** a terminal expression. Return it from your flow or branch path. Resolves nested references when run; no business action happens just because an outcome is named. No steps may follow it.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Builder return | `FlowExpression<FlowOutcome>` | Terminal result reference. |
-| Resolved outcome | `string` | The supplied name. |
-| Resolved value? | `unknown` | The supplied value with nested references resolved. |
+| Value / member   | Type                          | Description                                         |
+| ---------------- | ----------------------------- | --------------------------------------------------- |
+| Builder return   | `FlowExpression<FlowOutcome>` | Terminal result reference.                          |
+| Resolved outcome | `string`                      | The supplied name.                                  |
+| Resolved value?  | `unknown`                     | The supplied value with nested references resolved. |
 
 Inside a synchronous `defineJevFlow()` callback; these references resolve when you await the flow’s `run()`. See the [complete definition and execution](@/guides/flow-basics/#output-finish-with-a-result).
 
@@ -905,7 +913,7 @@ The object groups two previously defined references, `message` and `count`. Both
 
 The short expression snippets below belong inside a synchronous `defineJevFlow()` callback. They build references; use them in a step or terminal `output()`, then await the flow’s `run()` to get actual data. See the [complete expression and execution example](@/api/flow/#collections-and-loops).
 
-All these runtime exports come from `jev-devtools/flow`. References must belong to the same flow and be available in the current execution scope. See [expression scopes](@/api/expressions/#respect-scope). **Unreleased:** construction enforces complete [expression depth and expansion limits](@/api/expressions/#expression-limits), including reused children.
+All these runtime exports come from `jev-devtools/flow`. References must belong to the same flow and be available in the current execution scope. See [expression scopes](@/api/expressions/#respect-scope). **0.5.2 (pending publication):** construction enforces complete [expression depth and expansion limits](@/api/expressions/#expression-limits), including reused children.
 
 ### FlowExpression
 
@@ -920,10 +928,10 @@ expression.ast: Ast
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `ast` | `Expression AST; see supporting structural types` |
-| `owner?` | `object; ownership is managed by the builder` |
+| Parameter / option | Type                                              |
+| ------------------ | ------------------------------------------------- |
+| `ast`              | `Expression AST; see supporting structural types` |
+| `owner?`           | `object; ownership is managed by the builder`     |
 
 A typed representation of a future value. The constructor accepts an expression AST (`input`, `ref`, `get`, `literal`, or supported operator nodes) and optional ownership token; it freezes the AST. **Returns:** an expression with the methods below. Its `ast` property describes the expression, not its resolved value.
 
@@ -931,10 +939,10 @@ Ordinary consumers should obtain owned expressions from builders. Hand-construct
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `FlowExpression<T>` | Immutable expression object. |
-| ast | `Ast` | Frozen expression structure, not a resolved application value. |
+| Value / member | Type                | Description                                                    |
+| -------------- | ------------------- | -------------------------------------------------------------- |
+| Return         | `FlowExpression<T>` | Immutable expression object.                                   |
+| ast            | `Ast`               | Frozen expression structure, not a resolved application value. |
 
 #### Example
 
@@ -960,10 +968,10 @@ expression.get<K extends keyof T & (string | number)>(
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `this` (expression receiver) | `FlowExpression<object>` |
-| `key` | `keyof T & (string \| number)` |
+| Parameter / option           | Type                           |
+| ---------------------------- | ------------------------------ |
+| `this` (expression receiver) | `FlowExpression<object>`       |
+| `key`                        | `keyof T & (string \| number)` |
 
 **Input:** a string/number key from the object or array's type. The receiver is the expression before `.get()`; it is not an additional call argument. **Returns:** a reference to that field; chain for nested fields. Missing, inherited, or `undefined` properties fail when execution reaches them. This is field selection, not a general optional chaining mechanism.
 
@@ -971,9 +979,9 @@ expression.get<K extends keyof T & (string | number)>(
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `FlowExpression<T[K]>` | Reference to the selected field. |
+| Value / member | Type                   | Description                      |
+| -------------- | ---------------------- | -------------------------------- |
+| Return         | `FlowExpression<T[K]>` | Reference to the selected field. |
 
 #### Example
 
@@ -995,18 +1003,18 @@ expression.eq(value: T | Expression<T>): Expression<boolean>
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `value` | `T \| FlowExpression<T>` |
+| Parameter / option | Type                     |
+| ------------------ | ------------------------ |
+| `value`            | `T \| FlowExpression<T>` |
 
 **Input:** a literal or compatible expression. Equality for matching scalar types (string, number, Boolean, or null); not deep object equality. **Returns:** a Boolean expression, not a JavaScript Boolean. Invalid scalar comparisons reject during execution.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `FlowExpression<boolean>` | Reference to the comparison/condition result. |
-| Resolved value | `boolean` | True or false when the flow evaluates it. |
+| Value / member | Type                      | Description                                   |
+| -------------- | ------------------------- | --------------------------------------------- |
+| Return         | `FlowExpression<boolean>` | Reference to the comparison/condition result. |
+| Resolved value | `boolean`                 | True or false when the flow evaluates it.     |
 
 #### Example
 
@@ -1030,18 +1038,18 @@ expression.lt(value: number | Expression<number>): Expression<boolean>
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `value` | `number \| FlowExpression<number>` |
+| Parameter / option | Type                               |
+| ------------------ | ---------------------------------- |
+| `value`            | `number \| FlowExpression<number>` |
 
 **Input:** a literal or compatible expression. Strictly less than. **Returns:** a Boolean expression, not a JavaScript Boolean. Both resolved operands must be finite numbers; missing, nullable, or nonnumeric operands reject during execution. There is no `lte`; use `not(value.gt(limit))` for a valid numeric inclusive upper bound.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `FlowExpression<boolean>` | Reference to the comparison/condition result. |
-| Resolved value | `boolean` | True or false when the flow evaluates it. |
+| Value / member | Type                      | Description                                   |
+| -------------- | ------------------------- | --------------------------------------------- |
+| Return         | `FlowExpression<boolean>` | Reference to the comparison/condition result. |
+| Resolved value | `boolean`                 | True or false when the flow evaluates it.     |
 
 #### Example
 
@@ -1065,18 +1073,18 @@ expression.gt(value: number | Expression<number>): Expression<boolean>
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `value` | `number \| FlowExpression<number>` |
+| Parameter / option | Type                               |
+| ------------------ | ---------------------------------- |
+| `value`            | `number \| FlowExpression<number>` |
 
 **Input:** a literal or compatible expression. Strictly greater than. **Returns:** a Boolean expression, not a JavaScript Boolean. Both resolved operands must be finite numbers; missing, nullable, or nonnumeric operands reject during execution. There is no `lte`; use `not(value.gt(limit))` for a valid numeric inclusive upper bound.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `FlowExpression<boolean>` | Reference to the comparison/condition result. |
-| Resolved value | `boolean` | True or false when the flow evaluates it. |
+| Value / member | Type                      | Description                                   |
+| -------------- | ------------------------- | --------------------------------------------- |
+| Return         | `FlowExpression<boolean>` | Reference to the comparison/condition result. |
+| Resolved value | `boolean`                 | True or false when the flow evaluates it.     |
 
 #### Example
 
@@ -1100,18 +1108,18 @@ expression.gte(value: number | Expression<number>): Expression<boolean>
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `value` | `number \| FlowExpression<number>` |
+| Parameter / option | Type                               |
+| ------------------ | ---------------------------------- |
+| `value`            | `number \| FlowExpression<number>` |
 
 **Input:** a literal or compatible expression. Greater than or equal. **Returns:** a Boolean expression, not a JavaScript Boolean. Both resolved operands must be finite numbers; missing, nullable, or nonnumeric operands reject during execution. There is no `lte`; use `not(value.gt(limit))` for a valid numeric inclusive upper bound.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `FlowExpression<boolean>` | Reference to the comparison/condition result. |
-| Resolved value | `boolean` | True or false when the flow evaluates it. |
+| Value / member | Type                      | Description                                   |
+| -------------- | ------------------------- | --------------------------------------------- |
+| Return         | `FlowExpression<boolean>` | Reference to the comparison/condition result. |
+| Resolved value | `boolean`                 | True or false when the flow evaluates it.     |
 
 #### Example
 
@@ -1135,23 +1143,26 @@ all(...conditions: Expression<boolean>[]): Expression<boolean>
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `...conditions` | `FlowExpression<boolean>[]` |
+| Parameter / option | Type                        |
+| ------------------ | --------------------------- |
+| `...conditions`    | `FlowExpression<boolean>[]` |
 
 **Inputs:** Boolean expressions. **Returns:** a Boolean expression. True only when every condition is true. Supply at least one owned condition; a zero-operand expression has no flow owner and cannot be used in a definition. All operands are evaluated; these helpers do not short-circuit missing-reference errors like JavaScript `&&`/`||`.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `FlowExpression<boolean>` | Reference to the comparison/condition result. |
-| Resolved value | `boolean` | True or false when the flow evaluates it. |
+| Value / member | Type                      | Description                                   |
+| -------------- | ------------------------- | --------------------------------------------- |
+| Return         | `FlowExpression<boolean>` | Reference to the comparison/condition result. |
+| Resolved value | `boolean`                 | True or false when the flow evaluates it.     |
 
 #### Example
 
 ```ts api=expressions
-const ready = all(flow.input.get("count").gte(1), flow.input.get("count").lt(10));
+const ready = all(
+  flow.input.get("count").gte(1),
+  flow.input.get("count").lt(10),
+);
 ```
 
 #### How it works
@@ -1170,23 +1181,26 @@ any(...conditions: Expression<boolean>[]): Expression<boolean>
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `...conditions` | `FlowExpression<boolean>[]` |
+| Parameter / option | Type                        |
+| ------------------ | --------------------------- |
+| `...conditions`    | `FlowExpression<boolean>[]` |
 
 **Inputs:** Boolean expressions. **Returns:** a Boolean expression. True when at least one condition is true. Supply at least one owned condition; a zero-operand expression has no flow owner and cannot be used in a definition. All operands are evaluated; these helpers do not short-circuit missing-reference errors like JavaScript `&&`/`||`.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `FlowExpression<boolean>` | Reference to the comparison/condition result. |
-| Resolved value | `boolean` | True or false when the flow evaluates it. |
+| Value / member | Type                      | Description                                   |
+| -------------- | ------------------------- | --------------------------------------------- |
+| Return         | `FlowExpression<boolean>` | Reference to the comparison/condition result. |
+| Resolved value | `boolean`                 | True or false when the flow evaluates it.     |
 
 #### Example
 
 ```ts api=expressions
-const boundary = any(flow.input.get("count").eq(0), flow.input.get("count").eq(10));
+const boundary = any(
+  flow.input.get("count").eq(0),
+  flow.input.get("count").eq(10),
+);
 ```
 
 #### How it works
@@ -1205,18 +1219,18 @@ not(condition: Expression<boolean>): Expression<boolean>
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `condition` | `FlowExpression<boolean>` |
+| Parameter / option | Type                      |
+| ------------------ | ------------------------- |
+| `condition`        | `FlowExpression<boolean>` |
 
 **Inputs:** Boolean expression. **Returns:** a Boolean expression. Inverts one Boolean expression. All operands are evaluated; these helpers do not short-circuit missing-reference errors like JavaScript `&&`/`||`.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `FlowExpression<boolean>` | Reference to the comparison/condition result. |
-| Resolved value | `boolean` | True or false when the flow evaluates it. |
+| Value / member | Type                      | Description                                   |
+| -------------- | ------------------------- | --------------------------------------------- |
+| Return         | `FlowExpression<boolean>` | Reference to the comparison/condition result. |
+| Resolved value | `boolean`                 | True or false when the flow evaluates it.     |
 
 #### Example
 
@@ -1247,10 +1261,10 @@ Exported error class thrown when a loop condition remains true after its iterati
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `FlowLoopLimitError` | Error instance. |
-| name | `"FlowLoopLimitError"` | Identifies a still-true condition at the loop limit. |
+| Value / member | Type                   | Description                                          |
+| -------------- | ---------------------- | ---------------------------------------------------- |
+| Return         | `FlowLoopLimitError`   | Error instance.                                      |
+| name           | `"FlowLoopLimitError"` | Identifies a still-true condition at the loop limit. |
 
 #### Example
 
@@ -1284,11 +1298,11 @@ flowFixture(definition: FlowDefinition, run: FlowRun, traces: ReadonlyMap<string
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `definition` | `FlowDefinition` |
-| `run` | `FlowRun` |
-| `traces` | `ReadonlyMap<string, Trace>` |
+| Parameter / option | Type                         |
+| ------------------ | ---------------------------- |
+| `definition`       | `FlowDefinition`             |
+| `run`              | `FlowRun`                    |
+| `traces`           | `ReadonlyMap<string, Trace>` |
 
 **Import:** `jev-devtools` (browser-safe) or `jev-devtools/flow` (Node). **Inputs:** recorded definition, recorded run, and map indexed by trace ID. **Returns:** `{ fixture, missing, warnings }`. Completed Jev steps without available response captures appear in `missing`. Capture truncation/redaction warnings appear in `warnings`. Task results are not fixture responses.
 
@@ -1296,17 +1310,21 @@ Check both arrays before saving. Server redaction remains; this helper does not 
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `BuiltFlowFixture` | Export result with fields below. |
-| fixture | `FlowFixture` | Saved response bodies by step ID. |
-| missing | `string[]` | Completed Jev steps with missing response captures. |
-| warnings | `string[]` | Capture limitations such as redaction or truncation. |
+| Value / member | Type               | Description                                          |
+| -------------- | ------------------ | ---------------------------------------------------- |
+| Return         | `BuiltFlowFixture` | Export result with fields below.                     |
+| fixture        | `FlowFixture`      | Saved response bodies by step ID.                    |
+| missing        | `string[]`         | Completed Jev steps with missing response captures.  |
+| warnings       | `string[]`         | Capture limitations such as redaction or truncation. |
 
 #### Example
 
 ```ts
-const built = flowFixture(definition, capturedRun, new Map(traces.map((trace) => [trace.id, trace])));
+const built = flowFixture(
+  definition,
+  capturedRun,
+  new Map(traces.map((trace) => [trace.id, trace])),
+);
 if (built.missing.length || built.warnings.length) console.warn(built);
 const json = JSON.stringify(built.fixture, null, 2);
 ```
@@ -1327,9 +1345,9 @@ replayClient(fixture: FlowFixture): TypeSafeClient
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `fixture` | `FlowFixture` |
+| Parameter / option | Type          |
+| ------------------ | ------------- |
+| `fixture`          | `FlowFixture` |
 
 **Import:** `jev-devtools/flow`. **Input:** `{ version: 1, flow, steps }`. **Returns:** a client for a flow's `run` that supplies saved Jev responses without a key/network. Checks flow name, step IDs, and question names, not prompts/state. Invalid fixtures throw; missing steps/answers reject rather than falling back to inference. Item/iteration step keys include their indices.
 
@@ -1337,9 +1355,9 @@ Tasks and request factories run again and can have side effects. Pass controlled
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `TypeSafeClient` | Supplies fixture answers when used as a flow run’s client. |
+| Value / member | Type             | Description                                                |
+| -------------- | ---------------- | ---------------------------------------------------------- |
+| Return         | `TypeSafeClient` | Supplies fixture answers when used as a flow run’s client. |
 
 #### Example
 
@@ -1363,12 +1381,12 @@ compareWithFixture<Input>(flow: ComparableFlow<Input>, input: Input, fixture: Fl
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `flow` | `ComparableFlow<Input>` |
-| `input` | `Input` |
-| `fixture` | `FlowFixture` |
-| `options` | `FlowRunOptions & { tolerance?: number }` |
+| Parameter / option | Type                                      |
+| ------------------ | ----------------------------------------- |
+| `flow`             | `ComparableFlow<Input>`                   |
+| `input`            | `Input`                                   |
+| `fixture`          | `FlowFixture`                             |
+| `options`          | `FlowRunOptions & { tolerance?: number }` |
 
 **Import:** `jev-devtools/flow`. **Inputs:** the executable recipe, the same input for both runs, saved fixture, live client, optional observer/signal, and numeric answer tolerance (default 0; finite and nonnegative). Replays the recorded side first, then runs the live side; both execute tasks. Only the live side reaches your observer.
 
@@ -1378,23 +1396,25 @@ Unlike offline replay, this makes real SDK calls with the supplied client. `live
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `Promise<FixtureComparison>` | Resolves to the comparison fields below. |
-| changed | `boolean` | Outcome, value, decision, or executed Jev steps differ; answer drift alone does not set it. |
-| outcome | `{ recorded: string; live: string; changed: boolean }` | Terminal outcome comparison. |
-| value | `{ recorded?: unknown; live?: unknown; changed: boolean }` | Resolved output comparison. |
-| decisions | `Array<{ stepId: string; recorded?: boolean; live?: boolean; changed: boolean }>` | Branch and if decisions. |
-| answers | `AnswerChange[]` | Scalar answer-field comparisons, including numeric deltas when finite. |
-| steps | `{ onlyRecorded: string[]; onlyLive: string[] }` | Jev step IDs executed on only one side. |
-| liveFixture | `FlowFixture` | Unredacted, untruncated live response bodies. |
+| Value / member | Type                                                                              | Description                                                                                 |
+| -------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Return         | `Promise<FixtureComparison>`                                                      | Resolves to the comparison fields below.                                                    |
+| changed        | `boolean`                                                                         | Outcome, value, decision, or executed Jev steps differ; answer drift alone does not set it. |
+| outcome        | `{ recorded: string; live: string; changed: boolean }`                            | Terminal outcome comparison.                                                                |
+| value          | `{ recorded?: unknown; live?: unknown; changed: boolean }`                        | Resolved output comparison.                                                                 |
+| decisions      | `Array<{ stepId: string; recorded?: boolean; live?: boolean; changed: boolean }>` | Branch and if decisions.                                                                    |
+| answers        | `AnswerChange[]`                                                                  | Scalar answer-field comparisons, including numeric deltas when finite.                      |
+| steps          | `{ onlyRecorded: string[]; onlyLive: string[] }`                                  | Jev step IDs executed on only one side.                                                     |
+| liveFixture    | `FlowFixture`                                                                     | Unredacted, untruncated live response bodies.                                               |
 
 #### Example
 
 ```ts
 import { compareWithFixture, formatComparison } from "jev-devtools/flow";
 const comparison = await compareWithFixture(program, input, fixture, {
-  client, devtools: inspector, tolerance: 0.01,
+  client,
+  devtools: inspector,
+  tolerance: 0.01,
 });
 console.log(formatComparison(comparison));
 ```
@@ -1415,17 +1435,17 @@ formatComparison(comparison: FixtureComparison): string
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `comparison` | `FixtureComparison` |
+| Parameter / option | Type                |
+| ------------------ | ------------------- |
+| `comparison`       | `FixtureComparison` |
 
 **Import:** `jev-devtools/flow`. **Input:** a comparison result. **Returns:** a plain-text summary with one line per change, or `"no changes from fixture"`. No I/O is performed; print or store it yourself. It may report answer drift even when `comparison.changed` is false.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `string` | One line per reported change, or no changes from fixture. |
+| Value / member | Type     | Description                                               |
+| -------------- | -------- | --------------------------------------------------------- |
+| Return         | `string` | One line per reported change, or no changes from fixture. |
 
 #### Example
 
@@ -1454,17 +1474,17 @@ new JevRecorder(options?: CaptureOptions): JevRecorder
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `options?` | `CaptureOptions` |
+| Parameter / option | Type             |
+| ------------------ | ---------------- |
+| `options?`         | `CaptureOptions` |
 
 **Inputs:** optional `limit` (default 50, clamped 1–200 globally) and `redact(path, value)` callback. **Returns:** a recorder with the following methods. History is bounded process memory, not durable storage. Pair `instrument` and `transport` to capture logical requests and HTTP attempts.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `JevRecorder` | Recorder instance with the methods below. |
+| Value / member | Type          | Description                               |
+| -------------- | ------------- | ----------------------------------------- |
+| Return         | `JevRecorder` | Recorder instance with the methods below. |
 
 #### Example
 
@@ -1489,22 +1509,25 @@ recorder.transport(fetcher: Fetch): Fetch
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `fetcher` | `SDK-compatible Fetch` |
+| Parameter / option | Type                   |
+| ------------------ | ---------------------- |
+| `fetcher`          | `SDK-compatible Fetch` |
 
 **Input:** SDK-compatible fetch implementation, e.g. `globalThis.fetch`. **Returns:** a compatible wrapper that records HTTP attempts associated with instrumented calls. Give it to the SDK's `fetch` option; it is not a standalone recording server.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `Fetch` | SDK-compatible fetch wrapper; request/response contract is retained. |
+| Value / member | Type    | Description                                                          |
+| -------------- | ------- | -------------------------------------------------------------------- |
+| Return         | `Fetch` | SDK-compatible fetch wrapper; request/response contract is retained. |
 
 #### Example
 
 ```ts
-const sdk = new TypeSafeClient({ apiKey, fetch: recorder.transport(globalThis.fetch) });
+const sdk = new TypeSafeClient({
+  apiKey,
+  fetch: recorder.transport(globalThis.fetch),
+});
 ```
 
 #### How it works
@@ -1523,23 +1546,27 @@ recorder.instrument<T extends TypeSafeClient>(client: T, metadata: { session: st
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `client` | `T extends TypeSafeClient` |
-| `metadata` | `{ session: string; label: string; source: "sample" \| "live" }, or a factory returning it` |
+| Parameter / option | Type                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------- |
+| `client`           | `T extends TypeSafeClient`                                                                  |
+| `metadata`         | `{ session: string; label: string; source: "sample" \| "live" }, or a factory returning it` |
 
 **Inputs:** an SDK client and complete metadata or a synchronous metadata factory. `session` partitions history; `label` identifies a call; `source` labels sample/live captures. **Returns:** an instrumented proxy preserving the client's type, SDK promise, response helpers, and application result. Only `systemOne` is captured; pair with `transport` for attempts. A sample label does not prevent network calls.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `T` | Instrumented client proxy preserving its original SDK type. |
+| Value / member | Type | Description                                                 |
+| -------------- | ---- | ----------------------------------------------------------- |
+| Return         | `T`  | Instrumented client proxy preserving its original SDK type. |
 
 #### Example
 
 ```ts
-const client = recorder.instrument(sdk, { session: "local", label: "Support", source: "live" });
+const client = recorder.instrument(sdk, {
+  session: "local",
+  label: "Support",
+  source: "live",
+});
 ```
 
 #### How it works
@@ -1558,17 +1585,17 @@ recorder.snapshot(session: string): Trace[]
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `session` | `string` |
+| Parameter / option | Type     |
+| ------------------ | -------- |
+| `session`          | `string` |
 
 **Input:** session to read. **Returns:** detached retained traces, newest first. These are bounded/redacted inspection copies, not original SDK objects. Reading does not clear history.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `Trace[]` | Detached retained traces for the session, newest first. |
+| Value / member | Type      | Description                                             |
+| -------------- | --------- | ------------------------------------------------------- |
+| Return         | `Trace[]` | Detached retained traces for the session, newest first. |
 
 #### Example
 
@@ -1592,20 +1619,20 @@ recorder.changes(session: string, after?: number): { revision: number; order: st
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `session` | `string` |
-| `after?` | `number` |
+| Parameter / option | Type     |
+| ------------------ | -------- |
+| `session`          | `string` |
+| `after?`           | `number` |
 
 **Inputs:** session and optional revision cursor. **Returns:** current revision, authoritative newest-first retained IDs, and detached changed traces. Omit `after` for an initial full view. Remove locally cached IDs absent from `order`, even when `upserts` is empty, and save the returned cursor.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| revision | `number` | Cursor for the next call. |
-| order | `string[]` | Authoritative newest-first retained trace IDs. |
-| upserts | `Trace[]` | Detached traces changed since the supplied cursor. |
+| Value / member | Type       | Description                                        |
+| -------------- | ---------- | -------------------------------------------------- |
+| revision       | `number`   | Cursor for the next call.                          |
+| order          | `string[]` | Authoritative newest-first retained trace IDs.     |
+| upserts        | `Trace[]`  | Detached traces changed since the supplied cursor. |
 
 #### Example
 
@@ -1630,17 +1657,17 @@ recorder.subscribe(listener: (sessions: ReadonlySet<string>) => void): () => voi
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `listener` | `(sessions: ReadonlySet<string>) => void` |
+| Parameter / option | Type                                      |
+| ------------------ | ----------------------------------------- |
+| `listener`         | `(sessions: ReadonlySet<string>) => void` |
 
 **Input:** listener notified of affected sessions. **Returns:** a function to unsubscribe. Read a snapshot/changes for your session when notified. Notifications carry session names, not trace payloads.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `() => void` | Unsubscribe function; call when the listener is no longer needed. |
+| Value / member | Type         | Description                                                       |
+| -------------- | ------------ | ----------------------------------------------------------------- |
+| Return         | `() => void` | Unsubscribe function; call when the listener is no longer needed. |
 
 #### Example
 
@@ -1668,17 +1695,17 @@ recorder.clear(session: string): void
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `session` | `string` |
+| Parameter / option | Type     |
+| ------------------ | -------- |
+| `session`          | `string` |
 
 **Input:** session to clear. **Returns:** nothing. Removes that session's retained traces and notifies listeners; other session traces remain. Does not cancel your application's in-flight SDK work.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `void` | No data; affected listeners are notified. |
+| Value / member | Type   | Description                               |
+| -------------- | ------ | ----------------------------------------- |
+| Return         | `void` | No data; affected listeners are notified. |
 
 #### Example
 
@@ -1702,24 +1729,30 @@ recorder.withFlow<T>(link: { runId: string; stepId: string; executionId: string 
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `link` | `{ runId: string; stepId: string; executionId: string }` |
-| `onTrace` | `(id: string) => void` |
-| `callback` | `() => T` |
+| Parameter / option | Type                                                     |
+| ------------------ | -------------------------------------------------------- |
+| `link`             | `{ runId: string; stepId: string; executionId: string }` |
+| `onTrace`          | `(id: string) => void`                                   |
+| `callback`         | `() => T`                                                |
 
 **Inputs:** flow linkage, trace-ID callback, and request callback. **Returns:** the callback's result unchanged, including a promise if it returns one. Establishes async recording context and calls through immediately. Normally invoked by the adapter's observer; standalone custom integrations should keep the call-through synchronous.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `T` | The callback result unchanged, including a promise when applicable. |
+| Value / member | Type | Description                                                         |
+| -------------- | ---- | ------------------------------------------------------------------- |
+| Return         | `T`  | The callback result unchanged, including a promise when applicable. |
 
 #### Example
 
 ```ts
-return recorder.withFlow(link, (traceId) => { latestTraceId = traceId; }, callback);
+return recorder.withFlow(
+  link,
+  (traceId) => {
+    latestTraceId = traceId;
+  },
+  callback,
+);
 ```
 
 #### How it works
@@ -1742,20 +1775,20 @@ observer.startFlow(definition: FlowDefinition, run: FlowRun): { update; request 
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `definition` | `FlowDefinition` |
-| `run` | `FlowRun` |
+| Parameter / option | Type             |
+| ------------------ | ---------------- |
+| `definition`       | `FlowDefinition` |
+| `run`              | `FlowRun`        |
 
 **Inputs:** the graph and initial captured run. **Returns:** per-run `update`/`request` hooks, or `undefined` to skip observation. The adapter's `startFlow` records to the current session and returns `undefined` when disabled. Usually you never call it directly.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `{ update, request } \| undefined` | Per-run hooks, or undefined to skip recording. |
-| update | `(run: FlowRun) => void` | Receives execution updates. |
-| request | `Generic callback wrapper` | Links a request to its flow step; signature below. |
+| Value / member | Type                               | Description                                        |
+| -------------- | ---------------------------------- | -------------------------------------------------- |
+| Return         | `{ update, request } \| undefined` | Per-run hooks, or undefined to skip recording.     |
+| update         | `(run: FlowRun) => void`           | Receives execution updates.                        |
+| request        | `Generic callback wrapper`         | Links a request to its flow step; signature below. |
 
 #### Example
 
@@ -1779,24 +1812,30 @@ hooks.update(run: FlowRun): void
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `run` | `FlowRun` |
+| Parameter / option | Type      |
+| ------------------ | --------- |
+| `run`              | `FlowRun` |
 
 **Input:** latest run snapshot with step status, outcome, or error. **Returns:** nothing. Store/send the snapshot in a custom viewer integration; do not use it to execute business actions. The runner calls this as execution changes.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `void` | No application result is produced. |
+| Value / member | Type   | Description                        |
+| -------------- | ------ | ---------------------------------- |
+| Return         | `void` | No application result is produced. |
 
 #### Example
 
 ```ts
 const hooks = {
-  update(run: FlowRun) { console.log(run.id, run.status); },
-  request<T>(_link: unknown, _onTrace: (id: string) => void, callback: () => T): T {
+  update(run: FlowRun) {
+    console.log(run.id, run.status);
+  },
+  request<T>(
+    _link: unknown,
+    _onTrace: (id: string) => void,
+    callback: () => T,
+  ): T {
     return callback();
   },
 };
@@ -1818,19 +1857,19 @@ hooks.request<T>(link: { runId: string; stepId: string; executionId: string }, o
 
 #### Inputs
 
-| Parameter / option | Type |
-| --- | --- |
-| `link` | `{ runId: string; stepId: string; executionId: string }` |
-| `onTrace` | `(id: string) => void` |
-| `callback` | `() => T` |
+| Parameter / option | Type                                                     |
+| ------------------ | -------------------------------------------------------- |
+| `link`             | `{ runId: string; stepId: string; executionId: string }` |
+| `onTrace`          | `(id: string) => void`                                   |
+| `callback`         | `() => T`                                                |
 
 **Inputs:** execution linkage, a callback to report the captured trace ID, and the request callback. **Returns:** the callback's original result. Call through synchronously so recording context is established; the runner owns the result. Custom observers can delegate to a recorder.
 
 #### Returns
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| Return | `T` | The original request callback result. |
+| Value / member | Type | Description                           |
+| -------------- | ---- | ------------------------------------- |
+| Return         | `T`  | The original request callback result. |
 
 #### Example
 

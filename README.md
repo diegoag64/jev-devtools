@@ -8,7 +8,7 @@ A React inspector for TypeSafe Jev.<br />
 Explore requests, returned probabilities, and the paths your application takes.<br />
 Works with React and Next.js App Router.
 
-[![npm version 0.5.1](https://img.shields.io/badge/npm-v0.5.1-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.5.1)
+[![npm version 0.5.2](https://img.shields.io/badge/npm-v0.5.2-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.5.2)
 [![CI](https://github.com/diegoag64/jev-devtools/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/diegoag64/jev-devtools/actions/workflows/ci.yml)
 [![React 18 / 19](https://img.shields.io/badge/React-18%20%2F%2019-61DAFB?logo=react&logoColor=61DAFB&labelColor=0D0A0F)](#add-to-your-app)
 [![Next.js App Router](https://img.shields.io/badge/Next.js-App%20Router-white?logo=nextdotjs&labelColor=0D0A0F)](https://docs.jevtools.dev/guides/nextjs/)
@@ -31,7 +31,7 @@ Mount the React drawer, connect a server adapter, and make Jev calls through its
 pnpm add jev-devtools @typesafe-ai/sdk
 ```
 
-Requires React **18/19** and Node **22.12+**. **[0.5.1 is available on npm](https://www.npmjs.com/package/jev-devtools/v/0.5.1).** The default install resolves to 0.5.1; use the local archive below to try newer source changes. APIs remain experimental before 1.0. See the [release status](CHANGELOG.md). Your API key stays on the server. Capture and display are opt-in and disabled by default.
+Requires React **18/19** and Node **22.12+**. **Source version: 0.5.2 — pending publication.** The default npm install still resolves to 0.5.1; use the local archive below to try this release candidate. APIs remain experimental before 1.0. See the [release status](CHANGELOG.md). Your API key stays on the server. Capture and display are opt-in and disabled by default.
 
 Use ESM imports and TypeSafe SDK **0.7.x**. TypeScript consumers need **5.4+** and compatible React/Node types. See [compatibility and public imports](docs/integration.md#compatibility-and-public-imports), including the Node-only `/server` and `/flow` entry points.
 
@@ -40,8 +40,8 @@ Use ESM imports and TypeSafe SDK **0.7.x**. TypeScript consumers need **5.4+** a
 Mount once near your app's root. The drawer loads its own styles; no CSS import is needed. This example uses Vite's development flag:
 
 ```tsx
-import { JevDevtools } from 'jev-devtools';
-import { App } from './App';
+import { JevDevtools } from "jev-devtools";
+import { App } from "./App";
 
 export function Root() {
   return (
@@ -56,11 +56,11 @@ export function Root() {
 In your existing Express/Connect server, create a shared adapter and client:
 
 ```ts
-import { createJevDevtools } from 'jev-devtools/server';
+import { createJevDevtools } from "jev-devtools/server";
 
 export const inspector = createJevDevtools({
-  enabled: process.env.NODE_ENV === 'development',
-  origin: 'http://localhost:5173', // The URL you open in the browser.
+  enabled: process.env.NODE_ENV === "development",
+  origin: "http://localhost:5173", // The URL you open in the browser.
 });
 export const jev = inspector.createClient({
   apiKey: process.env.TYPESAFE_API_KEY,
@@ -93,7 +93,7 @@ Merge the SDK setting into your existing configuration:
 ```js
 // next.config.mjs
 export default {
-  serverExternalPackages: ['@typesafe-ai/sdk'],
+  serverExternalPackages: ["@typesafe-ai/sdk"],
 };
 ```
 
@@ -101,12 +101,12 @@ Create a shared server module. Keep the API key in your server environment as `T
 
 ```ts
 // server/jev.ts
-import 'server-only';
-import { getJevDevtools } from 'jev-devtools/server';
+import "server-only";
+import { getJevDevtools } from "jev-devtools/server";
 
-export const inspector = getJevDevtools('my-next-app', () => ({
-  enabled: process.env.NODE_ENV === 'development',
-  origin: 'http://127.0.0.1:3000',
+export const inspector = getJevDevtools("my-next-app", () => ({
+  enabled: process.env.NODE_ENV === "development",
+  origin: "http://127.0.0.1:3000",
 }));
 export const jev = inspector.createClient({
   apiKey: process.env.TYPESAFE_API_KEY,
@@ -117,10 +117,10 @@ Expose the inspector with an optional catch-all route:
 
 ```ts
 // app/api/jev-devtools/[[...path]]/route.ts
-import { inspector } from '../../../../server/jev';
+import { inspector } from "../../../../server/jev";
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 export const GET = (request: Request) => inspector.handleNodeRoute(request);
 export const DELETE = (request: Request) => inspector.handleNodeRoute(request);
 ```
@@ -129,11 +129,11 @@ Add a client component:
 
 ```tsx
 // app/devtools.tsx
-'use client';
-import { JevDevtools } from 'jev-devtools';
+"use client";
+import { JevDevtools } from "jev-devtools";
 
 export function Devtools() {
-  return <JevDevtools enabled={process.env.NODE_ENV === 'development'} />;
+  return <JevDevtools enabled={process.env.NODE_ENV === "development"} />;
 }
 ```
 
@@ -141,12 +141,19 @@ Mount it in your existing root layout. The drawer supplies its own styles; keep 
 
 ```tsx
 // app/layout.tsx
-import type { ReactNode } from 'react';
-import { Devtools } from './devtools';
+import type { ReactNode } from "react";
+import { Devtools } from "./devtools";
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 export default function Layout({ children }: { children: ReactNode }) {
-  return <html lang="en"><body>{children}<Devtools /></body></html>;
+  return (
+    <html lang="en">
+      <body>
+        {children}
+        <Devtools />
+      </body>
+    </html>
+  );
 }
 ```
 
@@ -167,36 +174,60 @@ A single request shows what Jev returned. A connected flow shows how those value
 This server-side example runs two checks in parallel, waits for both, and applies an explicit review policy. Reuse `jev` and `inspector` from your server setup:
 
 ```ts
-import { noul } from '@typesafe-ai/sdk';
-import { all, defineJevFlow } from 'jev-devtools/flow';
+import { noul } from "@typesafe-ai/sdk";
+import { all, defineJevFlow } from "jev-devtools/flow";
 
-const review = defineJevFlow<{ message: string }>('review', (flow) => {
-  const checks = flow.parallel('checks', {
-    complete: (lane) => lane.jev('completeness', {
-      state: flow.input,
-      questions: {
-        complete: noul('Does this request include enough detail to review?'),
-      },
-    }, { title: 'Check completeness' }).answer('complete').noul,
+const review = defineJevFlow<{ message: string }>("review", (flow) => {
+  const checks = flow.parallel(
+    "checks",
+    {
+      complete: (lane) =>
+        lane
+          .jev(
+            "completeness",
+            {
+              state: flow.input,
+              questions: {
+                complete: noul(
+                  "Does this request include enough detail to review?",
+                ),
+              },
+            },
+            { title: "Check completeness" },
+          )
+          .answer("complete").noul,
 
-    urgent: (lane) => lane.jev('urgency', {
-      state: flow.input,
-      questions: {
-        urgent: noul('Does this request require urgent attention?'),
-      },
-    }, { title: 'Check urgency' }).answer('urgent').noul,
-  }, { title: 'Wait for both checks' });
+      urgent: (lane) =>
+        lane
+          .jev(
+            "urgency",
+            {
+              state: flow.input,
+              questions: {
+                urgent: noul("Does this request require urgent attention?"),
+              },
+            },
+            { title: "Check urgency" },
+          )
+          .answer("urgent").noul,
+    },
+    { title: "Wait for both checks" },
+  );
 
-  return flow.branch('route', {
-    // Example policy: complete and non-urgent requests use standard review.
-    when: all(checks.complete.gte(0.9), checks.urgent.lt(0.2)),
-    then: (path) => path.output('standard-review'),
-    else: (path) => path.output('manual-review'),
-  }, { title: 'Choose a review path' });
+  return flow.branch(
+    "route",
+    {
+      // Example policy: complete and non-urgent requests use standard review.
+      when: all(checks.complete.gte(0.9), checks.urgent.lt(0.2)),
+      then: (path) => path.output("standard-review"),
+      else: (path) => path.output("manual-review"),
+    },
+    { title: "Choose a review path" },
+  );
 });
 
 const result = await review.run(
-  { message: 'Please review the attached proposal.' },
+  { message: "Please review the attached proposal." },
   { client: jev, devtools: inspector },
 );
 // result.outcome is 'standard-review' or 'manual-review'.
@@ -217,7 +248,7 @@ Define once in a Node module and run per request. Typed answer references can fe
 
 ```ts
 const result = await review.run(input, { client: replayClient(fixture) });
-assert.equal(result.outcome, 'standard-review');
+assert.equal(result.outcome, "standard-review");
 ```
 
 **New in 0.5.0.** `compareWithFixture` compares a live run's answers, routing and item steps with a saved fixture.
@@ -226,13 +257,13 @@ assert.equal(result.outcome, 'standard-review');
 
 ## What you can inspect
 
-| View | What it shows |
-| --- | --- |
-| **Connected flows** | Requests, dependencies, parallel checks, evaluated conditions, and named outcomes. |
-| **Questions and answers** | Choice probability bars, Score values, Noul probabilities, and Box regions. |
-| **Context** | The captured inputs sent with each request, with expandable structured values. |
-| **Request history** | Searchable calls with Flow, Questions, Context, Transport, and Raw views. |
-| **Transport** | Attempts, retries, errors, and cancellation alongside the logical request. |
+| View                      | What it shows                                                                      |
+| ------------------------- | ---------------------------------------------------------------------------------- |
+| **Connected flows**       | Requests, dependencies, parallel checks, evaluated conditions, and named outcomes. |
+| **Questions and answers** | Choice probability bars, Score values, Noul probabilities, and Box regions.        |
+| **Context**               | The captured inputs sent with each request, with expandable structured values.     |
+| **Request history**       | Searchable calls with Flow, Questions, Context, Transport, and Raw views.          |
+| **Transport**             | Attempts, retries, errors, and cancellation alongside the logical request.         |
 
 Diagrams show captured inputs, responses, and routing rules you explicitly define. They do not expose hidden model reasoning or infer policies from unrelated application code. Only calls through the instrumented client are captured; the drawer receives updates over same-origin SSE. Styles are scoped, and the library does not require Tailwind or shadcn.
 
@@ -281,7 +312,7 @@ Pack the local checkout, then install the archive in your app:
 npm run pack:devtools
 
 # In your React application:
-npm install /absolute/path/to/jev-devtools/jev-devtools-0.5.1.tgz
+npm install /absolute/path/to/jev-devtools/jev-devtools-0.5.2.tgz
 ```
 
 The archive contains the code and bundled setup skill from your checkout. Use it to try local changes before a future release. Keep the drawer and server adapter on the same build.
@@ -292,14 +323,14 @@ The archive contains the code and bundled setup skill from your checkout. Use it
 
 Start at [jevtools.dev](https://jevtools.dev/) for the product overview and [docs.jevtools.dev](https://docs.jevtools.dev/) for setup, examples, and API contracts.
 
-| What you need | Guide |
-| --- | --- |
-| Install and connect the inspector | [Quick start](https://docs.jevtools.dev/getting-started/) · [Next.js](https://docs.jevtools.dev/guides/nextjs/) |
-| Learn flows step by step | [Flows from scratch](https://docs.jevtools.dev/guides/flow-basics/) |
-| Look up a method, option, or type | [API reference](https://docs.jevtools.dev/api/reference/) |
-| Replay captures or compare runs | [Flow builder](https://docs.jevtools.dev/api/flow/) |
-| Work with a coding agent | [Agent guide](https://docs.jevtools.dev/agents/) · [Bundled setup skill](packages/jev-devtools/skills/setup-jev-devtools/SKILL.md) |
-| Check versions and changes | [Formatted changelog](https://docs.jevtools.dev/changelog/) · [Repository release history](CHANGELOG.md) |
+| What you need                     | Guide                                                                                                                              |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Install and connect the inspector | [Quick start](https://docs.jevtools.dev/getting-started/) · [Next.js](https://docs.jevtools.dev/guides/nextjs/)                    |
+| Learn flows step by step          | [Flows from scratch](https://docs.jevtools.dev/guides/flow-basics/)                                                                |
+| Look up a method, option, or type | [API reference](https://docs.jevtools.dev/api/reference/)                                                                          |
+| Replay captures or compare runs   | [Flow builder](https://docs.jevtools.dev/api/flow/)                                                                                |
+| Work with a coding agent          | [Agent guide](https://docs.jevtools.dev/agents/) · [Bundled setup skill](packages/jev-devtools/skills/setup-jev-devtools/SKILL.md) |
+| Check versions and changes        | [Formatted changelog](https://docs.jevtools.dev/changelog/) · [Repository release history](CHANGELOG.md)                           |
 
 The hosted site is a separately published snapshot; check its version and the repository changelog when comparing it with your installed package. The detailed [integration](docs/integration.md), [Next.js](docs/nextjs.md), and [flow](docs/flows.md) guides remain available as repository references; runnable examples live in [cookbooks](cookbooks/README.md).
 

@@ -4,14 +4,14 @@ Research date: October 24, 2026. This is the contributor design note for `apps/d
 
 ## What established docs do well
 
-| Source | Pattern | Application here |
-| --- | --- | --- |
-| [React Quick Start](https://react.dev/learn) | Introduce a concept with a small example and explain the result. | Examples next to the prose, followed by what readers should observe. |
-| [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) | Separate Getting Started, Guides, API, and Examples. | Stable task-oriented sidebar; reference does not interrupt first setup. |
-| [Vite](https://vite.dev/guide/) | Begin with requirements and a runnable path, then link deeper configuration. | Quick start identifies runtime boundaries and leads to one captured request. |
-| [VitePress](https://vitepress.dev/guide/what-is-vitepress) | Compile content to static HTML and allow enhanced interactions. | Static output with small, opt-in client modules. |
-| [Starlight](https://starlight.astro.build/guides/project-structure/) | Keep documentation content distinct from presentation/components. | Markdown content, navigation metadata, examples, and UI have separate homes. |
-| [Diátaxis](https://diataxis.fr/) | Tutorials, how-to guides, reference, and explanation answer different needs. | Quick start teaches; guides solve tasks; reference explains contracts; concepts explain the architecture. |
+| Source                                                                            | Pattern                                                                      | Application here                                                                                          |
+| --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| [React Quick Start](https://react.dev/learn)                                      | Introduce a concept with a small example and explain the result.             | Examples next to the prose, followed by what readers should observe.                                      |
+| [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) | Separate Getting Started, Guides, API, and Examples.                         | Stable task-oriented sidebar; reference does not interrupt first setup.                                   |
+| [Vite](https://vite.dev/guide/)                                                   | Begin with requirements and a runnable path, then link deeper configuration. | Quick start identifies runtime boundaries and leads to one captured request.                              |
+| [VitePress](https://vitepress.dev/guide/what-is-vitepress)                        | Compile content to static HTML and allow enhanced interactions.              | Static output with small, opt-in client modules.                                                          |
+| [Starlight](https://starlight.astro.build/guides/project-structure/)              | Keep documentation content distinct from presentation/components.            | Markdown content, navigation metadata, examples, and UI have separate homes.                              |
+| [Diátaxis](https://diataxis.fr/)                                                  | Tutorials, how-to guides, reference, and explanation answer different needs. | Quick start teaches; guides solve tasks; reference explains contracts; concepts explain the architecture. |
 
 These are selected useful patterns, not a benchmark or popularity ranking. The recommendation is our synthesis of them and this repository's constraints.
 
@@ -36,7 +36,7 @@ VitePress is a strong lower-maintenance alternative if its Vue-based theme/custo
 
 ## Compatibility and authoring
 
-The pages identify the published 0.5.1 package and its compatibility changes; hosted snapshots update separately from npm. Checked TypeScript source snippets use public exports. Partial snippets identify their context. Detailed legacy guides remain linked while reference coverage grows. Agent Markdown and the bundled setup skill are a separate reading path, with normal human onboarding first.
+The pages identify the 0.5.2 release candidate and its compatibility changes; hosted snapshots update separately from npm. Checked TypeScript source snippets use public exports. Partial snippets identify their context. Detailed legacy guides remain linked while reference coverage grows. Agent Markdown and the bundled setup skill are a separate reading path, with normal human onboarding first.
 
 ## Verification and future work
 

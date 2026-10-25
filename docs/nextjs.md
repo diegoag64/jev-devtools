@@ -1,6 +1,6 @@
 # Next.js and server frameworks
 
-For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/nextjs/). This file describes 0.5.1, available on npm; see the [published release notes and compatibility changes](../CHANGELOG.md#051--october-25-2026-experimental).
+For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/nextjs/). This file describes the 0.5.2 release candidate; see the [pending release notes and compatibility changes](../CHANGELOG.md#052--pending-publication-experimental).
 
 Jev DevTools supports Next.js App Router on the **Node.js runtime**. Mount one client component in the root layout, share one server adapter, and expose its Request/Response handler through an optional catch-all route. Calls made with that adapter's client can originate in Route Handlers, Server Actions, or Server Components.
 
@@ -8,7 +8,7 @@ The package has no Next.js dependency. `handle(request)` also works with other N
 
 ## Install
 
-The default npm install resolves to 0.5.1; use the archive below to try local source changes. See the [release notes](../CHANGELOG.md). Install in your Next.js app:
+The default npm install resolves to 0.5.1; use the archive below to try the 0.5.2 release candidate. See the [release notes](../CHANGELOG.md). Install in your Next.js app:
 
 ```sh
 npm install jev-devtools @typesafe-ai/sdk server-only
@@ -17,7 +17,7 @@ npm install jev-devtools @typesafe-ai/sdk server-only
 To try local changes before a future release, run `npm ci && npm run pack:devtools` from this repository, then in your Next.js app:
 
 ```sh
-npm install /absolute/path/to/jev-devtools-0.5.1.tgz server-only
+npm install /absolute/path/to/jev-devtools-0.5.2.tgz server-only
 ```
 
 Use Node 22.12+ and React 18/19. The App Router example pins Next.js 16.4.2 and React 19.3.1. The broader package's React 18 checks use the Vite consumer; they are not a claim that every Next.js version supports that combination.
@@ -28,9 +28,7 @@ Merge this into your existing `next.config.mjs`:
 
 ```js
 export default {
-  serverExternalPackages: [
-    '@typesafe-ai/sdk',
-  ],
+  serverExternalPackages: ["@typesafe-ai/sdk"],
 };
 ```
 
@@ -40,13 +38,13 @@ Next.js bundles server dependencies by default. [serverExternalPackages](https:/
 
 ```ts
 // server/jev.ts (use src/server/jev.ts if your app lives in src/)
-import 'server-only';
-import { getJevDevtools } from 'jev-devtools/server';
+import "server-only";
+import { getJevDevtools } from "jev-devtools/server";
 
-export const inspector = getJevDevtools('my-next-app', () => ({
-  enabled: process.env.NODE_ENV === 'development',
-  origin: 'http://localhost:3000', // exact URL you open, including port
-  redact: (path, value) => path.at(-1) === 'email' ? '[redacted]' : value,
+export const inspector = getJevDevtools("my-next-app", () => ({
+  enabled: process.env.NODE_ENV === "development",
+  origin: "http://localhost:3000", // exact URL you open, including port
+  redact: (path, value) => (path.at(-1) === "email" ? "[redacted]" : value),
 }));
 
 export const jev = inspector.createClient({
@@ -64,10 +62,10 @@ Keep `TYPESAFE_API_KEY` in the server environment, never in a `NEXT_PUBLIC_` var
 
 ```ts
 // app/api/jev-devtools/[[...path]]/route.ts
-import { inspector } from '../../../../server/jev';
+import { inspector } from "../../../../server/jev";
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 export const GET = (request: Request) => inspector.handleNodeRoute(request);
 export const DELETE = (request: Request) => inspector.handleNodeRoute(request);
 ```
@@ -80,25 +78,34 @@ For custom `getSession(request)` scopes, wrap inference Route Handlers in `inspe
 
 ```tsx
 // app/devtools.tsx
-'use client';
-import { JevDevtools } from 'jev-devtools';
+"use client";
+import { JevDevtools } from "jev-devtools";
 
 export function Devtools() {
-  return <JevDevtools
-    enabled={process.env.NODE_ENV === 'development'}
-    defaultOpen={false}
-  />;
+  return (
+    <JevDevtools
+      enabled={process.env.NODE_ENV === "development"}
+      defaultOpen={false}
+    />
+  );
 }
 ```
 
 ```tsx
 // app/layout.tsx
-import type { ReactNode } from 'react';
-import { Devtools } from './devtools';
+import type { ReactNode } from "react";
+import { Devtools } from "./devtools";
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 export default function Layout({ children }: { children: ReactNode }) {
-  return <html lang="en"><body>{children}<Devtools /></body></html>;
+  return (
+    <html lang="en">
+      <body>
+        {children}
+        <Devtools />
+      </body>
+    </html>
+  );
 }
 ```
 

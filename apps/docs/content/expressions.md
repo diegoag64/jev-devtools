@@ -16,13 +16,13 @@ This fragment assumes a flow input with `message` and an earlier request named `
 
 ## Select and compare
 
-| Method        | Meaning                                            |
-| ------------- | -------------------------------------------------- |
+| Method                                           | Meaning                                                             |
+| ------------------------------------------------ | ------------------------------------------------------------------- |
 | [`.get(key)`](@/api/reference/#expression-get)   | Select an own field of an object or array, including nested fields. |
-| [`.eq(value)`](@/api/reference/#expression-eq)  | Compare matching scalar types for equality.        |
-| [`.lt(value)`](@/api/reference/#expression-lt)  | Strictly less than; finite numeric values only.    |
-| [`.gt(value)`](@/api/reference/#expression-gt)  | Strictly greater than; finite numeric values only. |
-| [`.gte(value)`](@/api/reference/#expression-gte) | Greater than or equal; finite numeric values only. |
+| [`.eq(value)`](@/api/reference/#expression-eq)   | Compare matching scalar types for equality.                         |
+| [`.lt(value)`](@/api/reference/#expression-lt)   | Strictly less than; finite numeric values only.                     |
+| [`.gt(value)`](@/api/reference/#expression-gt)   | Strictly greater than; finite numeric values only.                  |
+| [`.gte(value)`](@/api/reference/#expression-gte) | Greater than or equal; finite numeric values only.                  |
 
 Each comparison accepts a literal or compatible expression. Optional or nullable numeric fields must be resolved to valid numbers before comparison. Missing fields are execution errors. There is no `.lte()` method; express an inclusive upper bound with [`not(value.gt(limit))`](@/api/reference/#not) when the value is a valid number.
 
@@ -30,9 +30,9 @@ Each comparison accepts a literal or compatible expression. Optional or nullable
 
 ### Return interfaces
 
-| Method | Return type | Resolved value |
-| --- | --- | --- |
-| `get(key)` | `FlowExpression<T[K]>` | Value of the selected field. |
+| Method                  | Return type               | Resolved value                |
+| ----------------------- | ------------------------- | ----------------------------- |
+| `get(key)`              | `FlowExpression<T[K]>`    | Value of the selected field.  |
 | `eq`, `lt`, `gt`, `gte` | `FlowExpression<boolean>` | The result of the comparison. |
 
 ## Combine conditions
@@ -58,11 +58,11 @@ All operands are evaluated. A missing reference remains an error even when anoth
 
 ### Return interfaces
 
-| Helper | Return type | Resolved value |
-| --- | --- | --- |
-| `all(...conditions)` | `FlowExpression<boolean>` | True when every condition is true. |
+| Helper               | Return type               | Resolved value                            |
+| -------------------- | ------------------------- | ----------------------------------------- |
+| `all(...conditions)` | `FlowExpression<boolean>` | True when every condition is true.        |
 | `any(...conditions)` | `FlowExpression<boolean>` | True when at least one condition is true. |
-| `not(condition)` | `FlowExpression<boolean>` | The inverse of the condition. |
+| `not(condition)`     | `FlowExpression<boolean>` | The inverse of the condition.             |
 
 ## Respect scope
 
@@ -70,7 +70,7 @@ A reference belongs to its definition and available execution scope. Do not use 
 
 ## Expression limits
 
-**Unreleased:** construction enforces depth 80 and 4,096 expanded nodes per expression, including ordinary composition and reused children. A leaf has depth 0 and counts as one node; each field selection, literal, reference, and operation also counts. Reusing a child counts its complete size at every occurrence. The existing per-operation limit is 256 operands.
+**0.5.2 (pending publication):** construction enforces depth 80 and 4,096 expanded nodes per expression, including ordinary composition and reused children. A leaf has depth 0 and counts as one node; each field selection, literal, reference, and operation also counts. Reusing a child counts its complete size at every occurrence. The existing per-operation limit is 256 operands.
 
 For example, 80 `not()` calls around Boolean `flow.input` fit; the 81st throws. Starting from that input, eleven `e = all(e, e)` doublings contain 4,095 expanded nodes; a twelfth throws. Split larger generated logic into tasks or smaller steps. Within these limits, all operands still evaluate, and references keep their scope and missing-value checks.
 

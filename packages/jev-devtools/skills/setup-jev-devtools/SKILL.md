@@ -19,15 +19,15 @@ Inspect the app's package manager/lockfile, React and Node versions, root compon
 
 Install `jev-devtools` using the app's existing package manager (npm: `npm install jev-devtools @typesafe-ai/sdk`; pnpm: `pnpm add jev-devtools @typesafe-ai/sdk`; Yarn: `yarn add jev-devtools @typesafe-ai/sdk`; Bun: `bun add jev-devtools @typesafe-ai/sdk`). `@typesafe-ai/sdk` is a peer dependency: keep the app's existing SDK version when it satisfies the peer range. Install in the workspace(s) that actually import it. It is a regular dependency when application modules import it, even though capture/display are development-only. Do not replace the app's framework or upgrade unrelated dependencies to force compatibility.
 
-### Consumer compatibility (0.5.1)
+### Consumer compatibility (0.5.2)
 
-| Requirement | Contract |
-| --- | --- |
-| Node.js | 22.12+ for the adapter and flow execution; Edge runtimes are unsupported. |
-| React / React DOM | Matching 18.x or 19.x versions; both remain required peers even for server-only installations. |
-| TypeSafe SDK | `>=0.7.0 <0.8.0`; verified with 0.7.0. |
-| TypeScript | 5.4+ for the public declarations; verified with 5.4.5. The flow API uses built-in `NoInfer`, which 5.3.3 cannot resolve. |
-| Modules | ESM imports with export-aware `Bundler` or `NodeNext` resolution and a matching module setting. There is no CommonJS `require` entry. |
+| Requirement       | Contract                                                                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Node.js           | 22.12+ for the adapter and flow execution; Edge runtimes are unsupported.                                                             |
+| React / React DOM | Matching 18.x or 19.x versions; both remain required peers even for server-only installations.                                        |
+| TypeSafe SDK      | `>=0.7.0 <0.8.0`; verified with 0.7.0.                                                                                                |
+| TypeScript        | 5.4+ for the public declarations; verified with 5.4.5. The flow API uses built-in `NoInfer`, which 5.3.3 cannot resolve.              |
+| Modules           | ESM imports with export-aware `Bundler` or `NodeNext` resolution and a matching module setting. There is no CommonJS `require` entry. |
 
 Use React types matching the app's React major, Node types compatible with its runtime/compiler, and DOM types for Web `Request`/`Response` APIs. The packed declarations passed strict checks without `skipLibCheck` using TypeScript 5.4.5, SDK 0.7.0, React 19.3.1, `@types/react` 19.3.0, and `@types/node` 22.10.2. Frameworks and newer type packages can require a newer compiler; preserve compatible app dependencies rather than downgrading to this verification baseline.
 
@@ -35,7 +35,7 @@ Import application APIs from `jev-devtools` (React and browser-safe capture help
 
 ## Optional connected flow API
 
-When asked to build or inspect connected calls, read [references/flows.md](references/flows.md) after the framework recipe. For 0.5.1 it covers requests, server function tasks, runtime request factories, parallel checks, terminal branches, returning conditionals, bounded collections, stateful loops, captured-answer replay, and fixture comparison. It includes sample verification, scope/execution rules, and privacy limits. For an older installation, use its bundled recipe and declarations rather than assuming these operations exist. Preserve existing application policies; do not convert unrelated calls just to install the drawer. Flow execution is server-only and continues even with the inspector disabled.
+When asked to build or inspect connected calls, read [references/flows.md](references/flows.md) after the framework recipe. For 0.5.2 it covers requests, server function tasks, runtime request factories, parallel checks, terminal branches, returning conditionals, bounded collections, stateful loops, captured-answer replay, and fixture comparison. It includes sample verification, scope/execution rules, and privacy limits. For an older installation, use its bundled recipe and declarations rather than assuming these operations exist. Preserve existing application policies; do not convert unrelated calls just to install the drawer. Flow execution is server-only and continues even with the inspector disabled.
 
 ## Integration invariants
 
