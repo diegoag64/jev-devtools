@@ -94,7 +94,7 @@ For custom server-derived sessions, use `await inspector.run(request, () => revi
 | `flow.if(id, { when, then, else }, display?)` | Only the selected path executes. Each arm returns an expression; the merged result can feed shared downstream steps. |
 | `flow.map(id, { items, input, concurrency?, maxItems }, buildItem, display?)` | Run a bounded item program over an array; preserve result order. Pass outer values through `input`; return an expression from the item builder. |
 | `flow.loop(id, { initial, input, while, maxIterations }, buildIteration, display?)` | Check a state expression before each iteration; return a same-type state expression from the body. Reject unfinished limit exhaustion with `FlowLoopLimitError`. |
-| `flow.input.get('field')` | A typed expression referencing the run input, not a value available during definition. |
+| `flow.input.get('field')` | Select an own object field, array index, or array `length` as a typed reference resolved during execution. Primitive properties (string length/indexes included) are unsupported; compute them in a task callback. |
 | `result.answer('name')` | Typed answer fields: `.choice`, `.probabilities.get('label')`, `.confidence`, `.noul`, `.score`, `.legend`, or `.box` as supported by that question's SDK result. Select nested fields with `.get(key)`. |
 | `value.eq(other)`, `.lt(number)`, `.gt(number)`, `.gte(number)` | Matching scalar equality or finite numeric comparisons. Noul values are in 0–1; use `0.9`, not `90`. There is no `.lte()` method. |
 | `all(...)`, `any(...)`, `not(...)` | Compose Boolean expressions. Every operand evaluates; missing values are errors even in an otherwise short-circuited expression. Do not use JavaScript `if`, `&&`, or `>=` on expression objects. |

@@ -69,7 +69,11 @@ export class FlowExpression<T> {
     freezeAst(ast);
     Object.freeze(this);
   }
-  get<K extends keyof T & (string | number)>(key: K): FlowExpression<T[K]> {
+  /** Select an own field from an object or array; primitive properties are unsupported. */
+  get<K extends keyof T & (string | number)>(
+    this: FlowExpression<object>,
+    key: K,
+  ): FlowExpression<T[K]> {
     return expression({ op: "get", from: this.ast, key: String(key) }, [this]);
   }
   eq(value: T | FlowExpression<T>): FlowExpression<boolean> {

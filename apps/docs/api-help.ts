@@ -285,7 +285,7 @@ export const apiHelp: Record<string, Help> = {
   get: entry(
     "expression.get()",
     "expression.get(key)",
-    "Select a field from a referenced value. Keys come from your data shape. A missing field is an execution error.",
+    "Select a field from a referenced object or array. Only own properties are supported; use a task for string operations. A missing field is an execution error.",
   ),
   lt: entry(
     "expression.lt()",

@@ -941,21 +941,26 @@ Use the builder’s owned input reference and select its message field. This avo
 
 ### expression.get
 
-Selects a property from a referenced value. Chain calls to reach nested fields while preserving their types.
+Selects an own property from a referenced object or array. Chain calls to reach nested fields while preserving their types. Primitive properties, including string length and character indexes, are unsupported.
 
 #### Signature
 
 ```ts
-expression.get<K extends keyof T & (string | number)>(key: K): Expression<T[K]>
+expression.get<K extends keyof T & (string | number)>(
+  this: FlowExpression<object>, key: K
+): FlowExpression<T[K]>
 ```
 
 #### Inputs
 
 | Parameter / option | Type |
 | --- | --- |
+| `this` (expression receiver) | `FlowExpression<object>` |
 | `key` | `keyof T & (string \| number)` |
 
-**Input:** a valid string/number property key. **Returns:** a reference to that field; chain for nested fields. Missing values fail when execution reaches them. This is field selection, not a general optional chaining mechanism.
+**Input:** a string/number key from the object or array's type. The receiver is the expression before `.get()`; it is not an additional call argument. **Returns:** a reference to that field; chain for nested fields. Missing, inherited, or `undefined` properties fail when execution reaches them. This is field selection, not a general optional chaining mechanism.
+
+**Unreleased type correction:** primitive receivers and unions that may contain primitives are rejected during type checking. Version 0.5.0 can accept these calls in TypeScript but rejects primitive property access at runtime. To compute a string's length, pass the string reference into a task and read `.length` inside its callback.
 
 #### Returns
 
@@ -965,13 +970,11 @@ expression.get<K extends keyof T & (string | number)>(key: K): Expression<T[K]>
 
 #### Example
 
-```ts api=expressions
-const city = flow.input.get("address").get("city");
-```
+<!-- example: expression-get.ts -->
 
 #### How it works
 
-The first `get()` selects the nested address object; the second selects its city field. Both selections remain references until the flow evaluates them.
+`get("tags")` selects the input array. Its `get(0)` selects the first item, and `get("length")` selects its length. `get("message")` selects a string, so the task computes its length using the resolved `message` value. Calling `tryFieldSelection()` runs the flow with `"abc"` and two tags, returning `{ firstTag: "new", tagCount: 2, messageLength: 3 }` as its value. All `.get()` calls construct references during definition; the runner reads their values during execution.
 
 ### expression.eq
 

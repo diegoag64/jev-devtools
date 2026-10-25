@@ -18,13 +18,15 @@ This fragment assumes a flow input with `message` and an earlier request named `
 
 | Method        | Meaning                                            |
 | ------------- | -------------------------------------------------- |
-| [`.get(key)`](@/api/reference/#expression-get)   | Select an existing field, including nested fields. |
+| [`.get(key)`](@/api/reference/#expression-get)   | Select an own field of an object or array, including nested fields. |
 | [`.eq(value)`](@/api/reference/#expression-eq)  | Compare matching scalar types for equality.        |
 | [`.lt(value)`](@/api/reference/#expression-lt)  | Strictly less than; finite numeric values only.    |
 | [`.gt(value)`](@/api/reference/#expression-gt)  | Strictly greater than; finite numeric values only. |
 | [`.gte(value)`](@/api/reference/#expression-gte) | Greater than or equal; finite numeric values only. |
 
 Each comparison accepts a literal or compatible expression. Optional or nullable numeric fields must be resolved to valid numbers before comparison. Missing fields are execution errors. There is no `.lte()` method; express an inclusive upper bound with [`not(value.gt(limit))`](@/api/reference/#not) when the value is a valid number.
+
+`.get()` does not read properties of primitive values: string `.get("length")` and `.get(0)` are unsupported. Array indexes and array `length` are supported. Use a task callback for string operations, as shown in the [complete field-selection example](@/api/reference/#expression-get). **Unreleased:** TypeScript now rejects primitive receivers, including unions that may contain primitives; version 0.5.0 accepts some of these calls but fails during execution.
 
 ### Return interfaces
 
