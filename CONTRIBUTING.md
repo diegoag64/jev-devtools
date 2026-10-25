@@ -57,11 +57,52 @@ For visible UI changes, include before/after captures when browser access is ava
 
 These are authoring and review requirements. There is no automated PR-description format check.
 
+## Keep the docs current
+
+Update the glossary, checked examples, curated hover descriptions, relevant guides, and changelog in the same PR as public API changes. Run `npm run verify:docs` for docs or API changes. The CI `docs` job validates browser behavior and uploads a review preview; it never deploys. Follow [the manual docs publishing policy](docs/docs-publishing.md) for when to publish, selecting one reviewed commit, checking `version.json`, and recording GPT Sites deployment results. Publication requires an explicit maintainer request.
+
 ## Keep the changelog current
 
 For user-visible changes, add a concise entry under **Unreleased** in [CHANGELOG.md](CHANGELOG.md) in the same PR. Describe the behavior and any compatibility change, and link the PR once its number is known. Include meaningful documentation and tooling improvements; skip internal refactors with no observable effect. Entries on feature branches describe proposed changes; the changelog on `main` describes merged work.
 
-Keep the overview table useful at a glance. Do not list an open PR as delivered work in another PR's changelog entry. At release time, follow the [release process](docs/releases.md): group the accumulated entries under the new version and verify its publication date before marking it published. npm versions and merged work must remain distinguishable.
+### Changelog categories
+
+Keep `CHANGELOG.md` as the single source; do not maintain a separate docs-site summary. Every release and Unreleased groups its entries under `### Changes`, using these `####` categories in this order. Include only categories with entries:
+
+| Category | Use for |
+| --- | --- |
+| Added | New APIs, features, or capabilities. |
+| Changed | Intentional changes to existing behavior or presentation. |
+| Fixed | Corrections to broken or incorrect behavior. |
+| Security | Access controls, credential protection, and privacy safeguards. |
+| Performance | Work that reduces latency, CPU, memory, or transfer cost; retain measured limits and tradeoffs. |
+| Documentation | Guides, examples, onboarding, and documentation-site changes. |
+| Maintenance | Build, test, CI, packaging, release, or contributor-workflow changes. |
+
+- Choose the category by the entry's primary effect. Put an entry in one category; split genuinely separate outcomes instead of copying the same entry across categories. Use Security for a privacy/access fix rather than repeating it under Fixed.
+- Start each bullet with a short, concrete **bold summary**, followed by the user-visible change and relevant compatibility or scope limits. Aim for one or two sentences; use the linked PR for implementation detail. Retain necessary caveats when reorganizing historical entries.
+- Keep `### Compatibility and upgrade` separate, before `### Changes`, for version requirements, migration steps, breaking behavior, and important limitations. New release sections require both headings for the release-note tooling. Do not bury an upgrade action in Maintenance.
+- Preserve release order, dates, version headings, publication status, citations, and factual limits when editing history. Never move a later feature into an older release. Formatting a history entry does not change what shipped.
+- Keep the overview to two or three short themes per version; the categorized entries hold the detail. Do not list an open PR as delivered work in another PR's entry.
+- At release time, move the intended Unreleased entries with their categories into the new version, combining matching categories and removing empty headings. Verify the npm publication date before marking it published. Follow [the release process](docs/releases.md).
+
+For example:
+
+```md
+## Unreleased
+
+### Changes
+
+#### Added
+
+- **Request filtering.** Filter captured requests by status. ([#123](https://github.com/diegoag64/jev-devtools/pull/123))
+
+#### Fixed
+
+- **Drawer focus.** Keep keyboard focus on the selected request after an update. ([#124](https://github.com/diegoag64/jev-devtools/pull/124))
+```
+
+The example links above are placeholders; use the actual PR for each contribution. Category grouping and entry summaries are reviewed in the PR; there is no automated semantic classifier.
 
 Use the [release checklist and completion rule](docs/releases.md#release-checklist) for every version, including the Git tag and GitHub release verification. Report any unfinished step explicitly, even after npm publication succeeds.
 
@@ -70,6 +111,7 @@ Use the [release checklist and completion rule](docs/releases.md#release-checkli
 | Path | Purpose |
 | --- | --- |
 | `packages/jev-devtools` | React drawer, diagrams, recorder, Node adapter, scoped CSS |
+| `apps/docs` | Static Vite documentation app; start with `npm run dev:docs` |
 | `apps/playground` | Sample/live scenarios, minimal shadcn form, application previews |
 | `examples/react-vite` | Independent consumer using only public package exports |
 | `examples/nextjs-app` | Next.js App Router consumer using the packed package |
