@@ -35,10 +35,7 @@ export const summarize = defineJevFlow<{ values: number[] }>(
 );
 
 export const count = defineJevFlow<{ target: number }>("count", (flow) => {
-  const initial = flow.task("initial", {
-    input: flow.input.get("target"),
-    run: (target) => ({ value: 0, target }),
-  });
+  const initial = { value: 0, target: flow.input.get("target") };
   const finalState = flow.loop(
     "advance",
     {

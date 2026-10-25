@@ -11,17 +11,27 @@ import {
   parallelFlow,
   flowTransport,
 } from "../apps/playground/server/flows.ts";
-const port = Number(process.env.FLOW_PORT ?? 4230),
-  origin = `http://127.0.0.1:${port}`;
-const out = resolve("benchmarks/results/flows-browser-" + port);
+const port = Number(process.env.FLOW_PORT ?? 4230);
+let origin, inspector;
+const out = resolve(
+  process.env.FLOW_OUT ?? "benchmarks/results/flows-browser-" + process.pid,
+);
 await build({
   root: resolve("benchmarks/flow-browser"),
   configFile: false,
   build: { outDir: out, emptyOutDir: true },
   define: { "process.env.NODE_ENV": '"production"' },
 });
-const inspector = createJevDevtools({ enabled: true, origin, limit: 200 });
 const running = new Set();
+// A real lossy rule capture that used to expand the card enough to make the
+// fitted diagram (including its warning) unreadably small.
+const warningFlow = defineJevFlow("capture-warning", (flow) =>
+  flow.branch("long-rule", {
+    when: flow.input.get("message").eq("x".repeat(20_000)),
+    then: (branch) => branch.output("matched"),
+    else: (branch) => branch.output("different"),
+  }),
+);
 const categories = Object.fromEntries(
   Array.from({ length: 150 }, (_, i) => [`category-${i + 1}`, null]),
 );
@@ -115,15 +125,17 @@ const server = createServer((req, res) => {
               const flow =
                 scenario === "flow-tasks"
                   ? taskSelectionFlow
-                  : scenario === "flow-content"
-                    ? contentFlow
-                    : scenario?.startsWith("scale-")
-                      ? scales.get(Number(scenario.slice(6)))
-                      : scenario === "flow-parallel"
-                        ? parallelFlow
-                        : scenario === "flow-large-choice"
-                          ? largeChoice
-                          : refundFlow;
+                  : scenario === "flow-warning"
+                    ? warningFlow
+                    : scenario === "flow-content"
+                      ? contentFlow
+                      : scenario?.startsWith("scale-")
+                        ? scales.get(Number(scenario.slice(6)))
+                        : scenario === "flow-parallel"
+                          ? parallelFlow
+                          : scenario === "flow-large-choice"
+                            ? largeChoice
+                            : refundFlow;
               if (!flow || running.size > 5) throw new Error("Invalid flow");
               const controller = new AbortController();
               running.add(controller);
@@ -216,7 +228,14 @@ const server = createServer((req, res) => {
       })(),
   );
 });
-server.listen(port, "127.0.0.1", () => console.log(origin));
+await new Promise((resolve, reject) => {
+  server.once("error", reject);
+  server.listen(port, "127.0.0.1", resolve);
+});
+origin = `http://127.0.0.1:${server.address().port}`;
+inspector = createJevDevtools({ enabled: true, origin, limit: 200 });
+console.log(origin);
+process.send?.({ origin });
 const stop = () => {
   for (const c of running) c.abort();
   inspector.dispose();

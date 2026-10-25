@@ -781,7 +781,7 @@ export const FlowOverview = memo(function FlowOverview({
               {run.outcome ? (
                 <strong>Outcome: {run.outcome}</strong>
               ) : (
-                run.error ?? "Execution paths"
+                (run.error ?? "Execution paths")
               )}
               <small className="muted">
                 {run.durationMs !== undefined
@@ -828,7 +828,10 @@ export const FlowOverview = memo(function FlowOverview({
                   +
                 </button>
                 <button onClick={fit}>Fit flow</button>
-                <button disabled={!selected} onClick={() => selectStep(selected)}>
+                <button
+                  disabled={!selected}
+                  onClick={() => selectStep(selected)}
+                >
                   Focus step
                 </button>
               </div>

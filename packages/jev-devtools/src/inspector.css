@@ -1939,7 +1939,9 @@
   /* Keep the header still when the shorter confirmation replaces the label. */
   min-width: 96px;
   font-size: 11px;
-  transition: background-color 160ms ease, border-color 160ms ease;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
 }
 .jev-devtools .flow-fixture-button[data-copied] {
   border-color: #e551ba;

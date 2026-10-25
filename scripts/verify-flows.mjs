@@ -2,13 +2,17 @@
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
+import { join } from "node:path";
 const origin = process.env.FLOW_URL ?? "http://127.0.0.1:4230";
+const output = process.env.FLOW_RESULTS ?? "benchmarks/results/flows";
+await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true });
+let page;
 try {
-  const page = await browser.newPage({
-      viewport: { width: 1710, height: 1000 },
-    }),
-    errors = [];
+  page = await browser.newPage({
+    viewport: { width: 1710, height: 1000 },
+  });
+  const errors = [];
   page.setDefaultTimeout(10000);
   page.on("pageerror", (e) => errors.push(String(e)));
   await page.goto(origin);
@@ -53,15 +57,19 @@ try {
   const controlsPosition = await controls.boundingBox();
   const zoomOutput = page.getByLabel("Flow zoom", { exact: true });
   const zoomBefore = await zoomOutput.textContent();
-  await controls.getByRole("button", { name: "Zoom flow in", exact: true }).click();
+  await controls
+    .getByRole("button", { name: "Zoom flow in", exact: true })
+    .click();
   await page.waitForTimeout(150);
   assert.notEqual(await zoomOutput.textContent(), zoomBefore);
   assert.deepEqual(
-    await controls.boundingBox(), controlsPosition,
+    await controls.boundingBox(),
+    controlsPosition,
     "Zooming the canvas does not move or scale its controls",
   );
   const cameraBeforeControlsDrag = await page
-    .locator(".flow-overview-canvas").getAttribute("style");
+    .locator(".flow-overview-canvas")
+    .getAttribute("style");
   await page.mouse.move(controlsPosition.x + 12, controlsPosition.y + 3);
   await page.mouse.down();
   await page.mouse.move(controlsPosition.x + 27, controlsPosition.y + 18);
@@ -72,7 +80,9 @@ try {
     cameraBeforeControlsDrag,
     "Dragging control-panel padding does not pan the diagram",
   );
-  await controls.getByRole("button", { name: "Fit flow", exact: true }).press("Enter");
+  await controls
+    .getByRole("button", { name: "Fit flow", exact: true })
+    .press("Enter");
   await page.selectOption('[aria-label="Flow step"]', "review");
   await review.getByText("94%", { exact: true }).first().waitFor();
   await page.waitForTimeout(150);
@@ -114,7 +124,8 @@ try {
     .locator(".flow-overview-canvas")
     .getAttribute("style");
   assert.deepEqual(
-    await controls.boundingBox(), controlsPosition,
+    await controls.boundingBox(),
+    controlsPosition,
     "Panning the canvas does not move the floating controls",
   );
   await page
@@ -268,7 +279,7 @@ try {
   await page.waitForTimeout(200);
   await mkdir("benchmarks/results/flows", { recursive: true });
   await page.screenshot({
-    path: "benchmarks/results/flows/connected-parallel.png",
+    path: join(output, "connected-parallel.png"),
   });
   await page.evaluate(() =>
     fetch("/run?scenario=flow-large-choice", { method: "POST" }),
@@ -439,70 +450,152 @@ try {
   assert.deepEqual(errors, []);
   await mkdir("benchmarks/results/flows", { recursive: true });
   await page.screenshot({
-    path: "benchmarks/results/flows/connected-choice.png",
+    path: join(output, "connected-choice.png"),
   });
   await page.setViewportSize({ width: 375, height: 900 });
   await page.waitForTimeout(150);
   const smallCanvas = await canvas.boundingBox();
   const smallControls = await controls.boundingBox();
   assert.ok(
-    smallControls.x >= smallCanvas.x && smallControls.y >= smallCanvas.y &&
-      smallControls.x + smallControls.width <= smallCanvas.x + smallCanvas.width &&
-      smallControls.y + smallControls.height <= smallCanvas.y + smallCanvas.height,
+    smallControls.x >= smallCanvas.x &&
+      smallControls.y >= smallCanvas.y &&
+      smallControls.x + smallControls.width <=
+        smallCanvas.x + smallCanvas.width &&
+      smallControls.y + smallControls.height <=
+        smallCanvas.y + smallCanvas.height,
     "Floating controls stay inside the canvas on narrow screens",
   );
   for (const control of await controls.getByRole("button").all()) {
     const box = await control.boundingBox();
     assert.ok(
-      box.x >= smallControls.x && box.y >= smallControls.y &&
+      box.x >= smallControls.x &&
+        box.y >= smallControls.y &&
         box.x + box.width <= smallControls.x + smallControls.width &&
         box.y + box.height <= smallControls.y + smallControls.height,
       "Every canvas control stays within the floating panel",
     );
   }
-  await page.screenshot({ path: "benchmarks/results/flows/floating-controls-narrow.png" });
+  await page.screenshot({ path: join(output, "floating-controls-narrow.png") });
   // Fresh Flows view with no default request selection: the first click must
   // behave like every later card click, without a one-time camera jump.
-  const taskPage = await browser.newPage({ viewport: { width: 1710, height: 1000 } });
+  const taskPage = await browser.newPage({
+    viewport: { width: 1710, height: 1000 },
+  });
   taskPage.on("pageerror", (error) => errors.push(String(error)));
   await taskPage.goto(origin);
-  await taskPage.getByRole("combobox", { name: "Scenario", exact: true }).selectOption("flow-tasks");
-  await taskPage.getByRole("button", { name: "Run sample flow", exact: true }).click();
+  await taskPage
+    .getByRole("combobox", { name: "Scenario", exact: true })
+    .selectOption("flow-tasks");
+  await taskPage
+    .getByRole("button", { name: "Run sample flow", exact: true })
+    .click();
   await taskPage.locator("#status").filter({ hasText: "tasks-done" }).waitFor();
-  await taskPage.getByRole("button", { name: "Open Jev DevTools", exact: true }).click();
+  await taskPage
+    .getByRole("button", { name: "Open Jev DevTools", exact: true })
+    .click();
   await taskPage.getByRole("button", { name: "Flows", exact: true }).click();
-  await taskPage.getByRole("button", { name: "Expand Jev drawer", exact: true }).click();
-  await taskPage.getByRole("region", { name: "Flow canvas", exact: true }).waitFor();
+  await taskPage
+    .getByRole("button", { name: "Expand Jev drawer", exact: true })
+    .click();
+  await taskPage
+    .getByRole("region", { name: "Flow canvas", exact: true })
+    .waitFor();
   await taskPage.waitForTimeout(150);
   const taskCamera = taskPage.locator(".flow-overview-canvas");
   const overviewCamera = await taskCamera.getAttribute("style");
   for (const id of ["task-0", "task-1"]) {
-    await taskPage.getByRole("button", { name: `Step ${id}, task, completed`, exact: true }).click();
+    await taskPage
+      .getByRole("button", { name: `Step ${id}, task, completed`, exact: true })
+      .click();
     await taskPage.waitForTimeout(150);
-    assert.equal(await taskPage.getByLabel("Flow step", { exact: true }).inputValue(), id);
-    assert.equal(await taskCamera.getAttribute("style"), overviewCamera,
-      "First and subsequent card selections preserve the overview camera");
+    assert.equal(
+      await taskPage.getByLabel("Flow step", { exact: true }).inputValue(),
+      id,
+    );
+    assert.equal(
+      await taskCamera.getAttribute("style"),
+      overviewCamera,
+      "First and subsequent card selections preserve the overview camera",
+    );
   }
-  await taskPage.getByRole("button", { name: "Step task-2, task, completed", exact: true }).press("Enter");
+  await taskPage
+    .getByRole("button", { name: "Step task-2, task, completed", exact: true })
+    .press("Enter");
   await taskPage.waitForTimeout(150);
-  assert.equal(await taskCamera.getAttribute("style"), overviewCamera,
-    "Keyboard step selection also preserves the camera");
-  await taskPage.getByRole("button", { name: "Focus step", exact: true }).click();
+  assert.equal(
+    await taskCamera.getAttribute("style"),
+    overviewCamera,
+    "Keyboard step selection also preserves the camera",
+  );
+  await taskPage
+    .getByRole("button", { name: "Focus step", exact: true })
+    .click();
   await taskPage.waitForTimeout(150);
-  assert.notEqual(await taskCamera.getAttribute("style"), overviewCamera,
-    "Explicit Focus still centers the selected step");
+  assert.notEqual(
+    await taskCamera.getAttribute("style"),
+    overviewCamera,
+    "Explicit Focus still centers the selected step",
+  );
   await taskPage.getByRole("button", { name: "Fit flow", exact: true }).click();
   await taskPage.waitForTimeout(150);
   assert.equal(await taskCamera.getAttribute("style"), overviewCamera);
-  await taskPage.getByLabel("Flow step", { exact: true }).selectOption("task-3");
+  await taskPage
+    .getByLabel("Flow step", { exact: true })
+    .selectOption("task-3");
   await taskPage.waitForTimeout(150);
-  assert.notEqual(await taskCamera.getAttribute("style"), overviewCamera,
-    "The step picker retains its explicit navigation behavior");
+  assert.notEqual(
+    await taskCamera.getAttribute("style"),
+    overviewCamera,
+    "The step picker retains its explicit navigation behavior",
+  );
   assert.deepEqual(errors, []);
   await taskPage.close();
-  console.log(
-    "Flows verified: first and later step clicks preserve the camera, explicit focus/fit/picker navigation works; floating controls stay fixed, do not initiate panning and fit narrow screens; connected request diagrams, question switching with one preserved camera, parallel wait explanation, outcome paths, untaken nodes, request details, pinned camera/selection across incoming runs and reopening, cancellation.",
+  // Warning readability checks run at the original desktop viewport.
+  await page.setViewportSize({ width: 1710, height: 1000 });
+  await page.evaluate(() =>
+    fetch("/run?scenario=flow-warning", { method: "POST" }),
   );
+  await rows.filter({ hasText: "capture-warning" }).first().click();
+  await page.selectOption('[aria-label="Flow step"]', "long-rule");
+  await page.getByRole("button", { name: "Fit flow", exact: true }).click();
+  const ruleCard = page.getByRole("button", {
+    name: "Step long-rule, branch, completed",
+    exact: true,
+  });
+  const warning = ruleCard.getByText(
+    "Rule capture: Long text truncated in capture.",
+    { exact: true },
+  );
+  await warning.waitFor();
+  await page.waitForTimeout(250);
+  // Assert rendered readability and clipping, not a CSS selector inventory.
+  const bounds = await warning.boundingBox();
+  const viewport = await canvas.boundingBox();
+  assert.ok(bounds && viewport);
+  assert.ok(
+    bounds.height >= 8,
+    "Rule warning remains readable after fitting the long-rule diagram",
+  );
+  assert.ok(
+    bounds.x >= viewport.x &&
+      bounds.y >= viewport.y &&
+      bounds.x + bounds.width <= viewport.x + viewport.width &&
+      bounds.y + bounds.height <= viewport.y + viewport.height,
+    "Complete warning remains inside the flow viewport",
+  );
+  await page.screenshot({ path: join(output, "capture-warning.png") });
+  await page.getByRole("button", { name: "Show details", exact: true }).click();
+  await page
+    .locator(".flow-selection")
+    .getByText("Rule capture: Long text truncated in capture.", { exact: true })
+    .waitFor();
+  assert.deepEqual(errors, []);
+  console.log(
+    "Flows verified: first and later step clicks preserve the camera, explicit focus/fit/picker navigation works; floating controls stay fixed, do not initiate panning and fit narrow screens; connected request diagrams, question switching with one preserved camera, parallel wait explanation, outcome paths, untaken nodes, request details, pinned camera/selection across incoming runs and reopening, cancellation, readable capture warnings.",
+  );
+} catch (error) {
+  await page?.screenshot({ path: join(output, "failure.png") }).catch(() => {});
+  throw error;
 } finally {
   await browser.close();
 }

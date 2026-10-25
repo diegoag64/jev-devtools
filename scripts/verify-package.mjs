@@ -4,17 +4,10 @@ import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
+import { npm } from "./runtime.mjs";
 import { verificationPackage } from "./verification-package.mjs";
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const temp = await mkdtemp(join(tmpdir(), "jev-consumer-"));
-// Node won't spawn npm.cmd without a shell, so Windows runs npm's CLI script directly.
-const npmCli = /npm-cli\.js$/.test(process.env.npm_execpath ?? "")
-  ? process.env.npm_execpath
-  : join(dirname(process.execPath), "node_modules/npm/bin/npm-cli.js");
-const npm = (args, options) =>
-  process.platform === "win32"
-    ? execFileSync(process.execPath, [npmCli, ...args], options)
-    : execFileSync("npm", args, options);
 const { tarball, files, dependency } = verificationPackage(npm, root, temp);
 // Guard the shipped archive, not just the source manifest's intended allowlist.
 // A widened files list or stale build output must not ship fixtures or secrets.
@@ -90,6 +83,14 @@ await cp(
   join(root, "scripts/fixtures/packed-flow-types.ts"),
   join(types, "flow.ts"),
 );
+await cp(
+  join(root, "scripts/fixtures/packed-resolved-templates.ts"),
+  join(types, "packed-resolved-templates.ts"),
+);
+await cp(
+  join(root, "scripts/fixtures/packed-resolved-templates.test.mjs"),
+  join(types, "packed-resolved-templates.test.mjs"),
+);
 // No skipLibCheck: it would also skip the archive's own declarations.
 await writeFile(
   join(types, "tsconfig.json"),
@@ -100,10 +101,10 @@ await writeFile(
       module: "ESNext",
       moduleResolution: "Bundler",
       strict: true,
-      noEmit: true,
+      noEmitOnError: true,
       types: [],
     },
-    files: ["flow.ts"],
+    files: ["flow.ts", "packed-resolved-templates.ts"],
   }),
 );
 execFileSync(
@@ -112,6 +113,11 @@ execFileSync(
   { cwd: consumer, stdio: "inherit" },
 );
 console.log("Packed flow types: passed");
+execFileSync(
+  process.execPath,
+  ["--test", join(types, "packed-resolved-templates.test.mjs")],
+  { cwd: consumer, stdio: "inherit" },
+);
 npm(["run", "build"], { cwd: consumer, stdio: "inherit" });
 console.log(`Independent consumer ready: ${consumer}`);
 console.log(`Installable package: ${tarball}`);

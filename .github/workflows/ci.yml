@@ -6,6 +6,22 @@ on:
 permissions:
   contents: read
 jobs:
+  formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Check changed-file formatting
+        env:
+          FORMAT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: npm run format:check -- --base "$FORMAT_BASE"
+
   drawer:
     runs-on: ubuntu-24.04
     strategy:
@@ -42,6 +58,16 @@ jobs:
       # Use the runner image's system libraries; keep Playwright's pinned browser.
       - run: npx playwright install chromium --only-shell
       - run: npm run verify:drawer
+      - run: npm run verify:flows
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: flow-browser-react-${{ matrix.react }}-${{ github.sha }}
+          path: |
+            benchmarks/results/flows/**/*.png
+            benchmarks/results/flows/**/server.log
+          if-no-files-found: ignore
+          retention-days: 7
 
   verify:
     runs-on: ubuntu-latest
