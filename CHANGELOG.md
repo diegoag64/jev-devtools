@@ -37,7 +37,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 - **Flow lifecycle regression coverage.** Assert exact loop body calls, retained iterations and latest completed state, and distinguish task timeouts from cancellation in recorded step errors. Runtime behavior and public APIs are unchanged. ([#95](https://github.com/diegoag64/jev-devtools/pull/95))
 
-- **Nested flow browser coverage.** Extend the existing sample verifier with map-item and loop-iteration navigation, request inspection and selection ownership, maps inside iterations, and shared-camera retention through updates and reopening. No runtime or public API changes.
+- **Nested flow browser coverage.** Extend the existing sample verifier with map-item and loop-iteration navigation, request inspection and selection ownership, maps inside iterations, and shared-camera retention through updates and reopening. No runtime or public API changes. ([#98](https://github.com/diegoag64/jev-devtools/pull/98))
 
 ## 0.5.2 — October 25, 2026 (experimental)
 
