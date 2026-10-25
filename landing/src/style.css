@@ -10,6 +10,9 @@
   --section-bg: #100d12;
   --section-space: clamp(68px, 7.5vw, 108px);
   --pink: #e551ba;
+  --button-primary-bg: #fff;
+  --button-primary-hover: #e8e8eb;
+  --button-primary-text: #17131a;
   --muted: #a59aa6;
   --line: #302735;
   --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
@@ -229,13 +232,13 @@ nav a:hover,
   height: 17px;
 }
 .button.primary {
-  background: #e8a0d4;
-  border: 1px solid #e8a0d4;
-  color: #21141e;
+  background: var(--button-primary-bg);
+  border: 1px solid var(--button-primary-bg);
+  color: var(--button-primary-text);
 }
 .button.primary:hover {
-  background: #f3b9e3;
-  border-color: #f3b9e3;
+  background: var(--button-primary-hover);
+  border-color: var(--button-primary-hover);
 }
 .button.secondary {
   background: #19131d;
@@ -243,8 +246,8 @@ nav a:hover,
   gap: 9px;
 }
 .button.secondary:hover {
-  border-color: #875073;
-  background: #231a28;
+  border-color: #776c7d;
+  background: #231e28;
 }
 .diagram-scroll {
   overflow-x: auto;
@@ -660,7 +663,7 @@ nav a:hover,
 }
 .install-command button {
   background: none;
-  color: #c5a3bd;
+  color: #c9c4cd;
   font: 9px var(--mono);
   padding: 6px;
 }
@@ -799,13 +802,13 @@ nav a:hover,
   height: 34px;
   padding: 0 8px;
   background: transparent;
-  color: #a088a7;
+  color: #b4adb7;
   border-radius: 6px;
   font-size: 12px;
 }
 .playback button:hover {
-  background: #251929;
-  color: #f0b9df;
+  background: #251f2b;
+  color: #fff;
 }
 .playback button:disabled {
   opacity: 0.4;
@@ -1174,12 +1177,12 @@ nav a:hover,
   font-family: var(--mono);
 }
 .api-sample-controls button:hover {
-  border-color: #8b5e85;
+  border-color: #776c7d;
 }
 .api-sample-controls button[aria-pressed="true"] {
-  color: #f0bbdf;
-  border-color: #a86895;
-  background: #2b192b;
+  color: var(--button-primary-text);
+  border-color: var(--button-primary-bg);
+  background: var(--button-primary-bg);
 }
 #api-sample-status {
   text-align: center;
