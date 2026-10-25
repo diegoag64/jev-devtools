@@ -687,26 +687,11 @@ nav a:hover,
   margin-top: 24px;
 }
 .site-footer {
-  padding-top: 26px;
-  padding-bottom: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-.site-footer > .wordmark {
-  font-size: 20px;
-}
-.site-footer > .wordmark svg {
-  width: 23px;
-}
-.site-footer > span {
-  font: 9px var(--mono);
-  color: #947f9b;
-}
-.site-footer nav {
-  gap: 22px;
-  font-size: 10px;
+  padding-block: 28px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted);
 }
 @keyframes signal-travel {
   to {
@@ -971,17 +956,6 @@ nav a:hover,
   }
   .experimental {
     font-size: 8px;
-  }
-  .site-footer {
-    flex-wrap: wrap;
-    padding-top: 24px;
-  }
-  .site-footer > span {
-    display: none;
-  }
-  .site-footer nav {
-    gap: 14px;
-    font-size: 9px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
