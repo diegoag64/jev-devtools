@@ -159,6 +159,40 @@ nav a:hover,
 .hero h1 > span {
   color: #ee9ed5;
 }
+/* Keep solid pink as the fallback; translucent, overlapping pools of color
+   create a pearlescent finish without a repeating stripe or text glow. */
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  .hero h1 > span {
+    background-color: #df8fc9;
+    background-image:
+      radial-gradient(ellipse at 50% 50%, #ffe3d6 0%, #ffe3d600 48%),
+      radial-gradient(ellipse at 50% 50%, #c4b4f3 0%, #c4b4f300 52%),
+      radial-gradient(ellipse at 50% 50%, #f5b4de 0%, #f5b4de00 58%);
+    background-size: 85% 220%, 90% 240%, 120% 180%;
+    background-position: -140% 20%, 150% 80%, 40% 50%;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: hero-pearl-drift 18s ease-in-out infinite alternate;
+  }
+}
+@keyframes hero-pearl-drift {
+  45% {
+    background-position: 20% 70%, 55% 20%, 90% 65%;
+  }
+  100% {
+    background-position: 180% 30%, -110% 75%, 10% 35%;
+  }
+}
+/* Restore solid ink when motion is reduced or OS contrast colors are active. */
+@media (prefers-reduced-motion: reduce), (forced-colors: active) {
+  .hero h1 > span {
+    animation: none;
+    background: none;
+    color: #ee9ed5;
+  }
+}
 .hero-description {
   font-size: 16px;
   line-height: 1.7;
