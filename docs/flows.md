@@ -262,6 +262,8 @@ const assessed = flow.map("assess-passages", {
 // assessed is a typed FlowExpression<Array<{ passage: Passage; relevance: number }>>.
 ```
 
+`items` accepts a literal array, a whole-array reference, or an array template containing nested references. Each item has type `Resolved<I>`: with `items: [flow.input.get("count")]`, `item.input.get("item")` is a `FlowExpression<number>` and a task receiving it gets a number. Nested object/array templates resolve the same way.
+
 `item.input` contains `{ item, index, context }`; index is zero-based. Pass outer references explicitly through `input`; they cannot be captured directly inside the item builder. Each item receives a detached JSON-compatible snapshot. A template can contain tasks, Jev calls, returning conditionals and static parallel lanes, and returns an expression. The runner adds the item-result output. Terminal `output()`/`branch()` calls in the item builder and nested maps are unsupported. Use `if()` for returning paths or a task for deterministic routing that returns a value.
 
 Results preserve input order regardless of completion order. An empty list returns `[]` and executes no item steps. The map waits for every item before advancing. A failed item aborts running siblings, blocks queued items, and prevents downstream work; external cancellation marks queued work cancelled. There is no partial-success mode or automatic map/task retry. SDK retries remain governed by the supplied client. Signals are cooperative for remote side effects; cancellation cannot undo work already performed.
@@ -311,7 +313,7 @@ New `if` and `merge` kinds extend the version-1 flow records; use the matching u
 
 ## Stateful iteration: `flow.loop()`
 
-`flow.loop(id, { initial, input, while, maxIterations }, buildIteration, display?)` returns the final state as a typed `FlowExpression<S>`. Included in **0.4.0**.
+`flow.loop(id, { initial, input, while, maxIterations }, buildIteration, display?)` returns the final state as a typed `FlowExpression<Resolved<S>>`. Included in **0.4.0**.
 
 ```ts
 const final = flow.loop("count", {
@@ -325,6 +327,8 @@ const final = flow.loop("count", {
 }), { title: "Count up to three" });
 return flow.output("done", final);
 ```
+
+`initial` accepts literal state, a whole-state reference, or nested object/array templates containing references. The `while` state reference, iteration state, body return and final result all use the resolved state shape. For example, `initial: { count: flow.input.get("count") }` gives numeric `state.count` to a task; return `{ count: state.count + 1 }`, not an expression object.
 
 The `while` callback builds an inspectable expression **once**, using only its state reference and literal thresholds. It is not an arbitrary runtime predicate. Put computed Boolean state fields in a task when the continuation rule needs application logic. Outer step references cannot be captured by the predicate; include necessary values in the initial state. The body is also built once; execute side effects only in tasks or Jev requests.
 

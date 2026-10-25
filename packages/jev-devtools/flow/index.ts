@@ -440,7 +440,7 @@ export interface FlowBuilder<T> {
     task: FlowTask<I, O>,
     display?: FlowDisplay,
   ): FlowExpression<Awaited<O>>;
-  /** Execute a reusable item program with bounded concurrency; return results in input order. */
+  /** Execute a reusable program over resolved items; return results in input order. */
   map<I, C, O>(
     id: string,
     options: {
@@ -450,24 +450,34 @@ export interface FlowBuilder<T> {
       maxItems: number;
     },
     build: (
-      item: FlowBuilder<{ item: I; index: number; context: Resolved<C> }>,
+      item: FlowBuilder<{
+        item: Resolved<I>;
+        index: number;
+        context: Resolved<C>;
+      }>,
     ) => FlowExpression<O>,
     display?: FlowDisplay,
   ): FlowExpression<O[]>;
-  /** Pre-test loop with JSON state, explicit context and a required iteration limit. */
+  /** Pre-test loop over resolved JSON state, with explicit context and an iteration limit. */
   loop<S, C>(
     id: string,
     options: {
       initial: S | FlowExpression<S>;
       input: C;
-      while: (state: FlowExpression<NoInfer<S>>) => FlowExpression<boolean>;
+      while: (
+        state: FlowExpression<NoInfer<Resolved<S>>>,
+      ) => FlowExpression<boolean>;
       maxIterations: number;
     },
     build: (
-      iteration: FlowBuilder<{ state: S; index: number; context: Resolved<C> }>,
-    ) => FlowExpression<NoInfer<S>>,
+      iteration: FlowBuilder<{
+        state: Resolved<S>;
+        index: number;
+        context: Resolved<C>;
+      }>,
+    ) => FlowExpression<NoInfer<Resolved<S>>>,
     display?: FlowDisplay,
-  ): FlowExpression<S>;
+  ): FlowExpression<Resolved<S>>;
   /** Execute one value-returning path, then continue with its typed result. */
   if<A, B>(
     id: string,

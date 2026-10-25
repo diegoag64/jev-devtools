@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | No changes yet. |
+| [Unreleased](#unreleased) | Not published | Resolved map and loop template types. |
 | [0.5.1](#051--pending-publication-experimental) | Pending publication | Task input validation and expression types; setup guidance; release and website maintenance. |
 | [0.5.0](#050--october-25-2026-experimental) | 2026-10-25 | Replay and comparison; capture reliability/privacy; website and docs. |
 | [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | CSS isolation; stricter published flow types; approved release workflow. |
@@ -22,7 +22,15 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No changes yet.
+### Compatibility and upgrade
+
+Map items and loop state now infer resolved values from nested reference templates. Code that treated resolved task values as `FlowExpression` objects must use ordinary value operations instead; runtime behavior is unchanged.
+
+### Changes
+
+#### Fixed
+
+- **Resolved map and loop types.** Map item builders and loop gates, iteration state, body returns and final results now agree with runtime template resolution, including nested objects and arrays.
 
 ## 0.5.1 — Pending publication (experimental)
 
