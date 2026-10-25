@@ -2,7 +2,8 @@ import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Marked } from "marked";
-import { changelogURL, changelogSource, renderChangelog } from "./changelog.js";
+import { renderChangelog } from "./changelog.js";
+import { readBuildSnapshot, type DocsBuildMode } from "./build-info.js";
 import { publicTypeReference } from "./type-reference.js";
 import { codeRenderer } from "./highlight.js";
 import { layoutReference, referenceGroups, referenceLabel } from "./reference-layout.js";
@@ -98,8 +99,9 @@ async function expandExamples(source: string) {
 export async function generate(
   base: string,
   generated: string,
-  changelogSourceMode: "local" | "github" = "local",
+  buildMode: DocsBuildMode = "working-tree",
 ) {
+  const { manifest, changelog } = readBuildSnapshot(resolve(appRoot, "../.."), buildMode);
   const githubLinks = await renderGitHubLinks();
   const logo = (await readFile(resolve(appRoot, "assets/logo.svg"), "utf8")).trim();
   const href = (slug: string) => base + (slug ? slug + "/" : "");
@@ -107,17 +109,12 @@ export async function generate(
     [];
   const inputs: Record<string, string> = {};
   await mkdir(resolve(generated, "public/raw"), { recursive: true });
-  const remoteChangelog = changelogSourceMode === "github"
-    ? await fetch(changelogURL, { signal: AbortSignal.timeout(10000), cache: "no-cache" }).then(async (response) => {
-        if (!response.ok) throw new Error(`GitHub changelog: ${response.status}`);
-        return response.text();
-      })
-    : undefined;
+  await writeFile(resolve(generated, "public/version.json"), JSON.stringify(manifest, null, 2) + "\n");
   for (const [index, page] of pages.entries()) {
     const isChangelog = page.slug === "changelog";
     const markdown = await expandExamples(
       isChangelog
-        ? remoteChangelog ?? await readFile(resolve(appRoot, "../../CHANGELOG.md"), "utf8")
+        ? changelog
         : await readFile(resolve(appRoot, "content", page.file), "utf8"),
     );
     // @/ is a site-relative link; leave external URLs and fragment links untouched.
@@ -125,9 +122,9 @@ export async function generate(
       /\]\(@\/([^)]*)\)/g,
       (_, path: string) => `](${base}${path})`,
     );
-    const { html, headings } = isChangelog ? renderChangelog(linked) : await compile(linked, base, page.slug === "api/reference");
+    const { html, headings } = isChangelog ? renderChangelog(linked, manifest.changelog.sourceUrl) : await compile(linked, base, page.slug === "api/reference");
     const articleHtml = page.slug === "api/reference" ? layoutReference(html) : html;
-    const changelogStatus = `Saved ${new Date().toISOString().slice(0, 10)} · ${remoteChangelog ? "GitHub main" : "working-tree copy"}.`;
+    const changelogStatus = `Built ${manifest.build.createdAt.slice(0, 10)} · ${buildMode === "publication" ? `commit ${manifest.source.commit.slice(0, 7)}` : "working-tree copy"}.`;
     const editURL = isChangelog ? `${repo}/edit/main/CHANGELOG.md` : `${repo}/edit/main/apps/docs/content/${page.file}`;
     const file = resolve(generated, page.slug, "index.html");
     const source = (name: string) =>
@@ -153,8 +150,8 @@ export async function generate(
     const doc = `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="${escape(page.description)}"><meta name="color-scheme" content="light dark"><script>${themeScript}</script><link rel="stylesheet" href="${source("style.css")}"><title>${escape(page.title)} · Jev DevTools</title><link rel="icon" href="${base}favicon-light.svg" type="image/svg+xml"></head><body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="topbar"><a class="brand" href="${base}" aria-label="Jev DevTools home">${logo}<strong>jev<span>tools</span><span class="brand-dot">.</span></strong></a><span class="docs-label">Documentation</span><button class="search-trigger" type="button" hidden><span>Search documentation</span><kbd>⌘ K</kbd></button>${githubLinks}<button class="theme-toggle" type="button" aria-label="Switch color theme" hidden>◐</button><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="sidebar" hidden>Menu</button></header>
-<div class="layout"><aside id="sidebar" class="sidebar"><div class="version">Working tree docs <span>pre-1.0</span></div><nav aria-label="Documentation">${nav}</nav></aside>
-<main id="main" tabindex="-1"><div class="breadcrumb">Docs <span>/</span> ${page.group}</div><div class="page-heading"><p class="eyebrow">${page.group}</p><h1>${page.title}</h1><p class="lead">${page.description}</p></div>${isChangelog ? `<div class="changelog-source"><a href="${changelogSource}">Source on GitHub ↗</a><p>${changelogStatus}</p></div>` : ""}<article${page.slug === "api/reference" ? ' class="api-reference"' : ""}>${articleHtml}</article><footer class="article-footer"><a href="${editURL}">Edit this page ↗</a><a href="${base}raw/${page.slug || "introduction"}.md">Read as Markdown</a></footer><nav class="page-nav" aria-label="Previous and next pages">${neighbour(pages[index - 1], "Previous")}${neighbour(pages[index + 1], "Next")}</nav><p class="site-note">Jev DevTools is an independent, open-source community project. It is not affiliated with TypeSafe AI.</p></main>
+<div class="layout"><aside id="sidebar" class="sidebar"><div class="version">${buildMode === "publication" ? "Docs snapshot" : "Working tree docs"} <span><a href="${base}version.json" aria-label="Build details for source package v${escape(manifest.package.version)}">v${escape(manifest.package.version)}</a></span></div><nav aria-label="Documentation">${nav}</nav></aside>
+<main id="main" tabindex="-1"><div class="breadcrumb">Docs <span>/</span> ${page.group}</div><div class="page-heading"><p class="eyebrow">${page.group}</p><h1>${page.title}</h1><p class="lead">${page.description}</p></div>${isChangelog ? `<div class="changelog-source"><a href="${manifest.changelog.sourceUrl}">Source on GitHub ↗</a><p>${changelogStatus}</p></div>` : ""}<article${page.slug === "api/reference" ? ' class="api-reference"' : ""}>${articleHtml}</article><footer class="article-footer"><a href="${editURL}">Edit this page ↗</a><a href="${base}raw/${page.slug || "introduction"}.md">Read as Markdown</a></footer><nav class="page-nav" aria-label="Previous and next pages">${neighbour(pages[index - 1], "Previous")}${neighbour(pages[index + 1], "Next")}</nav><p class="site-note">Jev DevTools is an independent, open-source community project. It is not affiliated with TypeSafe AI.</p></main>
 <aside class="toc"><nav aria-label="On this page"><p>On this page</p>${renderOutline(headings, page)}</nav></aside></div>
 <dialog id="search-dialog" aria-labelledby="search-title"><div class="search-header"><label id="search-title" for="search-input">Search the docs</label><button type="button" class="close-search" aria-label="Close search">Esc</button></div><input id="search-input" type="search" placeholder="Try ‘Next.js’ or ‘createClient’" autocomplete="off"><p id="search-status" role="status"></p><ul id="search-results"></ul></dialog>
 <script type="module" src="${source("client.ts")}"></script></body></html>`;
@@ -198,7 +195,7 @@ export async function generate(
   );
   await writeFile(
     resolve(generated, "public/llms.txt"),
-    `# Jev DevTools\n\nWorking-tree documentation. Check the changelog before using unreleased APIs.\n\n${pages.map((p) => `- [${p.title}](${base}raw/${p.slug || "introduction"}.md): ${p.description}`).join("\n")}\n`,
+    `# Jev DevTools\n\nSource package v${manifest.package.version}; ${buildMode} documentation. Check the changelog before using explicitly marked unreleased APIs.\n\nBuild details: ${base}version.json\n\n${pages.map((p) => `- [${p.title}](${base}raw/${p.slug || "introduction"}.md): ${p.description}`).join("\n")}\n`,
   );
   const favicon = await readFile(resolve(appRoot, "assets/favicon-light.svg"), "utf8");
   await writeFile(resolve(generated, "public/favicon-light.svg"), favicon);

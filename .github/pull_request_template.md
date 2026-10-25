@@ -12,7 +12,7 @@ Explain the problem or need and its impact. For a bug, describe actual versus ex
 
 ## Scope and compatibility
 
-<!-- Identify affected components and explain their relationship when needed. Describe public API, package exports, CSS integration, supported-version, or packaging changes and any migration needed. State when there is no compatibility impact; note meaningful limits or follow-up work. -->
+<!-- Identify affected components and explain their relationship when needed. Describe public API, package exports, CSS integration, supported-version, or packaging changes and any migration needed. For docs/API changes, identify the related guide/example/reference updates and whether a manual docs publication is needed after merge or package release. State when there is no compatibility impact; note meaningful limits or follow-up work. -->
 
 ## Verification
 

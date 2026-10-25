@@ -57,6 +57,10 @@ For visible UI changes, include before/after captures when browser access is ava
 
 These are authoring and review requirements. There is no automated PR-description format check.
 
+## Keep the docs current
+
+Update the glossary, checked examples, curated hover descriptions, relevant guides, and changelog in the same PR as public API changes. Run `npm run verify:docs` for docs or API changes. The CI `docs` job validates browser behavior and uploads a review preview; it never deploys. Follow [the manual docs publishing policy](docs/docs-publishing.md) for when to publish, selecting one reviewed commit, checking `version.json`, and recording GPT Sites deployment results. Publication requires an explicit maintainer request.
+
 ## Keep the changelog current
 
 For user-visible changes, add a concise entry under **Unreleased** in [CHANGELOG.md](CHANGELOG.md) in the same PR. Describe the behavior and any compatibility change, and link the PR once its number is known. Include meaningful documentation and tooling improvements; skip internal refactors with no observable effect. Entries on feature branches describe proposed changes; the changelog on `main` describes merged work.

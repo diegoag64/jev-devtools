@@ -1,11 +1,10 @@
 import { Marked } from "marked";
 
-export const changelogURL = "https://raw.githubusercontent.com/diegoag64/jev-devtools/main/CHANGELOG.md";
 export const changelogSource = "https://github.com/diegoag64/jev-devtools/blob/main/CHANGELOG.md";
 const escape = (value: string) => value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 // Preserve GitHub-style release anchors, including the two hyphens around an em dash.
-export function renderChangelog(markdown: string) {
+export function renderChangelog(markdown: string, sourceUrl = changelogSource) {
   if (markdown.length > 1_000_000 || !/^# Changelog\s*$/m.test(markdown) || !/^## /m.test(markdown))
     throw new Error("Invalid changelog response");
   const headings: { id: string; title: string; depth: number }[] = [];
@@ -25,7 +24,7 @@ export function renderChangelog(markdown: string) {
     link({ href, tokens }) {
       const text = this.parser.parseInline(tokens);
       let url: URL;
-      try { url = new URL(href, changelogSource.replace(/CHANGELOG.md$/, "")); }
+      try { url = new URL(href, sourceUrl.replace(/CHANGELOG.md$/, "")); }
       catch { return text; }
       if (!["http:", "https:", "mailto:"].includes(url.protocol)) return text;
       return `<a href="${escape(href.startsWith("#") ? href : url.href)}">${text}</a>`;

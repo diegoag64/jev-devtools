@@ -48,6 +48,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **Verified docs snapshots and manual publication.** Add docs browser checks and preview artifacts to CI, a source/package-version manifest, and a manual GPT Sites publishing/release policy. Publication builds require a clean checkout and embed its changelog instead of mixing in a newer GitHub revision. No automatic deployment or package API change. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
+
 - **Landing-inspired dark theme.** Match the docs to the JevTools landing page’s near-black plum backgrounds, warm text, and magenta accents, including code panels and navigation states. Light mode and package styles are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
 
 - **Shared JevTools branding.** Use the landing page’s flow symbol and wordmark in the docs header, with a light symbol for dark mode and a pale-background favicon. Docs only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).

@@ -121,9 +121,10 @@ const ordinary: string = "hello";`,
   }
 });
 
-// The changelog is fetched from GitHub during publication. Preserve its content
+// The changelog belongs to the selected source revision. Preserve its content
 // and links without interpreting embedded markup as executable page content.
 test("changelog releases preserve source anchors and resolve repository links safely", () => {
+  const source = "https://github.com/diegoag64/jev-devtools/blob/reviewed-commit/CHANGELOG.md";
   const result = renderChangelog(`# Changelog
 
 Introductory context.
@@ -150,9 +151,9 @@ Introductory context.
 #### Fixed
 
 - Another correction.
-`);
+`, source);
   assert.ok(result.html.includes('id="123--october-25-2026-experimental"'));
-  assert.ok(result.html.includes('href="https://github.com/diegoag64/jev-devtools/blob/main/docs/releases.md#release"'));
+  assert.ok(result.html.includes('href="https://github.com/diegoag64/jev-devtools/blob/reviewed-commit/docs/releases.md#release"'));
   assert.ok(result.html.includes("Not published to npm"));
   assert.ok(result.html.includes('href="#123--october-25-2026-experimental-fixed"'));
   assert.ok(result.html.includes('id="123--october-25-2026-experimental-fixed"'));

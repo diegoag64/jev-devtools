@@ -9,10 +9,10 @@ import { appRoot, generate, normalizeBase } from "./site.js";
 
 export default defineConfig(async ({ mode, command }): Promise<UserConfig> => {
   const base = normalizeBase(process.env.DOCS_BASE);
-  const changelogSource = mode === "publication" ? "github" : "local";
+  const buildMode = mode === "publication" ? "publication" : "working-tree";
   // A running preview must not overwrite a publication or subdirectory build.
-  const generated = resolve(appRoot, ".generated", `${command}-${changelogSource}-${base.replaceAll("/", "_")}`);
-  const input = await generate(base, generated, changelogSource);
+  const generated = resolve(appRoot, ".generated", `${command}-${buildMode}-${base.replaceAll("/", "_")}`);
+  const input = await generate(base, generated, buildMode);
   return {
     root: generated,
     base,
@@ -63,7 +63,7 @@ export default defineConfig(async ({ mode, command }): Promise<UserConfig> => {
               return;
             pending = pending
               .then(async () => {
-                await generate(base, generated, changelogSource);
+                await generate(base, generated, buildMode);
                 server.ws.send({ type: "full-reload" });
               })
               .catch((error) => server.config.logger.error(String(error)));

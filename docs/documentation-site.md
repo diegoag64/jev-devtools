@@ -42,7 +42,7 @@ The pages track the working tree and explicitly label unreleased changes; npm 0.
 
 Build output and browser checks should cover deep links, subdirectory paths, search, keyboard controls, no-JavaScript reading, responsive layouts, and example typing. Static hosting should serve directory indexes and real 404s. Do not add a server or live inference to the docs by default.
 
-Before public hosting: choose the canonical URL, add sitemap/social metadata, decide whether working-tree docs should be versioned, keep the complete API glossary and beginner examples aligned with public exports, and settle whether legacy guides become redirects or stay companion references. The static site is hosted on GPT Sites at https://docs.jevtools.dev. The publication build fetches the current changelog from GitHub main and renders it into the site; visitors do not fetch GitHub or load a Markdown parser.
+Before public hosting: choose the canonical URL, add sitemap/social metadata, decide whether working-tree docs should be versioned, keep the complete API glossary and beginner examples aligned with public exports, and settle whether legacy guides become redirects or stay companion references. The static site is hosted on GPT Sites at https://docs.jevtools.dev. The publication build uses one clean, reviewed checkout for content, declarations, and changelog, and emits a source/version manifest. Follow [the manual publishing policy](docs-publishing.md); CI never deploys, and visitors do not fetch GitHub or load a Markdown parser.
 
 ## Reference and beginner flow guide
 

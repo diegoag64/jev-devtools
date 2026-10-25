@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 import { readFile, mkdir, stat } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
@@ -53,6 +54,13 @@ try {
   const initialRequests = [];
   page.on("request", (r) => initialRequests.push(r.url()));
   assert.equal((await page.goto(origin + base)).status(), 200);
+  // The served manifest must describe the bytes shipped in the same artifact.
+  const manifestResponse = await page.request.get(origin + base + "version.json");
+  assert.equal(manifestResponse.status(), 200);
+  const manifest = await manifestResponse.json();
+  const rawChangelog = await page.request.get(origin + base + "raw/changelog.md");
+  assert.equal(manifest.changelog.sha256, createHash("sha256").update(await rawChangelog.body()).digest("hex"));
+  assert.equal(await page.getByRole("link", { name: `Build details for source package v${manifest.package.version}`, exact: true }).getAttribute("href"), base + "version.json");
   // Install commands are a copyable user contract, including framework extras.
   const install = page.locator("[data-install]");
   const variants = [["pnpm", "pnpm add"], ["npm", "npm install"], ["Yarn", "yarn add"], ["Bun", "bun add"]];
@@ -642,7 +650,7 @@ try {
   assert.ok(await page.getByRole("link", { name: "release verification and recovery record" }).count());
   assert.equal(
     await page.getByRole("link", { name: "release verification and recovery record" }).getAttribute("href"),
-    "https://github.com/diegoag64/jev-devtools/blob/main/docs/releases.md#release-041--published-october-24-2026",
+    manifest.changelog.sourceUrl.replace("CHANGELOG.md", "docs/releases.md#release-041--published-october-24-2026"),
   );
   await page.goto(origin + base + "changelog/");
   await page.screenshot({ path: resolve(evidence, "changelog-desktop.png") });

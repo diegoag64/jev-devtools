@@ -66,9 +66,9 @@ The original integration, flow, and Next.js documents remain the detailed compan
 
 `/changelog/` renders `CHANGELOG.md` into release sections with dates, unreleased status, source links, and GitHub-compatible anchors. The overview table is collapsible; all source notes remain available. Categorized entries use the headings authored in `CHANGELOG.md`, with per-release jump links and counts; the renderer does not infer categories or rewrite release facts. Follow `CONTRIBUTING.md#changelog-categories` when adding entries. Relative links resolve against the GitHub repository. There is no separate manually maintained changelog content file and no browser fetch or Markdown parser.
 
-- `npm run build:docs` and local development use the working-tree changelog, labeled as a working-tree copy. Changes to the root file trigger a docs reload.
-- **Before publishing**, run `npm run build:docs:publish`. This fetches `main/CHANGELOG.md` from GitHub and embeds it in HTML, raw Markdown, and the search index. Failed fetches or malformed content stop publication builds. The saved date and source appear on the page. The published copy updates only with the next deployment.
-- Publish the resulting `apps/docs/dist/` to the existing public GPT Sites project `appgprj_6add5705dbec8191b56b1c9555078a2d`. Reuse its identity and public audience. The dedicated Sites source checkout stores the generated static files; GitHub remains the editable source. The local deployment checkout and archives live under ignored `benchmarks/results/docs/`.
+- Local development and `npm run build:docs` use the working-tree changelog and emit a labeled `version.json` manifest. The sidebar links to its source package version and build details.
+- **Before an explicitly requested publication**, use a clean, reviewed commit on `main` and run `npm run build:docs:publish`. This rebuilds package declarations, rejects uncommitted/untracked changes, and embeds that checkout's changelog with commit-pinned source links. It does not fetch a different revision from GitHub. Verify the resulting artifact with `npm run verify -w @jev-devtools/docs` without rebuilding it.
+- Follow [the manual publishing policy](../../docs/docs-publishing.md) for triggers, checks, the version manifest, the existing public GPT Sites identity, publication receipts, and recovery. CI validates and retains previews; it never deploys. GitHub remains the editable source. Generated deployment checkouts/archives stay under ignored `benchmarks/results/docs/`.
 
 ## GitHub header
 
