@@ -7,20 +7,13 @@ import { execFileSync, spawn } from "node:child_process";
 import { createServer } from "node:net";
 import { once } from "node:events";
 import { setTimeout as delay } from "node:timers/promises";
+import { npm } from "./runtime.mjs";
 import { verificationPackage } from "./verification-package.mjs";
 
 // Exercise the installed package through Next's real route bundles, RSC renderer,
 // Server Action protocol, and server reloads. No browser or live inference needed.
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const temp = await mkdtemp(join(tmpdir(), "jev-nextjs-"));
-// Node won't spawn npm.cmd without a shell, so Windows runs npm's CLI script directly.
-const npmCli = /npm-cli\.js$/.test(process.env.npm_execpath ?? "")
-  ? process.env.npm_execpath
-  : join(dirname(process.execPath), "node_modules/npm/bin/npm-cli.js");
-const npm = (args, options) =>
-  process.platform === "win32"
-    ? execFileSync(process.execPath, [npmCli, ...args], options)
-    : execFileSync("npm", args, options);
 const { dependency } = verificationPackage(npm, root, temp);
 const app = join(temp, "app");
 await cp(join(root, "examples/nextjs-app"), app, {

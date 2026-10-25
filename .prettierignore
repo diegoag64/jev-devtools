@@ -1,0 +1,7 @@
+node_modules/
+/packages/jev-devtools/lib/
+**/dist/
+**/.next/
+apps/docs/.generated/
+benchmarks/results/
+**/package-lock.json
