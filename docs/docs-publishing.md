@@ -56,21 +56,34 @@ GPT Sites assigns a saved version and deployment timestamp **after** the build. 
    ```sh
    npm run build:docs:publish
    npm run verify -w @jev-devtools/docs
-   cat apps/docs/dist/version.json
+   npm run docs:publication -- inspect --commit FULL_REVIEWED_SHA --output benchmarks/results/docs/RUN/inspection.json
    ```
 
    Confirm `build.mode` is `publication`, `source.dirty` is false, the SHA and package version are intended, and the changelog reflects that revision. Review setup and a representative API page in both themes/mobile. Do not run `npm run verify:docs` after the final publication build: that command intentionally rebuilds a working-tree preview.
 
-5. Follow the supported GPT Sites source/open/package/save/deploy workflow manually. Copy the verified `apps/docs/dist/` into the existing deployment checkout; preserve `version.json` and the hosting identity. Record the manifest's canonical source SHA separately from the generated Sites source-repository commit. Save and deploy the same packaged archive without rebuilding it between verification and deployment.
-6. Confirm successful deployment, read the live `/version.json`, and compare its source SHA, package version, mode, and changelog hash with the inspected artifact. Smoke-check `/`, `/getting-started/`, an API deep link, and `/changelog/`. Record the receipt through the current or a follow-up PR. Keep raw screenshots/logs/archives under ignored `benchmarks/results/docs/`.
+5. Follow the supported GPT Sites source/open/package/save/deploy workflow manually. Open the existing deployment checkout with the Sites skill, then use the [publication helpers](#publication-helpers) to stage the inspected artifact; preserve `version.json` and the hosting identity. Record the manifest's canonical source SHA separately from the generated Sites source-repository commit. Save and deploy the same packaged archive without rebuilding it between verification and deployment.
+6. Confirm successful deployment, then run `npm run docs:publication -- verify-live --inspection benchmarks/results/docs/RUN/inspection.json --output benchmarks/results/docs/RUN/live.json`. This compares the live manifest and changelog to the inspected artifact and checks the core pages and API deep link. Review the live setup page in the browser. Record the receipt through the current or a follow-up PR. Keep raw screenshots/logs/archives under ignored `benchmarks/results/docs/`.
 
 The landing website is a separate Site/build under `landing/`; use [its publishing instructions](../landing/README.md#publishing) for an explicitly requested update. A docs deployment never deploys the landing page, and neither deploys npm.
 
 No scheduled refresh or automatic deployment is configured. To decide whether docs are behind, compare the live manifest SHA with the last reviewed main commit and inspect docs, public API, example, and changelog changes since that SHA. An unrelated commit or a newer timestamp alone does not require deployment.
 
+## Publication helpers
+
+`npm run docs:publication -- --help` lists local preparation/readback commands. From outside the repository, invoke `node /absolute/repository/scripts/docs-publication.mjs ...`; the default source and build directory resolve from the script. Explicit paths resolve from the caller's directory. Use a fresh ignored run directory for evidence; inspection and live evidence files are never overwritten.
+
+- **Inspect:** after the publication build and browser checks, supply the reviewed full SHA. Inspection requires a clean checkout at that SHA, reachable from the fetched `origin/main`, a publication manifest for the existing docs Site, matching source/package/changelog metadata, the required pages, and regular files. It records every artifact file hash. Successful main CI and publishing authorization remain separate maintainer gates.
+- **Stage:** open the existing Site using the Sites skill first, then run `npm run docs:publication -- stage --inspection benchmarks/results/docs/RUN/inspection.json --checkout /absolute/sites-checkout`. This requires a clean standalone Git checkout with the existing `.openai/hosting.json` identity and `static.directory: "dist"`. It rejects overlapping directories and changed inspected files, copies and hashes the complete artifact before replacing generated `dist`, and writes `source-provenance.json`. Hosting settings and other source files are preserved. If a previous stage already left changes, inspect/reuse them through the Sites workflow instead of discarding them to rerun stage.
+- **Package and deploy:** pass the Sites helper the opened source result and `commands: []`; the artifact is already built and checked. Save the helper's exact pushed commit/archive, then deploy that saved version with the existing audience. These local helpers neither store credentials nor publish. Keep the inspected build directory and packaged archive unchanged through save/deploy/readback.
+- **Verify live:** after a successful deployment, compare the complete `/version.json`, raw changelog hash, core page HTTP responses, and `#flow-jev` anchor. The output is local readback evidence, not a deployment receipt by itself: add the successful Sites version/deployment IDs, deployment timestamp, Sites source commit, and saved archive hash from the native response to the durable receipt.
+
+For partial failure, resume the existing saved version/deployment when available. A readback failure is incomplete verification, not permission to rebuild or redeploy. Later main commits do not replace the selected artifact. For a rollback, select the previously inspected artifact and verify the deployed manifest against that inspection. Keep npm/tag recovery under the release checklist.
+
+These helpers address preparation and readback errors from the 0.5.2 release. [Issue #77](https://github.com/diegoag64/jev-devtools/issues/77) remains open for the broader investigation of durable external receipt storage, retention, permissions, and recovery. Repository receipts remain the durable record in this workflow; ignored local evidence and expiring Actions artifacts do not replace them.
+
 ## Publication receipt and recovery
 
-Record the canonical commit, source package version, GPT Sites saved version/deployment ID, URL, verified UTC publication date, and a verification summary. Link the CI run and PR when available. Record a failed deployment as failed, not published. If saving succeeded but deployment did not, resume the saved version instead of rebuilding and creating duplicates. A rollback is an explicit manual deployment of a previously successful saved version; verify its live manifest and record the rollback. Never change npm versions or move release tags to repair a docs deployment.
+Record the canonical commit, source package version, GPT Sites saved version/deployment ID, URL, verified UTC publication date, and a verification summary. Link the CI run and PR when available. Use permanent wording such as `Deployment receipt: PR #N`; check the PR state when reporting completion rather than writing a self-referential pending-merge claim into the receipt. Record a failed deployment as failed, not published. If saving succeeded but deployment did not, resume the saved version instead of rebuilding and creating duplicates. A rollback is an explicit manual deployment of a previously successful saved version; verify its live manifest and record the rollback. Never change npm versions or move release tags to repair a docs deployment.
 
 Version 18 is the first publication under this policy. Its live manifest matches the reviewed main commit and embedded changelog. Version 17 remains the historical pre-policy baseline and predates `version.json`.
 

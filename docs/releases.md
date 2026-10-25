@@ -18,6 +18,12 @@ Call the release complete only after npm publication and its intended dist-tag, 
 
 If npm succeeds but tagging, GitHub publication, verification, record updates, or manual docs publication remain pending, report **partially completed release**. State what succeeded, what remains, and any missing authorization or failed check. Resume from the missing step; do not republish an existing npm version, move a published tag, or include newer commits. If a record-update PR is awaiting review, report publication as verified with that follow-up pending. Never silently omit a remaining step or describe npm success alone as completion of the whole release.
 
+### Durable receipt wording
+
+Record immutable observations with their UTC verification time and link the receipt PR as `Deployment receipt: PR #N`. Read the PR's live state when reporting outstanding work; a receipt does not embed its own pending-review status. For example, use `gh pr view N --repo diegoag64/jev-devtools --json state,mergedAt,url`. The completion rule still requires the record PR to merge. A historical Latest observation describes its verification time, not the current default version. `npm run check:release-records` checks local receipt links and rejects the self-expiring receipt-link wording repaired here; it runs in `check` and the receipt verifier.
+
+Routine corrections inside existing receipt sections may use the [receipt-only verification path](../CONTRIBUTING.md#receipt-only-verification). A version preparation, changed compatibility guidance, new release section, or publication candidate uses full verification.
+
 ### Read back the published state
 
 Replace `X.Y.Z` with the release version. These commands read public metadata; they do not publish:
@@ -93,7 +99,7 @@ The [GitHub release v0.5.2](https://github.com/diegoag64/jev-devtools/releases/t
 
 [Release-record PR #96](https://github.com/diegoag64/jev-devtools/pull/96) merged as `7c005e140863580c74b5f15c81b1005a2e5e178a`, with successful [main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40237265560). The explicitly requested docs deployment succeeded at 21:54:01 UTC on October 25, 2026 as GPT Sites version 22. Its live manifest matches that clean source commit, package 0.5.2, publication mode, and embedded changelog hash. Required local checks, publication-artifact verification, setup/API theme and mobile review, and live page checks passed. See the [publication receipt](docs-publishing.md#publication-receipt-and-recovery) for deployment IDs and hashes.
 
-npm publication, the exact tag, GitHub Latest, and hosted docs are verified. **Follow-up pending:** [deployment-receipt PR #99](https://github.com/diegoag64/jev-devtools/pull/99) needs review/merge; it does not require another docs deployment. The immutable npm archive retains its preparation-time README, and the deployed docs retain their pre-deployment publication status text; these receipt edits do not rewrite either artifact. Do not republish 0.5.2. No landing Site deployment was performed. Evidence remains ignored under `benchmarks/results/release-0.5.2/` and `benchmarks/results/docs/publication-96/`.
+npm publication, the exact tag, GitHub Latest, and hosted docs are verified. Deployment receipt: [PR #99](https://github.com/diegoag64/jev-devtools/pull/99). Receipt-only changes do not require another docs deployment. The immutable npm archive retains its preparation-time README, and the deployed docs retain their pre-deployment publication status text; these receipt edits do not rewrite either artifact. Do not republish 0.5.2. No landing Site deployment was performed. Evidence remains ignored under `benchmarks/results/release-0.5.2/` and `benchmarks/results/docs/publication-96/`.
 
 ## Release 0.5.1 — published October 25, 2026
 
@@ -110,11 +116,11 @@ The inspected and published archive is `jev-devtools-0.5.1.tgz` (78 files):
 - Release-notes SHA-256: `fd1f219b8eb082a35d59c6d1a19f578bc6feb49858f23293985d29b10fe7af12`
 - [npm provenance](https://registry.npmjs.org/-/npm/v1/attestations/jev-devtools@0.5.1)
 
-The [GitHub release v0.5.1](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.1) was published at 18:20:25 UTC. Its lightweight remote tag resolves exactly to `c88aea5d615a65bcda1d820b5abc63bb6fbe05e6`; it is neither draft nor prerelease. GitHub's latest-release endpoint returns v0.5.1, and its release body matches the approved notes.
+The [GitHub release v0.5.1](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.1) was published at 18:20:25 UTC. Its lightweight remote tag resolves exactly to `c88aea5d615a65bcda1d820b5abc63bb6fbe05e6`; it is neither draft nor prerelease. GitHub's latest-release endpoint returned v0.5.1 at publication, and its release body matches the approved notes.
 
 [Publication-record PR #87](https://github.com/diegoag64/jev-devtools/pull/87) merged as `a3294d6a2e9aff7f6758cb3f9ae5034bd0c2767c`, with successful [main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40221849336). The explicitly requested docs deployment succeeded at 18:37:34 UTC on October 25, 2026 as GPT Sites version 21. Its live manifest matches that clean source commit, package 0.5.1, publication mode, and embedded changelog hash. Setup/API theme and mobile review, publication-artifact checks, and live page checks passed. See the [publication receipt](docs-publishing.md#publication-receipt-and-recovery) for deployment IDs and hashes.
 
-npm publication, the exact tag, GitHub Latest, and hosted docs are verified. **Follow-up pending:** [receipt PR #89](https://github.com/diegoag64/jev-devtools/pull/89) still needs review/merge; it does not require another docs deployment. The immutable npm archive retains its preparation-time README, and the deployed docs retain their pre-deployment publication status text; these source receipt edits do not rewrite either artifact. Do not republish 0.5.1. No landing Site deployment was performed. Evidence remains ignored under `benchmarks/results/release-0.5.1/` and `benchmarks/results/docs/publication-87/`.
+npm publication, the exact tag, GitHub Latest, and hosted docs are verified. Deployment receipt: [PR #89](https://github.com/diegoag64/jev-devtools/pull/89). Receipt-only changes do not require another docs deployment. The immutable npm archive retains its preparation-time README, and the deployed docs retain their pre-deployment publication status text; these source receipt edits do not rewrite either artifact. Do not republish 0.5.1. No landing Site deployment was performed. Evidence remains ignored under `benchmarks/results/release-0.5.1/` and `benchmarks/results/docs/publication-87/`.
 
 ## Release 0.5.0 — published October 25, 2026
 
@@ -131,9 +137,9 @@ The inspected and published archive is `jev-devtools-0.5.0.tgz` (78 files):
 - Release-notes SHA-256: `75b5b971a2761ea8a8507e2b8d5c43654bad17322187ded64924ba574a8aa76e`
 - [npm provenance](https://registry.npmjs.org/-/npm/v1/attestations/jev-devtools@0.5.0)
 
-The [GitHub release v0.5.0](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.0) was created during recovery at 06:33:23 UTC using the original candidate notes. Its lightweight remote tag resolves exactly to `64efa4c494a83207e94c67b42f6744802db18c11`; it is neither draft nor prerelease, and GitHub's latest-release endpoint returns v0.5.0.
+The [GitHub release v0.5.0](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.0) was created during recovery at 06:33:23 UTC using the original candidate notes. Its lightweight remote tag resolves exactly to `64efa4c494a83207e94c67b42f6744802db18c11`; it is neither draft nor prerelease, and GitHub's latest-release endpoint returned v0.5.0 at publication.
 
-[Publication-record/workflow-fix PR #75](https://github.com/diegoag64/jev-devtools/pull/75) merged as `c22f7695ac83333fed7b34ea3487ed6b86e4c714`, with successful main CI. The explicitly requested docs deployment succeeded on October 25, 2026 at 06:45:14 UTC as GPT Sites version 18. The live manifest matches that clean source commit, package 0.5.0, publication mode, and embedded changelog hash; setup, API, and changelog smoke checks passed. See the [publication receipt](docs-publishing.md#publication-receipt-and-recovery) for deployment IDs and hashes. npm, tag, GitHub Latest, and live docs are verified. [Receipt PR #76](https://github.com/diegoag64/jev-devtools/pull/76) still needs review/merge; it does not require redeploying the same docs or changing immutable package bytes. The landing Site was not redeployed. Do not rerun the original publishing job or republish 0.5.0.
+[Publication-record/workflow-fix PR #75](https://github.com/diegoag64/jev-devtools/pull/75) merged as `c22f7695ac83333fed7b34ea3487ed6b86e4c714`, with successful main CI. The explicitly requested docs deployment succeeded on October 25, 2026 at 06:45:14 UTC as GPT Sites version 18. The live manifest matches that clean source commit, package 0.5.0, publication mode, and embedded changelog hash; setup, API, and changelog smoke checks passed. See the [publication receipt](docs-publishing.md#publication-receipt-and-recovery) for deployment IDs and hashes. npm, tag, GitHub Latest, and live docs are verified. Deployment receipt: [PR #76](https://github.com/diegoag64/jev-devtools/pull/76). Receipt-only changes do not require redeploying the same docs or changing immutable package bytes. The landing Site was not redeployed. Do not rerun the original publishing job or republish 0.5.0.
 
 ## Release 0.4.1 — published October 24, 2026
 

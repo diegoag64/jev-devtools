@@ -13,9 +13,17 @@ import { once } from "node:events";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { npm, npmCommand, runtimeEnv } from "./runtime.mjs";
+import { checkReceiptScope } from "./receipt-scope.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 process.chdir(root);
+const args = process.argv.slice(2);
+if (args.some((arg) => arg !== "--receipts"))
+  throw new Error("Usage: verify-all.mjs [--receipts]");
+const receipts = args.includes("--receipts");
+// Gate before any build/test. Include committed, staged, unstaged and untracked
+// changes since the merge base, so a clean index cannot hide broader work.
+const scope = receipts ? checkReceiptScope(root) : undefined;
 const git = (...args) => execFileSync("git", args, { encoding: "utf8" });
 async function sourceHash() {
   const files = new Set(
@@ -47,6 +55,8 @@ const output = join(
 );
 await mkdir(output, { recursive: true });
 const report = {
+  mode: receipts ? "receipts" : "full",
+  ...(scope ? { scope } : {}),
   revision: git("rev-parse", "HEAD").trim(),
   sourceHash: await sourceHash(),
   node: { version: process.versions.node, executable: process.execPath },
@@ -134,49 +144,67 @@ async function run(name, command, args, env = process.env) {
 }
 const runNpm = (name, args, env) => run(name, ...npmCommand(args), env);
 try {
-  // Always build and pack this checkout. Release-specific overrides belong to
+  // Full verification builds and packs this checkout. Release overrides belong to
   // the standalone consumer commands, not this source verification report.
   const env = { ...process.env };
   delete env.JEV_VERIFY_TARBALL;
   delete env.JEV_VERIFY_VERSION;
-  for (const name of [
-    "format:check",
-    "check",
-    "test",
-    "build",
-    "check:playground",
-  ]) {
-    await runNpm(name.replaceAll(":", "-"), ["run", name], env);
-  }
-  await runNpm(
-    "pack",
-    ["pack", "-w", "jev-devtools", "--pack-destination", output],
-    env,
-  );
-  const archives = (await readdir(output)).filter((name) =>
-    name.endsWith(".tgz"),
-  );
-  if (archives.length !== 1)
-    throw new Error("Expected exactly one packed archive");
-  const tarball = join(output, archives[0]);
-  report.archive = {
-    path: tarball,
-    sha256: createHash("sha256")
-      .update(await readFile(tarball))
-      .digest("hex"),
-  };
-  await save();
-  for (const name of [
-    "verify:package",
-    "verify:nextjs",
-    "verify:drawer",
-    "verify:flows",
-    "verify:docs",
-  ]) {
-    await runNpm(name.replaceAll(":", "-"), ["run", name], {
-      ...env,
-      JEV_VERIFY_TARBALL: tarball,
-    });
+  if (receipts) {
+    for (const name of [
+      "format:check",
+      "check:release-records",
+      "test:release-tools",
+      "build:package",
+    ]) {
+      await runNpm(name.replaceAll(":", "-"), ["run", name], env);
+    }
+    await runNpm(
+      "docs-check",
+      ["run", "check", "-w", "@jev-devtools/docs"],
+      env,
+    );
+    await runNpm("docs-test", ["run", "test", "-w", "@jev-devtools/docs"], env);
+    await runNpm("verify-docs", ["run", "verify:docs"], env);
+  } else {
+    for (const name of [
+      "format:check",
+      "check",
+      "test",
+      "build",
+      "check:playground",
+    ]) {
+      await runNpm(name.replaceAll(":", "-"), ["run", name], env);
+    }
+    await runNpm(
+      "pack",
+      ["pack", "-w", "jev-devtools", "--pack-destination", output],
+      env,
+    );
+    const archives = (await readdir(output)).filter((name) =>
+      name.endsWith(".tgz"),
+    );
+    if (archives.length !== 1)
+      throw new Error("Expected exactly one packed archive");
+    const tarball = join(output, archives[0]);
+    report.archive = {
+      path: tarball,
+      sha256: createHash("sha256")
+        .update(await readFile(tarball))
+        .digest("hex"),
+    };
+    await save();
+    for (const name of [
+      "verify:package",
+      "verify:nextjs",
+      "verify:drawer",
+      "verify:flows",
+      "verify:docs",
+    ]) {
+      await runNpm(name.replaceAll(":", "-"), ["run", name], {
+        ...env,
+        JEV_VERIFY_TARBALL: tarball,
+      });
+    }
   }
   await run("diff-check", "git", ["diff", "--check"]);
   report.finalSourceHash = await sourceHash();
