@@ -54,7 +54,9 @@ DOCS_BASE=/docs/ npm run build:docs
 DOCS_BASE=/docs/ npm run preview -w @jev-devtools/docs
 ```
 
-Open `/docs/` on the preview server. The base must start and end with `/`; only simple path segments are accepted. The public site is hosted on GPT Sites at https://docs.jevtools.dev. Choose canonical URL, sitemap, and social metadata deliberately when adding them. Missing routes should retain the host's 404 response.
+Open `/docs/` on the preview server. The base must start and end with `/`; only simple path segments are accepted. The public site is hosted on GPT Sites at https://docs.jevtools.dev. Choose canonical URL and sitemap deliberately when adding them. Missing routes should retain the host's 404 response.
+
+Every page emits Open Graph and Twitter metadata in its static HTML, using its existing title and description and requesting `summary_large_image`. The shared image is `assets/social/jevtools-docs.png`, copied to `dist/social/jevtools-docs.png`. Social page and image URLs use the public docs origin and honor `DOCS_BASE`. Keep the image dimensions and alt text in `site.ts` aligned when replacing the asset. Publication is manual; merging these files does not update live previews.
 
 ## Content direction and next steps
 

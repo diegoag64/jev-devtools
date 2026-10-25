@@ -1,4 +1,4 @@
-import { readFile, mkdir, writeFile } from "node:fs/promises";
+import { copyFile, readFile, mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Marked } from "marked";
@@ -105,6 +105,9 @@ export async function generate(
   const githubLinks = await renderGitHubLinks();
   const logo = (await readFile(resolve(appRoot, "assets/logo.svg"), "utf8")).trim();
   const href = (slug: string) => base + (slug ? slug + "/" : "");
+  const siteURL = "https://docs.jevtools.dev";
+  const shareImageURL = new URL(base + "social/jevtools-docs.png", siteURL).href;
+  const shareImageAlt = "Jev DevTools Documentation. Guides, Examples, API reference.";
   const search: { title: string; group: string; url: string; text: string }[] =
     [];
   const inputs: Record<string, string> = {};
@@ -147,7 +150,24 @@ export async function generate(
       p
         ? `<a href="${href(p.slug)}"><small>${label}</small><span>${escape(p.title)} ${label === "Next" ? "→" : ""}</span></a>`
         : "<span></span>";
-    const doc = `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="${escape(page.description)}"><meta name="color-scheme" content="light dark"><script>${themeScript}</script><link rel="stylesheet" href="${source("style.css")}"><title>${escape(page.title)} · Jev DevTools</title><link rel="icon" href="${base}favicon-light.svg" type="image/svg+xml"></head><body>
+    const title = escape(page.title + " · Jev DevTools");
+    const description = escape(page.description);
+    const socialMetadata = `
+<meta property="og:type" content="website">
+<meta property="og:title" content="${title}">
+<meta property="og:description" content="${description}">
+<meta property="og:url" content="${new URL(href(page.slug), siteURL).href}">
+<meta property="og:image" content="${shareImageURL}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1734">
+<meta property="og:image:height" content="907">
+<meta property="og:image:alt" content="${shareImageAlt}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${title}">
+<meta name="twitter:description" content="${description}">
+<meta name="twitter:image" content="${shareImageURL}">
+<meta name="twitter:image:alt" content="${shareImageAlt}">`;
+    const doc = `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="${description}">${socialMetadata}<meta name="color-scheme" content="light dark"><script>${themeScript}</script><link rel="stylesheet" href="${source("style.css")}"><title>${title}</title><link rel="icon" href="${base}favicon-light.svg" type="image/svg+xml"></head><body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="topbar"><a class="brand" href="${base}" aria-label="Jev DevTools home">${logo}<strong>jev<span>tools</span><span class="brand-dot">.</span></strong></a><span class="docs-label">Documentation</span><button class="search-trigger" type="button" hidden><span>Search documentation</span><kbd>⌘ K</kbd></button>${githubLinks}<button class="theme-toggle" type="button" aria-label="Switch color theme" hidden>◐</button><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="sidebar" hidden>Menu</button></header>
 <div class="layout"><aside id="sidebar" class="sidebar"><div class="version">${buildMode === "publication" ? "Docs snapshot" : "Working tree docs"} <span><a href="${base}version.json" aria-label="Build details for source package v${escape(manifest.package.version)}">v${escape(manifest.package.version)}</a></span></div><nav aria-label="Documentation">${nav}</nav></aside>
@@ -200,5 +220,10 @@ export async function generate(
   const favicon = await readFile(resolve(appRoot, "assets/favicon-light.svg"), "utf8");
   await writeFile(resolve(generated, "public/favicon-light.svg"), favicon);
   await writeFile(resolve(generated, "public/favicon.svg"), favicon);
+  await mkdir(resolve(generated, "public/social"), { recursive: true });
+  await copyFile(
+    resolve(appRoot, "assets/social/jevtools-docs.png"),
+    resolve(generated, "public/social/jevtools-docs.png"),
+  );
   return inputs;
 }
