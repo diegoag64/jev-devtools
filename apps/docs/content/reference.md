@@ -1,6 +1,6 @@
 Use this page when you know an API name and want its contract. Each method has a permanent heading link, a readable signature, inputs, return value, and usage. Start with [Flows from scratch](@/guides/flow-basics/) if flows are new to you.
 
-These docs describe the **0.5.2 release candidate, pending publication**; npm currently provides 0.5.1. Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
+These docs describe **published version 0.5.2**, also the default npm install. Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
 
 <details class="reference-notes">
 <summary>How to read the signatures</summary>
@@ -913,7 +913,7 @@ The object groups two previously defined references, `message` and `count`. Both
 
 The short expression snippets below belong inside a synchronous `defineJevFlow()` callback. They build references; use them in a step or terminal `output()`, then await the flow’s `run()` to get actual data. See the [complete expression and execution example](@/api/flow/#collections-and-loops).
 
-All these runtime exports come from `jev-devtools/flow`. References must belong to the same flow and be available in the current execution scope. See [expression scopes](@/api/expressions/#respect-scope). **0.5.2 (pending publication):** construction enforces complete [expression depth and expansion limits](@/api/expressions/#expression-limits), including reused children.
+All these runtime exports come from `jev-devtools/flow`. References must belong to the same flow and be available in the current execution scope. See [expression scopes](@/api/expressions/#respect-scope). **0.5.2:** construction enforces complete [expression depth and expansion limits](@/api/expressions/#expression-limits), including reused children.
 
 ### FlowExpression
 
