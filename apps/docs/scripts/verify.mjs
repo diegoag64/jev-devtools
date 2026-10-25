@@ -396,8 +396,39 @@ try {
   await page.keyboard.press("Enter");
   await page.waitForURL("**/api/reference/#flow-task");
   assert.equal(await page.locator("#search-dialog").evaluate((dialog) => dialog.open), false, "Same-page API search closes the dialog");
+  // Reading location follows native anchors, scrolling in either direction,
+  // and history; a long method must stay current after its heading scrolls away.
+  const expectLocation = async (hash) => {
+    await page.waitForFunction((hash) =>
+      document.querySelector('.toc [aria-current="location"]')?.getAttribute("href") === hash, hash);
+    assert.equal(await outline.locator('[aria-current="location"]').count(), 1);
+  };
+  await expectLocation("#flow-task");
+  await page.locator("#flow-task").evaluate((heading) => {
+    window.scrollBy(0, 450);
+  });
+  await expectLocation("#flow-task");
+  const hashBeforeScroll = new URL(page.url()).hash;
+  await page.locator("#flow-jev").evaluate((heading) => heading.scrollIntoView({ block: "start" }));
+  await expectLocation("#flow-jev");
+  assert.equal(new URL(page.url()).hash, hashBeforeScroll, "Reading does not rewrite history");
+  await page.locator("#flow-task").evaluate((heading) => heading.scrollIntoView({ block: "start" }));
+  await expectLocation("#flow-task");
+  await outline.getByRole("link", { name: "map()", exact: true }).click();
+  await page.waitForURL("**/#flow-map");
+  await expectLocation("#flow-map");
+  await page.goBack();
+  await expectLocation("#flow-task");
+  await page.goto(origin + base + "api/reference/#type-flowbuilder");
+  await expectLocation("#type-flowbuilder");
+  const activeBounds = await outline.locator('[aria-current="location"]').boundingBox();
+  assert.ok(activeBounds.y >= 76 && activeBounds.y + activeBounds.height <= 1050,
+    "Long groups keep the active method visible in the outline");
+  await page.goto(origin + base + "api/reference/#flow-task");
+  await expectLocation("#flow-task");
   await page.screenshot({ path: resolve(evidence, "api-glossary.png") });
   await page.goto(origin + base + "guides/flow-basics/#map-repeat-a-recipe-for-each-item");
+  await expectLocation("#map-repeat-a-recipe-for-each-item");
   await page.screenshot({ path: resolve(evidence, "flow-basics.png") });
   // The published changelog is a readable static document, including release
   // anchors from GitHub and source-relative links; no visitor fetch is needed.
@@ -472,8 +503,9 @@ try {
   await readable.goto(origin + base + "guides/flow-basics/");
   await readable.locator(".code-references").getByRole("link", { name: "flow.task()", exact: true }).first().click();
   assert.ok(readable.url().endsWith("/api/reference/#flow-task"));
-  await readable.locator("#type-taskcontext + p + p + details summary").click();
-  assert.ok((await readable.locator("#type-taskcontext + p + p + details").innerText()).includes("executionId"));
+  const contract = readable.getByRole("region", { name: /^Type: TaskContext/ });
+  await contract.getByText("Exact TypeScript declaration", { exact: true }).click();
+  assert.ok((await contract.innerText()).includes("executionId"));
   for (const route of ["api/reference/", "guides/flow-basics/"]) {
     await readable.goto(origin + base + route);
     assert.ok(await readable.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${route} fits mobile without JS`);

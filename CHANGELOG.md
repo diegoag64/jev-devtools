@@ -48,6 +48,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **Readable API glossary and page navigation.** Separate API groups and methods visually, label signatures, inputs, returns, and examples, and highlight the current section as you scroll. The glossary outline includes grouped method links; existing deep links and no-JavaScript reading remain available. Docs only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
+
 - **Define and run flow examples.** Pair flow definitions with awaited execution, concrete inputs, and resolved results throughout the docs. Explain before request examples that `flow.jev()` builds references while `run()` sends and awaits requests. Documentation only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
 
 - **Clearer method contracts.** Show input and return interfaces in tables, explain the operations used in each example, shorten flow navigation labels without changing section links, and present GitHub stars as a passive count. Documentation and docs UI only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).

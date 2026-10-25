@@ -111,7 +111,6 @@ h3 {
 h2 {
   font-size: 25px;
   margin: 44px 0 18px;
-  scroll-margin-top: 100px;
 }
 h3 {
   font-size: 18px;
@@ -345,10 +344,12 @@ main {
 }
 .toc a {
   display: block;
+  padding: 5px 9px;
+  border-radius: 5px;
   color: var(--muted);
   text-decoration: none;
   line-height: 1.5;
-  margin: 12px 0;
+  margin: 3px 0;
 }
 .toc a:hover {
   color: var(--accent);
@@ -945,5 +946,208 @@ dialog::backdrop {
 @media (max-width: 480px) {
   .topbar .brand strong {
     display: none;
+  }
+}
+
+/* The current reading location uses both a marker and color. */
+.toc a[aria-current="location"] {
+  color: var(--accent);
+  background: var(--tint);
+  box-shadow: inset 2px 0 var(--accent);
+  font-weight: 600;
+}
+.toc-group {
+  margin: 4px 0;
+}
+.toc-group summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+.toc-group summary a {
+  display: inline-block;
+  max-width: calc(100% - 16px);
+  vertical-align: middle;
+}
+.toc-group.is-current > summary {
+  color: var(--accent);
+}
+.toc-group.is-current > summary a {
+  color: var(--text);
+  font-weight: 600;
+}
+.toc-methods {
+  border-left: 1px solid var(--line);
+  margin: 5px 0 12px 6px;
+  padding-left: 8px;
+}
+.toc-methods a {
+  overflow-wrap: anywhere;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+}
+.reference-notes {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 18px;
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 32px;
+}
+.reference-notes summary,
+.reference-group details summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.reference-notes[open] summary {
+  margin-bottom: 16px;
+}
+.reference-notes p:last-child {
+  margin-bottom: 0;
+}
+.api-directory {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+}
+.api-directory a {
+  padding: 17px 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text);
+}
+.api-directory a:hover {
+  border-color: var(--accent);
+  background: var(--tint);
+}
+.api-directory strong,
+.api-directory span {
+  display: block;
+}
+.api-directory span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 5px;
+}
+.reference-group {
+  margin-top: 64px;
+}
+.reference-group-header {
+  border-top: 2px solid var(--accent);
+  padding-top: 24px;
+  margin-bottom: 24px;
+}
+.reference-group-header h2 {
+  margin: 0;
+  font-size: 29px;
+  letter-spacing: -0.8px;
+}
+.reference-source {
+  font-family: "SFMono-Regular", Consolas, monospace;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.api-entry {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin: 28px 0;
+  /* Do not clip fixed API hovers or keyboard focus rings at the card edge. */
+}
+.api-entry-header {
+  /* Keep the method name visible while reading its long example or tables. */
+  position: sticky;
+  top: 76px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 22px 24px;
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.api-entry-header h3 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font: 600 20px/1.4 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: -0.6px;
+  overflow-wrap: anywhere;
+}
+.api-entry-header .heading-link {
+  font-size: 14px;
+}
+.api-kind {
+  order: 2;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.api-entry-body {
+  padding: 0 24px 24px;
+}
+.api-entry-body > :last-child {
+  margin-bottom: 0;
+}
+.api-entry-body > h4 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 28px 0 12px;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.api-entry-body > h4::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--line);
+}
+.api-entry-body > h4 .heading-link {
+  /* Method headings own permalinks; subheadings remain keyboard-linkable. */
+  font-size: 11px;
+}
+.api-entry-body > p:first-child {
+  margin-top: 24px;
+}
+.api-entry .code-block,
+.api-entry table {
+  margin: 14px 0 24px;
+}
+.api-entry .code-references {
+  font-size: 12px;
+}
+.reference-group details {
+  margin: 20px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  font-size: 13px;
+}
+@media (max-width: 760px) {
+  .api-directory {
+    grid-template-columns: 1fr;
+  }
+  .api-entry-header {
+    top: 64px;
+    padding: 16px;
+  }
+  .api-entry-header h3 {
+    font-size: 17px;
+  }
+  .api-entry-body {
+    padding: 0 14px 18px;
+  }
+  .reference-group-header h2 {
+    font-size: 25px;
   }
 }

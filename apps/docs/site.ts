@@ -5,6 +5,7 @@ import { Marked } from "marked";
 import { changelogURL, changelogSource, renderChangelog } from "./changelog.js";
 import { publicTypeReference } from "./type-reference.js";
 import { codeRenderer } from "./highlight.js";
+import { layoutReference, referenceGroups, referenceLabel } from "./reference-layout.js";
 import { groups, pages, type Page } from "./pages.js";
 
 import { repositoryURL as repo, renderGitHubLinks } from "./github.js";
@@ -28,7 +29,7 @@ export function normalizeBase(value = "/") {
     );
   return value;
 }
-export async function compile(markdown: string, base = "/") {
+export async function compile(markdown: string, base = "/", reference = false) {
   const headings: { id: string; title: string; depth: number }[] = [];
   const ids = new Map<string, number>();
   const renderCode = await codeRenderer(base);
@@ -54,8 +55,31 @@ export async function compile(markdown: string, base = "/") {
       },
     },
   });
-  return { html: await renderer.parse(markdown), headings };
+  const html = await renderer.parse(markdown);
+  return { html: reference ? layoutReference(html) : html, headings };
 }
+
+function renderOutline(headings: { id: string; title: string; depth: number }[], page: Page) {
+  const isReference = page.slug === "api/reference";
+  const link = (h: (typeof headings)[number]) => {
+    const label = page.tocLabels?.[h.id] ?? (isReference
+      ? h.depth === 2 ? referenceGroups[h.id]?.label ?? h.title : referenceLabel(h.id, h.title)
+      : h.title);
+    return `<a data-toc-link href="#${h.id}">${escape(label)}</a>`;
+  };
+  if (!isReference) return headings.filter((h) => h.depth === 2).map(link).join("");
+  let result = "";
+  for (const [index, heading] of headings.entries()) {
+    if (heading.depth !== 2) continue;
+    const next = headings.findIndex((h, i) => i > index && h.depth === 2);
+    const methods = headings.slice(index + 1, next < 0 ? undefined : next).filter((h) => h.depth === 3);
+    result += methods.length
+      ? `<details class="toc-group" open><summary>${link(heading)}</summary><div class="toc-methods">${methods.map(link).join("")}</div></details>`
+      : link(heading);
+  }
+  return result;
+}
+
 async function expandExamples(source: string) {
   if (source.includes("<!-- public-api-types -->"))
     source = source.replace("<!-- public-api-types -->", publicTypeReference());
@@ -100,7 +124,7 @@ export async function generate(
       /\]\(@\/([^)]*)\)/g,
       (_, path: string) => `](${base}${path})`,
     );
-    const { html, headings } = isChangelog ? renderChangelog(linked) : await compile(linked, base);
+    const { html, headings } = isChangelog ? renderChangelog(linked) : await compile(linked, base, page.slug === "api/reference");
     const changelogStatus = `Saved ${new Date().toISOString().slice(0, 10)} · ${remoteChangelog ? "GitHub main" : "working-tree copy"}.`;
     const editURL = isChangelog ? `${repo}/edit/main/CHANGELOG.md` : `${repo}/edit/main/apps/docs/content/${page.file}`;
     const file = resolve(generated, page.slug, "index.html");
@@ -128,13 +152,8 @@ export async function generate(
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="topbar"><a class="brand" href="${base}" aria-label="Jev DevTools home"><span class="brand-mark" aria-hidden="true">j<span>•</span></span><strong>jev<span> / devtools</span></strong></a><span class="docs-label">Documentation</span><button class="search-trigger" type="button" hidden><span>Search documentation</span><kbd>⌘ K</kbd></button>${githubLinks}<button class="theme-toggle" type="button" aria-label="Switch color theme" hidden>◐</button><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="sidebar" hidden>Menu</button></header>
 <div class="layout"><aside id="sidebar" class="sidebar"><div class="version">Working tree docs <span>pre-1.0</span></div><nav aria-label="Documentation">${nav}</nav></aside>
-<main id="main" tabindex="-1"><div class="breadcrumb">Docs <span>/</span> ${page.group}</div><div class="page-heading"><p class="eyebrow">${page.group}</p><h1>${page.title}</h1><p class="lead">${page.description}</p></div>${isChangelog ? `<div class="changelog-source"><a href="${changelogSource}">Source on GitHub ↗</a><p>${changelogStatus}</p></div>` : ""}<article>${html}</article><footer class="article-footer"><a href="${editURL}">Edit this page ↗</a><a href="${base}raw/${page.slug || "introduction"}.md">Read as Markdown</a></footer><nav class="page-nav" aria-label="Previous and next pages">${neighbour(pages[index - 1], "Previous")}${neighbour(pages[index + 1], "Next")}</nav><p class="site-note">Jev DevTools is an independent, open-source community project. It is not affiliated with TypeSafe AI.</p></main>
-<aside class="toc"><nav aria-label="On this page"><p>On this page</p>${headings
-      .filter((h) => h.depth === 2)
-      .map((h) => `<a href="#${h.id}">${escape(page.tocLabels?.[h.id] ?? h.title)}</a>`)
-      .join(
-        "",
-      )}</nav></aside></div>
+<main id="main" tabindex="-1"><div class="breadcrumb">Docs <span>/</span> ${page.group}</div><div class="page-heading"><p class="eyebrow">${page.group}</p><h1>${page.title}</h1><p class="lead">${page.description}</p></div>${isChangelog ? `<div class="changelog-source"><a href="${changelogSource}">Source on GitHub ↗</a><p>${changelogStatus}</p></div>` : ""}<article${page.slug === "api/reference" ? ' class="api-reference"' : ""}>${html}</article><footer class="article-footer"><a href="${editURL}">Edit this page ↗</a><a href="${base}raw/${page.slug || "introduction"}.md">Read as Markdown</a></footer><nav class="page-nav" aria-label="Previous and next pages">${neighbour(pages[index - 1], "Previous")}${neighbour(pages[index + 1], "Next")}</nav><p class="site-note">Jev DevTools is an independent, open-source community project. It is not affiliated with TypeSafe AI.</p></main>
+<aside class="toc"><nav aria-label="On this page"><p>On this page</p>${renderOutline(headings, page)}</nav></aside></div>
 <dialog id="search-dialog" aria-labelledby="search-title"><div class="search-header"><label id="search-title" for="search-input">Search the docs</label><button type="button" class="close-search" aria-label="Close search">Esc</button></div><input id="search-input" type="search" placeholder="Try ‘Next.js’ or ‘createClient’" autocomplete="off"><p id="search-status" role="status"></p><ul id="search-results"></ul></dialog>
 <script type="module" src="${source("client.ts")}"></script></body></html>`;
     await mkdir(dirname(file), { recursive: true });

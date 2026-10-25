@@ -1,3 +1,5 @@
+import "./outline.js";
+
 const root = document.documentElement;
 const themeButton = document.querySelector<HTMLButtonElement>(".theme-toggle")!;
 themeButton.hidden = false;
