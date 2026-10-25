@@ -74,15 +74,28 @@ After any uncertain publish outcome, do not dispatch a new publication or rerun 
 
 The independent consumer checks accept `JEV_VERIFY_TARBALL=/absolute/path/to/archive.tgz` to check an inspected archive, or `JEV_VERIFY_VERSION=X.Y.Z` to check a fresh registry installation. Do not set both. Use the verification scripts from the release commit so later regression tests do not incorrectly reject an older release. With neither variable, the existing local pack-and-check behavior is unchanged.
 
-## Release 0.5.1 — pending publication
+## Release 0.5.1 — published October 25, 2026
 
-This release candidate includes the task-input symbol-key rejection from [PR #81](https://github.com/diegoag64/jev-devtools/pull/81), primitive expression property type correction from [PR #82](https://github.com/diegoag64/jev-devtools/pull/82), and setup/compatibility guidance from [PR #79](https://github.com/diegoag64/jev-devtools/pull/79), plus the accumulated documentation, website, and release-workflow maintenance. See the [pending release notes](../CHANGELOG.md#051--pending-publication-experimental) for the full scope and upgrade requirements.
+**[jev-devtools@0.5.1](https://www.npmjs.com/package/jev-devtools/v/0.5.1) was published at 18:19:01.066 UTC on October 25, 2026**, from `c88aea5d615a65bcda1d820b5abc63bb6fbe05e6` after [PR #83](https://github.com/diegoag64/jev-devtools/pull/83) and [main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40219281499) passed. npm's `latest` is 0.5.1. See the [release notes](../CHANGELOG.md#051--october-25-2026-experimental) for the task-input symbol-key rejection, primitive expression property type correction, setup guidance, and compatibility requirements.
 
-**Preparation only.** npm publication, `v0.5.1`, the GitHub release, and the corresponding hosted docs publication are pending. After this release PR is approved and merged, use the exact merged commit with green Verify CI for the release rehearsal and archive inspection. Publishing requires the explicit release authorization and protected environment approval described above; merging this PR does not publish.
+The [rehearsal](https://github.com/diegoag64/jev-devtools/actions/runs/40219824561) passed. The [approved publication run](https://github.com/diegoag64/jev-devtools/actions/runs/40220097820) built and checked its own candidate, paused for the maintainer's protected `npm-release` approval, and published the inspected bytes through npm OIDC. Both archives and generated release notes matched exactly. npm processing completed successfully within the workflow's verification window; all three jobs succeeded without a retry or recovery publication.
+
+Independent registry readback confirmed the UTC publication time, `latest`, integrity, and byte-for-byte equality of the downloaded npm archive with the approved candidate. The provenance identifies `.github/workflows/release.yml`, `main`, and the exact source commit above. The completion job used Node 24.21.0 and fresh registry installations to verify public exports, flow declarations, React build/SSR, Next.js development route/action/component capture, reload retention, SSE/clear, and production-disabled inspector endpoints. All checks used sample responses; no live inference was performed.
+
+The inspected and published archive is `jev-devtools-0.5.1.tgz` (78 files):
+
+- SHA-256: `d09b44d69e1c1f01f6074cc9ca380d772b1910a8379c03d983c08c59db4ef459`
+- npm integrity: `sha512-IUITSQSXNIRfwxxj5m9dM+czuEyBuNCI5JmSwHhwMEEBp0+qTsnN9NXE79aJYhnv91khSoZcsX9QGHuKPsGrig==`
+- Release-notes SHA-256: `fd1f219b8eb082a35d59c6d1a19f578bc6feb49858f23293985d29b10fe7af12`
+- [npm provenance](https://registry.npmjs.org/-/npm/v1/attestations/jev-devtools@0.5.1)
+
+The [GitHub release v0.5.1](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.1) was published at 18:20:25 UTC. Its lightweight remote tag resolves exactly to `c88aea5d615a65bcda1d820b5abc63bb6fbe05e6`; it is neither draft nor prerelease. GitHub's latest-release endpoint returns v0.5.1, and its release body matches the approved notes.
+
+**Follow-up pending:** this publication-record PR needs review/merge, followed by an explicitly requested manual docs publication and verified receipt. The live docs manifest still identifies package 0.5.0 and source `a18927f1b464ee637ba27fabdeba4cc79a6f1ef3` (GPT Sites version 20). Package publication is verified; the whole release remains partially completed under the checklist above until the records and hosted docs are complete. The immutable npm archive retains its preparation-time README; these source documentation edits do not change published bytes. Do not republish 0.5.1. Evidence remains ignored under `benchmarks/results/release-0.5.1/`.
 
 ## Release 0.5.0 — published October 25, 2026
 
-**[jev-devtools@0.5.0](https://www.npmjs.com/package/jev-devtools/v/0.5.0) was published at 06:30:45.073 UTC on October 25, 2026**, from `64efa4c494a83207e94c67b42f6744802db18c11` after [PR #73](https://github.com/diegoag64/jev-devtools/pull/73) and [main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40168724073) passed. See the [release notes](../CHANGELOG.md#050--october-25-2026-experimental) for compatibility and changes. npm's `latest` is 0.5.0.
+**[jev-devtools@0.5.0](https://www.npmjs.com/package/jev-devtools/v/0.5.0) was published at 06:30:45.073 UTC on October 25, 2026**, from `64efa4c494a83207e94c67b42f6744802db18c11` after [PR #73](https://github.com/diegoag64/jev-devtools/pull/73) and [main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40168724073) passed. See the [release notes](../CHANGELOG.md#050--october-25-2026-experimental) for compatibility and changes. npm's `latest` was verified as 0.5.0 at publication.
 
 The [rehearsal](https://github.com/diegoag64/jev-devtools/actions/runs/40168858183) and the [approved publication run](https://github.com/diegoag64/jev-devtools/actions/runs/40169000258) prepared and checked the selected source and candidate. The publish job uploaded the inspected bytes through npm OIDC and successfully verified registry integrity and provenance after processing. The original `finish` job then failed at the consumer type check: the fresh runner had no root TypeScript installation because the job omitted `npm ci`. Export/SSR checks passed before that failure; the subsequent Next.js and GitHub completion steps did not run. The original failed run remains the audit record.
 
