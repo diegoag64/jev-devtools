@@ -102,9 +102,11 @@ IDs must be unique across the whole definition, including untaken branches and l
 
 Structural errors fail during definition. Missing input values and invalid comparisons fail when execution reaches them. [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror) is exported for bounded-loop handling. For exact collection/concurrency/timeout limits, execution errors, and cancellation behavior, consult the [detailed guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md) and installed declarations.
 
-## Replay captured answers (unreleased)
+<a id="replay-captured-answers-unreleased"></a>
 
-[`replayClient(fixture)`](@/api/reference/#replayclient) returns an SDK-compatible client for a flow run. Jev steps receive stored answers without a network call or API key. This is not in npm 0.4.1 yet.
+## Replay captured answers
+
+[`replayClient(fixture)`](@/api/reference/#replayclient) returns an SDK-compatible client for a flow run. Jev steps receive stored answers without a network call or API key. Available in **0.5.0 (pending publication)**; use the [release candidate archive](https://github.com/diegoag64/jev-devtools#try-the-local-playground) until npm publication.
 
 Call `await replayExample()` from Node. The definition is synchronous; `await flow.run(...)` executes it using the stored response.
 
@@ -122,7 +124,11 @@ A [`FlowFixture`](@/api/reference/#type-flowfixture) contains `{ version: 1, flo
 
 Tasks and request factories execute again. A task can still perform external calls or side effects, so use controlled tasks when replaying in tests. Failed or cancelled captures are partial fixtures, not replays of recorded failures. See the [replay guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md#replay-a-run-in-tests) for fixture copying and the repository CLI.
 
-## Build a fixture (unreleased)
+<a id="build-a-fixture-unreleased"></a>
+
+## Build a fixture
+
+**New in 0.5.0 (pending publication).**
 
 [`flowFixture(definition, run, traces)`](@/api/reference/#flowfixture) is available from both `jev-devtools` and `jev-devtools/flow`. Pass the captured flow definition/run and a `ReadonlyMap<string, Trace>` indexed by trace ID. It returns a [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture) with `{ fixture, missing, warnings }`.
 
@@ -138,9 +144,13 @@ Check `missing` for completed steps whose response was unavailable, and `warning
 
 ## Related types
 
-[`FlowBuilder`](@/api/reference/#type-flowbuilder), [`FlowRunOptions`](@/api/reference/#type-flowrunoptions), [`FlowOutcome`](@/api/reference/#type-flowoutcome), [`FlowTask`](@/api/reference/#type-flowtask), [`FlowRequestFactory`](@/api/reference/#type-flowrequestfactory), [`TaskContext`](@/api/reference/#type-taskcontext), and [`Resolved`](@/api/reference/#type-resolved) describe builder and execution contracts. [`FlowDefinition`](@/api/reference/#type-flowdefinition), [`FlowRun`](@/api/reference/#type-flowrun), [`FlowStep`](@/api/reference/#type-flowstep), [`FlowDisplay`](@/api/reference/#type-flowdisplay), and [`FlowObserver`](@/api/reference/#type-flowobserver) describe inspection data and callbacks. [`FlowFixture`](@/api/reference/#type-flowfixture) and [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture) describe replay data (unreleased). See [recorder and types](@/api/recorder/).
+[`FlowBuilder`](@/api/reference/#type-flowbuilder), [`FlowRunOptions`](@/api/reference/#type-flowrunoptions), [`FlowOutcome`](@/api/reference/#type-flowoutcome), [`FlowTask`](@/api/reference/#type-flowtask), [`FlowRequestFactory`](@/api/reference/#type-flowrequestfactory), [`TaskContext`](@/api/reference/#type-taskcontext), and [`Resolved`](@/api/reference/#type-resolved) describe builder and execution contracts. [`FlowDefinition`](@/api/reference/#type-flowdefinition), [`FlowRun`](@/api/reference/#type-flowrun), [`FlowStep`](@/api/reference/#type-flowstep), [`FlowDisplay`](@/api/reference/#type-flowdisplay), and [`FlowObserver`](@/api/reference/#type-flowobserver) describe inspection data and callbacks. [`FlowFixture`](@/api/reference/#type-flowfixture) and [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture) describe replay data (new in 0.5.0). See [recorder and types](@/api/recorder/).
 
-## Compare a fixture with a live run (unreleased)
+<a id="compare-a-fixture-with-a-live-run-unreleased"></a>
+
+## Compare a fixture with a live run
+
+**New in 0.5.0 (pending publication).**
 
 [`compareWithFixture`](@/api/reference/#comparewithfixture) runs the same recipe and input twice: first with saved answers, then with your supplied client. [`formatComparison`](@/api/reference/#formatcomparison) turns the result into readable text. This comparison performs live inference; ordinary [`replayClient`](@/api/reference/#replayclient) does not.
 

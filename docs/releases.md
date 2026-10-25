@@ -74,6 +74,23 @@ After any uncertain publish outcome, do not dispatch a new publication or rerun 
 
 The independent consumer checks accept `JEV_VERIFY_TARBALL=/absolute/path/to/archive.tgz` to check an inspected archive, or `JEV_VERIFY_VERSION=X.Y.Z` to check a fresh registry installation. Do not set both. Use the verification scripts from the release commit so later regression tests do not incorrectly reject an older release. With neither variable, the existing local pack-and-check behavior is unchanged.
 
+## Release 0.5.0 — preparation
+
+**Pending publication.** Source/package/example versions are prepared as 0.5.0. The [candidate changelog](../CHANGELOG.md#050--pending-publication) groups all changes since 0.4.1 and documents compatibility. There is no approved release commit, npm publication, tag, or GitHub release yet. The final release commit is selected only after this PR merges and its main CI succeeds.
+
+Before dispatching the release workflow:
+
+- Review replay/comparison behavior, capture fixes, and privacy defaults in the candidate notes. Keep 0.4.1's published records unchanged.
+- Run the full repository and docs checks, plus `npm --prefix landing ci`, `npm --prefix landing test`, and `npm --prefix landing run build` for the separately locked website. Inspect the package archive; neither website output belongs in npm.
+- Use the normal manually approved release workflow against the reviewed main SHA. A locally prepared candidate archive proves packaging for its own source SHA; the workflow builds and verifies the final merged release candidate separately.
+
+After npm, the exact tag, and the GitHub release are verified:
+
+- Record the actual UTC publication date and links. Replace the Pending publication heading/table entry with those facts; do not infer the date from this PR's merge.
+- Update the pending-publication/current-0.4.1 notices in the root README, the docs introduction/reference/API guides, the repository integration/Next.js/flow guides, and `llms.txt`. Run `npm run sync:readme-version` and verify remaining `0.4.1` mentions are historical or intentionally version-specific. The npm README and bundled skill deliberately describe version capabilities and link to publication status instead of freezing a pending-publication claim in the immutable archive. The follow-up updates GitHub and hosted docs, not published bytes.
+- Merge the publication-record PR, then manually publish the docs from a reviewed main commit as described in [the policy](docs-publishing.md). Verify `/version.json`, quick start, 0.5.0 API sections, and the changelog.
+- Publish the [landing Site](../landing/README.md#publishing) manually if its copy or assets changed, using its separate project identity and build. Check the `jevtools.dev` → docs → API navigation and install command. A docs deployment does not update the landing Site.
+
 ## Release 0.4.1 — published October 24, 2026
 
 This patch release includes drawer CSS isolation and cleanup, corrected published `FlowExpression` types, and the contributor/release workflow updates. See the [0.4.1 changelog](../CHANGELOG.md#041--october-24-2026-experimental) for all included changes and compatibility notes.
@@ -91,7 +108,7 @@ The inspected and published archive was `jev-devtools-0.4.1.tgz` (66 files):
 
 The missing [GitHub release v0.4.1](https://github.com/diegoag64/jev-devtools/releases/tag/v0.4.1) was published during recovery at 17:35:21 UTC on October 24, 2026 using the original candidate's notes. Its lightweight remote tag resolves to `4ce235dd950b8b2f94e97d268ecbd5ae2b5b96ea`; it is neither a draft nor a prerelease, and GitHub's latest-release endpoint returned `v0.4.1`.
 
-npm and GitHub publication are verified. This documentation follow-up remains pending until its PR is merged. The immutable npm archive contains the preparation-time README; these documentation updates do not alter it. Do not republish 0.4.1 or rerun the failed publishing job.
+npm and GitHub publication and the documentation follow-up are recorded on main. The immutable npm archive contains the preparation-time README; these documentation updates do not alter it. Do not republish 0.4.1 or rerun the failed publishing job.
 
 ## Release 0.4.0 — published October 24, 2026
 
@@ -162,8 +179,8 @@ npm run verify:drawer
 git diff --check
 npm pack --dry-run --json -w jev-devtools
 npm run pack:devtools
-tar -tzf jev-devtools-0.4.1.tgz
-shasum -a 256 jev-devtools-0.4.1.tgz
+tar -tzf jev-devtools-0.5.0.tgz
+shasum -a 256 jev-devtools-0.5.0.tgz
 ```
 
 The archive must contain only `package.json`, the package README, MIT license, third-party notices, the setup skill and its four Markdown references under `skills/setup-jev-devtools`, and compiled JavaScript, declaration files, and scoped CSS under `lib/src`, `lib/server`, and `lib/flow`. It must not contain playground code, tests, fixtures, source TypeScript, demo media, environment files, or credentials. `verify:package` checks the actual pack file list before installing into an independent React app. `verify:nextjs` checks a separate packed installation with real development and production Next.js servers. Both use sample responses; neither makes live inference calls.
@@ -171,7 +188,7 @@ The archive must contain only `package.json`, the package README, MIT license, t
 Inspect the packed manifest too:
 
 ```sh
-tar -xOf jev-devtools-0.4.1.tgz package/package.json
+tar -xOf jev-devtools-0.5.0.tgz package/package.json
 ```
 
 Confirm the name/version, public access, Node engine, React peers, public exports (including the `/flow` entry point), and absence of `private: true`. Save the release commit SHA and archive checksum with the release evidence. Keep the archive unchanged between final inspection and publication. Do not publish from a dirty checkout or use a wildcard that could select an old archive.

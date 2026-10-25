@@ -2,6 +2,15 @@
 
 > React request inspector for TypeSafe Jev, with a Node server adapter. Development-only opt-in; React 18/19, Node 22.12+. Custom drawer; TanStack Virtual is used internally for Questions.
 
+## Website and documentation
+
+- [Website](https://jevtools.dev/): Product overview and simulated diagrams.
+- [Documentation](https://docs.jevtools.dev/): Human-oriented setup and examples.
+- [API reference](https://docs.jevtools.dev/api/reference/): Inputs, outputs, usage, and exact public declarations.
+- [Hosted Markdown index](https://docs.jevtools.dev/llms.txt): Plain Markdown with expanded examples.
+
+This source checkout prepares **0.5.0 (pending publication)**; npm currently serves 0.4.1. Hosted sites update separately. Prefer the installed version's bundled skill/declarations and check the changelog before using newer APIs.
+
 ## Set up in an existing app
 
 - [Setup skill](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/packages/jev-devtools/skills/setup-jev-devtools/SKILL.md): Start here; selects the framework and defines a complete integration.
@@ -11,7 +20,7 @@
 
 The skill and references ship in npm at `node_modules/jev-devtools/skills/setup-jev-devtools/`. Prefer the installed version's guidance and declaration files when it differs from main. These are explicit entry points, not a promise of automatic discovery by every AI tool.
 
-## Build connected flows (0.4.0)
+## Build connected flows
 
 - [Bundled flow recipe](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/packages/jev-devtools/skills/setup-jev-devtools/references/flows.md): Agent workflow for requests, tasks, runtime factories, parallel lanes, branches, returning conditionals, maps and loops; scope rules, sample checks and troubleshooting. Available offline beside the installed setup skill.
 - [Flow API guide](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/docs/flows.md): Definition versus execution, typed references, conditions, joins, errors/cancellation, recording and viewer limits.
@@ -31,12 +40,16 @@ Use the installed `lib/flow/index.d.ts` as the version-matched API contract. Def
 - [Repository workflow](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/AGENTS.md): For package contributors, not installation into a consumer app.
 - [Release process](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/docs/releases.md)
 
-## 0.4.0 capabilities and examples
+## Flow capabilities and examples
 
-The 0.4.0 flow API includes `task()`, runtime `jev()` request factories, `.answers`, `map()`, `if()`, strict `.gt()` comparisons, and `loop()`. Loops check a state expression before each iteration and reject incomplete iteration-limit exhaustion with `FlowLoopLimitError`. A loop can contain a map; all expanded work shares one run-wide budget. There are no nested loops, loops inside maps, nested maps, durable jobs, or automatic task retries. Use installed declarations and bundled references for the exact version; check the changelog for publication status.
+The flow API includes `task()`, runtime `jev()` request factories, `.answers`, `map()`, `if()`, strict `.gt()` comparisons, and `loop()`. Loops check a state expression before each iteration and reject incomplete iteration-limit exhaustion with `FlowLoopLimitError`. A loop can contain a map; all expanded work shares one run-wide budget. There are no nested loops, loops inside maps, nested maps, durable jobs, or automatic task retries. Use installed declarations and bundled references for the exact version; check the changelog for publication status.
 
-- [Cookbook collection](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/README.md): Six runnable repository apps using the 0.4.0 APIs. Code and synthetic fixtures are not shipped in npm.
+- [Cookbook collection](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/README.md): Six runnable repository apps using APIs available since 0.4.0. Code and synthetic fixtures are not shipped in npm.
 - [SDE cascade](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/sde-cascade/README.md): Sample-only returning conditional, strict escalation gate and shared continuation.
 - [Hierarchical classification](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/hierarchical-classification/README.md): Bounded iteration, frontier collections, beam versus greedy search and iteration-limit failure.
 - [Structure Recovery](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/structure-recovery/README.md): Tasks, dynamic requests and returning conditionals; four sample-only cases.
 - [Simple Memory](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/simple-memory/README.md): Tasks, dynamic requests, conditionals and loops; four sample-only timelines with customer-scoped run-local memory and an inclusive 50% save gate. No persistent storage.
+
+## Replay and comparison (0.5.0 candidate)
+
+`flowFixture` exports captured answers with warnings, `replayClient` reuses them without Jev inference, and `compareWithFixture` compares replay with a supplied client. Tasks still execute; comparison can make live calls and its returned fixture contains unredacted responses. These APIs require the 0.5.0 candidate until publication. Use [the version-matched flow recipe](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) and the installed declarations.

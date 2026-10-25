@@ -1,6 +1,6 @@
 # Build and inspect a Jev flow
 
-For `jev-devtools` **0.4.1**. Read the installed package version and `lib/flow/index.d.ts` first; online `main` may describe newer APIs. Use this recipe when the user asks to connect multiple Jev requests, inspect branches, run server function steps, or visualize parallel checks, collections, and loops. Adding the inspector alone does not require converting existing calls to flows.
+For `jev-devtools` **0.5.0**. Check the repository changelog for publication status when installing from source. Read the installed package version and `lib/flow/index.d.ts` first; online `main` may describe newer APIs. Use this recipe when the user asks to connect multiple Jev requests, inspect branches, run server function steps, or visualize parallel checks, collections, and loops. Adding the inspector alone does not require converting existing calls to flows.
 
 ## Plan the integration
 
@@ -9,7 +9,7 @@ For `jev-devtools` **0.4.1**. Read the installed package version and `lib/flow/i
 3. Import `defineJevFlow` (and `all`, `any`, `not` when needed) from **server-only** `jev-devtools/flow`. Define the graph once at module scope and call `run()` from the existing Node handler/action. In Next.js, mark the module `server-only` and keep the executing route/segment on the Node runtime. No new client provider or root component is needed.
 4. A named output returns data and does not execute an action. Existing business actions can remain in the application after the returned outcome; use `task()` when the user wants application-owned server work included in the flow. Preserve authorization, idempotency, input validation, and error handling. Cancellation cannot undo side effects.
 
-If importing question helpers as below, install `@typesafe-ai/sdk` as a direct dependency in the server workspace using its package manager. Version 0.4.1 requires SDK `>=0.7.0 <0.8.0` and is verified with 0.7.0; preserve a compatible existing version rather than silently changing SDK semantics. The flow also accepts ordinary SDK question objects.
+If importing question helpers as below, install `@typesafe-ai/sdk` as a direct dependency in the server workspace using its package manager. Version 0.5.0 requires SDK `>=0.7.0 <0.8.0` and is verified with 0.7.0; preserve a compatible existing version rather than silently changing SDK semantics. The flow also accepts ordinary SDK question objects.
 
 ## Complete example: parallel checks, one decision, two outcomes
 
@@ -229,3 +229,12 @@ Require `maxIterations` (1–64). If the condition is still true at the limit, `
 Loops may contain one level of map, plus tasks, requests, conditions and parallel lanes. Nested loops, loops in maps and nested maps remain unsupported. All template nodes count toward the 256-node definition cap; the root execution shares a 1,024-expanded-step budget across iterations and collections. A fresh per-iteration budget would bypass that guarantee. Use a matching server and drawer. Loop cards reuse inline expansion/navigation: select an iteration → View Flow → select a nested frontier item if present. Input/latest state and child outcomes use normal redaction and capture limits.
 
 `cookbooks/hierarchical-classification` is an executable sample at `/?cookbook=hierarchical-classification`. It follows the official executable algorithm’s **separate concurrent requests per frontier node**, despite introductory prose describing batching. Preserve geometric-mean decision-edge scores, epsilon 1e-9, single-child inference bypass, completed-leaf retention and top-k pruning. Samples are a small authored taxonomy and synthetic probabilities, not a replay of official benchmark data. Verify recovery, no-request paths, an initial leaf and intentional depth exhaustion before considering live execution.
+
+## Replay captures and compare runs (new in 0.5.0)
+
+For human examples, see [the flow reference](https://docs.jevtools.dev/api/flow/) and [API glossary](https://docs.jevtools.dev/api/reference/#fixtures-and-comparison). These operations require 0.5.0 or later; inspect the installed declarations before using them with older packages.
+
+1. Capture a complete run and use **Copy fixture** in the drawer. The browser-safe root export `flowFixture(definition, run, traces)` also builds a `BuiltFlowFixture` with the fixture and capture/missing-response warnings. A fixture stores captured response bodies and step IDs, not the original input or executable recipe.
+2. On Node, import `replayClient` from `jev-devtools/flow` and call `await program.run(originalInput, { client: replayClient(fixture) })`. Use the same recipe, input, and stable step IDs. Jev steps use stored answers without a key/network call; tasks and runtime request factories still execute. Avoid uncontrolled effects in test tasks.
+3. For an explicitly requested live comparison, import `compareWithFixture` and `formatComparison` from `jev-devtools/flow`. Call `await compareWithFixture(program, originalInput, fixture, { client: liveClient, devtools: inspector, tolerance: 0.01 })`, then use `formatComparison(result)` for text. Do not run live comparison merely to verify installation; use stored SDK responses for ordinary verification.
+4. Tasks execute on both sides. `changed` tracks outcomes, values, decisions, and executed Jev steps; answer drift alone does not set it. Inspect `answers` separately, and apply numeric tolerance only to answer fields. The result's `liveFixture` contains unredacted live responses: review it before saving or sharing. Replay is not rollback, and incomplete captures cannot recreate missing inference results.

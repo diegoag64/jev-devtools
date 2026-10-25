@@ -59,6 +59,8 @@ These are authoring and review requirements. There is no automated PR-descriptio
 
 ## Keep the docs current
 
+Use [jevtools.dev](https://jevtools.dev/) as the product entry point and [docs.jevtools.dev](https://docs.jevtools.dev/) as the primary human documentation. `README.md` and the npm README introduce the package and link to those sites. `apps/docs/content/` owns guided explanations and the API glossary; `docs/integration.md`, `docs/nextjs.md`, and `docs/flows.md` retain detailed repository references and stable paths. The bundled setup skill owns offline, installed-version agent guidance; `llms.txt` indexes it. Package declarations remain the exact API contract, and `CHANGELOG.md` owns publication facts. Update affected companion guidance in the API PR instead of adding another standalone tutorial.
+
 Update the glossary, checked examples, curated hover descriptions, relevant guides, and changelog in the same PR as public API changes. Run `npm run verify:docs` for docs or API changes. The CI `docs` job validates browser behavior and uploads a review preview; it never deploys. Follow [the manual docs publishing policy](docs/docs-publishing.md) for when to publish, selecting one reviewed commit, checking `version.json`, and recording GPT Sites deployment results. Publication requires an explicit maintainer request.
 
 ## Keep the changelog current
@@ -111,6 +113,7 @@ Use the [release checklist and completion rule](docs/releases.md#release-checkli
 | Path | Purpose |
 | --- | --- |
 | `packages/jev-devtools` | React drawer, diagrams, recorder, Node adapter, scoped CSS |
+| `landing` | Independently locked Vite website for jevtools.dev; see its README |
 | `apps/docs` | Static Vite documentation app; start with `npm run dev:docs` |
 | `apps/playground` | Sample/live scenarios, minimal shadcn form, application previews |
 | `examples/react-vite` | Independent consumer using only public package exports |

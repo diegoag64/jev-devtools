@@ -1,6 +1,6 @@
 {
   "name": "jev-devtools",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "type": "module",
   "engines": {
     "node": ">=22.12"
@@ -48,7 +48,7 @@
     "url": "git+https://github.com/diegoag64/jev-devtools.git",
     "directory": "packages/jev-devtools"
   },
-  "homepage": "https://github.com/diegoag64/jev-devtools#readme",
+  "homepage": "https://jevtools.dev",
   "bugs": "https://github.com/diegoag64/jev-devtools/issues",
   "scripts": {
     "check": "tsc --noEmit",

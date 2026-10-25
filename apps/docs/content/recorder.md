@@ -30,7 +30,7 @@ The retention limit is global to the recorder, not a per-session allocation. Sna
 
 [`FlowObserver`](@/api/reference/#type-flowobserver) is exported from `jev-devtools/flow`. Its [`startFlow(definition, run)`](@/api/reference/#observer-startflow) can return `{ update(run), request(link, onTrace, callback) }` or `undefined`. Recording is optional; the flow runner owns execution results.
 
-The request hook should call through synchronously to preserve request linkage. Avoid using observer callbacks for application actions. In the working tree, observer snapshots are detached from execution state and failures are contained; see the changelog for these **unreleased** robustness changes.
+The request hook should call through synchronously to preserve request linkage. Avoid using observer callbacks for application actions. In **0.5.0 (pending publication)**, observer snapshots are detached from execution state and failures are contained; see the [changelog](@/changelog/) for the capture fixes.
 
 ## Public type map
 
@@ -46,6 +46,10 @@ Use `import type` for data-only contracts. `/server` and `/flow` runtime imports
 
 The installed package's `lib/src/index.d.ts`, `lib/server/index.d.ts`, and `lib/flow/index.d.ts` are the precise contracts for that version. The [API glossary](@/api/reference/#public-types) includes exact public declarations and their supporting shapes. Additional stream semantics are documented in the [stream protocol](https://github.com/diegoag64/jev-devtools/blob/main/docs/stream-protocol.md) and installed declarations.
 
-## Replay types (unreleased)
+<a id="replay-types-unreleased"></a>
 
-[`FlowFixture`](@/api/reference/#type-flowfixture) and [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture) are also exported from the root and `/flow` entries. The browser-safe [`flowFixture()`](@/api/reference/#flowfixture) helper builds an export from captured data; Node-only [`replayClient()`](@/api/reference/#replayclient) uses it to supply stored answers to a flow. See [replay reference](@/api/flow/#replay-captured-answers-unreleased).
+## Replay types
+
+**New in 0.5.0 (pending publication).**
+
+[`FlowFixture`](@/api/reference/#type-flowfixture) and [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture) are also exported from the root and `/flow` entries. The browser-safe [`flowFixture()`](@/api/reference/#flowfixture) helper builds an export from captured data; Node-only [`replayClient()`](@/api/reference/#replayclient) uses it to supply stored answers to a flow. See [replay reference](@/api/flow/#replay-captured-answers).

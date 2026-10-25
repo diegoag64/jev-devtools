@@ -8,7 +8,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Flow replay and comparison; capture reliability and privacy; documentation site; proposed landing page. |
+| [Unreleased](#unreleased) | Not published | Changes after the 0.5.0 candidate. |
+| [0.5.0](#050--pending-publication) | Pending publication | Replay and comparison; capture reliability/privacy; website and docs. |
 | [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | CSS isolation; stricter published flow types; approved release workflow. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Tasks, maps and loops; six cookbooks; SDK and inspector access changes. |
 | [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API; readable diagrams; bundled flow guidance. |
@@ -20,11 +21,23 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
+No changes beyond the 0.5.0 release candidate yet.
+
+## 0.5.0 — Pending publication
+
+**Not published to npm.** This candidate brings flow replay and live fixture comparison, capture reliability/privacy improvements, and the JevTools website and documentation. npm's current published release is 0.4.1. Merge and successful CI do not publish a package or deploy either Site; follow the [release checklist](docs/releases.md#release-checklist).
+
+### Compatibility and upgrade
+
+- **Runtime support is unchanged.** React 18/19, Node 22.12+, and TypeSafe SDK `>=0.7.0 <0.8.0` remain supported. Existing request and flow integrations keep their public entry points; APIs remain experimental before 1.0. Websites are separate private apps and are not included in the npm archive.
+- **Inspection data may differ.** Expanded credential redaction and default-on `redactAdditionalSensitiveData` mask more captured/displayed fields. The display prop does not remove values from transport or memory; use server-side redaction for data that must never reach a browser. These policies do not alter SDK requests or application execution data.
+- **Replay and comparison are opt-in.** Replay supplies captured Jev answers without inference, but tasks and request factories run again and can have side effects. Comparison executes both a replay and the supplied client's run; inspect answer differences as well as the top-level `changed` flag. Review exported fixtures and live responses before sharing them.
+
 ### Changes
 
 #### Added
 
-- **Standalone landing page.** Add a standalone Vite landing page under `landing/` for jevtools.dev, linking to the docs and GitHub. Showcase six simulated flow diagrams, System One primitives, a real React drawer recording introduced by “System One Diagrams / Anywhere in your App,” and a Flow API definition with sample branch outcomes. Include responsive section layouts, stable diagram navigation, a “System One / Visualized” closing heading, and a Prism/Jade hero animation with randomized organic transitions and reduced-motion support. Copy and design remain work in progress. The site has isolated dependencies and styles, makes no inference requests, and does not change package APIs. Its Sites manifest retains the public hosting project identity for repeatable publishing; custom-domain routing requires DNS configuration. ([#72](https://github.com/diegoag64/jev-devtools/pull/72))
+- **JevTools website.** Add [jevtools.dev](https://jevtools.dev/) with six simulated flow diagrams, System One primitive illustrations, a drawer recording, and a Flow API example. Include responsive navigation, reduced-motion support, and an animated hero. The standalone Vite app has isolated dependencies/styles and makes no inference requests. Docs and GitHub links lead to setup and source. ([#72](https://github.com/diegoag64/jev-devtools/pull/72))
 
 - **Compare live runs with fixtures.** Add `compareWithFixture` and `formatComparison` to `jev-devtools/flow`: compare a live client's run with a saved fixture, print the differences for CI logs, and get the live run back as a new fixture. Map items and loop iterations are reported under their composed ids; a step that ran on only one side sets `changed`. Recording observer failures and mutations to run snapshots cannot corrupt the comparison; captured response snapshots also prevent later observer mutations from hiding answer drift or rewriting the live fixture. Tasks run on both sides. ([#32](https://github.com/diegoag64/jev-devtools/pull/32))
 
@@ -50,43 +63,17 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
-- **Verified docs snapshots and manual publication.** Add docs browser checks and preview artifacts to CI, a source/package-version manifest, and a manual GPT Sites publishing/release policy. Publication builds require a clean checkout and embed its changelog instead of mixing in a newer GitHub revision. No automatic deployment or package API change. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
+- **Human-friendly docs and complete API reference.** Add [docs.jevtools.dev](https://docs.jevtools.dev/) with 17 static pages: setup, framework guides, beginner flow examples, a public API glossary, and agent-readable Markdown. Show inputs, returns, and explained examples; pair synchronous flow definitions with awaited execution. Shiki/Twoslash and curated method/type help run at build time. Preserve deep links, label sticky method sections, and track reading position in the outline. ([#70](https://github.com/diegoag64/jev-devtools/pull/70))
 
-- **Landing-inspired dark theme.** Match the docs to the JevTools landing page’s near-black plum backgrounds, warm text, and magenta accents, including code panels and navigation states. Light mode and package styles are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
+- **Docs navigation and presentation.** Add local search, copyable pnpm/npm/Yarn/Bun installation tabs, mobile navigation, persistent themes without unstyled page flashes, shared JevTools branding, and a passive GitHub star count. Clarify the independent community-project status. Keep interactions small and lazily loaded, with readable pages and links without JavaScript. ([#70](https://github.com/diegoag64/jev-devtools/pull/70))
 
-- **Shared JevTools branding.** Use the landing page’s flow symbol and wordmark in the docs header, with a light symbol for dark mode and a pale-background favicon. Docs only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
+- **Traceable docs publication.** Build content, declarations, and the categorized changelog from one checkout. Emit a source/package-version manifest, reject dirty publication builds, and run browser checks with preview artifacts in CI. Keep GPT Sites deployment manual and separate from merging and npm publication, with an explicit release checklist and publication receipts. ([#70](https://github.com/diegoag64/jev-devtools/pull/70))
 
-- **Package-manager install tabs.** Offer pnpm, npm, Yarn, and Bun commands in package-install examples, defaulting to pnpm and remembering the reader’s selection. Copying uses the selected command; pnpm remains readable without JavaScript. Docs only. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
-
-- **Aligned outline progress.** Match the pink reading-progress line to method labels instead of total section height, including uneven method lengths, wrapped labels, and reopened groups. Docs only. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
-
-- **Sticky header corners.** Flatten glossary header corners while they are pinned below the top bar and restore the rounded card corners when scrolling back. Works with desktop and mobile header offsets. Docs only. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
-
-- **Section reading progress.** Fill each glossary outline group’s vertical line as you scroll through its content, including long methods. The fill follows scrolling in either direction and keeps the ordinary line without JavaScript. Docs only. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
-
-- **Straight sidebar markers.** Square the left corners of page-outline highlights so the active-section marker is a straight line. Docs only. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
-
-- **Glossary introductions.** Explain each method and concept before its signature, including generated declarations and supporting types. Docs only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
-
-- **Reference type help and reliable anchors.** Add build-time tooltips for important package types in reference signatures and declarations, with readable contracts, import sources, and property descriptions. Preserve existing URLs while moving method/type link targets off sticky headings so upward jumps reveal the selected card. Docs only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
-
-- **Readable API glossary and page navigation.** Separate API groups and methods visually, label signatures, inputs, returns, and examples, and highlight the current section as you scroll. The glossary outline includes grouped method links; existing deep links and no-JavaScript reading remain available. Docs only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
-
-- **Define and run flow examples.** Pair flow definitions with awaited execution, concrete inputs, and resolved results throughout the docs. Explain before request examples that `flow.jev()` builds references while `run()` sends and awaits requests. Documentation only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
-
-- **Clearer method contracts.** Show input and return interfaces in tables, explain the operations used in each example, shorten flow navigation labels without changing section links, and present GitHub stars as a passive count. Documentation and docs UI only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
-
-- **GitHub header links.** Show the GitHub logo and a build-time repository star count in the docs header, including compact mobile controls. If GitHub is unavailable, retain a Star link without inventing a count. No package API changes. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
-
-- **Complete API reference and beginner flow guide.** Add a linked glossary for public APIs and exact build-time declarations, plus small checked examples for each flow operation. Connect reference entries from prose and code examples without adding browser dependencies. Documentation only; package behavior is unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
-
-- **Community project notice.** Clarify in the docs footer that Jev DevTools is an independent, open-source community project and is not affiliated with TypeSafe AI. ([#70](https://github.com/diegoag64/jev-devtools/pull/70))
-
-- **Documentation website.** Add a lightweight Vite documentation app with static Markdown pages, human-oriented onboarding and API reference, local search, checked examples, and separate agent guidance. Add build-time Shiki highlighting and Twoslash-checked API help to complete examples and curated help to selected partial snippets across React, server, recorder, flow, replay, and expression guides, with compact usage summaries and plain-language option descriptions only on core API members, with keyboard and touch access, clean code copying, and the normal text cursor. Load styles and the saved theme before content paints to prevent unstyled or wrong-theme flashes during page navigation. Render the repository changelog as an in-site release history, refreshed from GitHub main during publication with no browser fetch or parser. Remove the promotional right-sidebar note. Existing package APIs and documentation paths remain compatible; the static site is hosted on GPT Sites. ([#70](https://github.com/diegoag64/jev-devtools/pull/70))
-
-- **Categorized release history.** Group every release into consistent categories, add short entry summaries and in-page category links, and require the same structure for future entries. Preserve publication facts, compatibility notes and source links. ([#70](https://github.com/diegoag64/jev-devtools/pull/70))
+- **Website and documentation consolidation.** Make [jevtools.dev](https://jevtools.dev/) and the hosted docs the primary README/package entry points. Align repository guides, the offline setup skill, agent indexes, example archives, and version labels with the 0.5.0 candidate. Preserve repository reference paths and old docs anchors; clearly distinguish pending publication from npm availability. ([#73](https://github.com/diegoag64/jev-devtools/pull/73))
 
 #### Maintenance
+
+- **Landing validation.** Add a separate read-only CI job that installs the landing app’s own lockfile, runs its tests, and builds it on Node 24. Keep website validation separate from package publishing and both manual Site deployments. ([#73](https://github.com/diegoag64/jev-devtools/pull/73))
 
 - **Drawer CI setup.** Run the React 18/19 drawer CI checks and release preparation on Ubuntu 24.04 using the runner's system libraries and Playwright's pinned Chromium headless shell, skipping per-run system package installation. In drawer CI, reuse matching installed React packages and read the lockfile for version overrides, verifying both React packages before browser checks. Package APIs, verification coverage, release approval, and publishing safeguards are unchanged. ([#64](https://github.com/diegoag64/jev-devtools/pull/64))
 

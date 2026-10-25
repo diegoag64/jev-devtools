@@ -63,6 +63,8 @@ GPT Sites assigns a saved version and deployment timestamp **after** the build. 
 5. Follow the supported GPT Sites source/open/package/save/deploy workflow manually. Copy the verified `apps/docs/dist/` into the existing deployment checkout; preserve `version.json` and the hosting identity. Record the manifest's canonical source SHA separately from the generated Sites source-repository commit. Save and deploy the same packaged archive without rebuilding it between verification and deployment.
 6. Confirm successful deployment, read the live `/version.json`, and compare its source SHA, package version, mode, and changelog hash with the inspected artifact. Smoke-check `/`, `/getting-started/`, an API deep link, and `/changelog/`. Record the receipt through the current or a follow-up PR. Keep raw screenshots/logs/archives under ignored `benchmarks/results/docs/`.
 
+The landing website is a separate Site/build under `landing/`; use [its publishing instructions](../landing/README.md#publishing) for an explicitly requested update. A docs deployment never deploys the landing page, and neither deploys npm.
+
 No scheduled refresh or automatic deployment is configured. To decide whether docs are behind, compare the live manifest SHA with the last reviewed main commit and inspect docs, public API, example, and changelog changes since that SHA. An unrelated commit or a newer timestamp alone does not require deployment.
 
 ## Publication receipt and recovery

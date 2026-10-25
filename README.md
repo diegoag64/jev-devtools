@@ -8,14 +8,14 @@ A React inspector for TypeSafe Jev.<br />
 Explore requests, returned probabilities, and the paths your application takes.<br />
 Works with React and Next.js App Router.
 
-[![npm version 0.4.1](https://img.shields.io/badge/npm-v0.4.1-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.4.1)
+[![npm version 0.5.0](https://img.shields.io/badge/npm-v0.5.0-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.5.0)
 [![CI](https://github.com/diegoag64/jev-devtools/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/diegoag64/jev-devtools/actions/workflows/ci.yml)
 [![React 18 / 19](https://img.shields.io/badge/React-18%20%2F%2019-61DAFB?logo=react&logoColor=61DAFB&labelColor=0D0A0F)](#add-to-your-app)
-[![Next.js App Router](https://img.shields.io/badge/Next.js-App%20Router-white?logo=nextdotjs&labelColor=0D0A0F)](docs/nextjs.md)
+[![Next.js App Router](https://img.shields.io/badge/Next.js-App%20Router-white?logo=nextdotjs&labelColor=0D0A0F)](https://docs.jevtools.dev/guides/nextjs/)
 [![MIT license](https://img.shields.io/badge/License-MIT-E551BA?labelColor=0D0A0F)](LICENSE)
 [![Status: experimental](https://img.shields.io/badge/Status-experimental-E551BA?labelColor=0D0A0F)](#add-to-your-app)
 
-[Demo](#see-it-in-motion) · [React](#react--node) · [Next.js](#nextjs-app-router) · [Flow API](#define-and-visualize-connected-flows-with-jev-devtoolsflow) · [Cookbooks](cookbooks/README.md) · [Docs](#documentation) · [Changelog](CHANGELOG.md)
+[Website](https://jevtools.dev/) · [Documentation](https://docs.jevtools.dev/) · [Quick start](https://docs.jevtools.dev/getting-started/) · [API reference](https://docs.jevtools.dev/api/reference/) · [Changelog](https://docs.jevtools.dev/changelog/)
 
 </div>
 
@@ -34,10 +34,10 @@ Works with React and Next.js App Router.
 Mount the React drawer, connect a server adapter, and make Jev calls through its client. Open **Jev DevTools** in your app to inspect the captured requests. You can add connected flows whenever you need to follow work across multiple calls.
 
 ```sh
-npm install jev-devtools @typesafe-ai/sdk
+pnpm add jev-devtools @typesafe-ai/sdk
 ```
 
-Requires React **18/19** and Node **22.12+**. **[Jev DevTools 0.4.1 is available on npm](https://www.npmjs.com/package/jev-devtools/v/0.4.1).** APIs remain experimental before 1.0. See the [release status](CHANGELOG.md#041--october-24-2026-experimental). Your API key stays on the server. Capture and display are opt-in and disabled by default.
+Requires React **18/19** and Node **22.12+**. **0.5.0 is pending publication.** The badge shows this checkout’s version; the default install still resolves to the latest published release (currently 0.4.1). Use the local archive below to try 0.5.0 before publication. APIs remain experimental before 1.0. See the [release status](CHANGELOG.md). Your API key stays on the server. Capture and display are opt-in and disabled by default.
 
 ### React + Node
 
@@ -77,7 +77,7 @@ app.use(inspector.middleware); // Before fallback routes.
 
 Serve the inspector at the browser's origin. If Vite and your backend use different ports, proxy `/api/jev-devtools` to the backend. Your handlers and inspector routes must use the same adapter instance. Bind a local development server to `127.0.0.1`; see the integration guide for authorization in shared environments.
 
-[React / Node integration and proxy setup](docs/integration.md) · [Independent Vite example](examples/react-vite)
+[React / Node quick start](https://docs.jevtools.dev/getting-started/) · [Detailed integration and access controls](docs/integration.md) · [Independent Vite example](examples/react-vite)
 
 ### Next.js App Router
 
@@ -89,7 +89,7 @@ Use one shared server adapter for calls from Route Handlers, Server Actions, and
 Install the server boundary helper:
 
 ```sh
-npm install server-only
+pnpm add server-only
 ```
 
 Merge the SDK setting into your existing configuration:
@@ -217,14 +217,14 @@ Define once in a Node module and run per request. Typed answer references can fe
 
 **New in 0.4.0:** server function steps (`task`), runtime request factories, bounded collections (`map`), conditional paths that rejoin (`if`), and stateful iteration (`loop`). Combine them with sequential requests, parallel lanes, terminal branches, and named outcomes to inspect complex flows such as passage assessment and hierarchical classification. Numeric conditions also support strict greater-than with `.gt()`.
 
-Unreleased: not in npm 0.4.1 yet. To test routing without a key, press **Copy fixture** on a run in the drawer and replay the saved JSON with `replayClient` from `jev-devtools/flow`. Jev calls replay with no network access or API key. Map items and loop iterations replay from their own answers; tasks run again and may call outside services.
+**New in 0.5.0 (pending publication).** To test routing without a key, press **Copy fixture** on a run in the drawer and replay the saved JSON with `replayClient` from `jev-devtools/flow`. Jev calls replay with no network access or API key. Map items and loop iterations replay from their own answers; tasks run again and may call outside services.
 
 ```ts
 const result = await review.run(input, { client: replayClient(fixture) });
 assert.equal(result.outcome, 'standard-review');
 ```
 
-Unreleased: not in npm 0.4.1 yet. `compareWithFixture` compares a live run's answers, routing and item steps with a saved fixture.
+**New in 0.5.0 (pending publication).** `compareWithFixture` compares a live run's answers, routing and item steps with a saved fixture.
 
 [Full flow API guide](docs/flows.md) · [Flow recipe for coding agents](packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) · [Release availability](CHANGELOG.md)
 
@@ -285,7 +285,7 @@ Pack the local checkout, then install the archive in your app:
 npm run pack:devtools
 
 # In your React application:
-npm install /absolute/path/to/jev-devtools/jev-devtools-0.4.1.tgz
+npm install /absolute/path/to/jev-devtools/jev-devtools-0.5.0.tgz
 ```
 
 The archive contains the code and bundled setup skill from your checkout. Use it to try local changes before a future release. Keep the drawer and server adapter on the same build.
@@ -294,7 +294,18 @@ The archive contains the code and bundled setup skill from your checkout. Use it
 
 ## Documentation
 
-[Integration and configuration](docs/integration.md) · [Next.js](docs/nextjs.md) · [Flow API](docs/flows.md) · [Cookbooks](cookbooks/README.md) · [Changelog](CHANGELOG.md)
+Start at [jevtools.dev](https://jevtools.dev/) for the product overview and [docs.jevtools.dev](https://docs.jevtools.dev/) for setup, examples, and API contracts.
+
+| What you need | Guide |
+| --- | --- |
+| Install and connect the inspector | [Quick start](https://docs.jevtools.dev/getting-started/) · [Next.js](https://docs.jevtools.dev/guides/nextjs/) |
+| Learn flows step by step | [Flows from scratch](https://docs.jevtools.dev/guides/flow-basics/) |
+| Look up a method, option, or type | [API reference](https://docs.jevtools.dev/api/reference/) |
+| Replay captures or compare runs | [Flow builder](https://docs.jevtools.dev/api/flow/) |
+| Work with a coding agent | [Agent guide](https://docs.jevtools.dev/agents/) · [Bundled setup skill](packages/jev-devtools/skills/setup-jev-devtools/SKILL.md) |
+| Check versions and changes | [Formatted changelog](https://docs.jevtools.dev/changelog/) · [Repository release history](CHANGELOG.md) |
+
+The hosted site is a separately published snapshot; check its version and the repository changelog when trying this release candidate. The detailed [integration](docs/integration.md), [Next.js](docs/nextjs.md), and [flow](docs/flows.md) guides remain available as repository references; runnable examples live in [cookbooks](cookbooks/README.md).
 
 For repository setup, layout, and verification, see [Contributing](CONTRIBUTING.md). Changes use feature branches and PRs; merging, publishing, and deployment require explicit authorization. [Architecture](docs/architecture.md) · [Release process](docs/releases.md)
 
@@ -302,7 +313,7 @@ For repository setup, layout, and verification, see [Contributing](CONTRIBUTING.
 
 Inspired by the TanStack Query DevTools workflow, with a custom drawer and TanStack Virtual for the Questions list. The TanStack DevTools shell is not included.
 
-Diagram styling is rooted in [Cathryn Lavery's diagram-design](https://github.com/cathrynlavery/diagram-design). TypeSafe branding belongs to its respective owner.
+Diagram styling is rooted in [Cathryn Lavery's diagram-design](https://github.com/cathrynlavery/diagram-design). Jev DevTools is an independent, open-source community project. It is not affiliated with TypeSafe AI. TypeSafe branding belongs to its respective owner.
 
 MIT for project code; see [LICENSE](LICENSE) and [third-party notices](THIRD_PARTY_NOTICES.txt) for design provenance and branding.
 
@@ -313,6 +324,10 @@ MIT for project code; see [LICENSE](LICENSE) and [third-party notices](THIRD_PAR
 
 </div>
 
-## Documentation app
+<a id="documentation-app"></a>
+
+## Website development
+
+The [landing app](landing/README.md) and [docs app](apps/docs/README.md) have isolated styles and build outputs. The landing app has its own lockfile; the docs app belongs to the npm workspace. Both Sites deployments are manual and separate from package releases. Follow the [docs publishing policy](docs/docs-publishing.md) and the landing app’s publishing instructions.
 
 Run `npm run dev:docs` from the repository root to open the human-oriented documentation site locally. See [the docs app guide](apps/docs/README.md) for authoring, static builds, and interactive examples. The existing [integration guide](docs/integration.md) remains available.

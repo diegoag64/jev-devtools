@@ -10,7 +10,7 @@ Your application's HTTP handlers and the inspector routes must share the same ad
 
 The recorder observes copies of request and response data. It preserves the original SDK promise, response helpers, cancellation, and application result. Captures have size and depth limits; the inspector marks omitted or truncated data.
 
-Known credential fields are removed from the inspection copy. Use a server [`redact`](@/api/reference/#createjevdevtools) callback for application-specific data that must not reach a browser. The unreleased [`redactAdditionalSensitiveData`](@/api/reference/#jevdevtools) prop masks supported personal fields in the display only; it does not remove them from captured or streamed data.
+Known credential fields are removed from the inspection copy. Use a server [`redact`](@/api/reference/#createjevdevtools) callback for application-specific data that must not reach a browser. The [`redactAdditionalSensitiveData`](@/api/reference/#jevdevtools) prop (new in 0.5.0, pending publication) masks supported personal fields in the display only; it does not remove them from captured or streamed data.
 
 ## A request versus a flow
 
