@@ -700,18 +700,11 @@ export const FlowOverview = memo(function FlowOverview({
     itemSizes,
   ]);
   const fixtureCopy = useFixtureCopy(definition, run, tracesById);
-  const deselectStep = useCallback(() => {
-    setSelected("");
-    setDetails(false);
-  }, []);
   const { viewport, canvas, zoom, zoomBy, fit, preserveCamera, focusArea } =
-    useDiagramViewport(
-      layout.width,
-      layout.height,
-      run.id,
-      { x: layout.left, y: 0 },
-      deselectStep,
-    );
+    useDiagramViewport(layout.width, layout.height, run.id, {
+      x: layout.left,
+      y: 0,
+    });
   const onResize = useCallback(
     (id: string, height: number) => {
       preserveCamera();
