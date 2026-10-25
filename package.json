@@ -13,7 +13,7 @@
   "scripts": {
     "dev": "npm run build:package && npm run dev -w @jev-devtools/playground",
     "build:package": "npm run build -w jev-devtools",
-    "build": "npm run build:package && npm run build -w @jev-devtools/playground",
+    "build": "npm run build:package && npm run build -w @jev-devtools/playground && npm run build:docs",
     "check": "node scripts/sync-readme-version.mjs --check && npm run build:package && npm run check --workspaces",
     "sync:readme-version": "node scripts/sync-readme-version.mjs",
     "test": "npm run build:package && npm test --workspaces && npm run test:release",
@@ -25,7 +25,10 @@
     "verify:drawer": "npm run build:package && node scripts/verify-drawer.mjs",
     "bench:server": "npm run build:package && node --expose-gc benchmarks/server.mjs",
     "bench:browser": "npm run build:package && node benchmarks/browser-server.mjs",
-    "bench:compare": "node benchmarks/compare.mjs"
+    "bench:compare": "node benchmarks/compare.mjs",
+    "dev:docs": "npm run dev -w @jev-devtools/docs",
+    "build:docs": "npm run build -w @jev-devtools/docs",
+    "verify:docs": "npm run build:docs && npm run verify -w @jev-devtools/docs"
   },
   "devDependencies": {
     "@types/node": "26.6.5",

@@ -1,0 +1,19 @@
+{
+  "name": "@jev-devtools/docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "check": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "verify": "node scripts/verify.mjs"
+  },
+  "devDependencies": {
+    "marked": "18.1.1",
+    "highlight.js": "11.12.0",
+    "jev-devtools": "file:../../packages/jev-devtools",
+    "@typesafe-ai/sdk": "0.7.0"
+  }
+}

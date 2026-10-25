@@ -70,6 +70,7 @@ Use the [release checklist and completion rule](docs/releases.md#release-checkli
 | Path | Purpose |
 | --- | --- |
 | `packages/jev-devtools` | React drawer, diagrams, recorder, Node adapter, scoped CSS |
+| `apps/docs` | Static Vite documentation app; start with `npm run dev:docs` |
 | `apps/playground` | Sample/live scenarios, minimal shadcn form, application previews |
 | `examples/react-vite` | Independent consumer using only public package exports |
 | `examples/nextjs-app` | Next.js App Router consumer using the packed package |

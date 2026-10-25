@@ -303,3 +303,7 @@ MIT for project code; see [LICENSE](LICENSE) and [third-party notices](THIRD_PAR
 [Open an issue](https://github.com/diegoag64/jev-devtools/issues) · [Contribute a PR](CONTRIBUTING.md)
 
 </div>
+
+## Documentation app
+
+Run `npm run dev:docs` from the repository root to open the human-oriented documentation site locally. See [the docs app guide](apps/docs/README.md) for authoring, static builds, and interactive examples. The existing [integration guide](docs/integration.md) remains available.
