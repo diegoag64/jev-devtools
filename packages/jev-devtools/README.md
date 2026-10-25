@@ -1,10 +1,10 @@
 # Jev DevTools
 
-[![npm version 0.5.0](https://img.shields.io/badge/npm-v0.5.0-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.5.0)
+[![npm version 0.5.1](https://img.shields.io/badge/npm-v0.5.1-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.5.1)
 
 A React drawer and Node adapter for inspecting TypeSafe Jev requests with animated diagrams. Includes request history, context, questions, typed answers, transport attempts, and raw snapshots.
 
-**Source version: 0.5.0.** Check the [release history](https://github.com/diegoag64/jev-devtools/blob/main/CHANGELOG.md) for npm availability. If trying this source before publication, install the local archive below. **Experimental (pre-1.0).** React 18/19 and Node 22.12+ are supported. APIs may change before 1.0. Verification uses sample responses through the real TypeSafe SDK, not live inference.
+**Source version: 0.5.1.** Check the [release history](https://github.com/diegoag64/jev-devtools/blob/main/CHANGELOG.md) for npm availability. If trying this source before publication, install the local archive below. **Experimental (pre-1.0).** React 18/19 and Node 22.12+ are supported. APIs may change before 1.0. Verification uses sample responses through the real TypeSafe SDK, not live inference.
 
 [Website](https://jevtools.dev/) · [Documentation](https://docs.jevtools.dev/) · [Quick start](https://docs.jevtools.dev/getting-started/) · [API reference](https://docs.jevtools.dev/api/reference/) · [Release history](https://docs.jevtools.dev/changelog/)
 
@@ -48,7 +48,7 @@ To try local changes before a future release:
 npm ci
 npm run pack:devtools
 # From the consuming app:
-npm install /absolute/path/to/jev-devtools-0.5.0.tgz
+npm install /absolute/path/to/jev-devtools-0.5.1.tgz
 ```
 
 Mount once. The drawer loads its own styles; no CSS import is needed:

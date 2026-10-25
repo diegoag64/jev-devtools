@@ -1,6 +1,6 @@
 # Jev DevTools integration
 
-For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/getting-started/). This file is the detailed repository reference for 0.5.0; see the [published release notes](../CHANGELOG.md#050--october-25-2026-experimental).
+For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/getting-started/). This file describes the 0.5.1 release candidate; see the [pending release notes and compatibility changes](../CHANGELOG.md#051--pending-publication-experimental).
 
 A reusable React inspector with one root component and a Node server adapter. It uses Diagram Motion Lab's rounded outline cards, curved connections, pink flowing dots, and probability bars. The drawer contains searchable request history and Flow, Questions, Context, Transport, and Raw views.
 
@@ -8,7 +8,7 @@ Jev DevTools remains experimental before 1.0. The default npm install resolves t
 
 ## Compatibility and public imports
 
-These requirements describe the 0.5.0 package. Use the installed package's declarations and bundled setup skill for version-matched guidance.
+These requirements describe the 0.5.1 release candidate. Use the installed package's declarations and bundled setup skill for version-matched guidance.
 
 | Requirement | Supported configuration |
 | --- | --- |
@@ -48,7 +48,7 @@ npm run pack:devtools
 From your React project, install the generated archive:
 
 ```sh
-npm install /absolute/path/to/jev-devtools/jev-devtools-0.5.0.tgz
+npm install /absolute/path/to/jev-devtools/jev-devtools-0.5.1.tgz
 ```
 
 Mount once near the root. The drawer loads its own styles; no CSS import, provider, client object, trace props, or application hook is needed:
