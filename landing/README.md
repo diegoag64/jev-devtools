@@ -30,6 +30,6 @@ The installation snippet shows only the browser mount. Visitors must follow the 
 
 ## Product showcases
 
-The drawer section serves its own copy of the project-owner-supplied recording from `docs/assets/jev-devtools-demo.mp4` (1280 × 716, H.264, about 517 KB). It initially shows the drawer at nine seconds; native controls and “Watch from the beginning” play the complete recording. There is no autoplay, audio, embedded app, or live transport. A written description accompanies the video. Playback pauses offscreen or when the tab is hidden.
+The drawer section serves a web-optimized copy of the project-owner-supplied “Screen Recording 2026-10-24 at 2.27.41 PM.mov”: a 31-second skill-suggestion cookbook recording, converted to 1920 × 1066 H.264 MP4 at 30 fps with fast-start enabled. It starts at the beginning and uses native playback controls. There is no autoplay, audio, embedded app, or live transport. A written description accompanies the video. Playback pauses offscreen or when the tab is hidden.
 
 The Flow API section uses a valid definition based on `docs/flows.md`. Its displayed source is documentation, not executed browser code. Two authored sample values highlight approve/manual-review branches of the matching diagram. The 0.90 threshold is illustrative application policy, and the output does not issue a refund. Actual integrations run the Flow API on the server with the connected inspector.

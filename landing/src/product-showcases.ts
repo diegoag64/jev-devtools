@@ -8,19 +8,17 @@ export const drawerShowcase = `
     <div><p>Open the drawer without leaving your app. Follow a request from its input to its answer, inspect the probabilities, and see the details behind every step.</p><a class="text-link" href="https://docs.jevtools.dev">Add the drawer to your app <span aria-hidden="true">↗</span></a></div>
   </div>
   <figure class="drawer-demo">
-    <video id="drawer-video" controls playsinline muted preload="metadata" width="1280" height="716" aria-label="Recorded demo of Jev DevTools in the React playground" aria-describedby="drawer-description">
-      <source src="/media/jev-devtools-demo.mp4#t=9" type="video/mp4" />
+    <video id="drawer-video" controls playsinline muted preload="metadata" width="1920" height="1066" aria-label="Recorded demo of Jev DevTools in the React playground" aria-describedby="drawer-description">
+      <source src="/media/jev-devtools-demo.mp4" type="video/mp4" />
       Your browser cannot play this video. <a href="/media/jev-devtools-demo.mp4">Open the drawer demo recording</a>.
     </video>
-    <figcaption><span>Real drawer. React playground. Sample responses.</span><button id="watch-drawer" class="text-link">Watch from the beginning <span aria-hidden="true">↗</span></button></figcaption>
-    <p id="drawer-playback-status" class="sr-only" role="status"></p>
   </figure>
   <div class="drawer-details" id="drawer-description">
     <div><h3>Stay in your app</h3><p>The React drawer sits alongside the interface you’re building. Open it when you need it, close it when you’re done.</p></div>
     <div><h3>Look inside each request</h3><p>Explore questions, returned probabilities, shared context, transport details, and raw captured data.</p></div>
     <div><h3>Follow the connections</h3><p>Move from a request diagram to a connected flow. Pan, zoom, and inspect the steps that produced the result.</p></div>
   </div>
-  <details class="demo-transcript"><summary>About this recording</summary><p>The 28-second, silent recording shows the React playground using synthetic support-triage responses. The drawer opens over the app, lists captured requests, and displays a Choice diagram with the returned billing category and alternative probabilities. The recording then inspects the Questions view and other request details. Playing this video makes no model calls. Connected multi-request flows are illustrated separately below.</p></details>
+  <details class="demo-transcript"><summary>About this recording</summary><p>The 31-second, silent recording shows the skill-suggestion cookbook in the React playground using synthetic responses. The drawer opens over the app and displays the connected flow: roster ranking, an application-defined request gate, shortlist preparation, and a follow-up Jev request. The recording explores the diagram and its returned results. Playing this video makes no model calls.</p></details>
 </section>`;
 
 export const flowApiShowcase = `
@@ -51,7 +49,7 @@ export const flowApiShowcase = `
 );</code></pre>
     </div>
     <div class="api-result">
-      <div class="api-result-header"><span>From definition to diagram</span><span>Illustrative run</span></div>
+      <p class="api-result-label">Illustrative run</p>
       <svg id="api-diagram" viewBox="0 0 500 355" role="img" aria-labelledby="api-diagram-title api-diagram-description">
         <title id="api-diagram-title">Refund review flow</title>
         <desc id="api-diagram-description"></desc>
@@ -69,24 +67,10 @@ export const flowApiShowcase = `
       <p id="api-sample-status" role="status"></p>
     </div>
   </div>
-  <div class="api-explanation"><p>Run with your connected inspector to record the path:<code>await review.run(input, { client, devtools: inspector });</code></p><p>The diagram follows the steps you define with the Flow API. The threshold is your application policy; an outcome is returned data. This example does not issue a refund.</p></div>
 </section>`;
 
 export function setupProductShowcases() {
   const video = document.querySelector<HTMLVideoElement>("#drawer-video")!;
-  document
-    .querySelector<HTMLButtonElement>("#watch-drawer")!
-    .addEventListener("click", async () => {
-      video.currentTime = 0;
-      try {
-        await video.play();
-        document.querySelector("#drawer-playback-status")!.textContent =
-          "Playing the recorded drawer demo from the beginning.";
-      } catch {
-        document.querySelector("#drawer-playback-status")!.textContent =
-          "Use the video’s play control to start the recording.";
-      }
-    });
   // Explicit playback only; don't start motion just because the section is visible.
   new IntersectionObserver(([entry]) => {
     if (!entry.isIntersecting) video.pause();

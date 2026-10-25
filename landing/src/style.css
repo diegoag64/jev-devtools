@@ -1049,26 +1049,11 @@ nav a span[aria-hidden] {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 1280/716;
+  aspect-ratio: 1920/1066;
   background: #100b12;
   border: 1px solid #4a344d;
   border-radius: 9px;
   box-shadow: 0 20px 90px -45px #b2538c50;
-}
-.drawer-demo figcaption {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  margin-top: 16px;
-}
-.drawer-demo figcaption > span {
-  color: #ad99b4;
-  font: 10px var(--mono);
-}
-.drawer-demo figcaption button {
-  background: none;
-  padding: 5px 0;
 }
 .drawer-details {
   display: grid;
@@ -1118,18 +1103,6 @@ nav a span[aria-hidden] {
 }
 .api-result {
   min-width: 0;
-}
-.api-result-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 15px;
-  padding: 0 20px 18px;
-  color: #cdb5cf;
-  font-size: 12px;
-}
-.api-result-header > span:last-child {
-  font: 9px var(--mono);
-  color: #a289a9;
 }
 #api-diagram {
   display: block;
@@ -1230,24 +1203,6 @@ nav a span[aria-hidden] {
   color: #ad96b6;
   min-height: 33px;
 }
-.api-explanation {
-  display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: 38px;
-  margin-top: 22px;
-}
-.api-explanation p {
-  font-size: 11px;
-  line-height: 1.8;
-  color: var(--muted);
-}
-.api-explanation code {
-  display: block;
-  margin-top: 7px;
-  color: #ceb5d3;
-  font: 10px/1.8 var(--mono);
-  overflow-wrap: anywhere;
-}
 @media (max-width: 1050px) {
   .product-heading {
     gap: 40px;
@@ -1255,8 +1210,7 @@ nav a span[aria-hidden] {
   .product-heading h2 {
     font-size: 38px;
   }
-  .api-comparison,
-  .api-explanation {
+  .api-comparison {
     gap: 24px;
     grid-template-columns: 1fr 1fr;
   }
@@ -1288,15 +1242,6 @@ nav a span[aria-hidden] {
   .product-heading p {
     font-size: 13px;
   }
-  .drawer-demo figcaption {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 9px;
-  }
-  .drawer-demo figcaption > span {
-    font-size: 8px;
-    line-height: 1.7;
-  }
   .drawer-details {
     grid-template-columns: 1fr;
     gap: 22px;
@@ -1306,18 +1251,18 @@ nav a span[aria-hidden] {
   .drawer-details p {
     font-size: 12px;
   }
-  .api-comparison,
-  .api-explanation {
+  .api-comparison {
     grid-template-columns: 1fr;
     gap: 30px;
   }
   .api-source pre {
     font-size: 10px;
   }
-  .api-result-header {
-    padding-inline: 0;
-  }
-  .api-explanation {
-    gap: 15px;
-  }
+}
+
+.api-result-label {
+  margin: 0 20px 18px;
+  text-align: right;
+  font: 9px var(--mono);
+  color: #a289a9;
 }
