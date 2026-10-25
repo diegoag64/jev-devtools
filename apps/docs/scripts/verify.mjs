@@ -370,6 +370,17 @@ try {
   );
   await page.goto(origin + base + "changelog/");
   await page.screenshot({ path: resolve(evidence, "changelog-desktop.png") });
+  const categorizedChangelog = (await readFile(resolve(root, "raw/changelog.md"), "utf8")).includes("#### Fixed");
+  const categoryNav = page.getByRole("navigation", { name: "Changes in 0.4.1", exact: true });
+  if (categorizedChangelog) {
+    await categoryNav.getByRole("link", { name: /^Fixed/ }).click();
+    assert.ok(page.url().endsWith("#041--october-24-2026-experimental-fixed"));
+    await page.screenshot({ path: resolve(evidence, "changelog-categories.png") });
+    await page.getByRole("button", { name: "Switch color theme" }).click();
+    await page.screenshot({ path: resolve(evidence, "changelog-categories-dark.png") });
+    await page.getByRole("button", { name: "Switch color theme" }).click();
+    await page.goto(origin + base + "changelog/");
+  }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: resolve(evidence, "changelog-mobile.png") });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "Changelog fits mobile");
@@ -418,6 +429,10 @@ try {
   await readable.goto(origin + base + "changelog/");
   await readable.getByRole("heading", { name: "Unreleased", exact: false }).waitFor();
   assert.ok((await readable.locator("article").innerText()).includes("Not published to npm"));
+  if (categorizedChangelog) {
+    await readable.getByRole("navigation", { name: "Changes in 0.4.1", exact: true }).getByRole("link", { name: /^Fixed/ }).click();
+    assert.ok(readable.url().endsWith("#041--october-24-2026-experimental-fixed"));
+  }
   assert.deepEqual(errors, []);
   console.log(
     `Verified ${links.length} pages, sample switching, lazy search, keyboard navigation, copy, persistent theme, mobile layout, raw Markdown, 404s, type hovers (pointer/keyboard/touch), clean copying, and no-JS reading at base ${base}.`,

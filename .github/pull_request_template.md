@@ -2,7 +2,9 @@
 
 ## Problem
 
-<!-- Explain the problem or need and its impact. For a bug, describe actual versus expected behavior and include reproduction steps or environment where relevant. Link related issues; use closing keywords only when fully resolved. -->
+<!-- For user-visible work, update CHANGELOG.md using CONTRIBUTING.md#changelog-categories: a short bold summary in the appropriate nonempty category, with compatibility notes kept separate.
+
+Explain the problem or need and its impact. For a bug, describe actual versus expected behavior and include reproduction steps or environment where relevant. Link related issues; use closing keywords only when fully resolved. -->
 
 ## Change
 

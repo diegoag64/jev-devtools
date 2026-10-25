@@ -17,7 +17,7 @@ function candidate(t) {
   writeFileSync(join(cwd, "package.json"), JSON.stringify({ private: true, workspaces: ["packages/*"] }));
   writeFileSync(join(cwd, "packages/jev-devtools/package.json"), JSON.stringify({ name: "jev-devtools", version: "1.2.3", files: ["index.js"], publishConfig: { access: "public", registry: "https://registry.npmjs.org/" } }));
   writeFileSync(join(cwd, "packages/jev-devtools/index.js"), "export const answer = 42;\n");
-  writeFileSync(join(cwd, "CHANGELOG.md"), "## Unreleased\n\nLater work.\n\n## 1.2.3 — Pending publication\n\nNot yet published.\n\n### Compatibility and upgrade\n\nInstall the SDK.\n\n### Changes\n\n- Add the feature.\n\n## 1.2.2 — Yesterday\n\nOlder work.\n");
+  writeFileSync(join(cwd, "CHANGELOG.md"), "## Unreleased\n\nLater work.\n\n## 1.2.3 — Pending publication\n\nNot yet published.\n\n### Compatibility and upgrade\n\nInstall the SDK.\n\n### Changes\n\n#### Added\n\n- **Feature.** Add the feature.\n\n#### Fixed\n\n- **Cancellation.** Preserve the original error.\n\n## 1.2.2 — Yesterday\n\nOlder work.\n");
   const git = (...args) => execFileSync("git", args, { cwd, encoding: "utf8" }).trim();
   git("init", "-q"); git("add", ".");
   git("-c", "user.name=Release fixture", "-c", "user.email=fixture@example.invalid", "commit", "-qm", "fixture");
@@ -37,7 +37,8 @@ test("release candidate packs the selected commit and scopes notes to that versi
   assert.equal(meta.version, "1.2.3");
   const notes = readFileSync(join(folder, "notes.md"), "utf8");
   assert.match(notes, /Install the SDK/);
-  assert.match(notes, /Add the feature/);
+  assert.match(notes, /#### Added\n\n- \*\*Feature\.\*\* Add the feature/);
+  assert.match(notes, /#### Fixed\n\n- \*\*Cancellation\.\*\* Preserve the original error/);
   assert.doesNotMatch(notes, /Later work|Older work|Not yet published/);
   assert.equal(cli("check-artifact", { RELEASE_SHA256: meta.sha256 }).status, 0);
   writeFileSync(join(cwd, "packages/jev-devtools/index.js"), "export const answer = 99;\n");

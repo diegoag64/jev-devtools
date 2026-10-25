@@ -16,6 +16,9 @@ export function renderChangelog(markdown: string) {
     counts.set(slug, count + 1);
     return count ? `${slug}-${count}` : slug;
   };
+  let releaseId = "";
+  let categories: { id: string; title: string; count: number }[] = [];
+  const categoryNames = new Set(["Added", "Changed", "Fixed", "Security", "Performance", "Documentation", "Maintenance"]);
   const parser = new Marked({ async: false, renderer: {
     html({ text }) { return escape(text); },
     image({ text }) { return escape(text); },
@@ -28,8 +31,12 @@ export function renderChangelog(markdown: string) {
       return `<a href="${escape(href.startsWith("#") ? href : url.href)}">${text}</a>`;
     },
     heading({ text, tokens, depth }) {
-      const id = idFor(text);
-      return `<h${depth} id="${id}">${this.parser.parseInline(tokens)}<a class="heading-link" href="#${id}" aria-label="Link to ${escape(text)}">#</a></h${depth}>`;
+      const legacyId = idFor(text);
+      const category = depth === 4 ? categories.find((item) => item.title === text) : undefined;
+      const id = category?.id ?? legacyId;
+      // Keep Markdown's original anchor as well as the stable per-release link.
+      const alias = category ? `<span id="${legacyId}" aria-hidden="true"></span>` : "";
+      return `${alias}<h${depth} id="${id}">${this.parser.parseInline(tokens)}<a class="heading-link" href="#${id}" aria-label="Link to ${escape(text)}">#</a></h${depth}>`;
     },
   }});
   const tokens = parser.lexer(markdown.replace(/^# Changelog\s*\n/, ""));
@@ -45,11 +52,25 @@ export function renderChangelog(markdown: string) {
     const release = /^(\d+\.\d+\.\d+(?:-[\w.-]+)?) — (.+?)(?: \(([^)]+)\))?$/.exec(title);
     const label = release?.[1] ?? title;
     headings.push({ id, title: label, depth: 2 });
+    releaseId = id;
+    categories = [];
+    let category: (typeof categories)[number] | undefined;
+    for (const token of body) {
+      if (token.type === "heading" && token.depth <= 4) {
+        category = token.depth === 4 && categoryNames.has(token.text)
+          ? { id: `${releaseId}-${token.text.toLowerCase()}`, title: token.text, count: 0 }
+          : undefined;
+        if (category) categories.push(category);
+      } else if (category && token.type === "list") category.count += token.items.length;
+    }
     const content = parser.parser(body);
+    const categoryNav = categories.length
+      ? `<nav class="release-categories" aria-label="Changes in ${escape(label)}">${categories.map((item) => `<a href="#${item.id}">${escape(item.title)} <span>${item.count}</span></a>`).join("")}</nav>`
+      : "";
     if (title === "At a glance")
       return `<details class="release-overview" id="${id}"><summary>${escape(title)}</summary>${content}</details>`;
     const badge = title === "Unreleased" ? "Not published to npm" : release?.[3];
-    return `<section class="release"><header class="release-header"><h2 id="${id}">${escape(label)}<a class="heading-link" href="#${id}" aria-label="Link to ${escape(label)}">#</a></h2>${release ? `<p class="release-date">${escape(release[2])}</p>` : ""}${badge ? `<span class="release-badge">${escape(badge)}</span>` : ""}</header><div class="release-body">${content}</div></section>`;
+    return `<section class="release"><header class="release-header"><h2 id="${id}">${escape(label)}<a class="heading-link" href="#${id}" aria-label="Link to ${escape(label)}">#</a></h2>${release ? `<p class="release-date">${escape(release[2])}</p>` : ""}${badge ? `<span class="release-badge">${escape(badge)}</span>` : ""}</header>${categoryNav}<div class="release-body">${content}</div></section>`;
   }).join("");
   return { html, headings };
 }

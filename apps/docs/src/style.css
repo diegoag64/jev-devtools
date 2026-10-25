@@ -875,3 +875,40 @@ dialog::backdrop {
   font-size: 16px;
   margin-top: 28px;
 }
+
+.release-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+.release-categories a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  text-decoration: none;
+}
+.release-categories a:hover,
+.release-categories a:focus-visible {
+  background: var(--tint);
+}
+.release-categories span {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.release-body h4 {
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+  margin: 28px 0 16px;
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 650;
+}
+.release-body h4:hover .heading-link,
+.release-body h4:focus-within .heading-link {
+  opacity: 1;
+}

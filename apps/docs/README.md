@@ -61,7 +61,7 @@ The original integration, flow, and Next.js documents remain the detailed compan
 
 ## Changelog and publishing
 
-`/changelog/` renders `CHANGELOG.md` into release sections with dates, unreleased status, source links, and GitHub-compatible anchors. The overview table is collapsible; all source notes remain available. Relative links resolve against the GitHub repository. There is no separate manually maintained changelog content file and no browser fetch or Markdown parser.
+`/changelog/` renders `CHANGELOG.md` into release sections with dates, unreleased status, source links, and GitHub-compatible anchors. The overview table is collapsible; all source notes remain available. Categorized entries use the headings authored in `CHANGELOG.md`, with per-release jump links and counts; the renderer does not infer categories or rewrite release facts. Follow `CONTRIBUTING.md#changelog-categories` when adding entries. Relative links resolve against the GitHub repository. There is no separate manually maintained changelog content file and no browser fetch or Markdown parser.
 
 - `npm run build:docs` and local development use the working-tree changelog, labeled as a working-tree copy. Changes to the root file trigger a docs reload.
 - **Before publishing**, run `npm run build:docs:publish`. This fetches `main/CHANGELOG.md` from GitHub and embeds it in HTML, raw Markdown, and the search index. Failed fetches or malformed content stop publication builds. The saved date and source appear on the page. The published copy updates only with the next deployment.
