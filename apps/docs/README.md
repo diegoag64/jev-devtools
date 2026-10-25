@@ -8,6 +8,7 @@ From the repository root, with Node 22.12+:
 
 ```sh
 npm ci
+npm run build:package
 npm run dev:docs
 ```
 
@@ -28,6 +29,8 @@ Pages load their stylesheet through a render-blocking link in the head, independ
 - `api-help.ts` contains compact usage summaries and property descriptions. `api-hovers.ts` selects imported core APIs, their receivers, callback builders, and direct option objects. Locals, application-defined keys, SDK methods/options, and import statements stay plain code. Help content is static HTML outside the copyable code; identical help is reused within each page. The existing lazy browser module only positions and dismisses tooltips.
 - Partial fenced snippets opt into authored help with `ts api=server`, `ts api=expressions`, `ts api=parallel`, or `tsx api=core`. These contexts match the surrounding setup described in the prose; they do not claim the fragment is a complete, type-checked program. Unmarked fences remain plain highlighted code. Add deliberate context and help entries when expanding coverage.
 - Markdown and embedded HTML are trusted repository source, reviewed like code. This compiler is not an untrusted-content sanitizer.
+- The API glossary at `/api/reference/` owns stable method links. Add/update the readable inputs, outputs, usage, and limitations there when changing a public API, and link related guides to it. `type-reference.ts` reads public package declarations at build time; rebuild the package after changing its API. Add a human description for new public types. Keep complete beginner flow examples in `examples/` and verify their explained results.
+- `api-links.ts` maps receiver-aware hover titles to glossary targets, including property help through its owning method. Reference links render outside copyable code and work without JavaScript. API glossary headings are individual search destinations.
 - Keep headings unique where possible; duplicate heading slugs receive suffixes. Heading IDs are deep links, so preserve them when editing.
 - Add interactions in `src/` and dynamically import them only on pages that need them. The introduction demo uses fixed fixtures and no network inference.
 - Keep current-working-tree and published behavior distinct. Avoid declaring unreleased APIs available in the published npm version.
@@ -55,7 +58,7 @@ Open `/docs/` on the preview server. The base must start and end with `/`; only 
 
 ## Content direction and next steps
 
-See [the research and architecture notes](../../docs/documentation-site.md). This first pass includes onboarding, framework/privacy/troubleshooting guides, an overview of every public entry point and runtime operation, example links, and a separate agent page. It is not an exhaustive field-by-field SDK or wire-protocol manual. Prioritize independently runnable examples for each advanced operation and expand options/results/error sections as feedback arrives.
+See [the research and architecture notes](../../docs/documentation-site.md). This first pass includes onboarding, framework/privacy/troubleshooting guides, a full public API glossary with readable contracts and exact declarations, a beginner flow guide with checked examples for every operation, example links, and a separate agent page. The TypeSafe SDK itself and wire-protocol transport semantics remain separate references.
 
 The original integration, flow, and Next.js documents remain the detailed companion references. If promoting this site to the canonical source, migrate those sections deliberately and replace duplicates with links in the same PR.
 

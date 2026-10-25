@@ -4,7 +4,16 @@ import { renderChangelog } from "../changelog.js";
 import { compile } from "../site.js";
 import { summarize, count } from "../examples/operations.js";
 import { replayExample } from "../examples/replay.js";
-import { FlowLoopLimitError } from "jev-devtools/flow";
+import { tryGreeting } from "../examples/first-flow.js";
+import { greeting } from "../examples/flow-task.js";
+import { delivery } from "../examples/flow-if.js";
+import { route } from "../examples/flow-branch.js";
+import { totals } from "../examples/flow-parallel.js";
+import { doubleEach } from "../examples/flow-map.js";
+import { countToThree } from "../examples/flow-loop.js";
+import { classify } from "../examples/flow-jev.js";
+import { customQuestion } from "../examples/flow-factory.js";
+import { FlowLoopLimitError, replayClient } from "jev-devtools/flow";
 
 test("code examples render as text while repeated headings get distinct deep links", async () => {
   const result = await compile(
@@ -25,6 +34,20 @@ test("documented task examples return the explained values and report loop exhau
       throw new Error("Task-only examples must not call inference");
     },
   };
+  const first = await tryGreeting();
+  assert.equal(first.outcome, "greeted");
+  assert.equal(first.value, "Ada");
+  assert.equal((await greeting.run({ name: "Ada" }, { client })).value, "Hello, Ada!");
+  for (const express of [true, false])
+    assert.equal((await delivery.run({ express }, { client })).value,
+      `Delivery in ${express ? 1 : 5} day(s)`);
+  for (const needsReview of [true, false])
+    assert.equal((await route.run({ needsReview }, { client })).outcome,
+      needsReview ? "manual-review" : "ready");
+  assert.deepEqual((await totals.run({ price: 100 }, { client })).value, { regular: 100, sale: 80 });
+  assert.deepEqual((await doubleEach.run({ numbers: [2, 4, 6] }, { client })).value, [4, 8, 12]);
+  assert.deepEqual((await doubleEach.run({ numbers: [] }, { client })).value, []);
+  assert.equal((await countToThree.run({}, { client })).value, 3);
   const result = await summarize.run({ values: [2, 4] }, { client });
   assert.equal(result.outcome, "summary");
   assert.deepEqual(result.value, { total: 12, label: "Large: 12" });
@@ -128,4 +151,21 @@ Introductory context.
   assert.ok(!result.html.includes("<script>"));
   assert.ok(!result.html.includes('href="javascript:'));
   assert.throws(() => renderChangelog("<html>Gateway error</html>"), /Invalid changelog/);
+});
+
+// Exercise the actual documented request forms with stored SDK responses.
+// The prose deliberately does not promise this answer from a live model.
+test("beginner Jev examples resolve named answers and factory answer objects", async () => {
+  const answers = {
+    team: { type: "choice", choice: "billing", probabilities: { billing: 0.8, support: 0.2 }, confidence: 0.6 },
+  };
+  const stored = (flow: string, step: string) => replayClient({
+    version: 1, flow, steps: { [step]: { model: "jev-sample", answers } },
+  });
+  assert.equal((await classify.run({ message: "A duplicate charge" }, {
+    client: stored("classify", "ask-team"),
+  })).value, "billing");
+  assert.deepEqual((await customQuestion.run({ message: "A duplicate charge" }, {
+    client: stored("custom-question", "ask"),
+  })).value, answers);
 });

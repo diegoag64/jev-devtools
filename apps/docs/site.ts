@@ -3,6 +3,7 @@ import { dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Marked } from "marked";
 import { changelogURL, changelogSource, renderChangelog } from "./changelog.js";
+import { publicTypeReference } from "./type-reference.js";
 import { codeRenderer } from "./highlight.js";
 import { groups, pages, type Page } from "./pages.js";
 
@@ -26,10 +27,10 @@ export function normalizeBase(value = "/") {
     );
   return value;
 }
-export async function compile(markdown: string) {
+export async function compile(markdown: string, base = "/") {
   const headings: { id: string; title: string; depth: number }[] = [];
   const ids = new Map<string, number>();
-  const renderCode = await codeRenderer();
+  const renderCode = await codeRenderer(base);
   const renderer = new Marked({
     renderer: {
       heading({ tokens, depth }) {
@@ -55,6 +56,8 @@ export async function compile(markdown: string) {
   return { html: await renderer.parse(markdown), headings };
 }
 async function expandExamples(source: string) {
+  if (source.includes("<!-- public-api-types -->"))
+    source = source.replace("<!-- public-api-types -->", publicTypeReference());
   const matches = [
     ...source.matchAll(/<!-- example: ([\w-]+\.(?:ts|tsx))( twoslash)? -->/g),
   ];
@@ -95,7 +98,7 @@ export async function generate(
       /\]\(@\/([^)]*)\)/g,
       (_, path: string) => `](${base}${path})`,
     );
-    const { html, headings } = isChangelog ? renderChangelog(linked) : await compile(linked);
+    const { html, headings } = isChangelog ? renderChangelog(linked) : await compile(linked, base);
     const changelogStatus = `Saved ${new Date().toISOString().slice(0, 10)} · ${remoteChangelog ? "GitHub main" : "working-tree copy"}.`;
     const editURL = isChangelog ? `${repo}/edit/main/CHANGELOG.md` : `${repo}/edit/main/apps/docs/content/${page.file}`;
     const file = resolve(generated, page.slug, "index.html");
@@ -142,7 +145,20 @@ export async function generate(
     );
     await mkdir(dirname(raw), { recursive: true });
     await writeFile(raw, isChangelog ? markdown : `# ${page.title}\n\n${page.description}\n\n${linked}`);
-    search.push({
+    if (page.slug === "api/reference") {
+      // Search resolves an API directly to its stable heading, not the top of
+      // a long glossary. Exact declarations stay out of the search payload.
+      const sections = [...html.matchAll(/<h3 id="([^"]+)">([\s\S]*?)(?=<h[23] |$)/g)];
+      for (const section of sections) {
+        const heading = headings.find((item) => item.id === section[1])!;
+        search.push({
+          title: heading.title,
+          group: page.group,
+          url: href(page.slug) + "#" + heading.id,
+          text: section[2].replace(/<details>[\s\S]*?<\/details>/g, "").replace(/<[^>]*>/g, " "),
+        });
+      }
+    } else search.push({
       title: page.title,
       group: page.group,
       url: href(page.slug),

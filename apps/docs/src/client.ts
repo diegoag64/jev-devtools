@@ -65,6 +65,9 @@ function renderSearch() {
     const item = document.createElement("li");
     const link = document.createElement("a");
     link.href = page.url;
+    // A glossary result may only change the hash, so navigation will not
+    // replace the document and dismiss the search dialog for us.
+    link.addEventListener("click", () => dialog.close());
     const title = document.createElement("strong");
     title.textContent = page.title;
     const group = document.createElement("span");

@@ -1,6 +1,6 @@
 ## References are values for later
 
-`FlowExpression<T>` represents a typed value that will be resolved during a run. Obtain one from `flow.input`, a task result, an answer field, or a joined operation. You usually do not construct the class directly.
+[`FlowExpression<T>`](@/api/reference/#flowexpression) represents a typed value that will be resolved during a run. Obtain one from [`flow.input`](@/api/reference/#flow-input), a task result, an answer field, or a joined operation. You usually do not construct the class directly.
 
 ```ts api=expressions
 const message = flow.input.get("message");
@@ -14,17 +14,17 @@ This fragment assumes a flow input with `message` and an earlier request named `
 
 | Method        | Meaning                                            |
 | ------------- | -------------------------------------------------- |
-| `.get(key)`   | Select an existing field, including nested fields. |
-| `.eq(value)`  | Compare matching scalar types for equality.        |
-| `.lt(value)`  | Strictly less than; finite numeric values only.    |
-| `.gt(value)`  | Strictly greater than; finite numeric values only. |
-| `.gte(value)` | Greater than or equal; finite numeric values only. |
+| [`.get(key)`](@/api/reference/#expression-get)   | Select an existing field, including nested fields. |
+| [`.eq(value)`](@/api/reference/#expression-eq)  | Compare matching scalar types for equality.        |
+| [`.lt(value)`](@/api/reference/#expression-lt)  | Strictly less than; finite numeric values only.    |
+| [`.gt(value)`](@/api/reference/#expression-gt)  | Strictly greater than; finite numeric values only. |
+| [`.gte(value)`](@/api/reference/#expression-gte) | Greater than or equal; finite numeric values only. |
 
-Each comparison accepts a literal or compatible expression. Optional or nullable numeric fields must be resolved to valid numbers before comparison. Missing fields are execution errors. There is no `.lte()` method; express an inclusive upper bound with `not(value.gt(limit))` when the value is a valid number.
+Each comparison accepts a literal or compatible expression. Optional or nullable numeric fields must be resolved to valid numbers before comparison. Missing fields are execution errors. There is no `.lte()` method; express an inclusive upper bound with [`not(value.gt(limit))`](@/api/reference/#not) when the value is a valid number.
 
 ## Combine conditions
 
-Import `all`, `any`, and `not` from `jev-devtools/flow`:
+Import [`all`](@/api/reference/#all), [`any`](@/api/reference/#any), and [`not`](@/api/reference/#not) from `jev-devtools/flow`:
 
 ```ts api=expressions
 const shouldReview = all(
@@ -33,10 +33,10 @@ const shouldReview = all(
 );
 ```
 
-This fragment assumes earlier requests named `eligibility` and `risk`. The thresholds are example application policy, not TypeSafe defaults. `all` requires every condition, `any` requires at least one, and `not` inverts one Boolean expression.
+This fragment assumes earlier requests named `eligibility` and `risk`. The thresholds are example application policy, not TypeSafe defaults. [`all`](@/api/reference/#all) requires every condition, [`any`](@/api/reference/#any) requires at least one, and [`not`](@/api/reference/#not) inverts one Boolean expression.
 
 All operands are evaluated. A missing reference remains an error even when another operand would normally short-circuit JavaScript evaluation. There is no arbitrary predicate callback or `eval` in the expression API.
 
 ## Respect scope
 
-A reference belongs to its definition and available execution scope. Do not use a reference from another flow, an untaken branch, or a sibling parallel lane. Return a value from `if` or `parallel` to make it available after the join. Pass explicit context into map and loop programs.
+A reference belongs to its definition and available execution scope. Do not use a reference from another flow, an untaken branch, or a sibling parallel lane. Return a value from [`if`](@/api/reference/#flow-if) or [`parallel`](@/api/reference/#flow-parallel) to make it available after the join. Pass explicit context into map and loop programs.

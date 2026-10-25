@@ -54,3 +54,7 @@ Trigger the handler from your app, open the **Jev DevTools** launcher, and selec
 4. Confirm production disables both the component and adapter. SDK requests still work when recording is off.
 
 An empty drawer usually means the route and the inference handler use different adapter instances, or the request came from a different client. See [troubleshooting](@/guides/troubleshooting/).
+
+## Look up an API
+
+The [API glossary](@/api/reference/) lists each method’s inputs and return value. Ready to connect multiple steps? Start with [Flows from scratch](@/guides/flow-basics/).

@@ -13,19 +13,19 @@ const inspector = createJevDevtools({
 });
 ```
 
-Import `createJevDevtools` from `jev-devtools/server`. The callback changes the captured copy, not SDK inputs or application values. Known credential fields are always redacted; extend the policy for your own sensitive data. Field-name redaction does not detect every secret in prose, URLs, images, or unusual field names.
+Import [`createJevDevtools`](@/api/reference/#createjevdevtools) from `jev-devtools/server`. The callback changes the captured copy, not SDK inputs or application values. Known credential fields are always redacted; extend the policy for your own sensitive data. Field-name redaction does not detect every secret in prose, URLs, images, or unusual field names.
 
-> **Unreleased:** expanded credential aliases and the default-on `redactAdditionalSensitiveData` prop are present in the working tree. Display masking leaves values in server capture memory, the event stream, and browser memory. Use server-side redaction when data must never reach the browser.
+> **Unreleased:** expanded credential aliases and the default-on [`redactAdditionalSensitiveData`](@/api/reference/#jevdevtools) prop are present in the working tree. Display masking leaves values in server capture memory, the event stream, and browser memory. Use server-side redaction when data must never reach the browser.
 
 ## Control who can inspect
 
-Same-origin checks protect browser access. Other HTTP clients can set Host and Origin headers. Node middleware therefore also requires a loopback socket when `authorize` is absent. Web Request handlers do not have socket information: bind the server to `127.0.0.1` or supply authorization.
+Same-origin checks protect browser access. Other HTTP clients can set Host and Origin headers. Node middleware therefore also requires a loopback socket when [`authorize`](@/api/reference/#createjevdevtools) is absent. Web Request handlers do not have socket information: bind the server to `127.0.0.1` or supply authorization.
 
-An enabled non-loopback origin requires `authorize(request)`. Use your existing application authentication. A network-reachable proxy or tunnel also needs authorization, even if it connects to the adapter over loopback.
+An enabled non-loopback origin requires [`authorize(request)`](@/api/reference/#createjevdevtools). Use your existing application authentication. A network-reachable proxy or tunnel also needs authorization, even if it connects to the adapter over loopback.
 
 ## Separate session history
 
-`getSession(request)` derives a trusted scope from server-authenticated identity. Wrap the inference handler with `inspector.run(request, callback)` so capture uses that same scope. `run` chooses the recording scope; it is not an authentication check.
+[`getSession(request)`](@/api/reference/#createjevdevtools) derives a trusted scope from server-authenticated identity. Wrap the inference handler with [`inspector.run(request, callback)`](@/api/reference/#adapter-run) so capture uses that same scope. [`run`](@/api/reference/#adapter-run) chooses the recording scope; it is not an authentication check.
 
 Without a custom scope, authorized clients share the local history. Do not use an untrusted query parameter as a session identity. See the [integration guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/integration.md#history-and-access) for the full access and redaction contract.
 

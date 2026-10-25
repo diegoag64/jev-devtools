@@ -4,6 +4,7 @@ import { createHighlighter } from "shiki";
 import { createTransformerFactory } from "@shikijs/twoslash/core";
 import { createTwoslasher } from "twoslash";
 import ts from "typescript";
+import { apiTargets } from "./api-links.js";
 import { apiHovers } from "./api-hovers.js";
 
 const app = dirname(fileURLToPath(import.meta.url));
@@ -27,7 +28,7 @@ const escape = (text: string) =>
       })[c]!,
   );
 
-export async function codeRenderer() {
+export async function codeRenderer(base = "/") {
   const shiki = await highlighter;
   let sequence = 0;
   const popupIds = new Map<string, string>();
@@ -128,6 +129,15 @@ export async function codeRenderer() {
       transformers,
       decorations,
     });
-    return `<div class="code-block"><div class="code-toolbar"><span>${escape(language)}${annotations.length ? " · API help" : ""}</span><button type="button" class="copy-code" hidden>Copy code</button></div>${html}</div>${popups.join("")}`;
+    const references = new Map<string, string>();
+    for (const { help } of annotations) {
+      const title = help.title.split(" · ")[0];
+      const target = apiTargets[title];
+      if (target) references.set(target, title);
+    }
+    const links = references.size
+      ? `<p class="code-references">API reference: ${[...references].map(([target, title]) => `<a href="${base}api/reference/#${target}">${escape(title)}</a>`).join(" · ")}</p>`
+      : "";
+    return `<div class="code-block"><div class="code-toolbar"><span>${escape(language)}${annotations.length ? " · API help" : ""}</span><button type="button" class="copy-code" hidden>Copy code</button></div>${html}</div>${popups.join("")}${links}`;
   };
 }

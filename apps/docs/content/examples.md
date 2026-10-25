@@ -37,3 +37,7 @@ Cookbooks are repository examples, not files shipped in npm. Each includes setup
 ## Add your own interaction
 
 For docs contributors: examples can have small, page-specific TypeScript modules. The introduction's fixture switcher is one example. Richer demos can load React or the public package lazily when needed. Keep sample policies labeled and API credentials on a server; the static docs app has no inference backend.
+
+## Learn one method at a time
+
+[Flows from scratch](@/guides/flow-basics/) has small checked examples for tasks, Jev requests, conditionals, parallel lanes, maps, and loops. Use the [API glossary](@/api/reference/) to look up their interfaces.

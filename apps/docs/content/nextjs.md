@@ -32,7 +32,7 @@ export const jev = inspector.createClient({
 });
 ```
 
-Import this `jev` from Route Handlers, Server Actions, or Server Components. The stable key reuses the adapter across module reloads in the same Node realm. Restart after changing its options: the first options factory wins until disposal or restart.
+Import this [`jev`](@/api/reference/#flow-jev) from Route Handlers, Server Actions, or Server Components. The stable key reuses the adapter across module reloads in the same Node realm. Restart after changing its options: the first options factory wins until disposal or restart.
 
 ## Expose the optional catch-all route
 
@@ -46,7 +46,7 @@ export const GET = (request: Request) => inspector.handleNodeRoute(request);
 export const DELETE = (request: Request) => inspector.handleNodeRoute(request);
 ```
 
-The optional catch-all includes both the base endpoint and its children. `handleNodeRoute` checks the incoming Host and normalizes framework-internal request URLs. Proxies must preserve Host; forwarded host headers are not trusted.
+The optional catch-all includes both the base endpoint and its children. [`handleNodeRoute`](@/api/reference/#adapter-handlenoderoute) checks the incoming Host and normalizes framework-internal request URLs. Proxies must preserve Host; forwarded host headers are not trusted.
 
 ## Mount a Client Component
 
@@ -68,6 +68,6 @@ Render `<Devtools />` once inside the root layout's `<body>`. It renders nothing
 npx next dev --hostname 127.0.0.1
 ```
 
-Open the URL matching your configured origin. Web Request handlers cannot inspect the connection's socket address, so bind to loopback or configure `authorize`. With custom session scopes, wrap inference handlers in `inspector.run(request, callback)`; Server Actions need a trusted Request derived from server headers.
+Open the URL matching your configured origin. Web Request handlers cannot inspect the connection's socket address, so bind to loopback or configure [`authorize`](@/api/reference/#createjevdevtools). With custom session scopes, wrap inference handlers in [`inspector.run(request, callback)`](@/api/reference/#adapter-run); Server Actions need a trusted Request derived from server headers.
 
 See the [complete framework guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/nextjs.md) for layout code, Server Actions, custom scopes, base paths, caching, and deployment limits. The [independent Next.js example](https://github.com/diegoag64/jev-devtools/tree/main/examples/nextjs-app) is sample-only and needs no key.

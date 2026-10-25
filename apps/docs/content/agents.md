@@ -17,3 +17,7 @@ Every page has a **Read as Markdown** link with expanded examples. The site's [l
 Check the installed public declaration files and package version before proposing code. Use public imports; keep `/server` and `/flow` in Node code. Distinguish fixed sample responses from live inference and application policies from model outputs.
 
 The repository [AGENTS.md](https://github.com/diegoag64/jev-devtools/blob/main/AGENTS.md) describes contributing to this package. It is not the installation workflow for a consumer application; follow that application's own instructions.
+
+## Resolve API references
+
+The [API glossary](@/api/reference/) documents every public method and includes exact declarations from the working-tree package. Its method anchors also work in the raw Markdown download. Prefer the [beginner flow examples](@/guides/flow-basics/) for small complete definitions.

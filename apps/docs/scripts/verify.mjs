@@ -356,6 +356,21 @@ try {
       200,
     );
   }
+  // The glossary must be reachable from both prose and code, and search must
+  // land on the requested method rather than the start of the long page.
+  await page.goto(origin + base + "guides/flow-basics/");
+  await page.locator(".code-references").getByRole("link", { name: "flow.map()", exact: true }).click();
+  await page.waitForURL("**/api/reference/#flow-map");
+  assert.equal(await page.locator("#flow-map").textContent(), "flow.map#");
+  await page.getByRole("button", { name: "Search documentation" }).click();
+  await page.getByRole("searchbox").fill("flow.task");
+  await page.locator("#search-results").getByRole("link", { name: "flow.task API reference", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await page.waitForURL("**/api/reference/#flow-task");
+  assert.equal(await page.locator("#search-dialog").evaluate((dialog) => dialog.open), false, "Same-page API search closes the dialog");
+  await page.screenshot({ path: resolve(evidence, "api-glossary.png") });
+  await page.goto(origin + base + "guides/flow-basics/#map-repeat-a-recipe-for-each-item");
+  await page.screenshot({ path: resolve(evidence, "flow-basics.png") });
   // The published changelog is a readable static document, including release
   // anchors from GitHub and source-relative links; no visitor fetch is needed.
   await page.goto(origin + base + "changelog/");
@@ -426,6 +441,17 @@ try {
     flowSource,
     "The complete example stays readable without JavaScript",
   );
+  await readable.goto(origin + base + "guides/flow-basics/");
+  await readable.locator(".code-references").getByRole("link", { name: "flow.task()", exact: true }).first().click();
+  assert.ok(readable.url().endsWith("/api/reference/#flow-task"));
+  await readable.locator("#type-taskcontext + p + p + details summary").click();
+  assert.ok((await readable.locator("#type-taskcontext + p + p + details").innerText()).includes("executionId"));
+  for (const route of ["api/reference/", "guides/flow-basics/"]) {
+    await readable.goto(origin + base + route);
+    assert.ok(await readable.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${route} fits mobile without JS`);
+    await readable.locator("#main").scrollIntoViewIfNeeded();
+    await readable.screenshot({ path: resolve(evidence, route.startsWith("api") ? "api-glossary-mobile.png" : "flow-basics-mobile.png") });
+  }
   await readable.goto(origin + base + "changelog/");
   await readable.getByRole("heading", { name: "Unreleased", exact: false }).waitFor();
   assert.ok((await readable.locator("article").innerText()).includes("Not published to npm"));

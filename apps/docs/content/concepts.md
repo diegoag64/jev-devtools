@@ -1,6 +1,6 @@
 ## Three pieces, one process
 
-1. **Your SDK client** sends `systemOne` requests. Create it through `inspector.createClient()` so the recorder can observe them.
+1. **Your SDK client** sends `systemOne` requests. Create it through [`inspector.createClient()`](@/api/reference/#adapter-createclient) so the recorder can observe them.
 2. **The Node adapter** keeps bounded request history and serves it over a same-origin event stream.
 3. **The React drawer** subscribes to that stream and presents the captured data.
 
@@ -10,13 +10,13 @@ Your application's HTTP handlers and the inspector routes must share the same ad
 
 The recorder observes copies of request and response data. It preserves the original SDK promise, response helpers, cancellation, and application result. Captures have size and depth limits; the inspector marks omitted or truncated data.
 
-Known credential fields are removed from the inspection copy. Use a server `redact` callback for application-specific data that must not reach a browser. The unreleased `redactAdditionalSensitiveData` prop masks supported personal fields in the display only; it does not remove them from captured or streamed data.
+Known credential fields are removed from the inspection copy. Use a server [`redact`](@/api/reference/#createjevdevtools) callback for application-specific data that must not reach a browser. The unreleased [`redactAdditionalSensitiveData`](@/api/reference/#jevdevtools) prop masks supported personal fields in the display only; it does not remove them from captured or streamed data.
 
 ## A request versus a flow
 
 A request is one logical `systemOne` call, potentially with retries. A flow is an optional application-defined sequence of requests, tasks, decisions, and outcomes.
 
-`defineJevFlow()` builds a definition synchronously. Calling its `run()` method executes a fresh instance. Definition callbacks describe possible paths; only selected paths execute. The graph describes your application, not hidden model reasoning.
+[`defineJevFlow()`](@/api/reference/#definejevflow) builds a definition synchronously. Calling its [`run()`](@/api/reference/#flow-run) method executes a fresh instance. Definition callbacks describe possible paths; only selected paths execute. The graph describes your application, not hidden model reasoning.
 
 ## Closing versus disabling
 

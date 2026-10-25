@@ -11,13 +11,13 @@ Mount once near the application root. The component is safe to import during SSR
 | `enabled`                       | `boolean` | `false`             | Opt in to loading and connecting the inspector.                                               |
 | `endpoint`                      | `string`  | `/api/jev-devtools` | Same-origin adapter path. Must match the server.                                              |
 | `defaultOpen`                   | `boolean` | `true`              | Initial expanded state; set false to start at the launcher.                                   |
-| `redactAdditionalSensitiveData` | `boolean` | `true`              | **Unreleased.** Mask supported personal fields in the display. Does not remove captured data. |
+| [`redactAdditionalSensitiveData`](@/api/reference/#jevdevtools) | `boolean` | `true`              | **Unreleased.** Mask supported personal fields in the display. Does not remove captured data. |
 
-`JevDevtoolsProps` is exported from `jev-devtools` for component wrappers. Production disabling is a runtime opt-in policy, not a promise that every bundler removes inspector assets.
+[`JevDevtoolsProps`](@/api/reference/#type-jevdevtoolsprops) is exported from `jev-devtools` for component wrappers. Production disabling is a runtime opt-in policy, not a promise that every bundler removes inspector assets.
 
 ## Styles
 
-The drawer injects its own stylesheet. You do not need an import. The `jev-devtools/styles.css` public export remains available for compatibility with existing integrations. Page selectors cannot reach the shadow tree; do not depend on host CSS to customize drawer internals.
+The drawer injects its own stylesheet. You do not need an import. The [`jev-devtools/styles.css`](@/api/reference/#styles-css) public export remains available for compatibility with existing integrations. Page selectors cannot reach the shadow tree; do not depend on host CSS to customize drawer internals.
 
 Document-level transforms, clipping, and page JavaScript can still affect the host. Shadow DOM is style encapsulation, not a security boundary.
 
@@ -27,8 +27,8 @@ Closing preserves selection, filters, and view state while incoming traces conti
 
 ## Browser-safe types
 
-`Trace`, `Snapshot`, `StreamSnapshot`, `TraceDelta`, `Json`, `AnswerView`, and `QuestionView` are exported from the root entry point. They describe captured protocol data, which may be redacted or truncated. See [recorder and types](@/api/recorder/) for advanced integrations.
+[`Trace`](@/api/reference/#type-trace), [`Snapshot`](@/api/reference/#type-snapshot), [`StreamSnapshot`](@/api/reference/#type-streamsnapshot), [`TraceDelta`](@/api/reference/#type-tracedelta), [`Json`](@/api/reference/#type-json), [`AnswerView`](@/api/reference/#type-answerview), and [`QuestionView`](@/api/reference/#type-questionview) are exported from the root entry point. They describe captured protocol data, which may be redacted or truncated. See [recorder and types](@/api/recorder/) for advanced integrations.
 
 ## Fixture export (unreleased)
 
-The root entry also exports browser-safe `flowFixture`, `FlowFixture`, and `BuiltFlowFixture`. See [building a fixture](@/api/flow/#build-a-fixture-unreleased) for parameters, missing captures, and masking behavior. These exports are not in npm 0.4.1.
+The root entry also exports browser-safe [`flowFixture`](@/api/reference/#flowfixture), [`FlowFixture`](@/api/reference/#type-flowfixture), and [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture). See [building a fixture](@/api/flow/#build-a-fixture-unreleased) for parameters, missing captures, and masking behavior. These exports are not in npm 0.4.1.

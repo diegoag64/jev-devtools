@@ -45,6 +45,13 @@ export const pages: Page[] = [
     file: "nextjs.md",
   },
   {
+    slug: "guides/flow-basics",
+    title: "Flows from scratch",
+    description: "Learn each flow method with a small example, starting with ordinary application code.",
+    group: "Guides",
+    file: "flow-basics.md",
+  },
+  {
     slug: "guides/flows",
     title: "Build a flow",
     description:
@@ -67,6 +74,13 @@ export const pages: Page[] = [
       "Resolve an empty drawer, rejected connections, and missing flow captures.",
     group: "Guides",
     file: "troubleshooting.md",
+  },
+  {
+    slug: "api/reference",
+    title: "API glossary",
+    description: "Every public API in one place: imports, inputs, return values, examples, and types.",
+    group: "API reference",
+    file: "reference.md",
   },
   {
     slug: "api/react",
