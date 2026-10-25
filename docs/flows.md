@@ -141,6 +141,14 @@ const evaluation = flow.task("external-evaluation", {
 
 From the repository root run `npm run dev`, open `http://127.0.0.1:4182/`, and select **Flow · Functions + dynamic questions (synthetic)**. Run the sample, open **Jev DevTools → Flows**, and select **Keep the top three skills**. Inspect its output, then the next request's three Choice criteria. Both model responses are synthetic fixtures; no API key or remote call is required. This demonstrates the API, not a faithful port of the official cookbook.
 
+## Capture completeness
+
+Captured outcome values and condition rules retain optional warnings beside their data: `FlowRun.captureWarnings` describes `value`, and `FlowNode.conditionCaptureWarnings` describes `conditionRule`. Step data continues to use `FlowStep.captureWarnings`. These fields also apply inside maps and loops. The drawer shows rule warnings on cards and in selected-step details, and outcome warnings in **Captured outcome value**. Redaction and capture failures never substitute shortened values into execution.
+
+Strings are limited to 16,000 characters and arrays/general objects to 150 entries, within a depth-12 and approximate 96,000-character capture budget. For example, a 20,000-character rule literal is displayed shortened with a warning; the recorded decision still uses the full literal. Older captures may omit warning fields, which does not prove completeness. User strings that resemble capture placeholders are still user data. See [the metadata contract and redactor limitations](stream-protocol.md#flow-capture-warnings). Replay fixtures export Jev responses, not these outcome/rule fields.
+
+Structured condition rules also have a 128-node projection budget. Exceeding it retains `conditionCaptureWarnings` before server capture; it does not change execution. Unsupported rule literals likewise carry an explicit warning.
+
 ## Explain steps in the diagram
 
 All builder methods accept an optional final display argument: `{ title, description }`. It is the third argument for `jev`, `task`, `if`, `branch`, `parallel`, and `output`, and the fourth for `map` and `loop`.
