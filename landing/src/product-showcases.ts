@@ -1,5 +1,5 @@
 const flowGuide =
-  "https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md";
+  "https://docs.jevtools.dev/api/flow/";
 
 export const drawerShowcase = `
 <section id="drawer" class="drawer-showcase section-band" data-theme="plum" aria-labelledby="drawer-title">
