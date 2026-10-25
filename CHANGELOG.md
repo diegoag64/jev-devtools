@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | No changes yet. |
+| [Unreleased](#unreleased) | Not published | Implementation verification guidance. |
 | [0.5.1](#051--pending-publication-experimental) | Pending publication | Task input validation and expression types; setup guidance; release and website maintenance. |
 | [0.5.0](#050--october-25-2026-experimental) | 2026-10-25 | Replay and comparison; capture reliability/privacy; website and docs. |
 | [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | CSS isolation; stricter published flow types; approved release workflow. |
@@ -22,7 +22,11 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No changes yet.
+### Changes
+
+#### Maintenance
+
+- **Boundary and contract verification.** Require agents to identify affected guarantees, reproduce bugs on current main, and verify composed expressions, resolved template types, capture metadata, and meaningful regressions at their owning boundaries. Keep required repository checks and public package behavior unchanged.
 
 ## 0.5.1 — Pending publication (experimental)
 
