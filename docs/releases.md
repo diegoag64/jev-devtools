@@ -74,6 +74,12 @@ After any uncertain publish outcome, do not dispatch a new publication or rerun 
 
 The independent consumer checks accept `JEV_VERIFY_TARBALL=/absolute/path/to/archive.tgz` to check an inspected archive, or `JEV_VERIFY_VERSION=X.Y.Z` to check a fresh registry installation. Do not set both. Use the verification scripts from the release commit so later regression tests do not incorrectly reject an older release. With neither variable, the existing local pack-and-check behavior is unchanged.
 
+## Release 0.5.2 — pending publication
+
+This candidate includes the responsive request navigation and flow controls from [PR #92](https://github.com/diegoag64/jev-devtools/pull/92), resolved map/loop template types from [#85](https://github.com/diegoag64/jev-devtools/pull/85), composed-expression limits from [#86](https://github.com/diegoag64/jev-devtools/pull/86), and flow capture warnings from [#88](https://github.com/diegoag64/jev-devtools/pull/88), plus the accumulated documentation and contributor verification updates. See the [pending release notes](../CHANGELOG.md#052--pending-publication-experimental) for scope and upgrade requirements.
+
+**Preparation only.** npm publication, `v0.5.2`, the GitHub release, and corresponding hosted docs publication are pending. After the release PR is reviewed and merged, select its exact merged commit with successful main CI for the release rehearsal and archive inspection. The publication run prepares its own candidate and waits for the protected `npm-release` approval; inspect that run's artifact before approving. After publication, verify npm, the exact tag, and GitHub Latest, then update the release records through a PR. Hosted docs publication remains a separate explicit action under the completion rule above.
+
 ## Release 0.5.1 — published October 25, 2026
 
 **[jev-devtools@0.5.1](https://www.npmjs.com/package/jev-devtools/v/0.5.1) was published at 18:19:01.066 UTC on October 25, 2026**, from `c88aea5d615a65bcda1d820b5abc63bb6fbe05e6` after [PR #83](https://github.com/diegoag64/jev-devtools/pull/83) and [main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40219281499) passed. npm's `latest` is 0.5.1. See the [release notes](../CHANGELOG.md#051--october-25-2026-experimental) for the task-input symbol-key rejection, primitive expression property type correction, setup guidance, and compatibility requirements.
@@ -202,8 +208,8 @@ npm run verify:drawer
 git diff --check
 npm pack --dry-run --json -w jev-devtools
 npm run pack:devtools
-tar -tzf jev-devtools-0.5.1.tgz
-shasum -a 256 jev-devtools-0.5.1.tgz
+tar -tzf jev-devtools-0.5.2.tgz
+shasum -a 256 jev-devtools-0.5.2.tgz
 ```
 
 The archive must contain only `package.json`, the package README, MIT license, third-party notices, the setup skill and its four Markdown references under `skills/setup-jev-devtools`, and compiled JavaScript, declaration files, and scoped CSS under `lib/src`, `lib/server`, and `lib/flow`. It must not contain playground code, tests, fixtures, source TypeScript, demo media, environment files, or credentials. `verify:package` checks the actual pack file list before installing into an independent React app. `verify:nextjs` checks a separate packed installation with real development and production Next.js servers. Both use sample responses; neither makes live inference calls.
@@ -211,7 +217,7 @@ The archive must contain only `package.json`, the package README, MIT license, t
 Inspect the packed manifest too:
 
 ```sh
-tar -xOf jev-devtools-0.5.1.tgz package/package.json
+tar -xOf jev-devtools-0.5.2.tgz package/package.json
 ```
 
 Confirm the name/version, public access, Node engine, React peers, public exports (including the `/flow` entry point), and absence of `private: true`. Save the release commit SHA and archive checksum with the release evidence. Keep the archive unchanged between final inspection and publication. Do not publish from a dirty checkout or use a wildcard that could select an old archive.

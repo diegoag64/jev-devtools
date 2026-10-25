@@ -1,30 +1,30 @@
 # Jev DevTools integration
 
-For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/getting-started/). This file describes 0.5.1, available on npm; see the [published release notes and compatibility changes](../CHANGELOG.md#051--october-25-2026-experimental).
+For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/getting-started/). This file describes the 0.5.2 release candidate; see the [pending release notes and compatibility changes](../CHANGELOG.md#052--pending-publication-experimental).
 
 A reusable React inspector with one root component and a Node server adapter. It uses Diagram Motion Lab's rounded outline cards, curved connections, pink flowing dots, and probability bars. The drawer contains searchable request history and Flow, Questions, Context, Transport, and Raw views.
 
-Jev DevTools remains experimental before 1.0. The default npm install resolves to 0.5.1; use the archive below to try local source changes. See the [release notes](../CHANGELOG.md). Verified with sample responses through the real TypeSafe SDK; no live inference was used for verification.
+Jev DevTools remains experimental before 1.0. The default npm install resolves to 0.5.1; use the archive below to try the 0.5.2 release candidate. See the [release notes](../CHANGELOG.md). Verified with sample responses through the real TypeSafe SDK; no live inference was used for verification.
 
 ## Compatibility and public imports
 
-These requirements describe the 0.5.1 package. Use the installed package's declarations and bundled setup skill for version-matched guidance.
+These requirements describe the 0.5.2 package. Use the installed package's declarations and bundled setup skill for version-matched guidance.
 
-| Requirement | Supported configuration |
-| --- | --- |
-| Node.js | **22.12+** for the server adapter, flow execution, and repository tooling. Keep API credentials on Node; Edge runtimes are unsupported. |
-| React and React DOM | Matching **18.x or 19.x** versions. Both are required package peers, including in installations that only import the server or flow entry point. |
-| TypeSafe SDK | Install `@typesafe-ai/sdk` **`>=0.7.0 <0.8.0`** in the consuming workspace; verified with **0.7.0**. |
-| TypeScript | **5.4+** for consumer declarations; verified with **5.4.5**. The flow declarations use the built-in [`NoInfer`](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-4.html#the-noinfer-utility-type) type; 5.3.3 fails with `Cannot find name 'NoInfer'`. |
-| Modules | **ESM imports**. The package exposes `import` entries and has no CommonJS `require` entry. Use an ESM Node module or a bundler that understands package exports. |
+| Requirement         | Supported configuration                                                                                                                                                                                                                                                       |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Node.js             | **22.12+** for the server adapter, flow execution, and repository tooling. Keep API credentials on Node; Edge runtimes are unsupported.                                                                                                                                       |
+| React and React DOM | Matching **18.x or 19.x** versions. Both are required package peers, including in installations that only import the server or flow entry point.                                                                                                                              |
+| TypeSafe SDK        | Install `@typesafe-ai/sdk` **`>=0.7.0 <0.8.0`** in the consuming workspace; verified with **0.7.0**.                                                                                                                                                                          |
+| TypeScript          | **5.4+** for consumer declarations; verified with **5.4.5**. The flow declarations use the built-in [`NoInfer`](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-4.html#the-noinfer-utility-type) type; 5.3.3 fails with `Cannot find name 'NoInfer'`. |
+| Modules             | **ESM imports**. The package exposes `import` entries and has no CommonJS `require` entry. Use an ESM Node module or a bundler that understands package exports.                                                                                                              |
 
 TypeScript apps need React types matching their React major and Node types compatible with their Node runtime and compiler. Include DOM types for the Web `Request`/`Response` APIs used by the adapter and SDK. Use export-aware module resolution: `Bundler` for a bundler, or `NodeNext` with its matching module setting for Node ESM. A framework or newer `@types/*` release may require a compiler newer than this package's minimum. Compatibility was checked without `skipLibCheck`, using SDK 0.7.0, React 19.3.1, `@types/react` 19.3.0, and `@types/node` 22.10.2; this is a verification baseline, not a requirement to downgrade an existing app's dependencies.
 
-| Public import | Use |
-| --- | --- |
-| `jev-devtools` | React drawer, browser-safe trace types, and capture-to-fixture helpers. Supports SSR; render the drawer in the app's client boundary. |
-| `jev-devtools/server` | Node-only adapter and recorder. Keep it out of client bundles. |
-| `jev-devtools/flow` | Node-only flow definitions/execution, replay client, and fixture comparison. Keep it out of client bundles. |
+| Public import         | Use                                                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `jev-devtools`        | React drawer, browser-safe trace types, and capture-to-fixture helpers. Supports SSR; render the drawer in the app's client boundary. |
+| `jev-devtools/server` | Node-only adapter and recorder. Keep it out of client bundles.                                                                        |
+| `jev-devtools/flow`   | Node-only flow definitions/execution, replay client, and fixture comparison. Keep it out of client bundles.                           |
 
 Use these entry points for application code; `jev-devtools/package.json` and internal paths are not exported. Use the package manager's dependency listing to inspect the installed version. The server options require `origin` even when `enabled: false`; pass the browser origin as shown in the setup example.
 
@@ -48,29 +48,31 @@ npm run pack:devtools
 From your React project, install the generated archive:
 
 ```sh
-npm install /absolute/path/to/jev-devtools/jev-devtools-0.5.1.tgz
+npm install /absolute/path/to/jev-devtools/jev-devtools-0.5.2.tgz
 ```
 
 Mount once near the root. The drawer loads its own styles; no CSS import, provider, client object, trace props, or application hook is needed:
 
 ```tsx
-import { JevDevtools } from 'jev-devtools';
+import { JevDevtools } from "jev-devtools";
 
 export function Root() {
-  return <>
-    <App />
-    <JevDevtools enabled={import.meta.env.DEV} />
-  </>;
+  return (
+    <>
+      <App />
+      <JevDevtools enabled={import.meta.env.DEV} />
+    </>
+  );
 }
 ```
 
 For the complete Next.js App Router setup, see [the Next.js guide](nextjs.md), including `getJevDevtools` for shared history across module reloads and the SDK externalization setting. Mount it in a client component and use `enabled={process.env.NODE_ENV === 'development'}`. The drawer and launcher render inside a `jev-devtools-root` Shadow DOM boundary with their own stylesheet and typography reset. Host rules such as `section`, `button`, or `.eyebrow` cannot style the inspector's internals. The package injects its built CSS into that boundary automatically. Page CSS overrides cannot reach inside the shadow tree. Server rendering produces no inspector markup, and browser code is loaded after mounting when enabled. `enabled` defaults to **false**. Disabled components open no connections. This is a runtime opt-in, not a guarantee that every bundler removes inspector assets from production output.
 
-| Prop | Default | Purpose |
-| --- | --- | --- |
-| `enabled` | `false` | Explicitly enable the inspector |
-| `endpoint` | `/api/jev-devtools` | Same-origin path to the server adapter |
-| `defaultOpen` | `true` | Start expanded or as the small Jev launcher |
+| Prop          | Default             | Purpose                                     |
+| ------------- | ------------------- | ------------------------------------------- |
+| `enabled`     | `false`             | Explicitly enable the inspector             |
+| `endpoint`    | `/api/jev-devtools` | Same-origin path to the server adapter      |
+| `defaultOpen` | `true`              | Start expanded or as the small Jev launcher |
 
 ### CSS isolation
 
@@ -96,12 +98,12 @@ those styles on the document ancestors; apply app effects to an app wrapper inst
 Create one adapter and one instrumented client per server process. Replace your existing TypeSafe client construction with `inspector.createClient(...)`; continue calling `jev.systemOne(...)` normally. API keys stay on the server.
 
 ```ts
-import { createJevDevtools } from 'jev-devtools/server';
+import { createJevDevtools } from "jev-devtools/server";
 
 export const inspector = createJevDevtools({
-  enabled: process.env.NODE_ENV === 'development',
-  origin: 'http://localhost:3000', // exact browser origin, including port
-  redact: (path, value) => path.at(-1) === 'email' ? '[redacted]' : value,
+  enabled: process.env.NODE_ENV === "development",
+  origin: "http://localhost:3000", // exact browser origin, including port
+  redact: (path, value) => (path.at(-1) === "email" ? "[redacted]" : value),
 });
 
 export const jev = inspector.createClient({
@@ -121,9 +123,9 @@ For Node frameworks with Web Request/Response handlers, route the endpoint **and
 
 ```ts
 // Next.js: app/api/jev-devtools/[[...path]]/route.ts
-import { inspector } from '@/server/jev';
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+import { inspector } from "@/server/jev";
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 export const GET = (request: Request) => inspector.handleNodeRoute(request);
 export const DELETE = (request: Request) => inspector.handleNodeRoute(request);
 ```
@@ -161,10 +163,10 @@ The prop applies to Context, Raw, Questions, request diagrams and flow data, inc
 
 Matching uses the complete field name, ignores case, and removes hyphens and underscores. For example, `X-API-Key`, `x_api_key`, and `xApiKey` all match `xapikey`. A matching object's entire value is replaced with `[redacted]`, recursively through arrays and objects. Display masking preserves SDK structure: question IDs, Choice category labels/probabilities, score levels, and asset reference names remain intact even when named `email` or `phone`. Sensitive fields inside their instructions, descriptions, and other content are still masked. This display rule does not undo mandatory credential or custom server redaction.
 
-| Policy | Normalized field names |
-| --- | --- |
-| Always protected credentials | `authorization`, `proxyauthorization`, `cookie`, `cookies`, `setcookie`, `apikey`, `xapikey`, `password`, `passwd`, `passphrase`, `secret`, `clientsecret`, `token`, `accesstoken`, `refreshtoken`, `sessiontoken`, `authtoken`, `xauthtoken`, `xaccesstoken`, `idtoken`, `bearertoken`, `privatekey`, `secretkey` |
-| Display-only sensitive data, default on | `email`, `emailaddress`, `phone`, `phonenumber`, `mobile`, `mobilenumber`, `address`, `postaladdress`, `streetaddress`, `mailingaddress`, `ssn`, `socialsecuritynumber`, `creditcard`, `creditcardnumber`, `cardnumber` |
+| Policy                                  | Normalized field names                                                                                                                                                                                                                                                                                             |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Always protected credentials            | `authorization`, `proxyauthorization`, `cookie`, `cookies`, `setcookie`, `apikey`, `xapikey`, `password`, `passwd`, `passphrase`, `secret`, `clientsecret`, `token`, `accesstoken`, `refreshtoken`, `sessiontoken`, `authtoken`, `xauthtoken`, `xaccesstoken`, `idtoken`, `bearertoken`, `privatekey`, `secretkey` |
+| Display-only sensitive data, default on | `email`, `emailaddress`, `phone`, `phonenumber`, `mobile`, `mobilenumber`, `address`, `postaladdress`, `streetaddress`, `mailingaddress`, `ssn`, `socialsecuritynumber`, `creditcard`, `creditcardnumber`, `cardnumber`                                                                                            |
 
 Names such as `tokenCount`, `sessionId`, `apiKeyName`, and `secretary` remain inspectable. This explicit field-name policy does not detect arbitrary secrets in prose, URLs, image pixels, JSON encoded inside strings, unusual names, or structural labels. Actual HTTP request headers/options are never captured; header-like fields supplied inside captured bodies still follow the mandatory credential policy. Add application-specific `redact(path, value)` rules for other sensitive data. This callback remains active regardless of the component prop, and cannot restore fields removed by the built-in policy. It applies to requests, responses, task data, flow outcomes, and condition literals; static definition metadata must remain public-safe.
 
@@ -218,7 +220,6 @@ Closing retains the inspector's selection, filters, active tab, question, flow p
 Question, flow, and camera state belong to the current diagram. Following a newer request, or falling back after eviction, replaces that diagram just as it does while the drawer is open.
 
 With `defaultOpen={false}`, the inspector panel first mounts when the launcher is opened. After its first open, the hidden panel and its last displayed snapshot stay in memory to preserve UI state. Closing reduces rendering work, not capture, network traffic, or JSON parsing. Unmounting/disabling the component closes the subscription and releases its UI state; server capture continues independently.
-
 
 ## Verification
 

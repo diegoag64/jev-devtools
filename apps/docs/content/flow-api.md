@@ -12,24 +12,23 @@ Import from `jev-devtools/flow` in Node code. [`defineJevFlow<Input>()`](@/api/r
 
 ### Definition and run interfaces
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| `triage.definition` | `FlowDefinition` | The static recipe graph. |
-| `triage.run(input, options)` | `Promise<FlowOutcome & { runId: string }>` | Executes the recipe and resolves to the fields below. |
-| `runId` | `string` | Unique execution ID. |
-| `outcome` | `string` | `"billing-team"` or `"support-team"` for this example. |
-| `value?` | `unknown` | Optional output data; omitted by this example. |
-
+| Value / member               | Type                                       | Description                                            |
+| ---------------------------- | ------------------------------------------ | ------------------------------------------------------ |
+| `triage.definition`          | `FlowDefinition`                           | The static recipe graph.                               |
+| `triage.run(input, options)` | `Promise<FlowOutcome & { runId: string }>` | Executes the recipe and resolves to the fields below.  |
+| `runId`                      | `string`                                   | Unique execution ID.                                   |
+| `outcome`                    | `string`                                   | `"billing-team"` or `"support-team"` for this example. |
+| `value?`                     | `unknown`                                  | Optional output data; omitted by this example.         |
 
 [`run`](@/api/reference/#flow-run) accepts a required `client` with `systemOne`, optional `devtools: FlowObserver`, and optional `signal: AbortSignal`. It resolves to `{ runId, outcome, value? }`. `definition` exposes the static graph for inspection. Definitions make no SDK calls.
 
 ## Requests and function steps
 
-| Method                                           | Arguments and result                                                                                                |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| [`jev(id, request, display?)`](@/api/reference/#flow-jev)                     | A regular SDK request whose state can contain expressions. Returns [`.answer(name)`](@/api/reference/#request-answer) field references and [`.answers`](@/api/reference/#request-answers). |
-| [`jev(id, { input, request }, display?)`](@/api/reference/#flow-jev)          | Resolve input, then synchronously construct an SDK request in the factory. Use a preceding task for async work.     |
-| [`task(id, { input, run, timeoutMs? }, display?)`](@/api/reference/#flow-task) | Resolve nested input references and execute application code. Returns a typed expression for the result.            |
+| Method                                                                         | Arguments and result                                                                                                                                                                       |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`jev(id, request, display?)`](@/api/reference/#flow-jev)                      | A regular SDK request whose state can contain expressions. Returns [`.answer(name)`](@/api/reference/#request-answer) field references and [`.answers`](@/api/reference/#request-answers). |
+| [`jev(id, { input, request }, display?)`](@/api/reference/#flow-jev)           | Resolve input, then synchronously construct an SDK request in the factory. Use a preceding task for async work.                                                                            |
+| [`task(id, { input, run, timeoutMs? }, display?)`](@/api/reference/#flow-task) | Resolve nested input references and execute application code. Returns a typed expression for the result.                                                                                   |
 
 [`run`](@/api/reference/#flow-task) on a task receives `(resolvedInput, context)`. [`TaskContext`](@/api/reference/#type-taskcontext) contains `signal`, `runId`, `stepId`, and `executionId`. Respond to the signal for cooperative cancellation. Timeouts cannot undo side effects or forcibly stop non-cooperating code. Tasks do not retry automatically.
 
@@ -37,29 +36,29 @@ Import from `jev-devtools/flow` in Node code. [`defineJevFlow<Input>()`](@/api/r
 
 ### Return interfaces
 
-| Method / member | Type | Description |
-| --- | --- | --- |
-| `jev(...).answer(name)` | Object of typed field expressions | References to the selected question's SDK result fields. |
-| `jev(...).answers` | `FlowExpression` of the answer object | Reference to all answers. Both Jev overloads return this interface. |
-| `task(...)` | `FlowExpression<Awaited<O>>` | Reference to the application callback's awaited result. |
+| Method / member         | Type                                  | Description                                                         |
+| ----------------------- | ------------------------------------- | ------------------------------------------------------------------- |
+| `jev(...).answer(name)` | Object of typed field expressions     | References to the selected question's SDK result fields.            |
+| `jev(...).answers`      | `FlowExpression` of the answer object | Reference to all answers. Both Jev overloads return this interface. |
+| `task(...)`             | `FlowExpression<Awaited<O>>`          | Reference to the application callback's awaited result.             |
 
 ## Decisions and outcomes
 
-| Method                                       | Behavior                                                                                     |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| [`branch(id, { when, then, else }, display?)`](@/api/reference/#flow-branch) | Terminal decision. Both paths must return [`output()`](@/api/reference/#flow-output) or another terminal branch.             |
-| [`if(id, { when, then, else }, display?)`](@/api/reference/#flow-if)     | Return a typed value from one path, then continue shared work.                               |
-| [`output(name, value?, display?)`](@/api/reference/#flow-output)             | Finish with a named outcome and optional resolved value. Does not execute a business action. |
+| Method                                                                       | Behavior                                                                                                         |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| [`branch(id, { when, then, else }, display?)`](@/api/reference/#flow-branch) | Terminal decision. Both paths must return [`output()`](@/api/reference/#flow-output) or another terminal branch. |
+| [`if(id, { when, then, else }, display?)`](@/api/reference/#flow-if)         | Return a typed value from one path, then continue shared work.                                                   |
+| [`output(name, value?, display?)`](@/api/reference/#flow-output)             | Finish with a named outcome and optional resolved value. Does not execute a business action.                     |
 
 Path callbacks build both possible paths synchronously; only the selected path executes. Conditions use [inspectable expressions](@/api/expressions/). You cannot use a JavaScript `if` on an expression to select runtime work.
 
 ### Return interfaces
 
-| Method | Type | Description |
-| --- | --- | --- |
-| `branch(...)` | `FlowExpression<FlowOutcome>` | Terminal result of the selected path. |
-| `if(...)` | `FlowExpression<A \| B>` | Selected value, available to shared steps after the join. |
-| `output(...)` | `FlowExpression<FlowOutcome>` | Terminal outcome name and optional resolved value. |
+| Method        | Type                          | Description                                               |
+| ------------- | ----------------------------- | --------------------------------------------------------- |
+| `branch(...)` | `FlowExpression<FlowOutcome>` | Terminal result of the selected path.                     |
+| `if(...)`     | `FlowExpression<A \| B>`      | Selected value, available to shared steps after the join. |
+| `output(...)` | `FlowExpression<FlowOutcome>` | Terminal outcome name and optional resolved value.        |
 
 ## Parallel lanes
 
@@ -69,10 +68,10 @@ Path callbacks build both possible paths synchronously; only the selected path e
 
 **Example walkthrough:** the left lane doubles `2` and the right lane triples `3`. The joined references are passed into `output()`, producing `{ left: 4, right: 9 }`. The lane computations are independent; neither reads the other's private steps. `tryJoin()` starts the run and waits for both lanes before reading the output.
 
-| Returned member | Type | Resolved value in this example |
-| --- | --- | --- |
-| `results.left` | `FlowExpression<number>` | `4`. |
-| `results.right` | `FlowExpression<number>` | `9`. |
+| Returned member | Type                     | Resolved value in this example |
+| --------------- | ------------------------ | ------------------------------ |
+| `results.left`  | `FlowExpression<number>` | `4`.                           |
+| `results.right` | `FlowExpression<number>` | `9`.                           |
 
 The builder describes both lanes synchronously; the task callbacks run when `tryJoin()` awaits execution. For a request-based example, see the [full flow guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md#parallel-calls-and-the-join).
 
@@ -88,11 +87,10 @@ Call `tryOperations()` from Node to run both definitions below. Its two `await` 
 
 **Example walkthrough:** `summarize` uses `map()` to double each number, a task to add them, and `if()` to choose a label before returning the summary. `all()` and `not()` make the label policy explicit. With `[2, 4]`, the output is `{ total: 12, label: "Large: 12" }`. The separate `count` flow carries `{ value, target }` as loop state and increments `value` until it reaches the target. Its initial template nests the target reference; the gate and task both see its numeric value type.
 
-| Method | Return type | Resolved value |
-| --- | --- | --- |
-| `map(...)` | `FlowExpression<Output[]>` | Item results in input order. |
+| Method      | Return type                                                                                                 | Resolved value                                              |
+| ----------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `map(...)`  | `FlowExpression<Output[]>`                                                                                  | Item results in input order.                                |
 | `loop(...)` | `FlowExpression<State>` for whole-state references/scalars; `FlowExpression<Resolved<State>>` for templates | Final state when its pre-iteration condition becomes false. |
-
 
 A loop can contain a map. Nested maps, nested loops, and loops inside maps are unsupported. Shared context is explicit; use `context` inside map/loop item programs rather than reaching across scope boundaries.
 
@@ -100,7 +98,7 @@ A loop can contain a map. Nested maps, nested loops, and loops inside maps are u
 
 IDs must be unique across the whole definition, including untaken branches and lanes: 1–80 letters, digits, `_`, or `-`, starting with a letter or digit. Output names are node IDs too. Definitions allow 256 nodes, 16 nested blocks, and a run-wide budget of 1,024 expanded nodes.
 
-**Unreleased:** each expression is limited to depth 80 and 4,096 expanded nodes, counting reused children at every occurrence; an operation accepts at most 256 operands. These limits apply during construction, including composition. Legacy condition text is capped at 4,096 UTF-16 code units with an explicit truncation suffix; execution retains the full accepted expression. See [expression limits](@/api/expressions/#expression-limits).
+**0.5.2 (pending publication):** each expression is limited to depth 80 and 4,096 expanded nodes, counting reused children at every occurrence; an operation accepts at most 256 operands. These limits apply during construction, including composition. Legacy condition text is capped at 4,096 UTF-16 code units with an explicit truncation suffix; execution retains the full accepted expression. See [expression limits](@/api/expressions/#expression-limits).
 
 Structural errors fail during definition. Missing input values and invalid comparisons fail when execution reaches them. [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror) is exported for bounded-loop handling. For exact collection/concurrency/timeout limits, execution errors, and cancellation behavior, consult the [detailed guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md) and installed declarations.
 
@@ -116,11 +114,10 @@ Call `await replayExample()` from Node. The definition is synchronous; `await fl
 
 **Example walkthrough:** the fixture stores the response for the `classify` step. `replayClient()` supplies that response to the same flow, so the Choice expression resolves to `"billing"` without inference. The run returns outcome `"routed"` and value `"billing"`.
 
-| API | Return type | Description |
-| --- | --- | --- |
-| `replayClient(fixture)` | `TypeSafeClient` | Client that supplies saved answers inside a flow run. |
-| `replayExample()` | Promise of a flow run result | Resolves to `{ runId, outcome: "routed", value: "billing" }`. |
-
+| API                     | Return type                  | Description                                                   |
+| ----------------------- | ---------------------------- | ------------------------------------------------------------- |
+| `replayClient(fixture)` | `TypeSafeClient`             | Client that supplies saved answers inside a flow run.         |
+| `replayExample()`       | Promise of a flow run result | Resolves to `{ runId, outcome: "routed", value: "billing" }`. |
 
 A [`FlowFixture`](@/api/reference/#type-flowfixture) contains `{ version: 1, flow, steps }`. It contains responses, not the original input or flow implementation. Replay checks the flow name, step IDs, and requested question names; it does not validate prompts or state. Missing responses reject rather than calling live inference. Map/loop steps use composed IDs such as `rounds/0/batch/1/assess`.
 
@@ -138,11 +135,11 @@ Check `missing` for completed steps whose response was unavailable, and `warning
 
 ### Return interface
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `fixture` | `FlowFixture` | Captured response bodies indexed by step ID. |
-| `missing` | `string[]` | Completed steps whose response captures were unavailable. |
-| `warnings` | `string[]` | Capture limitations to inspect before saving. |
+| Property   | Type          | Description                                               |
+| ---------- | ------------- | --------------------------------------------------------- |
+| `fixture`  | `FlowFixture` | Captured response bodies indexed by step ID.              |
+| `missing`  | `string[]`    | Completed steps whose response captures were unavailable. |
+| `warnings` | `string[]`    | Capture limitations to inspect before saving.             |
 
 ## Related types
 
@@ -170,13 +167,13 @@ console.log(formatComparison(comparison));
 
 **Example walkthrough:** the comparison replays the stored answers, then runs with the supplied client using the same input. The tolerance applies to numeric answer-field differences. `formatComparison()` returns text, and the application's `console.log()` prints it.
 
-| Value / member | Type | Description |
-| --- | --- | --- |
-| `compareWithFixture(...)` | `Promise<FixtureComparison>` | Resolves to outcome, value, decisions, answers, step differences, and a live fixture. |
-| `comparison.changed` | `boolean` | Outcome, value, decision, or executed Jev-step differences. |
-| `comparison.answers` | `AnswerChange[]` | Individual scalar answer-field comparisons. |
-| `comparison.liveFixture` | `FlowFixture` | Unredacted, untruncated live response bodies. |
-| `formatComparison(comparison)` | `string` | Plain-text description of changes. |
+| Value / member                 | Type                         | Description                                                                           |
+| ------------------------------ | ---------------------------- | ------------------------------------------------------------------------------------- |
+| `compareWithFixture(...)`      | `Promise<FixtureComparison>` | Resolves to outcome, value, decisions, answers, step differences, and a live fixture. |
+| `comparison.changed`           | `boolean`                    | Outcome, value, decision, or executed Jev-step differences.                           |
+| `comparison.answers`           | `AnswerChange[]`             | Individual scalar answer-field comparisons.                                           |
+| `comparison.liveFixture`       | `FlowFixture`                | Unredacted, untruncated live response bodies.                                         |
+| `formatComparison(comparison)` | `string`                     | Plain-text description of changes.                                                    |
 
 Tasks execute on both sides. Use controlled, repeatable tasks; neither replay nor comparison undoes side effects. Top-level `changed` tracks outcome, value, decisions, and executed Jev steps; answer drift alone does not set it. Inspect `answers` for individual field differences. Numeric tolerance only applies to those answer fields. The returned `liveFixture` contains unredacted live responses, so review it before saving or sharing.
 
