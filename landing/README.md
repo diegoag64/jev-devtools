@@ -4,7 +4,7 @@ Independent, static Vite + TypeScript app for `jevtools.dev`. It is intentionall
 
 ## Local development
 
-Use Node **22.12+** (the repository currently uses Node 26 locally):
+Use Node **22.12+** (Node 24 is the repository CI baseline):
 
 ```sh
 cd landing
@@ -12,7 +12,7 @@ npm ci
 npm run dev
 ```
 
-Open the printed localhost URL (default `http://127.0.0.1:4190`). Run `npm run build` for a type-checked static build in `dist/`, or `npm run preview` to serve it locally. No credentials or environment variables are needed. Hosting uses the Sites project recorded in `.openai/hosting.json`; see Publishing below.
+Open the printed localhost URL (default `http://127.0.0.1:4190`). Run `npm run build` for a type-checked static build in `dist/`, or `npm run preview` to serve it locally. No credentials or environment variables are needed. The standalone `landing` CI job installs this lockfile, runs the tests, and builds on Node 24 for every PR/main push; it does not deploy. Hosting uses the Sites project recorded in `.openai/hosting.json`; see Publishing below.
 
 ## Editing
 
@@ -48,6 +48,6 @@ The Flow API section uses a valid definition based on `docs/flows.md`. Its displ
 
 The public Sites project is **jevtools landing**, with the generated URL [jevtools-landing.diego-arias94.chatgpt.site](https://jevtools-landing.diego-arias94.chatgpt.site). `.openai/hosting.json` retains its project identity and declares `dist/` as the static build output.
 
-GitHub remains the source for review through the landing PR. Publishing is a separate action: use the Sites workflow with the existing project ID, synchronize this directory into the Site's dedicated source checkout, run the landing tests and production build, and save/deploy the exact pushed Site source and matching archive. Do not push the parent monorepo, dependencies, or generated verification evidence into the Site source. A GitHub push alone does not deploy.
+The public website is [jevtools.dev](https://jevtools.dev/), with documentation at [docs.jevtools.dev](https://docs.jevtools.dev/). GitHub `main` is the reviewed source; changes use a new feature PR. Publishing requires an explicit maintainer request and is separate from merging or npm releases: use the Sites workflow with the existing project ID, synchronize this directory into the Site's dedicated source checkout, run the landing tests and production build, and save/deploy the exact pushed Site source and matching archive. Do not push the parent monorepo, dependencies, or generated verification evidence into the Site source. A GitHub push alone does not deploy.
 
 Custom-domain setup for `jevtools.dev` is managed through Sites. Use the routing and validation records returned for that hostname; keep the existing `docs.jevtools.dev` DNS record intact.

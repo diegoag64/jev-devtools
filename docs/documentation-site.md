@@ -36,13 +36,13 @@ VitePress is a strong lower-maintenance alternative if its Vue-based theme/custo
 
 ## Compatibility and authoring
 
-The pages track the working tree and explicitly label unreleased changes; npm 0.4.1 is not assumed to contain everything on main. Checked TypeScript source snippets use public exports. Partial snippets identify their context. Detailed legacy guides remain linked while reference coverage grows. Agent Markdown and the bundled setup skill are a separate reading path, with normal human onboarding first.
+The pages identify the source version and explicitly distinguish the 0.5.0 candidate from npm 0.4.1 until publication. Checked TypeScript source snippets use public exports. Partial snippets identify their context. Detailed legacy guides remain linked while reference coverage grows. Agent Markdown and the bundled setup skill are a separate reading path, with normal human onboarding first.
 
 ## Verification and future work
 
 Build output and browser checks should cover deep links, subdirectory paths, search, keyboard controls, no-JavaScript reading, responsive layouts, and example typing. Static hosting should serve directory indexes and real 404s. Do not add a server or live inference to the docs by default.
 
-Before public hosting: choose the canonical URL, add sitemap/social metadata, decide whether working-tree docs should be versioned, keep the complete API glossary and beginner examples aligned with public exports, and settle whether legacy guides become redirects or stay companion references. The static site is hosted on GPT Sites at https://docs.jevtools.dev. The publication build uses one clean, reviewed checkout for content, declarations, and changelog, and emits a source/version manifest. Follow [the manual publishing policy](docs-publishing.md); CI never deploys, and visitors do not fetch GitHub or load a Markdown parser.
+Before public hosting: choose the canonical URL, add sitemap/social metadata, keep the complete API glossary and beginner examples aligned with public exports. The hosted docs are the primary human reference; legacy repository guides remain detailed companions with stable paths, and the bundled skill remains the installed-version agent reference. The static site is hosted on GPT Sites at https://docs.jevtools.dev. The publication build uses one clean, reviewed checkout for content, declarations, and changelog, and emits a source/version manifest. Follow [the manual publishing policy](docs-publishing.md); CI never deploys, and visitors do not fetch GitHub or load a Markdown parser.
 
 ## Reference and beginner flow guide
 

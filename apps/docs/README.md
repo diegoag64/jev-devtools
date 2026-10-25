@@ -60,7 +60,7 @@ Open `/docs/` on the preview server. The base must start and end with `/`; only 
 
 See [the research and architecture notes](../../docs/documentation-site.md). This first pass includes onboarding, framework/privacy/troubleshooting guides, a full public API glossary with readable contracts and exact declarations, a beginner flow guide with checked examples for every operation, example links, and a separate agent page. The TypeSafe SDK itself and wire-protocol transport semantics remain separate references.
 
-The original integration, flow, and Next.js documents remain the detailed companion references. If promoting this site to the canonical source, migrate those sections deliberately and replace duplicates with links in the same PR.
+The hosted site is the primary human documentation. The original integration, flow, and Next.js documents remain detailed companion references with stable repository paths. READMEs and the landing page lead to the site; the bundled skill remains self-contained for installed-version/offline use. Update the affected companion guidance alongside API changes; publication status comes from `CHANGELOG.md`.
 
 ## Changelog and publishing
 

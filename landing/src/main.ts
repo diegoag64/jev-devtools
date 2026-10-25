@@ -48,7 +48,7 @@ app.innerHTML = `
     ${flowApiShowcase}
     <section class="integration wrap" aria-labelledby="integration-title">
       <div class="integration-copy"><h2 id="integration-title">Keep your code.<br />See the connections.</h2><p>Mount the React drawer, connect a server adapter, and inspect your Jev requests right where you build. Add connected flows when you need the whole picture.</p><a class="text-link" href="${DOCS}">Find your integration guide</a><div class="integration-tags"><span>React 18 / 19</span><span>Next.js App Router</span></div></div>
-      <div class="code-window"><div class="code-heading"><span><span class="code-dot"></span> Your application</span><span>React / Vite</span></div><div class="install-command"><code>npm install jev-devtools @typesafe-ai/sdk</code><button id="copy" aria-label="Copy install command" title="Copy install command">Copy</button></div><pre><code><span class="syntax-purple">import</span> { JevDevtools } <span class="syntax-purple">from</span> <span class="syntax-green">'jev-devtools'</span>;
+      <div class="code-window"><div class="code-heading"><span><span class="code-dot"></span> Your application</span><span>React / Vite</span></div><div class="install-command"><code>pnpm add jev-devtools @typesafe-ai/sdk</code><button id="copy" aria-label="Copy install command" title="Copy install command">Copy</button></div><pre><code><span class="syntax-purple">import</span> { JevDevtools } <span class="syntax-purple">from</span> <span class="syntax-green">'jev-devtools'</span>;
 
 <span class="syntax-purple">export function</span> <span class="syntax-pink">Root</span>() {
   <span class="syntax-purple">return</span> (
@@ -222,7 +222,7 @@ let copyTimer: ReturnType<typeof setTimeout>;
 el("copy").addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(
-      "npm install jev-devtools @typesafe-ai/sdk",
+      "pnpm add jev-devtools @typesafe-ai/sdk",
     );
     el("copy").textContent = "Copied";
     el("copy-status").textContent = "Install command copied.";

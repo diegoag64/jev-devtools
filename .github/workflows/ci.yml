@@ -110,3 +110,17 @@ jobs:
           path: benchmarks/results/docs/
           if-no-files-found: ignore
           retention-days: 7
+
+  landing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: landing/package-lock.json
+      - run: npm --prefix landing ci
+      - run: npm --prefix landing test
+      - run: npm --prefix landing run build

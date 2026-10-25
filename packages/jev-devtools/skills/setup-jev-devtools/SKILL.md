@@ -7,6 +7,8 @@ description: Install and verify Jev DevTools in an existing React application wi
 
 Complete the integration in the user's application: one React drawer, one shared Node adapter, and application calls through that adapter's TypeSafe client. Installing or mounting the drawer alone does not capture requests.
 
+The human guides live at [docs.jevtools.dev](https://docs.jevtools.dev/), and [jevtools.dev](https://jevtools.dev/) introduces the project. Prefer the installed package’s bundled recipe and declarations when online documentation targets a different version.
+
 ## Choose the integration
 
 Inspect the app's package manager/lockfile, React and Node versions, root component, server entry point, existing TypeSafe client construction, and development URL. Preserve existing configuration, authentication, routes, providers, and client options. Follow the host project's instructions; this package's contributor workflow does not apply to consumer apps.
@@ -15,11 +17,11 @@ Inspect the app's package manager/lockfile, React and Node versions, root compon
 - **React with a Node backend, including Vite:** read [references/react-node.md](references/react-node.md). A browser-only app needs a Node server for Jev; the Vite development-server option is local only.
 - **Other Node frameworks:** use the Web Request/Response or middleware API described in the React/Node reference and verify that framework's routing. Do not assume the Next.js recipe applies to Pages Router. Edge runtimes and cross-process/serverless history aggregation are unsupported.
 
-Install `jev-devtools` using the app's existing package manager (npm: `npm install jev-devtools @typesafe-ai/sdk`; pnpm: `pnpm add jev-devtools @typesafe-ai/sdk`; Yarn: `yarn add jev-devtools @typesafe-ai/sdk`). `@typesafe-ai/sdk` is a peer dependency: keep the app's existing SDK version when it satisfies the peer range. Install in the workspace(s) that actually import it. It is a regular dependency when application modules import it, even though capture/display are development-only. React 18/19 and Node 22.12+ are required. Do not replace the app's framework or upgrade unrelated dependencies to force compatibility.
+Install `jev-devtools` using the app's existing package manager (npm: `npm install jev-devtools @typesafe-ai/sdk`; pnpm: `pnpm add jev-devtools @typesafe-ai/sdk`; Yarn: `yarn add jev-devtools @typesafe-ai/sdk`; Bun: `bun add jev-devtools @typesafe-ai/sdk`). `@typesafe-ai/sdk` is a peer dependency: keep the app's existing SDK version when it satisfies the peer range. Install in the workspace(s) that actually import it. It is a regular dependency when application modules import it, even though capture/display are development-only. React 18/19 and Node 22.12+ are required. Do not replace the app's framework or upgrade unrelated dependencies to force compatibility.
 
-## Optional connected flow API (0.4.0)
+## Optional connected flow API
 
-When asked to build or inspect connected calls, read [references/flows.md](references/flows.md) after the framework recipe. It covers the 0.4.0 API: requests, server function tasks, runtime request factories, parallel checks, terminal branches, returning conditionals, bounded collections, and stateful loops. It includes sample verification, scope/execution rules, and privacy limits. For an older installation, use its bundled recipe and declarations rather than assuming these operations exist. Preserve existing application policies; do not convert unrelated calls just to install the drawer. Flow execution is server-only and continues even with the inspector disabled.
+When asked to build or inspect connected calls, read [references/flows.md](references/flows.md) after the framework recipe. For 0.5.0 it covers requests, server function tasks, runtime request factories, parallel checks, terminal branches, returning conditionals, bounded collections, stateful loops, captured-answer replay, and fixture comparison. It includes sample verification, scope/execution rules, and privacy limits. For an older installation, use its bundled recipe and declarations rather than assuming these operations exist. Preserve existing application policies; do not convert unrelated calls just to install the drawer. Flow execution is server-only and continues even with the inspector disabled.
 
 ## Integration invariants
 
@@ -28,6 +30,7 @@ When asked to build or inspect connected calls, read [references/flows.md](refer
 - Create a shared adapter; the inspector routes and application client must use it in the same Node realm/process. Replace existing `new TypeSafeClient(options)` construction with `inspector.createClient(options)` while preserving keys, transport options, retries, and call semantics. Keep existing `systemOne(...)` inputs and application behavior.
 - Browser and server `endpoint` paths must agree (default `/api/jev-devtools`). Route the base path and its subpaths. The server `origin` must exactly match the browser scheme, hostname, and port. A browser endpoint is a same-origin path, not an absolute backend URL.
 - Keep keys in server environment variables, never `VITE_*` or `NEXT_PUBLIC_*`. Use the host's environment loader and an ignored local env file. If a key is unavailable, complete setup and use the clearly labeled sample verification in [references/verify.md](references/verify.md); report that live inference remains unverified.
+- In 0.5.0, `redactAdditionalSensitiveData` defaults to true and masks supported personal fields in the drawer only; those values still exist in capture/stream/browser memory. Known credentials and custom server redactions cannot be revealed by disabling display masking. Keep application-specific server redaction for data that must not reach the browser.
 - Preserve authentication and project redaction. Shared/non-loopback access requires a real `authorize(request)` check; do not bypass it with `() => true`. Keep local defaults unless shared access is requested. Without `authorize`, Node middleware accepts only loopback connections; Web Request routes can't check the connection, so their dev server must listen on `127.0.0.1` or set a real `authorize`. Separate processes require a different architecture, not extra adapter instances.
 
 ## Finish and verify

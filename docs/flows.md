@@ -1,10 +1,12 @@
 # Define and inspect connected Jev calls
 
-The flow API was introduced in **0.3.0**. This guide covers **0.4.0**, including function steps, runtime requests, collections, returning conditionals, and loops. Existing single-request integrations remain supported; adopting flows is optional. For publication status, check the [changelog](../CHANGELOG.md#040--october-24-2026-experimental).
+For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/flow-basics/). This file is the detailed repository reference for the 0.5.0 release candidate; [publication is pending](../CHANGELOG.md).
+
+The flow API includes function steps, runtime requests, collections, returning conditionals, loops, replay, and fixture comparison. Replay and comparison are new in **0.5.0 (pending publication)**. Existing single-request integrations remain supported; adopting flows is optional. For publication status, check the [changelog](../CHANGELOG.md).
 
 Start with the [integration guide](integration.md) or [Next.js setup](nextjs.md) to mount the drawer and expose the shared inspector. For coding agents, the [bundled flow recipe](../packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) includes a complete parallel-checks → decision → branch example and no-key verification. It ships with npm for offline, version-matched use.
 
-The examples below import `@typesafe-ai/sdk` question helpers; declare it as a direct dependency in the server workspace (0.4.0 requires SDK `>=0.7.0 <0.8.0`, verified with 0.7.0). Keep API keys and both `/server` and `/flow` imports in Node code.
+The examples below import `@typesafe-ai/sdk` question helpers; declare it as a direct dependency in the server workspace (0.5.0 requires SDK `>=0.7.0 <0.8.0`, verified with 0.7.0). Keep API keys and both `/server` and `/flow` imports in Node code.
 
 `jev-devtools/flow` is a TypeScript/Node entry point. A definition builds an inspectable, bounded graph once; each `run()` executes an independent instance. This is an in-process helper for Jev calls and application-owned function steps. Tasks can execute server code with side effects; the runner does not provide durable execution or rollback.
 
@@ -337,7 +339,7 @@ Try the [hierarchical classification cookbook](../cookbooks/hierarchical-classif
 
 ## Replay a run in tests
 
-Unreleased: not in npm 0.4.1 yet.
+**New in 0.5.0 (pending publication).**
 
 ### Copy a fixture from DevTools
 
@@ -406,7 +408,7 @@ The drawer reports completed steps it could not include and any capture warnings
 
 ## Compare a live run with a fixture
 
-Unreleased: not in npm 0.4.1 yet.
+**New in 0.5.0 (pending publication).**
 
 After you change a prompt or a model, re-run your saved cases with `compareWithFixture` to see what moved. It replays the fixture offline, runs the flow with your client on the same input, and reports the differences:
 

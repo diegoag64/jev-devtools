@@ -1,8 +1,10 @@
 # Jev DevTools integration
 
+For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/getting-started/). This file is the detailed repository reference for the 0.5.0 release candidate; [publication is pending](../CHANGELOG.md).
+
 A reusable React inspector with one root component and a Node server adapter. It uses Diagram Motion Lab's rounded outline cards, curved connections, pink flowing dots, and probability bars. The drawer contains searchable request history and Flow, Questions, Context, Transport, and Raw views.
 
-This guide covers **[Jev DevTools 0.4.1](https://www.npmjs.com/package/jev-devtools/v/0.4.1)**, an experimental pre-1.0 package available on npm. See the [release notes](../CHANGELOG.md#041--october-24-2026-experimental). Verified with sample responses through the real TypeSafe SDK; no live inference was used for verification.
+Jev DevTools remains experimental before 1.0. The default npm install currently resolves to 0.4.1; use the archive below for the 0.5.0 candidate. See the [release notes](../CHANGELOG.md). Verified with sample responses through the real TypeSafe SDK; no live inference was used for verification.
 
 ## Install in another React project
 
@@ -24,7 +26,7 @@ npm run pack:devtools
 From your React project, install the generated archive:
 
 ```sh
-npm install /absolute/path/to/jev-devtools/jev-devtools-0.4.1.tgz
+npm install /absolute/path/to/jev-devtools/jev-devtools-0.5.0.tgz
 ```
 
 Mount once near the root. The drawer loads its own styles; no CSS import, provider, client object, trace props, or application hook is needed:
@@ -56,7 +58,7 @@ inside a React `<main>` or `<section>`. Global page selectors such as `section`,
 override is needed. The drawer supplies its own styles and resets inherited
 typography. No CSS import is needed to use the component.
 
-**Unreleased:** the public stylesheet also scopes connected-flow selectors to
+Since 0.4.1, the public stylesheet also scopes connected-flow selectors to
 `.jev-devtools` and namespaces their animation, preventing collisions with host
 classes such as `.flow-step`. The drawer suppresses host pseudo-element
 decorations, explicitly resets text direction, and establishes defaults for its
