@@ -62,6 +62,14 @@ export function checkReceiptScope(root) {
     ...new Set(
       [
         ...git("diff", "--name-only", "--no-renames", "-z", base).split("\0"),
+        ...git(
+          "diff",
+          "--cached",
+          "--name-only",
+          "--no-renames",
+          "-z",
+          base,
+        ).split("\0"),
         ...git("ls-files", "--others", "--exclude-standard", "-z").split("\0"),
       ].filter(Boolean),
     ),
@@ -84,9 +92,15 @@ export function checkReceiptScope(root) {
       `${path}: file additions, deletions, renames or mode changes require verify:all`,
     );
     const before = git("show", `${base}:${path}`);
+    const staged = git("show", `:${path}`);
     const after = readFileSync(resolve(root, path), "utf8");
-    assertReceiptChange(path, before, after);
-    checkLocalLinks(root, path, after);
+    // The index can contain a broader edit even when the working file was
+    // restored. Validate each version independently before reporting scope.
+    for (const candidate of [staged, after]) {
+      if (candidate === before) continue;
+      assertReceiptChange(path, before, candidate);
+      checkLocalLinks(root, path, candidate);
+    }
   }
   return { base, files: paths };
 }

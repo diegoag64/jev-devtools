@@ -144,7 +144,30 @@ test("scope includes branch commits, staged/unstaged edits, deletions, mode chan
   assert.equal(checkReceiptScope(root).files.length, 1);
   writeFileSync(join(root, "code.js"), "changed");
   assert.throws(() => checkReceiptScope(root), /code.js/);
+  git("add", "code.js");
+  writeFileSync(join(root, "code.js"), "original");
+  assert.throws(
+    () => checkReceiptScope(root),
+    /code.js/,
+    "A reversed working file must not hide a staged code change",
+  );
+  git("reset", "--quiet", "HEAD", "code.js");
   git("restore", "code.js");
+  writeFileSync(
+    join(root, "CHANGELOG.md"),
+    changelog.replace("Keep Node support.", "Drop Node support."),
+  );
+  git("add", "CHANGELOG.md");
+  writeFileSync(
+    join(root, "CHANGELOG.md"),
+    changelog.replace("noon", "midnight"),
+  );
+  assert.throws(
+    () => checkReceiptScope(root),
+    /outside existing receipt/,
+    "A valid receipt edit must not hide staged compatibility changes",
+  );
+  git("reset", "--quiet", "HEAD", "CHANGELOG.md");
   writeFileSync(join(root, "new.js"), "new");
   assert.throws(() => checkReceiptScope(root), /new.js/);
   rmSync(join(root, "new.js"));
