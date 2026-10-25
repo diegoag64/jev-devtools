@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                         | Published (UTC)     | Highlights                                                                                                 |
 | ----------------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                       | Not published       | No changes yet.                                                                                            |
+| [Unreleased](#unreleased)                       | Not published       | Shared flow stream encoding for matching viewers.                                                          |
 | [0.5.2](#052--pending-publication-experimental) | Pending publication | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
 | [0.5.1](#051--october-25-2026-experimental)     | 2026-10-25          | Task input validation and expression types; setup guidance; release and website maintenance.               |
 | [0.5.0](#050--october-25-2026-experimental)     | 2026-10-25          | Replay and comparison; capture reliability/privacy; website and docs.                                      |
@@ -23,7 +23,11 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No changes yet.
+### Changes
+
+#### Performance
+
+- **Shared flow stream encoding.** Matching viewers share the server's flow projection and encoding within each delivery turn, while retaining independent response buffers, session isolation, and reader catch-up state. The version-1 wire format and capture policy are unchanged; whole-run budgets and finer-grained deltas remain follow-up work.
 
 ## 0.5.2 — Pending publication (experimental)
 
