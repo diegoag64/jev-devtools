@@ -143,11 +143,14 @@ type Request<Q extends Questions> = Omit<SystemOneRequest<Q>, "state"> & {
 export type Resolved<T> =
   T extends FlowExpression<infer V>
     ? V
-    : T extends readonly unknown[]
-      ? { [K in keyof T]: Resolved<T[K]> }
-      : T extends object
+    // Branded primitives can extend object but remain scalar runtime values.
+    : T extends string | number | boolean | null | undefined
+      ? T
+      : T extends readonly unknown[]
         ? { [K in keyof T]: Resolved<T[K]> }
-        : T;
+        : T extends object
+          ? { [K in keyof T]: Resolved<T[K]> }
+          : T;
 export type TaskContext = {
   signal: AbortSignal;
   runId: string;
@@ -440,6 +443,23 @@ export interface FlowBuilder<T> {
     task: FlowTask<I, O>,
     display?: FlowDisplay,
   ): FlowExpression<Awaited<O>>;
+  /** References and scalar arrays already carry their resolved item type. */
+  map<I, C, O>(
+    id: string,
+    options: {
+      // Intersect arrays rather than I so inference preserves scalar brands.
+      items:
+        | FlowExpression<readonly I[]>
+        | (readonly I[] & readonly (string | number | boolean | null)[]);
+      input: C;
+      concurrency?: number;
+      maxItems: number;
+    },
+    build: (
+      item: FlowBuilder<{ item: I; index: number; context: Resolved<C> }>,
+    ) => FlowExpression<O>,
+    display?: FlowDisplay,
+  ): FlowExpression<O[]>;
   /** Execute a reusable program over resolved items; return results in input order. */
   map<I, C, O>(
     id: string,
@@ -458,6 +478,22 @@ export interface FlowBuilder<T> {
     ) => FlowExpression<O>,
     display?: FlowDisplay,
   ): FlowExpression<O[]>;
+  /** References and scalar initial values preserve their generic state type. */
+  loop<S, C>(
+    id: string,
+    // Infer S from the full initial value before restricting this overload to
+    // references/scalars; intersecting S directly would strip scalar brands.
+    options: {
+      initial: S | FlowExpression<S>;
+      input: C;
+      while: (state: FlowExpression<NoInfer<S>>) => FlowExpression<boolean>;
+      maxIterations: number;
+    } & { initial: FlowExpression<S> | string | number | boolean | null },
+    build: (
+      iteration: FlowBuilder<{ state: S; index: number; context: Resolved<C> }>,
+    ) => FlowExpression<NoInfer<S>>,
+    display?: FlowDisplay,
+  ): FlowExpression<S>;
   /** Pre-test loop over resolved JSON state, with explicit context and an iteration limit. */
   loop<S, C>(
     id: string,

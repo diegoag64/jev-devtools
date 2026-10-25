@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { maps, loops } from "./packed-resolved-templates.js";
+import { maps, loops, genericReferences, unionSources, brandedReferences, brandedTemplates } from "./packed-resolved-templates.js";
 
 const client = { systemOne() { throw new Error("Unexpected inference request"); } };
 
@@ -25,4 +25,26 @@ test("packed loop types and execution agree for gates, next states, and final st
       },
     });
   }
+});
+
+test("packed whole-reference helpers preserve generic values through maps and loops", async () => {
+  const { value } = await genericReferences.run({
+    values: [1, 2], count: 2, records: [{ id: "first" }, { id: "second" }],
+  }, { client });
+  assert.deepEqual(value, {
+    copied: [1, 2], matched: [false, true], kept: 2,
+    copiedScalars: [1, 2], keptScalar: 2,
+    records: [{ id: "first" }, { id: "second" }],
+  });
+  for (const useReference of [true, false]) {
+    const result = await unionSources(useReference).run({ values: [1, 2], state: 2 }, { client });
+    assert.deepEqual(result.value, { mapped: [1, 2], kept: 2 });
+  }
+});
+
+test("packed branded scalars remain numeric in whole references and literal templates", async () => {
+  const whole = await brandedReferences.run({ count: 2, values: [1, 2] }, { client });
+  assert.deepEqual(whole.value, { mapped: [2, 4], kept: 2 });
+  const literal = await brandedTemplates(2).run(null, { client });
+  assert.deepEqual(literal.value, { mapped: [2], kept: { count: 2 }, doubled: 4 });
 });

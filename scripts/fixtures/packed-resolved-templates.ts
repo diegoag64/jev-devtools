@@ -1,5 +1,5 @@
 // Compiled AND executed by verify-package.mjs against the installed archive.
-import { defineJevFlow, type FlowExpression } from "jev-devtools/flow";
+import { defineJevFlow, type FlowBuilder, type FlowExpression } from "jev-devtools/flow";
 
 export const maps = defineJevFlow<{
   count: number;
@@ -79,6 +79,101 @@ export const loops = defineJevFlow<{ count: number; keepGoing: boolean }>("resol
   return f.output("done", { literal, whole, nested: result });
 });
 
+// Whole-value references must retain generic payloads, not deferred Resolved<T>.
+function copy<T>(
+  f: FlowBuilder<unknown>, id: string, items: FlowExpression<readonly T[]>,
+): FlowExpression<T[]> {
+  return f.map(id, { items, input: null, maxItems: 2 },
+    (item) => item.input.get("item"));
+}
+
+function matches<T extends number>(
+  f: FlowBuilder<unknown>, items: FlowExpression<readonly T[]>, target: T,
+) {
+  return f.map("matches", { items, input: null, maxItems: 2 },
+    (item) => item.input.get("item").eq(target));
+}
+
+function copyScalars<T extends number>(
+  f: FlowBuilder<unknown>, items: readonly T[],
+): FlowExpression<T[]> {
+  return f.map("copy-scalars", { items, input: null, maxItems: 2 },
+    (item) => item.input.get("item"));
+}
+
+function keep<T extends number>(
+  f: FlowBuilder<unknown>, id: string, initial: T | FlowExpression<T>,
+): FlowExpression<T> {
+  return f.loop(id, {
+    initial, input: null, while: (s) => s.lt(0), maxIterations: 1,
+  }, (iteration) => iteration.input.get("state"));
+}
+
+export const genericReferences = defineJevFlow<{
+  values: (1 | 2)[]; count: 1 | 2; records: { id: string }[];
+}>("generic-references", (f) => {
+  const values = f.input.get("values");
+  return f.output("done", {
+    copied: copy(f, "copy-numbers", values),
+    matched: matches(f, values, 2),
+    kept: keep(f, "keep-reference", f.input.get("count")),
+    copiedScalars: copyScalars(f, [1, 2]),
+    keptScalar: keep(f, "keep-scalar", 2),
+    records: copy(f, "copy-records", f.input.get("records")),
+  });
+});
+
+// The reference overloads must still accept reference-or-literal options.
+export function unionSources(useReference: boolean) {
+  return defineJevFlow<{ values: number[]; state: number }>("union-sources", (f) => {
+    const mapped: FlowExpression<number[]> = f.map("copy", {
+      items: useReference ? f.input.get("values") : [1, 2], input: null, maxItems: 2,
+    }, (item) => item.input.get("item"));
+    const kept: FlowExpression<number> = f.loop("keep", {
+      initial: useReference ? f.input.get("state") : 2, input: null,
+      while: (s) => s.lt(0), maxIterations: 1,
+    }, (iteration) => iteration.input.get("state"));
+    return f.output("done", { mapped, kept });
+  });
+}
+
+type Count = number & { readonly __brand: "Count" };
+
+export const brandedReferences = defineJevFlow<{ count: Count; values: Count[] }>("branded-references", (f) => {
+  const mapped: FlowExpression<number[]> = f.map("double", {
+    items: f.input.get("values"), input: null, maxItems: 2,
+  }, (item) => {
+    const value: FlowExpression<Count> = item.input.get("item");
+    return item.task("multiply", {
+      input: value, run: (n) => n * 2,
+    });
+  });
+  const kept: FlowExpression<Count> = f.loop("keep", {
+    initial: f.input.get("count"), input: null,
+    while: (s) => s.lt(0), maxIterations: 1,
+  }, (iteration) => iteration.input.get("state"));
+  return f.output("done", { mapped, kept });
+});
+
+// Literal templates also preserve branded scalar fields instead of mapping
+// their number methods into an object. This exercises Resolved independently
+// of the whole-reference overloads above.
+export function brandedTemplates(count: Count) {
+  return defineJevFlow("branded-templates", (f) => {
+    const mapped: FlowExpression<Count[]> = f.map("copy", {
+      items: [count], input: null, maxItems: 1,
+    }, (item) => item.input.get("item"));
+    const kept: FlowExpression<{ count: Count }> = f.loop("keep", {
+      initial: { count }, input: null,
+      while: (s) => s.get("count").lt(0), maxIterations: 1,
+    }, (iteration) => iteration.input.get("state"));
+    const doubled = f.task("double", {
+      input: { count }, run: ({ count }) => count * 2,
+    });
+    return f.output("done", { mapped, kept, doubled });
+  });
+}
+
 // Never executed: these calls must be rejected by the packed declarations.
 function invalidTemplates() {
   defineJevFlow<{ count: number }>("invalid-templates", (f) => {
@@ -107,6 +202,13 @@ function invalidTemplates() {
       while: (s) => s.get("count").lt(2), maxIterations: 1,
     // @ts-expect-error the body must return the resolved initial shape; it cannot widen state
     }, (iteration) => iteration.task("wrong", { input: null, run: () => ({ count: "text" }) }));
+    f.loop("wrong-whole-state", {
+      initial: f.input, input: null,
+      while: (s) => s.get("count").lt(2), maxIterations: 1,
+    // @ts-expect-error the whole-reference overload cannot widen the next state either
+    }, (iteration) => iteration.task("wrong", { input: null, run: () => ({ count: "text" }) }));
+    // @ts-expect-error preserving brands must not make ordinary numbers branded
+    const unearnedBrand: FlowExpression<Count> = f.input.get("count");
     return f.output("done", { mapped, wrong });
   });
 }

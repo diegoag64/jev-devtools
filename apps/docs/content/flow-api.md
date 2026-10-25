@@ -78,9 +78,9 @@ The builder describes both lanes synchronously; the task callbacks run when `try
 
 ## Collections and loops
 
-[`map(id, { items, input, maxItems, concurrency? }, build, display?)`](@/api/reference/#flow-map) executes one bounded item program per item and returns results in input order. Its builder input is `{ item, index, context }`. The `input` option supplies explicit shared context. Items may be literals, a whole-array reference, or nested reference templates; their builder type is `Resolved<Item>`.
+[`map(id, { items, input, maxItems, concurrency? }, build, display?)`](@/api/reference/#flow-map) executes one bounded item program per item and returns results in input order. Its builder input is `{ item, index, context }`. The `input` option supplies explicit shared context. Items may be literals, a whole-array reference, or nested reference templates; whole-array references and scalar arrays preserve `Item`, while nested template items use `Resolved<Item>`.
 
-[`loop(id, { initial, input, while, maxIterations }, build, display?)`](@/api/reference/#flow-loop) tests the state condition before each iteration. Its builder input is `{ state, index, context }`; state uses `Resolved<State>`, including references nested in the initial template. Return the next state with that resolved shape. It returns the final state after the condition becomes false. If the condition still holds at the iteration limit, it throws [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror).
+[`loop(id, { initial, input, while, maxIterations }, build, display?)`](@/api/reference/#flow-loop) tests the state condition before each iteration. Its builder input is `{ state, index, context }`; whole-state references and scalars preserve `State`, while initial templates use `Resolved<State>` to resolve nested references. Return the next state with that resolved shape. It returns the final state after the condition becomes false. If the condition still holds at the iteration limit, it throws [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror).
 
 Call `tryOperations()` from Node to run both definitions below. Its two `await` calls execute application-owned tasks without inference and read the resolved results:
 
@@ -91,7 +91,7 @@ Call `tryOperations()` from Node to run both definitions below. Its two `await` 
 | Method | Return type | Resolved value |
 | --- | --- | --- |
 | `map(...)` | `FlowExpression<Output[]>` | Item results in input order. |
-| `loop(...)` | `FlowExpression<Resolved<State>>` | Final state when its pre-iteration condition becomes false. |
+| `loop(...)` | `FlowExpression<State>` for whole-state references/scalars; `FlowExpression<Resolved<State>>` for templates | Final state when its pre-iteration condition becomes false. |
 
 
 A loop can contain a map. Nested maps, nested loops, and loops inside maps are unsupported. Shared context is explicit; use `context` inside map/loop item programs rather than reaching across scope boundaries.

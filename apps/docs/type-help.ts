@@ -70,7 +70,7 @@ export const typeHelp: Record<string, Help> = {
   },
   Resolved: {
     title: "Resolved", importFrom: "jev-devtools/flow",
-    description: "Replaces flow references inside task inputs, map items and loop state with their actual value types, including nested objects and arrays.",
+    description: "Replaces flow references inside task inputs, map items and loop state with their actual value types, including nested objects and arrays, while preserving branded primitives. Whole-value reference payloads are already resolved and remain intact.",
     signature: "// Example of the resulting type:\nResolved<{ name: FlowExpression<string> }>\n// becomes { name: string }",
   },
   FlowExpression: {
