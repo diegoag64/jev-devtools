@@ -26,7 +26,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
-- **0.5.1 publication records.** Record verified npm publication, archive integrity/provenance, fresh registry consumers, and the exact Git tag and GitHub Latest release. Update source documentation to describe the published fixes and preserve their compatibility notes. Hosted docs were subsequently published as Sites version 21 from the merged record commit; see the [publication receipt](docs/docs-publishing.md#publication-receipt-and-recovery). ([#87](https://github.com/diegoag64/jev-devtools/pull/87))
+- **0.5.1 publication records.** Record verified npm publication, archive integrity/provenance, fresh registry consumers, and the exact Git tag and GitHub Latest release. Update source documentation to describe the published fixes and preserve their compatibility notes. Hosted docs were subsequently published as Sites version 21 from the merged record commit; see the [publication receipt](docs/docs-publishing.md#publication-receipt-and-recovery). ([#87](https://github.com/diegoag64/jev-devtools/pull/87), [receipt #89](https://github.com/diegoag64/jev-devtools/pull/89))
 
 ## 0.5.1 — October 25, 2026 (experimental)
 
