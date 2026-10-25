@@ -26,7 +26,8 @@ try {
   await page
     .getByRole("button", { name: "Expand Jev drawer", exact: true })
     .click();
-  await page.getByRole("region", { name: "Flow canvas" }).waitFor();
+  const canvas = page.getByRole("region", { name: "Flow canvas" });
+  await canvas.waitFor();
   const triage = page.getByRole("article", {
     name: "Request triage",
     exact: true,
@@ -89,6 +90,52 @@ try {
     beforeQuestion,
   );
 
+  const stepPicker = page.getByRole("combobox", { name: "Flow step", exact: true });
+  const waitForDeselect = () => page.waitForFunction(() =>
+    document.querySelector("jev-devtools-root").shadowRoot
+      .querySelector('[aria-label="Flow step"]').value === "",
+  );
+  const selectedStep = page.getByRole("button", {
+    name: "Step review, jev, completed", exact: true,
+  });
+  // Control-panel padding and request-card content are not empty canvas space.
+  await page.mouse.click(controlsPosition.x + 12, controlsPosition.y + 3);
+  await review.getByRole("heading", { name: "Shared context", exact: true }).click();
+  await page.waitForTimeout(150);
+  assert.equal(await stepPicker.inputValue(), "review");
+  const cameraBeforeDeselect = await page.locator(".flow-overview-canvas").getAttribute("style");
+  await canvas.click({ position: { x: 8, y: 8 } });
+  await waitForDeselect();
+  assert.equal(await stepPicker.inputValue(), "");
+  assert.equal(await selectedStep.getAttribute("aria-pressed"), "false");
+  assert.equal(await controls.getByRole("button", { name: "Focus step", exact: true }).isEnabled(), false);
+  assert.equal(await page.locator(".flow-overview-canvas").getAttribute("style"), cameraBeforeDeselect,
+    "Deselecting a step leaves the camera unchanged");
+  await stepPicker.selectOption("review");
+  // A drag that returns to its start is still a pan, not a background click.
+  const canvasBox = await canvas.boundingBox();
+  await page.mouse.move(canvasBox.x + 8, canvasBox.y + 8);
+  await page.mouse.down();
+  await page.mouse.move(canvasBox.x + 48, canvasBox.y + 48);
+  await page.mouse.move(canvasBox.x + 8, canvasBox.y + 8);
+  await page.mouse.up();
+  await page.waitForTimeout(150);
+  assert.equal(await stepPicker.inputValue(), "review");
+  // Also clear from a gap inside the transformed canvas, not only its margins.
+  const gap = await page.locator(".flow-overview-canvas").evaluate((el) => {
+    const rect = el.parentElement.getBoundingClientRect();
+    const root = el.getRootNode();
+    for (let y = rect.bottom - 8; y > rect.top + 8; y -= 24) {
+      for (let x = rect.left + 8; x < rect.right - 8; x += 24) {
+        if (root.elementFromPoint(x, y) === el) return { x, y };
+      }
+    }
+  });
+  assert.ok(gap, "The transformed canvas has a gap between cards");
+  await page.mouse.click(gap.x, gap.y);
+  await waitForDeselect();
+  assert.equal(await stepPicker.inputValue(), "");
+  await stepPicker.selectOption("review");
   await page
     .getByRole("button", { name: "Step review, jev, completed", exact: true })
     .click();
@@ -98,6 +145,13 @@ try {
     .click();
   await page.getByRole("button", { name: "Questions", exact: true }).click();
   await page.getByText("eligible", { exact: true }).first().waitFor();
+  await canvas.click({ position: { x: 8, y: 8 } });
+  await waitForDeselect();
+  assert.equal(await page.locator(".flow-request-detail").count(), 0);
+  await stepPicker.selectOption("review");
+  assert.equal(await page.locator(".flow-request-detail").count(), 0,
+    "Reselecting a step does not reopen its previous request inspection");
+  await page.getByRole("button", { name: "Inspect request", exact: true }).click();
   await page
     .getByRole("button", { name: "Hide request details", exact: true })
     .click();
@@ -105,7 +159,6 @@ try {
   await page
     .getByRole("button", { name: "Step other, output, untaken", exact: true })
     .waitFor();
-  const canvas = page.getByRole("region", { name: "Flow canvas" });
   await canvas.focus();
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("+");
@@ -461,8 +514,21 @@ try {
     );
   }
   await page.screenshot({ path: "benchmarks/results/flows/floating-controls-narrow.png" });
+  const narrowGap = await page.locator(".flow-overview-viewport .lab-connections").first().evaluate((el) => {
+    const rect = el.closest(".flow-overview-viewport").getBoundingClientRect();
+    const root = el.getRootNode();
+    for (let y = rect.bottom - 8; y > rect.top + 8; y -= 24) {
+      for (let x = rect.left + 8; x < rect.right - 8; x += 24) {
+        if (root.elementFromPoint(x, y) === el) return { x, y };
+      }
+    }
+  });
+  assert.ok(narrowGap, "The embedded request diagram has visible empty space");
+  await page.mouse.click(narrowGap.x, narrowGap.y);
+  await waitForDeselect();
+  await page.screenshot({ path: "benchmarks/results/flows/background-deselected.png" });
   console.log(
-    "Flows verified: floating controls stay fixed, do not initiate panning and fit narrow screens; connected request diagrams, question switching with one preserved camera, parallel wait explanation, outcome paths, untaken nodes, request details, pinned camera/selection across incoming runs and reopening, cancellation.",
+    "Flows verified: background clicks deselect without moving the camera, card/control clicks and panning retain selection; floating controls stay fixed, do not initiate panning and fit narrow screens; connected request diagrams, question switching with one preserved camera, parallel wait explanation, outcome paths, untaken nodes, request details, pinned camera/selection across incoming runs and reopening, cancellation.",
   );
 } finally {
   await browser.close();

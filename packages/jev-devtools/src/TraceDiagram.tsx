@@ -328,6 +328,7 @@ export function TraceDiagram({
       <div
         hidden={showProbabilities}
         className={embedded ? "lab-flow-surface" : "lab-flow-viewport"}
+        data-diagram-background
         ref={embedded ? undefined : viewport}
         style={embedded ? { height } : undefined}
         tabIndex={embedded ? undefined : 0}
@@ -341,10 +342,12 @@ export function TraceDiagram({
         <div
           ref={embedded ? undefined : canvas}
           className="lab-flow-canvas"
+          data-diagram-background
           style={{ width: 1120, height }}
         >
           <svg
             className="lab-connections"
+            data-diagram-background
             width="1120"
             height={height}
             aria-hidden="true"

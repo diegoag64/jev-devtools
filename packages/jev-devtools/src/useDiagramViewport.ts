@@ -18,6 +18,7 @@ export function useDiagramViewport(
   height: number,
   scene: string,
   origin: Point = { x: 0, y: 0 },
+  onBackgroundClick?: () => void,
 ) {
   const viewport = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLDivElement>(null);
@@ -102,6 +103,7 @@ export function useDiagramViewport(
     const el = viewport.current;
     if (!el) return;
     const pointers = new Map<number, Point>();
+    let backgroundClick: { pointerId: number; start: Point } | null = null;
     const local = (event: { clientX: number; clientY: number }): Point => {
       const rect = el.getBoundingClientRect();
       return {
@@ -122,6 +124,7 @@ export function useDiagramViewport(
       }
     };
     const down = (event: PointerEvent) => {
+      backgroundClick = null;
       if (
         event.button !== 0 ||
         pointers.size >= 2 ||
@@ -130,6 +133,16 @@ export function useDiagramViewport(
         )
       )
         return;
+      // Capture retargets pointerup to the viewport, so remember where the tap began.
+      if (
+        pointers.size === 0 &&
+        (event.target === el ||
+          event.target === canvas.current ||
+          (event.target as Element).hasAttribute("data-diagram-background") ||
+          (event.target as Element).closest("svg[data-diagram-background]"))
+      ) {
+        backgroundClick = { pointerId: event.pointerId, start: local(event) };
+      }
       event.preventDefault();
       el.focus({ preventScroll: true });
       el.setPointerCapture(event.pointerId);
@@ -139,7 +152,17 @@ export function useDiagramViewport(
     const move = (event: PointerEvent) => {
       if (!pointers.has(event.pointerId)) return;
       const before = [...pointers.values()];
-      pointers.set(event.pointerId, local(event));
+      const point = local(event);
+      pointers.set(event.pointerId, point);
+      if (
+        backgroundClick &&
+        Math.hypot(
+          point.x - backgroundClick.start.x,
+          point.y - backgroundClick.start.y,
+        ) > 4
+      ) {
+        backgroundClick = null;
+      }
       const after = [...pointers.values()];
       fitted.current = false;
       if (before.length === 1) {
@@ -162,13 +185,24 @@ export function useDiagramViewport(
       paint();
     };
     const release = (event: PointerEvent) => {
+      const clicked =
+        event.type === "pointerup" &&
+        event.button === 0 &&
+        backgroundClick?.pointerId === event.pointerId &&
+        Math.hypot(
+          local(event).x - backgroundClick.start.x,
+          local(event).y - backgroundClick.start.y,
+        ) <= 4;
+      backgroundClick = null;
       pointers.delete(event.pointerId);
       if (el.hasPointerCapture(event.pointerId))
         el.releasePointerCapture(event.pointerId);
       if (!pointers.size) delete el.dataset.panning;
+      if (clicked) onBackgroundClick?.();
     };
     const wheel = (event: WheelEvent) => {
       if ((event.target as Element).closest("[data-diagram-scroll]")) return;
+      backgroundClick = null;
       event.preventDefault();
       const units =
         event.deltaMode === 1
@@ -230,6 +264,6 @@ export function useDiagramViewport(
       if (frame.current !== null) cancelAnimationFrame(frame.current);
       frame.current = null;
     };
-  }, [fit, zoomBy, paint, scene]);
+  }, [fit, zoomBy, paint, scene, onBackgroundClick]);
   return { viewport, canvas, zoom, zoomBy, fit, preserveCamera, focusArea };
 }
