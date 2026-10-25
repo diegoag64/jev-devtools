@@ -43,10 +43,11 @@ export class FlowRecorder {
           if (node.itemDefinition)
             redactRules(node.itemDefinition, [...prefix, node.id, "items"]);
           if (node.conditionRule === undefined) continue;
+          const warnings = new Set(node.conditionCaptureWarnings);
           try {
             node.conditionRule = capture(
               node.conditionRule,
-              new Set(),
+              warnings,
               this.options.redact
                 ? (path, value) =>
                     this.options.redact!(
@@ -57,7 +58,9 @@ export class FlowRecorder {
             );
           } catch {
             node.conditionRule = "[rule capture unavailable]";
+            warnings.add("Rule capture unavailable.");
           }
+          node.conditionCaptureWarnings = [...warnings];
         }
       };
       redactRules(stored);
@@ -138,24 +141,32 @@ export class FlowRecorder {
             {
               ...step,
               data: captured.data,
-              captureWarnings: captured.warnings,
+              captureWarnings: [
+                ...new Set([
+                  ...(step.captureWarnings ?? []),
+                  ...captured.warnings,
+                ]),
+              ],
             },
           ];
         }),
       ),
     };
     if ("value" in stored) {
+      const warnings = new Set(run.captureWarnings);
       try {
         stored.value = capture(
           stored.value,
-          new Set(),
+          warnings,
           this.options.redact
             ? (path, value) => this.options.redact!([...prefix, ...path], value)
             : undefined,
         );
       } catch {
         stored.value = "[capture unavailable]";
+        warnings.add("Outcome capture unavailable.");
       }
+      stored.captureWarnings = [...warnings];
     }
     if (prefix.length) this.itemCaptures.set(run, stored);
     return stored;

@@ -78,20 +78,20 @@ The builder describes both lanes synchronously; the task callbacks run when `try
 
 ## Collections and loops
 
-[`map(id, { items, input, maxItems, concurrency? }, build, display?)`](@/api/reference/#flow-map) executes one bounded item program per item and returns results in input order. Its builder input is `{ item, index, context }`. The `input` option supplies explicit shared context.
+[`map(id, { items, input, maxItems, concurrency? }, build, display?)`](@/api/reference/#flow-map) executes one bounded item program per item and returns results in input order. Its builder input is `{ item, index, context }`. The `input` option supplies explicit shared context. Items may be literals, a whole-array reference, or nested reference templates; whole-array references and scalar arrays preserve `Item`, while nested template items use `Resolved<Item>`.
 
-[`loop(id, { initial, input, while, maxIterations }, build, display?)`](@/api/reference/#flow-loop) tests the state condition before each iteration. Its builder input is `{ state, index, context }`; return the next state. It returns the final state after the condition becomes false. If the condition still holds at the iteration limit, it throws [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror).
+[`loop(id, { initial, input, while, maxIterations }, build, display?)`](@/api/reference/#flow-loop) tests the state condition before each iteration. Its builder input is `{ state, index, context }`; whole-state references and scalars preserve `State`, while initial templates use `Resolved<State>` to resolve nested references. Return the next state with that resolved shape. It returns the final state after the condition becomes false. If the condition still holds at the iteration limit, it throws [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror).
 
 Call `tryOperations()` from Node to run both definitions below. Its two `await` calls execute application-owned tasks without inference and read the resolved results:
 
 <!-- example: operations.ts -->
 
-**Example walkthrough:** `summarize` uses `map()` to double each number, a task to add them, and `if()` to choose a label before returning the summary. `all()` and `not()` make the label policy explicit. With `[2, 4]`, the output is `{ total: 12, label: "Large: 12" }`. The separate `count` flow carries `{ value, target }` as loop state and increments `value` until it reaches the target.
+**Example walkthrough:** `summarize` uses `map()` to double each number, a task to add them, and `if()` to choose a label before returning the summary. `all()` and `not()` make the label policy explicit. With `[2, 4]`, the output is `{ total: 12, label: "Large: 12" }`. The separate `count` flow carries `{ value, target }` as loop state and increments `value` until it reaches the target. Its initial template nests the target reference; the gate and task both see its numeric value type.
 
 | Method | Return type | Resolved value |
 | --- | --- | --- |
 | `map(...)` | `FlowExpression<Output[]>` | Item results in input order. |
-| `loop(...)` | `FlowExpression<State>` | Final state when its pre-iteration condition becomes false. |
+| `loop(...)` | `FlowExpression<State>` for whole-state references/scalars; `FlowExpression<Resolved<State>>` for templates | Final state when its pre-iteration condition becomes false. |
 
 
 A loop can contain a map. Nested maps, nested loops, and loops inside maps are unsupported. Shared context is explicit; use `context` inside map/loop item programs rather than reaching across scope boundaries.
@@ -99,6 +99,8 @@ A loop can contain a map. Nested maps, nested loops, and loops inside maps are u
 ## Limits and errors
 
 IDs must be unique across the whole definition, including untaken branches and lanes: 1–80 letters, digits, `_`, or `-`, starting with a letter or digit. Output names are node IDs too. Definitions allow 256 nodes, 16 nested blocks, and a run-wide budget of 1,024 expanded nodes.
+
+**Unreleased:** each expression is limited to depth 80 and 4,096 expanded nodes, counting reused children at every occurrence; an operation accepts at most 256 operands. These limits apply during construction, including composition. Legacy condition text is capped at 4,096 UTF-16 code units with an explicit truncation suffix; execution retains the full accepted expression. See [expression limits](@/api/expressions/#expression-limits).
 
 Structural errors fail during definition. Missing input values and invalid comparisons fail when execution reaches them. [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror) is exported for bounded-loop handling. For exact collection/concurrency/timeout limits, execution errors, and cancellation behavior, consult the [detailed guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md) and installed declarations.
 

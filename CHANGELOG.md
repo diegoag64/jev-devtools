@@ -8,8 +8,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version | Published (UTC) | Highlights |
 | --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Implementation verification guidance. |
-| [0.5.1](#051--pending-publication-experimental) | Pending publication | Task input validation and expression types; setup guidance; release and website maintenance. |
+| [Unreleased](#unreleased) | Not published | Resolved map and loop template types; composed-expression limits and flow capture warnings; 0.5.1 publication records and docs deployment. |
+| [0.5.1](#051--october-25-2026-experimental) | 2026-10-25 | Task input validation and expression types; setup guidance; release and website maintenance. |
 | [0.5.0](#050--october-25-2026-experimental) | 2026-10-25 | Replay and comparison; capture reliability/privacy; website and docs. |
 | [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | CSS isolation; stricter published flow types; approved release workflow. |
 | [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Tasks, maps and loops; six cookbooks; SDK and inspector access changes. |
@@ -22,15 +22,39 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
+### Compatibility and upgrade
+
+- **Resolved template types.** Map items and loop state now infer resolved values from nested reference templates. Code that treated resolved task values as `FlowExpression` objects must use ordinary value operations instead; runtime behavior is unchanged.
+
+- **Composed expression limits.** Expressions now reject depth greater than 80 or more than 4,096 expanded nodes during construction, including repeated uses of a shared child. Split larger generated logic into task results or smaller steps. Accepted expressions retain their semantics and public types; long legacy condition descriptions now end with `[condition truncated]` within a 4,096-code-unit cap.
+
+- **Flow capture metadata.** Optional warning arrays extend version-1 records; older captures remain readable, but absent metadata cannot establish completeness. Update both server and drawer to see the new warnings. Execution values and decisions are unchanged.
+
 ### Changes
+
+#### Fixed
+
+- **Resolved map and loop types.** Map item builders and loop gates, iteration state, body returns and final results now agree with runtime template resolution, including nested objects and arrays, while preserving generic whole-reference/scalar types and branded scalar values. ([#85](https://github.com/diegoag64/jev-devtools/pull/85))
+
+- **Bound composed expressions.** Account for complete subtree depth and expanded size before recursive validation, projection, and evaluation; cap legacy descriptions independently of the structured rule projection. Fixes [#43](https://github.com/diegoag64/jev-devtools/issues/43). ([#86](https://github.com/diegoag64/jev-devtools/pull/86))
+
+- **Flow capture warnings.** Retain and display outcome and condition-rule truncation, redaction, and unavailable-capture warnings, including rule projection limits, nested item runs, and non-JSON merge values. Warnings are separate metadata; user strings are never treated as capture signals. Fixes [#45](https://github.com/diegoag64/jev-devtools/issues/45). ([#88](https://github.com/diegoag64/jev-devtools/pull/88))
+
+#### Documentation
+
+- **0.5.1 publication records.** Record verified npm publication, archive integrity/provenance, fresh registry consumers, and the exact Git tag and GitHub Latest release. Update source documentation to describe the published fixes and preserve their compatibility notes. Hosted docs were subsequently published as Sites version 21 from the merged record commit; see the [publication receipt](docs/docs-publishing.md#publication-receipt-and-recovery). ([#87](https://github.com/diegoag64/jev-devtools/pull/87), [receipt #89](https://github.com/diegoag64/jev-devtools/pull/89))
 
 #### Maintenance
 
 - **Boundary and contract verification.** Require agents to identify affected guarantees, reproduce bugs on current main, and verify composed expressions, resolved template types, capture metadata, and meaningful regressions at their owning boundaries. Keep required repository checks and public package behavior unchanged. ([#84](https://github.com/diegoag64/jev-devtools/pull/84))
 
-## 0.5.1 — Pending publication (experimental)
+- **Faster docs verification.** Serve the built preview without repeating documentation generation and reuse the CI runner's browser system libraries. Existing build, development, and browser checks remain enabled; package APIs are unchanged. ([#90](https://github.com/diegoag64/jev-devtools/pull/90))
 
-**Pending publication.** This patch release prepares the merged task-input validation, expression typing, and setup documentation fixes. npm publication, the release tag, GitHub release, and updated hosted docs remain pending.
+- **Local expression benchmarks.** Add a reproducible comparison of normal flow construction and execution, with isolated installs, alternating process order, local sample SDK responses, and recorder-on/off cases. ([#86](https://github.com/diegoag64/jev-devtools/pull/86))
+
+## 0.5.1 — October 25, 2026 (experimental)
+
+**[Published on npm](https://www.npmjs.com/package/jev-devtools/v/0.5.1)** at 18:19:01.066 UTC on October 25, 2026 from `c88aea5d615a65bcda1d820b5abc63bb6fbe05e6`, after [PR #83](https://github.com/diegoag64/jev-devtools/pull/83) and [main CI](https://github.com/diegoag64/jev-devtools/actions/runs/40219281499) passed. This patch release includes task-input validation, expression typing, and setup documentation fixes. The [release workflow](https://github.com/diegoag64/jev-devtools/actions/runs/40220097820) verified npm integrity/provenance and fresh registry consumers, then created the [GitHub release](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.1) at 18:20:25 UTC. The tag resolves to the exact published commit; npm latest and GitHub Latest are both verified. See the [release record](docs/releases.md#release-051--published-october-25-2026). The corresponding docs were published and verified at 18:37:34 UTC as Sites version 21; see the [publication receipt](docs/docs-publishing.md#publication-receipt-and-recovery).
 
 ### Compatibility and upgrade
 

@@ -1658,13 +1658,21 @@
   margin-bottom: 5px;
 }
 :where(.jev-devtools) .flow-condition-rule code {
-  display: block;
   white-space: pre-wrap;
-  overflow-wrap: anywhere;
   font:
     12px/1.6 ui-monospace,
     monospace;
   color: #f2d7eb;
+}
+/* Bound card previews so long captured literals cannot push warnings off-canvas.
+   The complete captured rule remains available in selected-step details. */
+:where(.jev-devtools) .flow-condition-rule code,
+:where(.jev-devtools) .flow-map-progress > code {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 :where(.jev-devtools) .flow-condition-incoming {
