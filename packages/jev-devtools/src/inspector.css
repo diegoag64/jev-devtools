@@ -1164,6 +1164,12 @@
   min-width: 0;
   overflow: hidden;
 }
+:where(.jev-devtools)
+  .flow-overview-stack:not(.flow-inline-overview)
+  > .whole-flow {
+  /* Short drawers must scroll metadata instead of clipping the canvas controls. */
+  overflow: auto;
+}
 :where(.jev-devtools) .whole-flow > .detail-header {
   flex-wrap: wrap;
   flex-shrink: 0;
@@ -1171,7 +1177,7 @@
 :where(.jev-devtools) .flow-workspace {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 0 auto;
   min-height: 0;
   overflow: hidden;
 }
@@ -1229,7 +1235,9 @@
 :where(.jev-devtools) .flow-overview-viewport {
   background-color: #08060a;
   position: relative;
-  min-height: 0;
+  /* The panel's grid row reserves its actual height, including wrapped buttons. */
+  display: grid;
+  min-height: min-content;
   flex: 1 1 0;
   overflow: hidden;
   touch-action: none;
@@ -1242,9 +1250,9 @@
   background-size: 20px 20px;
 }
 .jev-devtools .flow-canvas-controls {
-  position: absolute;
-  top: 12px;
-  right: 12px;
+  align-self: start;
+  justify-self: end;
+  margin: 12px;
   z-index: 1;
   display: flex;
   flex-wrap: wrap;
@@ -1263,6 +1271,9 @@
 }
 :where(.jev-devtools) .flow-overview-canvas {
   position: absolute;
+  /* Keep camera coordinates at the viewport origin when the overlay uses grid. */
+  top: 0;
+  left: 0;
   transform-origin: 0 0;
 }
 :where(.jev-devtools) .flow-connections {

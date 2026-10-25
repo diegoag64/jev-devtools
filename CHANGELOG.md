@@ -38,6 +38,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Fixed
 
+- **Controls in short drawers.** Reserve the floating panel’s rendered height inside the flow canvas, including wrapped buttons, and let flow metadata scroll when drawer space is limited. Zoom, Fit, and Focus remain reachable in small unexpanded drawers and after reopening; public APIs are unchanged. ([#92](https://github.com/diegoag64/jev-devtools/pull/92))
+
 - **Consistent step selection.** Stop automatically focusing the first selected step, including flows with no request steps. Flows start with the normal overview fit, and clicking steps preserves pan and zoom; the step picker and explicit Focus/Fit controls keep their existing behavior. Public APIs are unchanged. ([#92](https://github.com/diegoag64/jev-devtools/pull/92))
 
 - **Select arrow spacing.** Inset dropdown chevrons consistently across drawer selects and reserve space between their labels and arrows. Keep native menus and keyboard interaction, with the system arrow restored in forced-colors mode. Public APIs are unchanged. ([#92](https://github.com/diegoag64/jev-devtools/pull/92))
