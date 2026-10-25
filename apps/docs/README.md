@@ -99,3 +99,7 @@ Method and type permalinks belong to the stationary card, with a separate ID for
 Use a `sh install` fence containing one `pnpm add` command for package installation. The build emits pnpm, npm, Yarn, and Bun variants; the small selector module loads only on pages with these blocks. pnpm is the default in both HTML and raw Markdown. The reader’s selection is remembered when storage is available, and copying uses only the selected command. Keep repository checkout/packing scripts in ordinary shell fences because they follow the repository’s npm workflow. Install fences currently accept package names and versions, not flags or multiline scripts; extend the command mapping explicitly before documenting other install modes.
 
 Command syntax follows the official [pnpm](https://pnpm.io/cli/add), [npm](https://docs.npmjs.com/cli/v11/commands/npm-install/), [Yarn](https://yarnpkg.com/cli/add), and [Bun](https://bun.sh/docs/pm/cli/add) documentation. Selecting Bun here changes the install command; the package’s documented Node runtime requirement still applies.
+
+### Brand assets
+
+`assets/logo.svg` reuses the landing page’s flow symbol (`landing/src/main.ts` on `codex/landing`). It inherits the docs text color so it stays light in dark mode and dark in light mode. The header uses the same `jevtools.` wordmark. `assets/favicon-light.svg` preserves the landing favicon geometry with a pale pink background and dark pink symbol. Both SVGs render without JavaScript; the favicon is copied at build time.

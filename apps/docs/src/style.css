@@ -153,26 +153,16 @@ strong {
 }
 .brand strong > span {
   font-weight: 400;
-  color: var(--muted);
 }
-.brand-mark {
-  position: relative;
-  display: grid;
-  place-content: center;
-  width: 31px;
-  height: 31px;
-  border: 1.5px solid var(--accent);
-  border-radius: 9px;
-  font-size: 24px;
-  line-height: 1;
-  font-weight: 600;
+.brand strong > .brand-dot {
   color: var(--accent);
 }
-.brand-mark span {
-  position: absolute;
-  font-size: 13px;
-  right: 3px;
-  top: 2px;
+.brand-mark {
+  display: block;
+  flex-shrink: 0;
+  width: 31px;
+  height: 31px;
+  color: var(--text);
 }
 .docs-label {
   font-size: 13px;

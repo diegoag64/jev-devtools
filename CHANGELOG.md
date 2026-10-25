@@ -48,6 +48,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **Shared JevTools branding.** Use the landing page’s flow symbol and wordmark in the docs header, with a light symbol for dark mode and a pale-background favicon. Docs only; package APIs are unchanged. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
+
 - **Package-manager install tabs.** Offer pnpm, npm, Yarn, and Bun commands in package-install examples, defaulting to pnpm and remembering the reader’s selection. Copying uses the selected command; pnpm remains readable without JavaScript. Docs only. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
 
 - **Aligned outline progress.** Match the pink reading-progress line to method labels instead of total section height, including uneven method lengths, wrapped labels, and reopened groups. Docs only. [PR #70](https://github.com/diegoag64/jev-devtools/pull/70).
