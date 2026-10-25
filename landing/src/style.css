@@ -1062,24 +1062,6 @@ nav a span[aria-hidden] {
   line-height: 1.8;
   color: var(--muted);
 }
-.demo-transcript {
-  margin-top: 20px;
-  font-size: 11px;
-  color: #a48faa;
-  line-height: 1.8;
-}
-.demo-transcript summary {
-  cursor: pointer;
-  width: fit-content;
-}
-.demo-transcript summary:focus-visible {
-  outline: 2px solid #f48dd3;
-  outline-offset: 5px;
-}
-.demo-transcript p {
-  margin-top: 10px;
-  max-width: 860px;
-}
 .api-comparison {
   display: grid;
   grid-template-columns: 1.15fr 1fr;

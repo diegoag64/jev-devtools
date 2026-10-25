@@ -18,7 +18,6 @@ export const drawerShowcase = `
     <div><h3>Look inside each request</h3><p>Explore questions, returned probabilities, shared context, transport details, and raw captured data.</p></div>
     <div><h3>Follow the connections</h3><p>Move from a request diagram to a connected flow. Pan, zoom, and inspect the steps that produced the result.</p></div>
   </div>
-  <details class="demo-transcript"><summary>About this recording</summary><p>The 31-second, silent recording shows the skill-suggestion cookbook in the React playground using synthetic responses. The drawer opens over the app and displays the connected flow: roster ranking, an application-defined request gate, shortlist preparation, and a follow-up Jev request. The recording explores the diagram and its returned results. Playing this video makes no model calls.</p></details>
 </section>`;
 
 export const flowApiShowcase = `
