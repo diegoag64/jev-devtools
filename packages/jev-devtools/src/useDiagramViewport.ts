@@ -126,7 +126,7 @@ export function useDiagramViewport(
         event.button !== 0 ||
         pointers.size >= 2 ||
         (event.target as Element).closest(
-          "button, input, select, textarea, a, summary, [data-diagram-scroll]",
+          "button, input, select, textarea, a, summary, [data-diagram-scroll], [data-diagram-controls]",
         )
       )
         return;

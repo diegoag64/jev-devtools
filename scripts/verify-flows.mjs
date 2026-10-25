@@ -3,6 +3,8 @@ import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { checkMobileRequests } from "./check-mobile-requests.mjs";
+import { checkShortDrawerControls } from "./check-flow-controls.mjs";
 const origin = process.env.FLOW_URL ?? "http://127.0.0.1:4230";
 const output = process.env.FLOW_RESULTS ?? "benchmarks/results/flows";
 await mkdir(output, { recursive: true });
@@ -52,6 +54,37 @@ try {
       .count(),
     0,
   );
+  // The floating controls stay in viewport space and never initiate a pan.
+  const controls = page.getByRole("group", { name: "Flow canvas controls" });
+  const controlsPosition = await controls.boundingBox();
+  const zoomOutput = page.getByLabel("Flow zoom", { exact: true });
+  const zoomBefore = await zoomOutput.textContent();
+  await controls
+    .getByRole("button", { name: "Zoom flow in", exact: true })
+    .click();
+  await page.waitForTimeout(150);
+  assert.notEqual(await zoomOutput.textContent(), zoomBefore);
+  assert.deepEqual(
+    await controls.boundingBox(),
+    controlsPosition,
+    "Zooming the canvas does not move or scale its controls",
+  );
+  const cameraBeforeControlsDrag = await page
+    .locator(".flow-overview-canvas")
+    .getAttribute("style");
+  await page.mouse.move(controlsPosition.x + 12, controlsPosition.y + 3);
+  await page.mouse.down();
+  await page.mouse.move(controlsPosition.x + 27, controlsPosition.y + 18);
+  await page.mouse.up();
+  await page.waitForTimeout(150);
+  assert.equal(
+    await page.locator(".flow-overview-canvas").getAttribute("style"),
+    cameraBeforeControlsDrag,
+    "Dragging control-panel padding does not pan the diagram",
+  );
+  await controls
+    .getByRole("button", { name: "Fit flow", exact: true })
+    .press("Enter");
   await page.selectOption('[aria-label="Flow step"]', "review");
   await review.getByText("94%", { exact: true }).first().waitFor();
   await page.waitForTimeout(150);
@@ -92,6 +125,11 @@ try {
   const initialCamera = await page
     .locator(".flow-overview-canvas")
     .getAttribute("style");
+  assert.deepEqual(
+    await controls.boundingBox(),
+    controlsPosition,
+    "Panning the canvas does not move the floating controls",
+  );
   await page
     .getByRole("button", { name: "Close Jev DevTools", exact: true })
     .click();
@@ -416,6 +454,106 @@ try {
   await page.screenshot({
     path: join(output, "connected-choice.png"),
   });
+  await page.setViewportSize({ width: 375, height: 900 });
+  await page.waitForTimeout(150);
+  const smallCanvas = await canvas.boundingBox();
+  const smallControls = await controls.boundingBox();
+  assert.ok(
+    smallControls.x >= smallCanvas.x &&
+      smallControls.y >= smallCanvas.y &&
+      smallControls.x + smallControls.width <=
+        smallCanvas.x + smallCanvas.width &&
+      smallControls.y + smallControls.height <=
+        smallCanvas.y + smallCanvas.height,
+    "Floating controls stay inside the canvas on narrow screens",
+  );
+  for (const control of await controls.getByRole("button").all()) {
+    const box = await control.boundingBox();
+    assert.ok(
+      box.x >= smallControls.x &&
+        box.y >= smallControls.y &&
+        box.x + box.width <= smallControls.x + smallControls.width &&
+        box.y + box.height <= smallControls.y + smallControls.height,
+      "Every canvas control stays within the floating panel",
+    );
+  }
+  await page.screenshot({ path: join(output, "floating-controls-narrow.png") });
+  // Fresh Flows view with no default request selection: the first click must
+  // behave like every later card click, without a one-time camera jump.
+  const taskPage = await browser.newPage({
+    viewport: { width: 1710, height: 1000 },
+  });
+  taskPage.on("pageerror", (error) => errors.push(String(error)));
+  await taskPage.goto(origin);
+  await taskPage
+    .getByRole("combobox", { name: "Scenario", exact: true })
+    .selectOption("flow-tasks");
+  await taskPage
+    .getByRole("button", { name: "Run sample flow", exact: true })
+    .click();
+  await taskPage.locator("#status").filter({ hasText: "tasks-done" }).waitFor();
+  await taskPage
+    .getByRole("button", { name: "Open Jev DevTools", exact: true })
+    .click();
+  await taskPage.getByRole("button", { name: "Flows", exact: true }).click();
+  await taskPage
+    .getByRole("button", { name: "Expand Jev drawer", exact: true })
+    .click();
+  await taskPage
+    .getByRole("region", { name: "Flow canvas", exact: true })
+    .waitFor();
+  await taskPage.waitForTimeout(150);
+  const taskCamera = taskPage.locator(".flow-overview-canvas");
+  const overviewCamera = await taskCamera.getAttribute("style");
+  for (const id of ["task-0", "task-1"]) {
+    await taskPage
+      .getByRole("button", { name: `Step ${id}, task, completed`, exact: true })
+      .click();
+    await taskPage.waitForTimeout(150);
+    assert.equal(
+      await taskPage.getByLabel("Flow step", { exact: true }).inputValue(),
+      id,
+    );
+    assert.equal(
+      await taskCamera.getAttribute("style"),
+      overviewCamera,
+      "First and subsequent card selections preserve the overview camera",
+    );
+  }
+  await taskPage
+    .getByRole("button", { name: "Step task-2, task, completed", exact: true })
+    .press("Enter");
+  await taskPage.waitForTimeout(150);
+  assert.equal(
+    await taskCamera.getAttribute("style"),
+    overviewCamera,
+    "Keyboard step selection also preserves the camera",
+  );
+  await taskPage
+    .getByRole("button", { name: "Focus step", exact: true })
+    .click();
+  await taskPage.waitForTimeout(150);
+  assert.notEqual(
+    await taskCamera.getAttribute("style"),
+    overviewCamera,
+    "Explicit Focus still centers the selected step",
+  );
+  await taskPage.getByRole("button", { name: "Fit flow", exact: true }).click();
+  await taskPage.waitForTimeout(150);
+  assert.equal(await taskCamera.getAttribute("style"), overviewCamera);
+  await taskPage
+    .getByLabel("Flow step", { exact: true })
+    .selectOption("task-3");
+  await taskPage.waitForTimeout(150);
+  assert.notEqual(
+    await taskCamera.getAttribute("style"),
+    overviewCamera,
+    "The step picker retains its explicit navigation behavior",
+  );
+  assert.deepEqual(errors, []);
+  await taskPage.close();
+  // Warning readability checks run at the original desktop viewport.
+  await page.setViewportSize({ width: 1710, height: 1000 });
   await page.evaluate(() =>
     fetch("/run?scenario=flow-warning", { method: "POST" }),
   );
@@ -454,8 +592,10 @@ try {
     .getByText("Rule capture: Long text truncated in capture.", { exact: true })
     .waitFor();
   assert.deepEqual(errors, []);
+  await checkMobileRequests({ browser, origin, output });
+  await checkShortDrawerControls({ browser, origin, output });
   console.log(
-    "Flows verified: connected request diagrams, question switching with one preserved camera, parallel wait explanation, outcome paths, untaken nodes, request details, pinned camera/selection across incoming runs and reopening, cancellation.",
+    "Flows verified: first and later step clicks preserve the camera, explicit focus/fit/picker navigation works; floating controls stay fixed, do not initiate panning and fit narrow screens; connected request diagrams, question switching with one preserved camera, parallel wait explanation, outcome paths, untaken nodes, request details, pinned camera/selection across incoming runs and reopening, cancellation, readable capture warnings.",
   );
 } catch (error) {
   await page?.screenshot({ path: join(output, "failure.png") }).catch(() => {});

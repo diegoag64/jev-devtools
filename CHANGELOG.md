@@ -32,7 +32,21 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ### Changes
 
+#### Changed
+
+- **Simpler diagram footer.** Keep only the pan, zoom, and fit instructions below request diagrams at all screen widths. ([#92](https://github.com/diegoag64/jev-devtools/pull/92))
+
+- **Mobile request navigation.** Show a full-height, searchable request list on small screens; selecting a request opens its details with an **All requests** button to switch back. Retain search, status filters, and selection while navigating, and keep the desktop split view. Hide the selected-step summary beside **Show details** on mobile. Public APIs are unchanged. ([#92](https://github.com/diegoag64/jev-devtools/pull/92))
+
+- **Flow canvas boundary.** Move the step selector beside **Copy fixture** in the run header and darken the diagram viewport so its pan/zoom area is easier to distinguish. Float zoom, Fit, and Focus controls in the canvas’s top-right corner to free vertical space. Header and canvas controls wrap in narrow drawers; public APIs and zoom behavior are unchanged. ([#92](https://github.com/diegoag64/jev-devtools/pull/92))
+
 #### Fixed
+
+- **Controls in short drawers.** Reserve the floating panel’s rendered height inside the flow canvas, including wrapped buttons, and let flow metadata scroll when drawer space is limited. Zoom, Fit, and Focus remain reachable in small unexpanded drawers and after reopening; public APIs are unchanged. ([#92](https://github.com/diegoag64/jev-devtools/pull/92))
+
+- **Consistent step selection.** Stop automatically focusing the first selected step, including flows with no request steps. Flows start with the normal overview fit, and clicking steps preserves pan and zoom; the step picker and explicit Focus/Fit controls keep their existing behavior. Public APIs are unchanged. ([#92](https://github.com/diegoag64/jev-devtools/pull/92))
+
+- **Select arrow spacing.** Inset dropdown chevrons consistently across drawer selects and reserve space between their labels and arrows. Keep native menus and keyboard interaction, with the system arrow restored in forced-colors mode. Public APIs are unchanged. ([#92](https://github.com/diegoag64/jev-devtools/pull/92))
 
 - **Resolved map and loop types.** Map item builders and loop gates, iteration state, body returns and final results now agree with runtime template resolution, including nested objects and arrays, while preserving generic whole-reference/scalar types and branded scalar values. ([#85](https://github.com/diegoag64/jev-devtools/pull/85))
 

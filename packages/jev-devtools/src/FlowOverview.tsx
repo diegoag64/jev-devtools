@@ -714,12 +714,10 @@ export const FlowOverview = memo(function FlowOverview({
     },
     [preserveCamera],
   );
-  const started = useRef(false);
   const changeCollection = useCallback(
     (id: string, view: CollectionView) => {
       preserveCamera();
       setSelected(id);
-      started.current = true;
       setCollectionViews((previous) => ({ ...previous, [id]: view }));
     },
     [preserveCamera],
@@ -736,14 +734,6 @@ export const FlowOverview = memo(function FlowOverview({
     },
     [preserveCamera],
   );
-  useEffect(() => {
-    if (inline || started.current) return;
-    const first = layout.points.get(selected);
-    if (first) {
-      started.current = true;
-      focusArea(first);
-    }
-  }, [layout, selected, focusArea, inline]);
   const selectStep = (id: string) => {
     setSelected(id);
     const bounds = layout.points.get(id);
@@ -754,6 +744,24 @@ export const FlowOverview = memo(function FlowOverview({
   const trace = step?.traceId
     ? traces.find((t) => t.id === step.traceId)
     : undefined;
+  const stepSelection = (
+    <label className="flow-step-select">
+      Step
+      <select
+        aria-label="Flow step"
+        value={selected}
+        onChange={(e) => selectStep(e.target.value)}
+      >
+        <option value="">Select a step</option>
+        {definition.nodes.map((n) => (
+          <option key={n.id} value={n.id}>
+            {n.title ? `${n.title} (${n.id})` : n.id} ·{" "}
+            {run.steps[n.id]?.status ?? "waiting"}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
   return (
     <div
       className={`flow-overview-stack ${inline ? "flow-inline-overview" : ""}`}
@@ -773,54 +781,22 @@ export const FlowOverview = memo(function FlowOverview({
               {run.outcome ? (
                 <strong>Outcome: {run.outcome}</strong>
               ) : (
-                run.error ?? "Execution paths"
+                (run.error ?? "Execution paths")
               )}
               <small className="muted">
                 {run.durationMs !== undefined
                   ? ` · ${Math.round(run.durationMs)} ms`
                   : ""}
               </small>
-              <CopyFixtureButton control={fixtureCopy} />
+              <div className="flow-run-controls">
+                {stepSelection}
+                <CopyFixtureButton control={fixtureCopy} />
+              </div>
             </div>
           </header>
         )}
         {!inline && <CopyFixtureReport control={fixtureCopy} />}
-        <div className="lab-flow-toolbar">
-          {!inline && (
-            <div>
-              <button
-                aria-label="Zoom flow out"
-                onClick={() => zoomBy(1 / 1.2)}
-              >
-                −
-              </button>
-              <output aria-label="Flow zoom">{zoom}%</output>
-              <button aria-label="Zoom flow in" onClick={() => zoomBy(1.2)}>
-                +
-              </button>
-              <button onClick={fit}>Fit flow</button>
-              <button disabled={!selected} onClick={() => selectStep(selected)}>
-                Focus step
-              </button>
-            </div>
-          )}
-          <label>
-            Step
-            <select
-              aria-label="Flow step"
-              value={selected}
-              onChange={(e) => selectStep(e.target.value)}
-            >
-              <option value="">Select a step</option>
-              {definition.nodes.map((n) => (
-                <option key={n.id} value={n.id}>
-                  {n.title ? `${n.title} (${n.id})` : n.id} ·{" "}
-                  {run.steps[n.id]?.status ?? "waiting"}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+        {inline && <div className="lab-flow-toolbar">{stepSelection}</div>}
         <div className="flow-workspace">
           <div
             className={
@@ -834,6 +810,32 @@ export const FlowOverview = memo(function FlowOverview({
             aria-label={inline ? "Item flow canvas" : "Flow canvas"}
             role="region"
           >
+            {!inline && (
+              <div
+                className="flow-canvas-controls"
+                role="group"
+                aria-label="Flow canvas controls"
+                data-diagram-controls
+              >
+                <button
+                  aria-label="Zoom flow out"
+                  onClick={() => zoomBy(1 / 1.2)}
+                >
+                  −
+                </button>
+                <output aria-label="Flow zoom">{zoom}%</output>
+                <button aria-label="Zoom flow in" onClick={() => zoomBy(1.2)}>
+                  +
+                </button>
+                <button onClick={fit}>Fit flow</button>
+                <button
+                  disabled={!selected}
+                  onClick={() => selectStep(selected)}
+                >
+                  Focus step
+                </button>
+              </div>
+            )}
             <div
               ref={inline ? undefined : canvas}
               className="flow-overview-canvas"

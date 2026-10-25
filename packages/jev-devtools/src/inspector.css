@@ -64,6 +64,21 @@
   padding: 8px;
   width: 100%;
 }
+.jev-devtools select {
+  appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%23bcadbf' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
+}
+@media (forced-colors: active) {
+  .jev-devtools select {
+    /* Let the system draw a visible arrow in high-contrast themes. */
+    appearance: auto;
+    background-image: none;
+  }
+}
 .jev-devtools button:hover:not(:disabled) {
   border-color: #e551ba;
 }
@@ -149,12 +164,16 @@
   min-width: 0;
 }
 .jev-devtools .list-filters select {
-  width: 86px;
+  width: 100px;
+  flex-shrink: 0;
   font-size: 11px;
 }
 .jev-devtools .request-items {
   overflow: auto;
   flex: 1;
+}
+.jev-devtools .request-navigation {
+  display: none;
 }
 .jev-devtools .request-row {
   display: flex;
@@ -495,6 +514,63 @@
     min-width: 240px;
     padding: 8px 12px;
   }
+  /* Requests use separate list/detail screens so history cannot collapse into
+     the fixed-height strip used by flow runs. CSS keeps desktop split panes. */
+  .jev-devtools .jev-inspector[data-mobile-view="list"] > .request-list {
+    flex: 1;
+  }
+  .jev-devtools .jev-inspector[data-mobile-view="list"] > .request-detail,
+  .jev-devtools .jev-inspector[data-mobile-view="detail"] .list-filters,
+  .jev-devtools .jev-inspector[data-mobile-view="detail"] .request-items {
+    display: none;
+  }
+  .jev-devtools .jev-inspector[data-mobile-view="detail"] > .request-list {
+    flex: none;
+  }
+  .jev-devtools .jev-inspector[data-mobile-view="detail"] .request-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    margin: 6px 12px;
+    text-align: left;
+  }
+  .jev-devtools .jev-inspector[data-mobile-view] .request-items {
+    flex-direction: column;
+  }
+  .jev-devtools .jev-inspector[data-mobile-view] .request-row {
+    flex: none;
+    min-width: 0;
+    min-height: 60px;
+    padding: 12px;
+  }
+  .jev-devtools
+    .jev-inspector[data-mobile-view]
+    .request-row
+    > span:nth-child(2) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .jev-devtools .jev-inspector[data-mobile-view] > .request-detail {
+    overflow: auto;
+  }
+  .jev-devtools
+    .jev-inspector[data-mobile-view]
+    > .request-detail
+    > :is(.detail-header, .detail-meta, .detail-tabs) {
+    flex: none;
+  }
+  .jev-devtools
+    .jev-inspector[data-mobile-view]
+    > .request-detail
+    > .detail-body-flow {
+    /* Let metadata scroll above the diagram instead of clipping its toolbar. */
+    flex: 1 0 auto;
+    min-height: min-content;
+  }
+  .jev-devtools .flow-details-bar > span {
+    display: none;
+  }
   .jev-devtools .detail-header {
     padding: 12px;
   }
@@ -502,6 +578,10 @@
   .jev-devtools .detail-tabs {
     padding-left: 12px;
     padding-right: 12px;
+  }
+  .jev-devtools .detail-tabs {
+    overflow-x: auto;
+    flex-shrink: 0;
   }
   .jev-devtools .detail-body {
     padding: 12px;
@@ -668,14 +748,16 @@
   padding: 12px 16px;
   flex-wrap: wrap;
 }
-.jev-devtools .lab-flow-toolbar label {
+.jev-devtools .lab-flow-toolbar label,
+.jev-devtools .flow-step-select {
   display: flex;
   gap: 10px;
   align-items: center;
   font-size: 11px;
   min-width: 0;
 }
-.jev-devtools .lab-flow-toolbar select {
+.jev-devtools .lab-flow-toolbar select,
+.jev-devtools .flow-step-select select {
   width: auto;
   max-width: 240px;
   font-size: 11px;
@@ -685,10 +767,12 @@
   gap: 8px;
   align-items: center;
 }
-.jev-devtools .lab-flow-toolbar button {
+.jev-devtools .lab-flow-toolbar button,
+.jev-devtools .flow-canvas-controls button {
   font-size: 11px;
 }
-.jev-devtools .lab-flow-toolbar output {
+.jev-devtools .lab-flow-toolbar output,
+.jev-devtools .flow-canvas-controls output {
   font-size: 11px;
   min-width: 35px;
   text-align: center;
@@ -722,10 +806,9 @@
   flex-shrink: 0;
   padding: 8px 16px;
   margin: 0;
-}
-.jev-devtools .lab-gesture-hint {
-  display: block;
   color: #c6a7bd;
+  font-size: 11px;
+  line-height: 1.6;
 }
 .jev-devtools .lab-flow-canvas {
   position: absolute;
@@ -1144,14 +1227,20 @@
   min-width: 0;
   overflow: hidden;
 }
-:where(.jev-devtools) .whole-flow > .detail-header,
-:where(.jev-devtools) .whole-flow > .lab-flow-toolbar {
+:where(.jev-devtools)
+  .flow-overview-stack:not(.flow-inline-overview)
+  > .whole-flow {
+  /* Short drawers must scroll metadata instead of clipping the canvas controls. */
+  overflow: auto;
+}
+:where(.jev-devtools) .whole-flow > .detail-header {
+  flex-wrap: wrap;
   flex-shrink: 0;
 }
 :where(.jev-devtools) .flow-workspace {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 0 auto;
   min-height: 0;
   overflow: hidden;
 }
@@ -1207,8 +1296,11 @@
   outline-offset: -1px;
 }
 :where(.jev-devtools) .flow-overview-viewport {
+  background-color: #08060a;
   position: relative;
-  min-height: 0;
+  /* The panel's grid row reserves its actual height, including wrapped buttons. */
+  display: grid;
+  min-height: min-content;
   flex: 1 1 0;
   overflow: hidden;
   touch-action: none;
@@ -1220,11 +1312,31 @@
   );
   background-size: 20px 20px;
 }
+.jev-devtools .flow-canvas-controls {
+  align-self: start;
+  justify-self: end;
+  margin: 12px;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 24px);
+  padding: 8px;
+  border: 1px solid #3b303d;
+  border-radius: 10px;
+  background: #17121b;
+  box-shadow: 0 4px 16px #0006;
+  cursor: default;
+}
 :where(.jev-devtools) .flow-overview-viewport[data-panning] {
   cursor: grabbing;
 }
 :where(.jev-devtools) .flow-overview-canvas {
   position: absolute;
+  /* Keep camera coordinates at the viewport origin when the overlay uses grid. */
+  top: 0;
+  left: 0;
   transform-origin: 0 0;
 }
 :where(.jev-devtools) .flow-connections {
@@ -1878,15 +1990,32 @@
   right: -76px;
 }
 .jev-devtools .flow-run-summary {
+  max-width: 100%;
+  margin-left: auto;
   text-align: right;
 }
+.jev-devtools .flow-run-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+.jev-devtools .flow-run-controls .flow-step-select {
+  max-width: 100%;
+}
+.jev-devtools .flow-step-select select {
+  min-width: 0;
+}
 .jev-devtools .flow-fixture-button {
-  display: block;
-  margin: 6px 0 0 auto;
+  flex-shrink: 0;
   /* Keep the header still when the shorter confirmation replaces the label. */
   min-width: 96px;
   font-size: 11px;
-  transition: background-color 160ms ease, border-color 160ms ease;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
 }
 .jev-devtools .flow-fixture-button[data-copied] {
   border-color: #e551ba;

@@ -46,6 +46,14 @@ const largeChoice = defineJevFlow("large-choice", (flow) => {
   });
   return flow.output("done", checked.answer("eligible").noul);
 });
+// A request-free graph reproduces first-click focusing when no step starts selected.
+const taskSelectionFlow = defineJevFlow("task-selection", (flow) => {
+  let value = flow.input;
+  for (let index = 0; index < 6; index++) {
+    value = flow.task(`task-${index}`, { input: value, run: (input) => input });
+  }
+  return flow.output("tasks-done", value);
+});
 const contentFlow = defineJevFlow("structured-content", (flow) => {
   const result = flow.jev("content", {
     state: {
@@ -115,17 +123,19 @@ const server = createServer((req, res) => {
             if (url.pathname === "/run") {
               const scenario = url.searchParams.get("scenario");
               const flow =
-                scenario === "flow-warning"
-                  ? warningFlow
-                  : scenario === "flow-content"
-                    ? contentFlow
-                    : scenario?.startsWith("scale-")
-                      ? scales.get(Number(scenario.slice(6)))
-                      : scenario === "flow-parallel"
-                        ? parallelFlow
-                        : scenario === "flow-large-choice"
-                          ? largeChoice
-                          : refundFlow;
+                scenario === "flow-tasks"
+                  ? taskSelectionFlow
+                  : scenario === "flow-warning"
+                    ? warningFlow
+                    : scenario === "flow-content"
+                      ? contentFlow
+                      : scenario?.startsWith("scale-")
+                        ? scales.get(Number(scenario.slice(6)))
+                        : scenario === "flow-parallel"
+                          ? parallelFlow
+                          : scenario === "flow-large-choice"
+                            ? largeChoice
+                            : refundFlow;
               if (!flow || running.size > 5) throw new Error("Invalid flow");
               const controller = new AbortController();
               running.add(controller);

@@ -504,14 +504,8 @@ export function TraceDiagram({
         </div>
       </div>
       {!showProbabilities && !embedded && (
-        <p className="muted lab-flow-caption">
-          <span className="lab-gesture-hint">
-            Drag to pan · Scroll or pinch to zoom · 0 to fit
-          </span>
-          {entries.length} parallel question{entries.length === 1 ? "" : "s"} in
-          one request. Connections show data flow, not model timing. Application
-          routes and thresholds are not captured. Full inputs and criteria are
-          in Questions and Context.
+        <p className="lab-flow-caption">
+          Drag to pan · Scroll or pinch to zoom · 0 to fit
         </p>
       )}
     </div>

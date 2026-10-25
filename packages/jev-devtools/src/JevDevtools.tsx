@@ -4,7 +4,10 @@ import {
   memo,
   startTransition,
   Suspense,
+  useCallback,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { TraceDiagram } from "./TraceDiagram.js";
@@ -38,6 +41,7 @@ const RequestRow = memo(function RequestRow({
   return (
     <button
       className={`request-row ${selected ? "selected" : ""}`}
+      aria-pressed={selected}
       onClick={() => onSelect(trace.id)}
     >
       <span className={`status-dot ${trace.status}`} />
@@ -225,6 +229,26 @@ export function JevPanel({
   const run = flows.runs.find((r) => r.id === selectedRun) ?? flows.runs[0];
   const definition = flows.definitions.find((d) => d.id === run?.definitionId);
   const [selected, setSelected] = useState<string>();
+  const [browsingRequests, setBrowsingRequests] = useState(true);
+  const requestList = useRef<HTMLDivElement>(null);
+  const backToRequests = useRef<HTMLButtonElement>(null);
+  const moveRequestFocus = useRef(false);
+  const selectRequest = useCallback((id: string) => {
+    setSelected(id);
+    moveRequestFocus.current = true;
+    setBrowsingRequests(false);
+  }, []);
+  useEffect(() => {
+    if (!moveRequestFocus.current) return;
+    moveRequestFocus.current = false;
+    // CSS owns the breakpoint; only move focus when mobile navigation is visible.
+    const back = backToRequests.current;
+    if (browsingRequests) {
+      requestList.current
+        ?.querySelector<HTMLButtonElement>(".request-row.selected")
+        ?.focus();
+    } else if (back?.getClientRects().length) back.focus();
+  }, [browsingRequests]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [error, setError] = useState("");
@@ -238,7 +262,12 @@ export function JevPanel({
   }, [traces, search, status]);
   const trace = filtered.find((t) => t.id === selected) || filtered[0];
   return (
-    <div className="jev-inspector">
+    <div
+      className="jev-inspector"
+      data-mobile-view={
+        view === "requests" ? (browsingRequests ? "list" : "detail") : undefined
+      }
+    >
       <aside className="request-list">
         <header>
           <h2>
@@ -274,6 +303,18 @@ export function JevPanel({
           </nav>
         )}
         {view === "requests" && (
+          <button
+            ref={backToRequests}
+            className="request-navigation"
+            onClick={() => {
+              moveRequestFocus.current = true;
+              setBrowsingRequests(true);
+            }}
+          >
+            ← All requests <span>{filtered.length}</span>
+          </button>
+        )}
+        {view === "requests" && (
           <div className="list-filters">
             <input
               aria-label="Search requests"
@@ -292,7 +333,7 @@ export function JevPanel({
             </select>
           </div>
         )}
-        <div className="request-items">
+        <div className="request-items" ref={requestList}>
           {view === "flows"
             ? flows.runs.map((r) => (
                 <button
@@ -316,7 +357,7 @@ export function JevPanel({
                   key={t.id}
                   trace={t}
                   selected={trace?.id === t.id}
-                  onSelect={setSelected}
+                  onSelect={selectRequest}
                 />
               ))}
           {view === "requests" && !filtered.length && (
