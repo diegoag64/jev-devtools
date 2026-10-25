@@ -235,3 +235,8 @@ el("copy").addEventListener("click", async () => {
 });
 setupProductShowcases();
 render();
+
+// TEMPORARY: delete this block and src/hero-effects/ to remove the effect lab.
+if (import.meta.env.DEV) {
+  void import("./hero-effects/lab").then(({ mountHeroEffectLab }) => mountHeroEffectLab());
+}
