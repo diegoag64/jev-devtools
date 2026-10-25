@@ -2,13 +2,17 @@
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
+import { join } from "node:path";
 const origin = process.env.FLOW_URL ?? "http://127.0.0.1:4230";
+const output = process.env.FLOW_RESULTS ?? "benchmarks/results/flows";
+await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true });
+let page;
 try {
-  const page = await browser.newPage({
-      viewport: { width: 1710, height: 1000 },
-    }),
-    errors = [];
+  page = await browser.newPage({
+    viewport: { width: 1710, height: 1000 },
+  });
+  const errors = [];
   page.setDefaultTimeout(10000);
   page.on("pageerror", (e) => errors.push(String(e)));
   await page.goto(origin);
@@ -239,7 +243,7 @@ try {
   await page.waitForTimeout(200);
   await mkdir("benchmarks/results/flows", { recursive: true });
   await page.screenshot({
-    path: "benchmarks/results/flows/connected-parallel.png",
+    path: join(output, "connected-parallel.png"),
   });
   await page.evaluate(() =>
     fetch("/run?scenario=flow-large-choice", { method: "POST" }),
@@ -410,11 +414,52 @@ try {
   assert.deepEqual(errors, []);
   await mkdir("benchmarks/results/flows", { recursive: true });
   await page.screenshot({
-    path: "benchmarks/results/flows/connected-choice.png",
+    path: join(output, "connected-choice.png"),
   });
+  await page.evaluate(() =>
+    fetch("/run?scenario=flow-warning", { method: "POST" }),
+  );
+  await rows.filter({ hasText: "capture-warning" }).first().click();
+  await page.selectOption('[aria-label="Flow step"]', "long-rule");
+  await page.getByRole("button", { name: "Fit flow", exact: true }).click();
+  const ruleCard = page.getByRole("button", {
+    name: "Step long-rule, branch, completed",
+    exact: true,
+  });
+  const warning = ruleCard.getByText(
+    "Rule capture: Long text truncated in capture.",
+    { exact: true },
+  );
+  await warning.waitFor();
+  await page.waitForTimeout(250);
+  // Assert rendered readability and clipping, not a CSS selector inventory.
+  const bounds = await warning.boundingBox();
+  const viewport = await canvas.boundingBox();
+  assert.ok(bounds && viewport);
+  assert.ok(
+    bounds.height >= 8,
+    "Rule warning remains readable after fitting the long-rule diagram",
+  );
+  assert.ok(
+    bounds.x >= viewport.x &&
+      bounds.y >= viewport.y &&
+      bounds.x + bounds.width <= viewport.x + viewport.width &&
+      bounds.y + bounds.height <= viewport.y + viewport.height,
+    "Complete warning remains inside the flow viewport",
+  );
+  await page.screenshot({ path: join(output, "capture-warning.png") });
+  await page.getByRole("button", { name: "Show details", exact: true }).click();
+  await page
+    .locator(".flow-selection")
+    .getByText("Rule capture: Long text truncated in capture.", { exact: true })
+    .waitFor();
+  assert.deepEqual(errors, []);
   console.log(
     "Flows verified: connected request diagrams, question switching with one preserved camera, parallel wait explanation, outcome paths, untaken nodes, request details, pinned camera/selection across incoming runs and reopening, cancellation.",
   );
+} catch (error) {
+  await page?.screenshot({ path: join(output, "failure.png") }).catch(() => {});
+  throw error;
 } finally {
   await browser.close();
 }

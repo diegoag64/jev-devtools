@@ -9,6 +9,7 @@ These instructions apply to contributing to this repository. For installing the 
 - Push completed feature work with verification details, and leave the PR open for review.
 - Run performance benchmarks locally, not in GitHub Actions. Do not add benchmark workflows or dispatch hosted benchmark runs.
 - Keep the package independent of the playground. Consumers use public exports; do not import internal source across workspaces.
+- For capture changes, trace the [flow capture boundaries](docs/architecture.md#flow-capture-boundaries). Use [the verification and formatting workflow](CONTRIBUTING.md#verification-details) for reproducible local evidence; `npm run verify:all` includes the required checks below.
 - Run `npm run check`, `npm test`, `npm run build`, `npm run check:playground`, `npm run verify:package`, `npm run verify:nextjs`, and `git diff --check` before opening or updating a PR. Visually verify UI changes when browser access is available; disclose unavailable checks.
 - Add tests for observable behavior and credible regressions. Keep recorder fixtures independent of demo scenarios.
 - Keep API credentials on the server. Distinguish samples from live inference. Follow official TypeSafe semantics; diagrams must not invent model reasoning or routing policies.

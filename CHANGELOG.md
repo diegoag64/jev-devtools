@@ -6,19 +6,19 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## At a glance
 
-| Version | Published (UTC) | Highlights |
-| --- | --- | --- |
-| [Unreleased](#unreleased) | Not published | Composed-expression limits and flow capture warnings; verified 0.5.1 publication records and docs deployment. |
-| [0.5.1](#051--october-25-2026-experimental) | 2026-10-25 | Task input validation and expression types; setup guidance; release and website maintenance. |
-| [0.5.0](#050--october-25-2026-experimental) | 2026-10-25 | Replay and comparison; capture reliability/privacy; website and docs. |
-| [0.4.1](#041--october-24-2026-experimental) | 2026-10-24 | CSS isolation; stricter published flow types; approved release workflow. |
-| [0.4.0](#040--october-24-2026-experimental) | 2026-10-24 | Tasks, maps and loops; six cookbooks; SDK and inspector access changes. |
-| [0.3.0](#030--october-24-2026-experimental) | 2026-10-24 | Connected flow API; readable diagrams; bundled flow guidance. |
-| [0.2.0](#020--october-23-2026-experimental) | 2026-10-23 | Faster streaming and rendering; virtualized questions; compact Choice views. |
-| [0.1.3](#013--october-23-2026-experimental) | 2026-10-23 | Isolated drawer styles; diagram pan and zoom; versioned package links. |
-| [0.1.2](#012--october-23-2026-experimental) | 2026-10-23 | Bundled setup skill; agent prompts; framework recipes. |
-| [0.1.1](#011--october-23-2026-experimental) | 2026-10-23 | Installation guidance; complete inline demo; smaller video download. |
-| [0.1.0](#010--october-23-2026-experimental) | 2026-10-23 | React inspector; Node capture; Next.js integration. |
+| Version                                     | Published (UTC) | Highlights                                                                                                    |
+| ------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------- |
+| [Unreleased](#unreleased)                   | Not published   | Composed-expression limits and flow capture warnings; verified 0.5.1 publication records and docs deployment. |
+| [0.5.1](#051--october-25-2026-experimental) | 2026-10-25      | Task input validation and expression types; setup guidance; release and website maintenance.                  |
+| [0.5.0](#050--october-25-2026-experimental) | 2026-10-25      | Replay and comparison; capture reliability/privacy; website and docs.                                         |
+| [0.4.1](#041--october-24-2026-experimental) | 2026-10-24      | CSS isolation; stricter published flow types; approved release workflow.                                      |
+| [0.4.0](#040--october-24-2026-experimental) | 2026-10-24      | Tasks, maps and loops; six cookbooks; SDK and inspector access changes.                                       |
+| [0.3.0](#030--october-24-2026-experimental) | 2026-10-24      | Connected flow API; readable diagrams; bundled flow guidance.                                                 |
+| [0.2.0](#020--october-23-2026-experimental) | 2026-10-23      | Faster streaming and rendering; virtualized questions; compact Choice views.                                  |
+| [0.1.3](#013--october-23-2026-experimental) | 2026-10-23      | Isolated drawer styles; diagram pan and zoom; versioned package links.                                        |
+| [0.1.2](#012--october-23-2026-experimental) | 2026-10-23      | Bundled setup skill; agent prompts; framework recipes.                                                        |
+| [0.1.1](#011--october-23-2026-experimental) | 2026-10-23      | Installation guidance; complete inline demo; smaller video download.                                          |
+| [0.1.0](#010--october-23-2026-experimental) | 2026-10-23      | React inspector; Node capture; Next.js integration.                                                           |
 
 ## Unreleased
 
@@ -41,6 +41,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 - **0.5.1 publication records.** Record verified npm publication, archive integrity/provenance, fresh registry consumers, and the exact Git tag and GitHub Latest release. Update source documentation to describe the published fixes and preserve their compatibility notes. Hosted docs were subsequently published as Sites version 21 from the merged record commit; see the [publication receipt](docs/docs-publishing.md#publication-receipt-and-recovery). ([#87](https://github.com/diegoag64/jev-devtools/pull/87), [receipt #89](https://github.com/diegoag64/jev-devtools/pull/89))
 
 #### Maintenance
+
+- **Reproducible contributor verification.** Add a pinned development runtime and formatter, a complete local verification command with source/archive provenance, and CI-connected sample flow browser checks. Document capture owners so upstream projection and snapshot losses remain visible during maintenance. Package runtime requirements and public APIs are unchanged.
 
 - **Local expression benchmarks.** Add a reproducible comparison of normal flow construction and execution, with isolated installs, alternating process order, local sample SDK responses, and recorder-on/off cases. ([#86](https://github.com/diegoag64/jev-devtools/pull/86))
 
