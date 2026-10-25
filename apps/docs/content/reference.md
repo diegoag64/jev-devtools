@@ -517,6 +517,8 @@ The `get("name")` call selects a typed field reference. Pass that reference to a
 
 Adds a step that runs your application code, such as fetching data or transforming a value. Its callback receives resolved inputs and can return a value or a promise.
 
+**Unreleased:** Task inputs reject own symbol keys, including nested objects and arrays. Literal templates fail during definition; referenced values fail when resolved, before the callback runs.
+
 #### Signature
 
 ```ts
