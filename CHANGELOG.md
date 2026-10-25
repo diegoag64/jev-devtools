@@ -25,11 +25,11 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
-- **0.5.0 publication records.** Record verified npm publication, archive integrity, registry consumers, and the recovered GitHub release/tag. Update mutable documentation to describe the published APIs. Manual docs publication remains pending.
+- **0.5.0 publication records.** Record verified npm publication, archive integrity, registry consumers, and the recovered GitHub release/tag. Update mutable documentation to describe the published APIs. Manual docs publication remains pending. ([#75](https://github.com/diegoag64/jev-devtools/pull/75))
 
 #### Maintenance
 
-- **Release verification dependencies.** Install locked repository dependencies in the fresh release completion job before registry-consumer checks. This supplies the TypeScript compiler those checks use; it does not rebuild or republish the approved archive. The original 0.5.0 finish job failed because this install was missing.
+- **Release verification dependencies.** Install locked repository dependencies in the fresh release completion job before registry-consumer checks. This supplies the TypeScript compiler those checks use; it does not rebuild or republish the approved archive. The original 0.5.0 finish job failed because this install was missing. ([#75](https://github.com/diegoag64/jev-devtools/pull/75))
 
 ## 0.5.0 — October 25, 2026 (experimental)
 
