@@ -48,6 +48,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **Community project notice.** Clarify in the docs footer that Jev DevTools is an independent, open-source community project and is not affiliated with TypeSafe AI. ([#70](https://github.com/diegoag64/jev-devtools/pull/70))
+
 - **Documentation website.** Add a lightweight Vite documentation app with static Markdown pages, human-oriented onboarding and API reference, local search, checked examples, and separate agent guidance. Add build-time Shiki highlighting and Twoslash-checked API help to complete examples and curated help to selected partial snippets across React, server, recorder, flow, replay, and expression guides, with compact usage summaries and plain-language option descriptions only on core API members, with keyboard and touch access, clean code copying, and the normal text cursor. Load styles and the saved theme before content paints to prevent unstyled or wrong-theme flashes during page navigation. Render the repository changelog as an in-site release history, refreshed from GitHub main during publication with no browser fetch or parser. Remove the promotional right-sidebar note. Existing package APIs and documentation paths remain compatible; the static site is hosted on GPT Sites. ([#70](https://github.com/diegoag64/jev-devtools/pull/70))
 
 - **Categorized release history.** Group every release into consistent categories, add short entry summaries and in-page category links, and require the same structure for future entries. Preserve publication facts, compatibility notes and source links. ([#70](https://github.com/diegoag64/jev-devtools/pull/70))
