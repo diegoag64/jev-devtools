@@ -1,12 +1,10 @@
 import type { HeroEffect } from "./types";
-import { createPrism, jade, prism } from "./effects/prism";
-import { prismJade } from "./effects/prism-jade";
+import { createPrismJade, prismJade } from "./effects/prism-jade";
 
 export const effects: HeroEffect[] = [
-  { id: "prism", name: "Original prism · baseline", description: "The original blue, violet, rose, and champagne palette. Every option uses this exact effect and motion.", paint: prism },
-  { id: "rose", name: "Rose quartz", description: "Pink, orchid, and soft rose with a pearly blush reflection. Close to the site's existing accent.", paint: createPrism({ base: "#edb9db", hueStart: 290, hueRange: 60, highlight: "#fff0f6" }) },
-  { id: "ice", name: "Glacier blue", description: "Aquamarine, icy blue, and periwinkle with a cool white reflection.", paint: createPrism({ base: "#b7d9ed", hueStart: 175, hueRange: 65, highlight: "#edfaff" }) },
-  { id: "copper", name: "Peach champagne", description: "Coral, peach, and pale gold with a warm champagne reflection.", paint: createPrism({ base: "#eec2b0", hueStart: 335, hueRange: 70, highlight: "#fff1dc" }) },
-  { id: "jade", name: "Jade & gold", description: "Pale gold, mint, and jade with a soft ivory reflection.", paint: jade },
-  { id: "prism-jade", name: "Prism & jade sweep", description: "Jade seeps into the prism in soft, staggered pockets. A slow 64-second cycle keeps the colors vivid and the movement organic.", paint: prismJade },
+  { id: "left-to-right", name: "Left to right · current", description: "The approved organic sweep. Jade enters from the left; Prism returns from the right.", paint: prismJade },
+  { id: "right-to-left", name: "Right to left", description: "The direction reverses: Jade enters from the right, then Prism returns from the left.", paint: createPrismJade("right-to-left") },
+  { id: "sides-in", name: "Sides to center", description: "Jade grows inward from both ends and meets in the middle. Prism then expands out from the center.", paint: createPrismJade("sides-in") },
+  { id: "center-out", name: "Center to sides", description: "Jade blooms at the center and spreads to both ends. Prism returns inward from the edges.", paint: createPrismJade("center-out") },
+  { id: "spots", name: "Scattered spots", description: "Scattered pockets of Jade bloom at different times, merge, and take over every letter before receding.", paint: createPrismJade("spots") },
 ];

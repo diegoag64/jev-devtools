@@ -30,9 +30,9 @@ The installation snippet shows only the browser mount. Visitors must follow the 
 
 The hero’s pink phrase uses a CSS-only pearlescent finish: overlapping rose, lilac, and warm pearl color pools drift over 18 seconds, then reverse smoothly. Only the text fill animates. Reduced-motion and forced-color preferences restore solid text; unsupported text clipping also retains the original pink.
 
-## Temporary hero effect lab
+## Temporary hero transition lab
 
-Local development includes a collapsible picker for five color palettes for the same Prism foil effect: Original prism, Rose quartz, Glacier blue, Peach champagne, and Jade & gold. Geometry and animation stay identical across palettes. A sixth option, Prism & jade sweep, alternates Original prism and Jade & gold through soft, staggered color pockets on a 64-second cycle, keeping each palette vivid instead of mixing the entire text. It supports cycling, pause, speed, and an optional automatic preview. It is excluded from production builds. [Cleanup and keeping a winner](src/hero-effects/README.md) requires removing one import block and either deleting the folder or retaining only the chosen painter and small renderer.
+Local development includes a collapsible transition picker for the chosen Prism foil + Jade & gold treatment. Compare left-to-right, right-to-left, sides-to-center, center-to-sides, and scattered spots, with the same organic feathering and 64-second loop. Switching types preserves the animation position. Scrub the loop or use Half takeover for immediate comparisons; pause, speed, and optional cycling are available. It is excluded from production builds. [Cleanup and keeping a winner](src/hero-effects/README.md) remains isolated to one import block and the experiment folder.
 
 ## Section themes
 

@@ -2,7 +2,7 @@ import "./renderer.css";
 import type { PaintEffect } from "./types";
 
 // Independent of the lab UI and effect catalog so a single painter can ship later.
-export function mountHeroEffect(target: HTMLElement, initial: PaintEffect) {
+export function mountHeroEffect(target: HTMLElement, initial: PaintEffect, onTime?: (time: number) => void) {
   const canvas = document.createElement("canvas");
   canvas.className = "hero-effect-canvas";
   canvas.setAttribute("aria-hidden", "true");
@@ -32,6 +32,7 @@ export function mountHeroEffect(target: HTMLElement, initial: PaintEffect) {
     ctx.fillStyle = "#fff";
     ctx.fillText(text, 0, baseline);
     ctx.globalCompositeOperation = "source-over";
+    onTime?.(time);
   }
   function active() { return !paused && !motion.matches && !contrast.matches && visible && !document.hidden; }
   function tick(now: number) {
@@ -73,7 +74,8 @@ export function mountHeroEffect(target: HTMLElement, initial: PaintEffect) {
   contrast.addEventListener("change", sync, { signal: events.signal });
   resize();
   return {
-    setEffect(next: PaintEffect) { paint = next; time = 0; sync(); },
+    setEffect(next: PaintEffect, preserveTime = false) { paint = next; if (!preserveTime) time = 0; sync(); },
+    seek(seconds: number) { time = Math.max(0, seconds); sync(); },
     setPaused(value: boolean) { paused = value; sync(); },
     setSpeed(value: number) { speed = value; },
     destroy() {

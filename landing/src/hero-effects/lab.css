@@ -4,6 +4,8 @@
   right: 20px;
   bottom: 20px;
   width: min(370px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
   z-index: 20;
   padding: 18px;
   border: 1px solid #5e4564;
@@ -29,7 +31,8 @@
 .hero-lab-row label { display: flex; align-items: center; gap: 8px; }
 .hero-lab input { accent-color: #e8a0d4; }
 .hero-lab input[type="range"] { width: 130px; }
-.hero-lab output { width: 32px; font-variant-numeric: tabular-nums; }
+.hero-lab output { width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+.hero-lab-phase { color: #bfa8c5; font-size: 11px; }
 .hero-lab small { display: block; color: #ad94b5; margin-top: 12px; line-height: 1.5; }
 .hero-lab [hidden] { display: none; }
 .hero-lab.is-collapsed { width: auto; }
