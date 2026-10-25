@@ -404,9 +404,15 @@ try {
     assert.equal(await outline.locator('[aria-current="location"]').count(), 1);
   };
   await expectLocation("#flow-task");
-  await page.locator("#flow-task").evaluate((heading) => {
-    window.scrollBy(0, 450);
-  });
+  const taskEntry = page.getByRole("region", { name: /^flow.task/ });
+  const taskInputs = taskEntry.getByRole("heading", { name: /^Inputs/, level: 4 });
+  await taskInputs.getByRole("link").focus();
+  await page.keyboard.press("Enter");
+  const inputBounds = await taskInputs.boundingBox();
+  const headerBounds = await taskEntry.locator("header").boundingBox();
+  assert.ok(inputBounds.y >= headerBounds.y + headerBounds.height,
+    "Subsection permalinks clear the sticky method header");
+  await page.evaluate(() => window.scrollBy(0, 450));
   await expectLocation("#flow-task");
   const hashBeforeScroll = new URL(page.url()).hash;
   await page.locator("#flow-jev").evaluate((heading) => heading.scrollIntoView({ block: "start" }));
