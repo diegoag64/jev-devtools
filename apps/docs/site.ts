@@ -62,7 +62,7 @@ async function expandExamples(source: string) {
     const code = await readFile(resolve(appRoot, "examples", match[1]), "utf8");
     source = source.replace(
       match[0],
-      `\n\x60\x60\x60${match[1].endsWith("tsx") ? "tsx" : "ts"}${match[2] ? ` twoslash file=${match[1]}` : ""}\n${code.trim()}\n\x60\x60\x60\n`,
+      `\n\x60\x60\x60${match[1].endsWith("tsx") ? "tsx" : "ts"} twoslash file=${match[1]}\n${code.trim()}\n\x60\x60\x60\n`,
     );
   }
   return source;

@@ -4,7 +4,7 @@ The server adapter and React component default to disabled. Enable them for loca
 
 ## Choose what leaves the server
 
-```ts
+```ts api=server
 const inspector = createJevDevtools({
   enabled: process.env.NODE_ENV === "development",
   origin: "http://localhost:3000",

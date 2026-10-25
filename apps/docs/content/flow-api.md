@@ -32,7 +32,7 @@ Path callbacks build both possible paths synchronously; only the selected path e
 
 `parallel(id, lanes, display?)` takes a named object of lane callbacks. Each lane returns an expression. The result is an object of joined expressions with matching names. Work inside a lane is sequential; lanes are concurrent. A sibling lane's private intermediate references are not available to other lanes.
 
-```ts
+```ts api=parallel
 const results = flow.parallel("load", {
   left: (lane) => lane.task("left-value", { input: 2, run: (n) => n * 2 }),
   right: (lane) => lane.task("right-value", { input: 3, run: (n) => n * 3 }),

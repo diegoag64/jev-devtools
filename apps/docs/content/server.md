@@ -22,7 +22,7 @@ These form `JevDevtoolsServerOptions`; `limit` and `redact` also form the export
 
 Accepts the TypeSafe SDK's constructor options and returns an instrumented SDK client. Metadata is `{ label?: string, source?: 'sample' | 'live' }`, exported as `ClientMetadata`. Defaults are `Jev request` and `live`.
 
-```ts
+```ts api=server
 const client = inspector.createClient(
   { apiKey: process.env.TYPESAFE_API_KEY },
   { label: "Support triage", source: "live" },
@@ -43,7 +43,7 @@ Route the base path **and all subpaths** to the same adapter. The browser uses c
 
 ## getJevDevtools(key, createOptions)
 
-```ts
+```ts api=server
 import { getJevDevtools } from "jev-devtools/server";
 
 const inspector = getJevDevtools("my-app", () => ({
@@ -58,7 +58,7 @@ Returns the same adapter for a stable, nonempty key in the same Node realm. The 
 
 Select the request's server-derived recording scope while the callback runs. Use it for inference handlers when `getSession` is customized:
 
-```ts
+```ts api=server
 return inspector.run(request, () => jev.systemOne(input));
 ```
 

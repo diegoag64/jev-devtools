@@ -18,7 +18,7 @@ Externalize the SDK only. The React package entry should use Next's React instan
 
 ## Share your server adapter
 
-```ts
+```ts api=server
 // server/jev.ts
 import "server-only";
 import { getJevDevtools } from "jev-devtools/server";
@@ -36,7 +36,7 @@ Import this `jev` from Route Handlers, Server Actions, or Server Components. The
 
 ## Expose the optional catch-all route
 
-```ts
+```ts api=server
 // app/api/jev-devtools/[[...path]]/route.ts
 import { inspector } from "../../../../server/jev";
 
@@ -50,7 +50,7 @@ The optional catch-all includes both the base endpoint and its children. `handle
 
 ## Mount a Client Component
 
-```tsx
+```tsx api=core
 // app/devtools.tsx
 "use client";
 import { JevDevtools } from "jev-devtools";

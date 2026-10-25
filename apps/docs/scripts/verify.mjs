@@ -197,6 +197,130 @@ try {
     "Tapping outside dismisses the tooltip",
   );
   await touch.close();
+  // Exercise each new API family through the delivered pages. Shared focus,
+  // touch and dismissal behavior is covered above; here verify meaning/scope.
+  const examples = [
+    {
+      route: "api/react/",
+      file: "client.tsx",
+      marker: "export function Root",
+      term: "enabled",
+      meaning: /browser inspector/,
+      excluded: ["Root", "DEV"],
+    },
+    {
+      route: "api/server/",
+      file: "server.ts",
+      marker: "export const inspector",
+      term: "enabled",
+      meaning: /server capture/,
+      excluded: ["apiKey", "inspector", "NODE_ENV"],
+    },
+    {
+      route: "api/recorder/",
+      file: "recorder.ts",
+      marker: "new JevRecorder",
+      term: "instrument",
+      meaning: /systemOne calls/,
+      excluded: ["TypeSafeClient", "fetch", "sessions", "has"],
+    },
+    {
+      route: "api/flow/",
+      file: "operations.ts",
+      marker: "const doubled",
+      term: "run",
+      meaning: /resolved input and task context/,
+      excluded: ["values", "reduce", "target", "value"],
+    },
+    {
+      route: "api/flow/",
+      file: "replay.ts",
+      marker: "export async function replayExample",
+      term: "replayClient",
+      meaning: /without a key or inference call/,
+      excluded: ["fixture", "classify", "team", "billing", "probabilities"],
+    },
+  ];
+  for (const example of examples) {
+    await page.goto(origin + base + example.route);
+    const block = page
+      .locator(".code-block")
+      .filter({ hasText: example.marker });
+    await block
+      .getByRole("button", { name: `${example.term}: API help`, exact: true })
+      .first()
+      .hover();
+    await tooltip.waitFor();
+    assert.match(await tooltip.innerText(), example.meaning);
+    for (const name of example.excluded)
+      assert.equal(
+        await block
+          .getByRole("button", { name: `${name}: API help`, exact: true })
+          .count(),
+        0,
+        `${example.file}: ${name} stays ordinary code`,
+      );
+    if (example.file === "client.tsx" || example.file === "server.ts")
+      await page.screenshot({
+        path: resolve(
+          evidence,
+          `api-help-${example.file.replace(/\./g, "-")}.png`,
+        ),
+      });
+    await page.keyboard.press("Escape");
+    await block.getByRole("button", { name: "Copy code", exact: true }).click();
+    assert.equal(
+      (await page.evaluate(() => navigator.clipboard.readText())).trim(),
+      (await readFile(resolve(app, "examples", example.file), "utf8")).trim(),
+      `Copy ${example.file} without tooltip text`,
+    );
+  }
+  for (const example of [
+    {
+      route: "api/flow/",
+      term: "maxIterations",
+      meaning: /FlowLoopLimitError/,
+    },
+    {
+      route: "api/flow/",
+      term: "then",
+      marker: "const doubled",
+      meaning: /Return an expression for its value/,
+    },
+    { route: "api/server/", term: "run", meaning: /recording scope/ },
+    { route: "guides/nextjs/", term: "handleNodeRoute", meaning: /Check Host/ },
+    { route: "guides/privacy/", term: "redact", meaning: /captured copy/ },
+    { route: "api/expressions/", term: "get", meaning: /Select a field/ },
+    { route: "api/flow/", term: "parallel", meaning: /lanes concurrently/ },
+  ]) {
+    await page.goto(origin + base + example.route);
+    const area = example.marker
+      ? page.locator(".code-block").filter({ hasText: example.marker })
+      : page;
+    await area
+      .getByRole("button", { name: `${example.term}: API help`, exact: true })
+      .first()
+      .hover();
+    await tooltip.waitFor();
+    assert.match(await tooltip.innerText(), example.meaning);
+    await page.keyboard.press("Escape");
+  }
+  await page.goto(origin + base + "getting-started/");
+  const sdkExample = page
+    .locator(".code-block")
+    .filter({ hasText: "export async function classifyMessage" });
+  assert.equal(
+    await sdkExample.locator("[data-type-info]").count(),
+    0,
+    "SDK-only request code has no Jev API hovers",
+  );
+  await sdkExample
+    .getByRole("button", { name: "Copy code", exact: true })
+    .click();
+  assert.equal(
+    (await page.evaluate(() => navigator.clipboard.readText())).trim(),
+    (await readFile(resolve(app, "examples/request.ts"), "utf8")).trim(),
+  );
   const links = await page
     .locator("#sidebar nav a")
     .evaluateAll((nodes) => nodes.map((n) => n.href));

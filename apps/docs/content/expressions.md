@@ -2,7 +2,7 @@
 
 `FlowExpression<T>` represents a typed value that will be resolved during a run. Obtain one from `flow.input`, a task result, an answer field, or a joined operation. You usually do not construct the class directly.
 
-```ts
+```ts api=expressions
 const message = flow.input.get("message");
 const answer = classification.answer("team").choice;
 const isBilling = answer.eq("billing");
@@ -26,7 +26,7 @@ Each comparison accepts a literal or compatible expression. Optional or nullable
 
 Import `all`, `any`, and `not` from `jev-devtools/flow`:
 
-```ts
+```ts api=expressions
 const shouldReview = all(
   eligibility.answer("eligible").noul.gte(0.9),
   not(risk.answer("risky").noul.gt(0.2)),

@@ -20,7 +20,7 @@ The `origin` must be the URL you open in the browser, including scheme, hostname
 
 In Express or Connect, mount the middleware at the root, before your fallback handler:
 
-```ts
+```ts api=server
 import { inspector } from "./server/jev.js";
 
 app.use(inspector.middleware);
