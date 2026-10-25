@@ -5,7 +5,7 @@ export const drawerShowcase = `
 <section id="drawer" class="drawer-showcase section-band" data-theme="plum" aria-labelledby="drawer-title">
   <div class="wrap">
   <div class="product-heading">
-    <h2 id="drawer-title">Your React app.<br /><span>Jev, in plain sight.</span></h2>
+    <h2 id="drawer-title">System One Diagrams<br /><span>Anywhere in your App</span></h2>
     <div><p>Open the drawer without leaving your app. Follow a request from its input to its answer, inspect the probabilities, and see the details behind every step.</p><a class="text-link" href="https://docs.jevtools.dev">Add the drawer to your app</a></div>
   </div>
   <figure class="drawer-demo">
