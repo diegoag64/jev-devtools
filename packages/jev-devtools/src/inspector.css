@@ -1244,7 +1244,7 @@
 .jev-devtools .flow-canvas-controls {
   position: absolute;
   top: 12px;
-  left: 12px;
+  right: 12px;
   z-index: 1;
   display: flex;
   flex-wrap: wrap;
