@@ -42,7 +42,7 @@ The Node adapter creates an instrumented TypeSafe SDK client and serves inspecto
 
 The React component connects to those endpoints through your app's browser origin. It includes its own styles and needs no provider. API credentials stay on the server.
 
-[How it fits together](@/concepts/) explains the client, recorder, and drawer in more detail.
+[Concepts](@/concepts/) explains the client, recorder, and drawer in more detail.
 
 ## Local capture and privacy
 

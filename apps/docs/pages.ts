@@ -31,9 +31,8 @@ export const pages: Page[] = [
   },
   {
     slug: "concepts",
-    title: "How it fits together",
-    description:
-      "Understand the client, recorder, and drawer before connecting them to your application.",
+    title: "Concepts",
+    description: "Understand requests, flows, and how data reaches the drawer.",
     group: "Getting started",
     file: "concepts.md",
   },
@@ -62,7 +61,7 @@ export const pages: Page[] = [
     slug: "guides/flows",
     title: "Build a flow",
     description:
-      "Connect requests and application code in an inspectable, bounded flow.",
+      "Classify a message, select a team, and inspect the resulting flow.",
     group: "Guides",
     file: "flows.md",
   },
