@@ -1,0 +1,4 @@
+interface:
+  display_name: "Port Jev to Flow"
+  short_description: "Preserve Jev behavior in inspectable Flow workflows"
+  default_prompt: "Use $port-jev-to-flow to port this Jev workflow while preserving its source semantics."
