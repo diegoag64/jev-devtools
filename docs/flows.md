@@ -171,6 +171,8 @@ const evaluation = flow.task(
 
 From the repository root run `npm run dev`, open `http://127.0.0.1:4182/`, and select **Flow · Functions + dynamic questions (synthetic)**. Run the sample, open **Jev DevTools → Flows**, and select **Keep the top three skills**. Inspect its output, then the next request's three Choice criteria. Both model responses are synthetic fixtures; no API key or remote call is required. This demonstrates the API, not a faithful port of the official cookbook.
 
+The [Date extraction cookbook](../cookbooks/date-extraction/README.md) demonstrates one runtime request per role followed by calendar assembly in a task and a returning conditional for acceptance/review. It preserves the official seven Choice questions and fixed 2026-07-30 reference date. Task outputs are ISO date strings or `null`; the strict `< 0.60` gate uses only consumed Choice confidences, with review for unresolved dates or missing used confidence. All model responses are synthetic.
+
 ## Capture completeness
 
 Captured outcome values and condition rules retain optional warnings beside their data: `FlowRun.captureWarnings` describes `value`, and `FlowNode.conditionCaptureWarnings` describes `conditionRule`. Step data continues to use `FlowStep.captureWarnings`. These fields also apply inside maps and loops. The drawer shows rule warnings on cards and in selected-step details, and outcome warnings in **Captured outcome value**. Redaction and capture failures never substitute shortened values into execution.

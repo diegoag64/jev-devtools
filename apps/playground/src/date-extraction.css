@@ -1,0 +1,33 @@
+/* Date component tables retain their column relationships on narrow screens. */
+.date-result-row {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #334155;
+}
+.date-result-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+}
+.date-result-values dt {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+.date-result-values dd {
+  margin: 0.3rem 0;
+  font-weight: 600;
+}
+.date-components {
+  overflow-x: auto;
+}
+.date-components table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.date-components th,
+.date-components td {
+  padding: 0.5rem;
+  border-bottom: 1px solid #334155;
+  white-space: nowrap;
+}

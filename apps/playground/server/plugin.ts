@@ -1,3 +1,10 @@
+import { dateFlow } from "../../../cookbooks/date-extraction/flow.js";
+import { dateSampleTransport } from "../../../cookbooks/date-extraction/samples.js";
+import {
+  dateCases,
+  isDateCase,
+  type DateCase,
+} from "../../../cookbooks/date-extraction/cases.js";
 import { memoryFlow } from "../../../cookbooks/simple-memory/flow.js";
 import { memorySampleTransport } from "../../../cookbooks/simple-memory/samples.js";
 import {
@@ -138,6 +145,7 @@ export function jevInspectorServer(
             hierarchyCase?: string;
             structureCase?: string;
             memoryCase?: string;
+            dateCase?: string;
           };
           try {
             let text = "";
@@ -180,6 +188,7 @@ export function jevInspectorServer(
               "flow-hierarchy",
               "flow-structure",
               "flow-memory",
+              "flow-date",
               "flow-manual",
               "flow-other",
               "flow-parallel",
@@ -191,6 +200,9 @@ export function jevInspectorServer(
             typeof body.message !== "string" ||
             body.message.length > 8000 ||
             (body.scenario === "stress" && !validStress(body.stress)) ||
+            (body.scenario === "flow-date" &&
+              (!isDateCase(body.dateCase) ||
+                body.message !== dateCases[body.dateCase].message)) ||
             (body.scenario === "flow-memory" &&
               (!isMemoryCase(body.memoryCase) ||
                 body.message !== memoryCases[body.memoryCase].message)) ||
@@ -280,7 +292,11 @@ export function jevInspectorServer(
                                   : skillSampleTransport(
                                       body.cookbookCase as keyof typeof skillCases,
                                     )
-                                : flowTransport(body.scenario!),
+                                : body.scenario === "flow-date"
+                                  ? dateSampleTransport(
+                                      body.dateCase as DateCase,
+                                    )
+                                  : flowTransport(body.scenario!),
                   logLevel: "off",
                   retry: { maxRetries: 0 },
                   timeout: 120_000,
@@ -295,7 +311,9 @@ export function jevInspectorServer(
                           ? hierarchyFlow.definition.name
                           : body.scenario === "flow-sde"
                             ? sdeFlow.definition.name
-                            : flow.definition.name,
+                            : body.scenario === "flow-date"
+                              ? dateFlow.definition.name
+                              : flow.definition.name,
                   source: body.mode === "live" ? "live" : "sample",
                 },
               );
@@ -352,17 +370,29 @@ export function jevInspectorServer(
                               signal: controller.signal,
                             },
                           )
-                        : await flow.run(
-                            {
-                              message: body.message,
-                              caseId: body.ragCase as RagCase,
-                            },
-                            {
-                              client,
-                              devtools: inspector,
-                              signal: controller.signal,
-                            },
-                          );
+                        : body.scenario === "flow-date"
+                          ? await dateFlow.run(
+                              {
+                                message: body.message,
+                                caseId: body.dateCase as DateCase,
+                              },
+                              {
+                                client,
+                                devtools: inspector,
+                                signal: controller.signal,
+                              },
+                            )
+                          : await flow.run(
+                              {
+                                message: body.message,
+                                caseId: body.ragCase as RagCase,
+                              },
+                              {
+                                client,
+                                devtools: inspector,
+                                signal: controller.signal,
+                              },
+                            );
               send(res, 200, { ok: true, flow: result });
               return;
             }
