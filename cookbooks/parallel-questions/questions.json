@@ -1,0 +1,85 @@
+{
+  "breach_72h": {
+    "type": "noul",
+    "instructions": "Must a personal data breach be reported to the supervisory authority within 72 hours?"
+  },
+  "applies_non_eu": {
+    "type": "noul",
+    "instructions": "Does the regulation apply to organisations established outside the EU that offer goods or services to people in the EU?"
+  },
+  "dpo_all_orgs": {
+    "type": "noul",
+    "instructions": "Must every organisation appoint a Data Protection Officer, regardless of what data it processes?"
+  },
+  "pre_ticked_consent": {
+    "type": "noul",
+    "instructions": "Can valid consent be obtained through pre-ticked boxes or inactivity?"
+  },
+  "right_erasure": {
+    "type": "noul",
+    "instructions": "Does the regulation grant individuals a right to erasure of their personal data?"
+  },
+  "data_portability": {
+    "type": "noul",
+    "instructions": "Does the regulation include a right to data portability?"
+  },
+  "us_federal_law": {
+    "type": "noul",
+    "instructions": "Is the GDPR a United States federal law?"
+  },
+  "criminal_penalties": {
+    "type": "noul",
+    "instructions": "Does the GDPR itself impose criminal penalties such as imprisonment?"
+  },
+  "instrument_type": {
+    "type": "choice",
+    "instructions": "What kind of EU legal instrument is the GDPR?",
+    "criteria": {
+      "Regulation": "Directly binding law in all member states, no national implementation needed.",
+      "Directive": "Sets goals that member states implement through national law.",
+      "Treaty": "An international treaty between states.",
+      "Recommendation": "Non-binding guidance."
+    }
+  },
+  "max_fine": {
+    "type": "choice",
+    "instructions": "What is the maximum administrative fine for the most serious infringements?",
+    "criteria": {
+      "TwentyM_or_4pct": "Up to EUR 20 million or 4% of annual worldwide turnover, whichever is greater.",
+      "TenM_or_2pct": "Up to EUR 10 million or 2% of annual worldwide turnover, whichever is greater.",
+      "FixedCap": "A fixed amount not tied to turnover.",
+      "NoFines": "The GDPR provides no administrative fines."
+    }
+  },
+  "individual_rights": {
+    "type": "score",
+    "instructions": "How strong are the rights the GDPR grants to individuals over their data?",
+    "criteria": [
+      "None: individuals get no rights over their data.",
+      "Weak: a right to be informed, but little control.",
+      "Moderate: access and correction rights, but limited means to act on them.",
+      "Strong: access, erasure, portability, and objection rights, with enforcement behind them."
+    ]
+  },
+  "penalty_severity": {
+    "type": "score",
+    "instructions": "How severe are the penalties the GDPR provides for non-compliance?",
+    "criteria": [
+      "None: no penalties of any kind.",
+      "Symbolic: small fixed fines unlikely to change behavior.",
+      "Substantial: fines large enough to matter to most companies.",
+      "Severe: fines scaled to global revenue, material even to the largest companies."
+    ]
+  },
+  "compliance_burden": {
+    "type": "score",
+    "instructions": "How heavy is the compliance burden the GDPR places on organisations?",
+    "criteria": [
+      "Negligible: no meaningful obligations.",
+      "Light: a few notices and disclosures.",
+      "Moderate: documented processes and some dedicated roles for larger processors.",
+      "Heavy: records, impact assessments, officers, and breach procedures for many organisations.",
+      "Extreme: obligations so demanding that ordinary organisations cannot fully comply."
+    ]
+  }
+}

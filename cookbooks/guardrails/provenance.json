@@ -1,0 +1,20 @@
+{
+  "recipe": "https://docs.typesafe.ai/cookbooks/llm_guardrails",
+  "markdown": "https://docs.typesafe.ai/cookbooks/llm_guardrails.md",
+  "retrieved": "2026-10-26",
+  "recipeSha256": "8831a11d09c1f257ee03b29b4015fdc2f517fc1901be15fa04dfea72b4170664",
+  "upstreamCommit": "25e9d373f4853b3e7e300e55a194f50e54838f68",
+  "inspectedAssets": [
+    {
+      "path": "prompts.txt",
+      "sha256": "e44b070922877a2109dafe265ad710401679e3554af96bc17edc10099834d43a"
+    },
+    {
+      "path": "replies.txt",
+      "sha256": "fbbebc52f5f90519698f3b1a9da6db48a0c8499c2db2d5f07d9c4863f7a1e813"
+    }
+  ],
+  "transformation": "Extract exact input/output question instructions, Noul true/false criteria and shared four-level Score from the recipe. Port route() inclusive thresholds and precedence. Upstream message assets inspected but not redistributed; all local messages and assessments are authored synthetic fixtures. No official cache or measured outputs replayed.",
+  "batteriesSemanticSha256": "cc619f4507fafd3b3cf9bca73be8d69d8b807efe10b430ea3b4005bec4b5335e",
+  "license": "MIT; LICENSE.typesafe"
+}

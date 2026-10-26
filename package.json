@@ -33,7 +33,7 @@
     "build:docs:publish": "npm run build:package && npm run build:publish -w @jev-devtools/docs",
     "preinstall": "node scripts/runtime.mjs",
     "check:runtime": "node scripts/runtime.mjs",
-    "test:tooling": "node --test scripts/runtime.test.mjs",
+    "test:tooling": "node --test scripts/runtime.test.mjs scripts/verification-evidence.test.mjs scripts/cookbook-verification.test.mjs",
     "verify:flows": "npm run build:package && node scripts/run-flow-verification.mjs",
     "verify:all": "node scripts/verify-all.mjs",
     "format": "node scripts/format.mjs --write",
@@ -41,7 +41,9 @@
     "verify:receipts": "node scripts/verify-all.mjs --receipts",
     "docs:publication": "node scripts/docs-publication.mjs",
     "test:release-tools": "node --test scripts/docs-publication.test.mjs scripts/receipt-scope.test.mjs",
-    "check:release-records": "node scripts/receipt-scope.mjs"
+    "check:release-records": "node scripts/receipt-scope.mjs",
+    "verify:cookbooks": "npm run build:package && node scripts/run-cookbook-verification.mjs",
+    "verify:evidence": "node scripts/check-verification-evidence.mjs"
   },
   "devDependencies": {
     "@types/node": "26.6.5",

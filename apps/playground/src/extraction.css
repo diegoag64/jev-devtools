@@ -1,0 +1,21 @@
+.extraction-result ol {
+  list-style: decimal;
+  padding-left: 24px;
+  overflow-wrap: anywhere;
+}
+.extraction-result table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+  text-align: left;
+}
+.extraction-result th,
+.extraction-result td {
+  border-bottom: 1px solid #403442;
+  padding: 12px;
+  vertical-align: top;
+}
+.extraction-result td {
+  overflow-wrap: anywhere;
+  min-width: 120px;
+}

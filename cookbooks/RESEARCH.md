@@ -2,7 +2,7 @@
 
 Research date: **2026-10-23**. Baseline: **jev-devtools 0.3.0**, commit `a229b328ce742cf2a15fb01514d62e7a52cb0839`, SDK dependency `@typesafe-ai/sdk@0.7.0`.
 
-Historical research: API limitations below describe the reviewed 0.3.0 baseline, not the current library. The 0.4.0 flow API includes tasks, runtime requests, maps, returning conditionals, and loops; see [the flow guide](../docs/flows.md). Six adaptations are now runnable in the [cookbook collection](README.md). The original analysis and proposed plan below are retained as research provenance.
+Historical research: API limitations below describe the reviewed 0.3.0 baseline, not the current library. The current Flow API includes tasks, runtime requests, maps, returning conditionals, and loops; see [the flow guide](../docs/flows.md). Adaptations are now runnable in the [cookbook collection](README.md). The original analysis and proposed plan below are retained as research provenance.
 
 ## Scope and evidence
 
@@ -133,11 +133,11 @@ Changing a policy against a completed assessment should not automatically dispat
 
 Use three explicit kinds of evidence:
 
-| Mode | What it means | Required behavior |
-| --- | --- | --- |
-| Recorded replay | Actual saved response for the exact request | Preserve fields and model provenance; show historical timing separately from replay elapsed time. |
-| Synthetic sample | Deliberately constructed output for a demonstration or boundary case | Label it synthetic; never describe it as the official measured result. |
-| Live | A new call using the user's server-side key | No silent fallback, bounded calls, cancellation, and current returned model metadata. |
+| Mode             | What it means                                                        | Required behavior                                                                                 |
+| ---------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Recorded replay  | Actual saved response for the exact request                          | Preserve fields and model provenance; show historical timing separately from replay elapsed time. |
+| Synthetic sample | Deliberately constructed output for a demonstration or boundary case | Label it synthetic; never describe it as the official measured result.                            |
+| Live             | A new call using the user's server-side key                          | No silent fallback, bounded calls, cancellation, and current returned model metadata.             |
 
 Match fixtures using a stable canonical representation of all semantic request fields, including state, questions, criteria, model, and relevant options/assets. Include an explicit repeat/case index when several observations share a request. Do not store keys or authentication headers. A missing match must show an explanation, not fall back to a stale fixture or a paid request.
 

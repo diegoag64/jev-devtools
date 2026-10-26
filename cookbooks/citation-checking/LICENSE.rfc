@@ -1,0 +1,14 @@
+RFC 7519 — JSON Web Token (JWT), May 2015
+Source: https://www.rfc-editor.org/rfc/rfc7519.txt
+Authors: M. Jones, J. Bradley, N. Sakimura
+
+Copyright (c) 2015 IETF Trust and the persons identified as the
+ document authors. All rights reserved.
+
+The full unmodified RFC is included in rfc7519.txt with its original
+Copyright Notice. It is subject to BCP 78 and the IETF Trust's Legal
+Provisions Relating to IETF Documents in effect on its publication date:
+http://trustee.ietf.org/license-info
+
+The TypeSafe MIT license does not replace the RFC's own notice.
+No RFC Code Components are extracted into this implementation.

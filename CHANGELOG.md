@@ -28,11 +28,27 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
+- **Parallel Questions cookbook.** Compare five batched requests with 65 sequential single-question requests over a fixed synthetic sample, with all 13 original questions, inspectable loops and computed answer statistics. No live timing or cost savings are claimed. ([#106](https://github.com/diegoag64/jev-devtools/pull/106))
+- **Twitch chat filter cookbook.** Replay the original 29-message feed with eight concurrent sample requests, inspect exact moderation precedence, and compare normal/quiet policies without additional inference. Includes a separate threshold-boundary feed; ongoing Twitch ingestion is outside this sample. ([#108](https://github.com/diegoag64/jev-devtools/pull/108))
+- **Entity alignment cookbook.** Inspect attributed beer pairs with one Score, three companion Nouls and exact unlink/review/proposed-sameAs boundaries. Includes no-key synthetic examples and boundary cases; no database mutation or full evaluation. ([#109](https://github.com/diegoag64/jev-devtools/pull/109))
+- **Citation checking cookbook.** Inspect exact normalized quote matches against RFC 7519, a zero-request fabricated path and Choice-confidence review routing in five no-key synthetic samples. ([#107](https://github.com/diegoag64/jev-devtools/pull/107))
+- **Confidence fallback cookbook.** Explore one 75-group industry Choice, the inclusive API-confidence cutoff and a deterministic parent-division task with four synthetic no-key cases. Preserves the original SIC taxonomy; no SEC evaluation or live inference. ([#110](https://github.com/diegoag64/jev-devtools/pull/110))
+- **Line-by-line search cookbook.** Search the complete pinned document with synthetic Choice and Noul responses, inspect exact existence routing and view every line option in the playground. ([#113](https://github.com/diegoag64/jev-devtools/pull/113))
+- **Inspect candidate re-ranking.** Run a no-key cookbook with an authored retrieval fixture, independent synthetic Nouls, bounded candidate requests and a stable sorting task. Compare before/after order and tied probabilities without claiming benchmark accuracy. ([#112](https://github.com/diegoag64/jev-devtools/pull/112))
+- **Date extraction cookbook.** Add a no-key playground adaptation with seven Choice questions per role, fixed-reference calendar assembly, ISO dates, and inspectable confidence review. Synthetic fixtures cover official examples, calendar boundaries, invalid dates and the strict 0.60 gate; missing used confidence requires review. ([#114](https://github.com/diegoag64/jev-devtools/pull/114))
+- **Pre-parsed extraction cookbook.** Explore document-order regex candidates, separate email/phone/money Choice helpers, amount-dependent credit routing and deterministic normalization with fixed synthetic samples. Includes missing-value routes and exact decimal strings; no live inference or public API changes. ([#111](https://github.com/diegoag64/jev-devtools/pull/111))
+- **Function calling cookbook.** Explore a proposed tool call from a batched request, with selected-argument branches, omitted defaults, set membership and source-faithful confidence arithmetic. Synthetic samples only; no tool execution. ([#115](https://github.com/diegoag64/jev-devtools/pull/115))
+- **LLM guardrails cookbook.** Screen input or output samples with the official hazard batteries, compare strict/permissive policies on one synthetic assessment, and inspect severity upgrades and action precedence. No live inference or LLM generation. ([#117](https://github.com/diegoag64/jev-devtools/pull/117))
+- **Choice self-consistency cookbook.** Run the original eight-question rubric through 15 sequential synthetic requests, inspect exact probability gates and compare raw agreement, abstention and probability variation in an interactive heatmap. No paid inference or measured consistency claims. ([#118](https://github.com/diegoag64/jev-devtools/pull/118))
+- **Noul self-consistency cookbook.** Explore fifteen sequential fourteen-question requests, exact uncertainty-band decisions and computed statistics from authored synthetic fixtures. Preserve every answer and requested/returned model labels; no measured consistency or provider comparison is claimed. ([#116](https://github.com/diegoag64/jev-devtools/pull/116))
+
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
 - **API reference previews.** Hover or focus a supported API link for its summary, then open the full reference or read its contract and examples in a side panel. Touch controls, keyboard navigation, copy buttons, and failed-load recovery keep reference reading available without losing the current page. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
 #### Changed
+
+- **Routine cookbook browser verification and current evidence.** Run the existing recipe and collection browser checks in full verification and React 18/19 CI, with matching playground/root React versions and color-independent server readiness. Preserve each run’s source identity and evidence separately, and validate current source/reviewed HEAD before handoff. ([#119](https://github.com/diegoag64/jev-devtools/pull/119))
 
 - **Clearer landing copy.** Explain captured requests, sample flows, and application-defined decisions in plain language, and add a community-project and TypeSafe AI non-affiliation notice beneath the hero actions. Preserve the drawer and Flow API heading treatments, accent the second line of the System One primitives heading, and remove decorative card numbers. The landing page has not been deployed. ([#105](https://github.com/diegoag64/jev-devtools/pull/105))
 
@@ -41,6 +57,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 - **Search from an API reading panel.** Opening search dismisses the reference panel and keeps focus in search, so glossary results appear without an old panel covering the destination. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
 #### Documentation
+
+- **Current cookbook collection guide.** Separate the thirteen new ports from the six existing examples, document routine browser verification, and replace outdated API-fit proposals with current implementation status. Preserve the original research as historical context and identify Autoresearch as excluded. ([#119](https://github.com/diegoag64/jev-devtools/pull/119))
 
 - **Even API panel close control.** Give the close button a square touch target with a centered X in desktop and mobile layouts. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 

@@ -1,0 +1,9 @@
+{
+  "source": "https://docs.typesafe.ai/cookbooks/consistency_choice_cookbook.md",
+  "reviewedOn": "2026-10-26",
+  "sourceSha256": "29c783687984fc3311016f697ba3f1123dc17a4f1770964425352358baa3c3f6",
+  "upstreamRepository": "https://github.com/typesafe-ai/typesafe-public-examples/tree/25e9d373f4853b3e7e300e55a194f50e54838f68",
+  "assetReview": "The upstream tree at this revision has no consistency-choice directory or cache. The executable source is the official documentation page; no upstream cached results are replayed.",
+  "license": "TypeSafe MIT notice retained in LICENSE.typesafe; verified from the official examples repository.",
+  "transformation": "Original post, eight question instructions and ordered criteria retained verbatim. Fifteen sequential TypeSafe requests with rubric fingerprint, zero-based index and fresh four-byte hex nonce in state.uid. Authored varying responses demonstrate argmax, >=0.60 application gate and original aggregation denominators. Other-provider sampling, cost, latency, usage and quality comparisons excluded. No paid inference."
+}

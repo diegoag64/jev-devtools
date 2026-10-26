@@ -1,0 +1,12 @@
+{
+  "source": "https://docs.typesafe.ai/cookbooks/entity_alignment.md",
+  "reviewedOn": "2026-10-26",
+  "sourceSha256": "0c8eda7b9f90739b99db4103a1b9ea52387a299edbf296d9dc5e95599c1b4eb6",
+  "examplesCommit": "25e9d373f4853b3e7e300e55a194f50e54838f68",
+  "pairAsset": "https://raw.githubusercontent.com/typesafe-ai/typesafe-public-examples/25e9d373f4853b3e7e300e55a194f50e54838f68/cookbooks/entity_alignment/candidate_pairs.json",
+  "pairAssetSha256": "bb2c160ac9a00cfffd336636cb3cf6601d1d522941a7c1a7e798752160f8c227",
+  "retainedPairIds": ["c446", "c427", "c100", "c428"],
+  "dataAttribution": "Magellan Beer entity-matching benchmark, as attributed in the official recipe. Four illustrative factual pairs only, including their reference labels; reference labels are excluded from requests and routing.",
+  "transformation": "Preserve one Score, three original levels, three original Noul prompts, raw pair state, model and nearest-level routing. Use task/jev/branch/output public Flow APIs. Display an optional arithmetic ABV gap, without routing on it. All responses are authored synthetic fixtures, not cached official outputs. Six boundary variants reuse c428. Return proposed sameAs without mutation; omit the 450-pair evaluation.",
+  "license": "Official examples repository: MIT, LICENSE.typesafe retained. No separate license was included with the candidate-pair asset; the MIT notice is not asserted to cover the underlying third-party catalogue corpus. Only the four illustrated factual records are retained."
+}

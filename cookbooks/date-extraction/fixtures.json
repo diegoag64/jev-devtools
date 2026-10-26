@@ -1,0 +1,714 @@
+{
+  "effective": {
+    "mode": {
+      "choice": "absolute",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "January",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "1",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "2025",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "expires": {
+    "mode": {
+      "choice": "absolute",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "December",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "31",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "2027",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "form": {
+    "mode": {
+      "choice": "absolute",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "August",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "14",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "kickoff": {
+    "mode": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "survey": {
+    "mode": {
+      "choice": "relative",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "today",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "review": {
+    "mode": {
+      "choice": "relative",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "weekday",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "Thursday",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "next",
+      "confidence": 0.9
+    }
+  },
+  "tomorrow": {
+    "mode": {
+      "choice": "relative",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "tomorrow",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "day-after": {
+    "mode": {
+      "choice": "relative",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "day_after",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "bare": {
+    "mode": {
+      "choice": "relative",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "weekday",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "Thursday",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "current": {
+    "mode": {
+      "choice": "relative",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "weekday",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "Monday",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "current",
+      "confidence": 0.9
+    }
+  },
+  "next": {
+    "mode": {
+      "choice": "relative",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "weekday",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "Monday",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "next",
+      "confidence": 0.9
+    }
+  },
+  "31-days": {
+    "mode": {
+      "choice": "absolute",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "June",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "29",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "32-days": {
+    "mode": {
+      "choice": "absolute",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "June",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "28",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "impossible": {
+    "mode": {
+      "choice": "absolute",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "February",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "30",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "2026",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "outside": {
+    "mode": {
+      "choice": "absolute",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "January",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "1",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "out_of_range",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "incomplete": {
+    "mode": {
+      "choice": "absolute",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "August",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "absent": {
+    "mode": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "weekday-unread": {
+    "mode": {
+      "choice": "relative",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "weekday",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "next",
+      "confidence": 0.9
+    }
+  },
+  "below": {
+    "mode": {
+      "choice": "relative",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "tomorrow",
+      "confidence": 0.59999
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "at": {
+    "mode": {
+      "choice": "relative",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "tomorrow",
+      "confidence": 0.6
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "above": {
+    "mode": {
+      "choice": "relative",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "tomorrow",
+      "confidence": 0.60001
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "missing": {
+    "mode": {
+      "choice": "relative",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "tomorrow"
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "all-missing": {
+    "mode": {
+      "choice": "relative"
+    },
+    "month": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "year": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "day_anchor": {
+      "choice": "tomorrow"
+    },
+    "weekday": {
+      "choice": "none",
+      "confidence": 0.9
+    },
+    "week_offset": {
+      "choice": "none",
+      "confidence": 0.9
+    }
+  },
+  "unused": {
+    "mode": {
+      "choice": "relative",
+      "confidence": 0.9
+    },
+    "month": {
+      "choice": "none"
+    },
+    "day": {
+      "choice": "none"
+    },
+    "year": {
+      "choice": "none"
+    },
+    "day_anchor": {
+      "choice": "tomorrow",
+      "confidence": 0.9
+    },
+    "weekday": {
+      "choice": "none"
+    },
+    "week_offset": {
+      "choice": "none"
+    }
+  }
+}

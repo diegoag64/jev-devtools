@@ -1,0 +1,182 @@
+[
+  {
+    "id": "sample-01",
+    "title": "Default judgment",
+    "text": "When a defendant fails to plead, default procedures may permit judgment after the court examines jurisdiction and the requested relief.",
+    "noul": 0.27
+  },
+  {
+    "id": "sample-02",
+    "title": "Late opposition",
+    "text": "A district court may enforce a briefing deadline and decline to consider a late opposition memorandum.",
+    "noul": 0.18
+  },
+  {
+    "id": "sample-03",
+    "title": "Material dispute",
+    "text": "A factual disagreement prevents summary judgment only if the fact is material under the governing law.",
+    "noul": 0.72
+  },
+  {
+    "id": "sample-04",
+    "title": "Evidence at judgment",
+    "text": "The court considers admissible evidence and draws reasonable inferences for the party opposing summary judgment.",
+    "noul": 0.66
+  },
+  {
+    "id": "sample-05",
+    "title": "Unopposed motion",
+    "text": "An unanswered summary judgment motion is not automatically granted. The court must still decide whether the moving party demonstrates no genuine dispute of material fact and a right to judgment as a matter of law.",
+    "noul": 1
+  },
+  {
+    "id": "sample-06",
+    "title": "Burden of proof",
+    "text": "A party bearing the burden at trial must identify evidence supporting each essential element challenged by a properly supported motion.",
+    "noul": 0.58
+  },
+  {
+    "id": "sample-07",
+    "title": "Pleading standard",
+    "text": "A complaint must allege sufficient factual matter to state a plausible claim for relief.",
+    "noul": 0.08
+  },
+  {
+    "id": "sample-08",
+    "title": "Discovery extension",
+    "text": "A party seeking additional discovery must identify the facts it expects to obtain and explain why they are needed.",
+    "noul": 0.31
+  },
+  {
+    "id": "sample-09",
+    "title": "Local rules",
+    "text": "Local briefing rules regulate deadlines, but do not relieve a court of applying the governing substantive standard.",
+    "noul": 0.72
+  },
+  {
+    "id": "sample-10",
+    "title": "Review on appeal",
+    "text": "An appellate court reviews the grant of summary judgment without deference to the district court legal determination.",
+    "noul": 0.42
+  },
+  {
+    "id": "sample-11",
+    "title": "Sanctions",
+    "text": "Before imposing severe discovery sanctions, a court considers the conduct and the availability of lesser measures.",
+    "noul": 0.14
+  },
+  {
+    "id": "sample-12",
+    "title": "Personal jurisdiction",
+    "text": "The exercise of personal jurisdiction requires sufficient connections between the defendant and the forum.",
+    "noul": 0.03
+  },
+  {
+    "id": "sample-13",
+    "title": "Hearsay",
+    "text": "An out-of-court statement offered for its truth generally requires an applicable exception to be admissible.",
+    "noul": 0.11
+  },
+  {
+    "id": "sample-14",
+    "title": "Affidavit",
+    "text": "An affidavit supporting a motion must be based on personal knowledge and set out facts that could be admitted in evidence.",
+    "noul": 0.55
+  },
+  {
+    "id": "sample-15",
+    "title": "Credibility",
+    "text": "At summary judgment, weighing evidence and resolving witness credibility belong to the fact finder at trial.",
+    "noul": 0.66
+  },
+  {
+    "id": "sample-16",
+    "title": "Contract interpretation",
+    "text": "An unambiguous contract is construed according to the ordinary meaning of its terms.",
+    "noul": 0.06
+  },
+  {
+    "id": "sample-17",
+    "title": "Statutory deadline",
+    "text": "A statutory filing deadline may bar an otherwise sufficient claim when no exception applies.",
+    "noul": 0.09
+  },
+  {
+    "id": "sample-18",
+    "title": "Injunction",
+    "text": "Preliminary injunctive relief requires a showing of likely success and irreparable harm among other factors.",
+    "noul": 0.12
+  },
+  {
+    "id": "sample-19",
+    "title": "Standing",
+    "text": "A plaintiff must establish a concrete injury traceable to the challenged conduct and redressable by relief.",
+    "noul": 0.04
+  },
+  {
+    "id": "sample-20",
+    "title": "Venue",
+    "text": "A transfer determination accounts for the convenience of parties and witnesses and the interests of justice.",
+    "noul": 0.02
+  },
+  {
+    "id": "sample-21",
+    "title": "Waiver",
+    "text": "Arguments not presented to the district court are ordinarily not considered for the first time on appeal.",
+    "noul": 0.19
+  },
+  {
+    "id": "sample-22",
+    "title": "Service",
+    "text": "Proper service gives a defendant notice of the proceedings and an opportunity to appear.",
+    "noul": 0.1
+  },
+  {
+    "id": "sample-23",
+    "title": "Judgment as law",
+    "text": "After a party has been fully heard, judgment as a matter of law may follow where a reasonable jury lacks a legally sufficient basis to find for it.",
+    "noul": 0.48
+  },
+  {
+    "id": "sample-24",
+    "title": "Reconsideration",
+    "text": "A motion for reconsideration is not an opportunity simply to repeat arguments already rejected.",
+    "noul": 0.17
+  },
+  {
+    "id": "sample-25",
+    "title": "Qualified immunity",
+    "text": "An official may be protected from damages unless the alleged conduct violated a clearly established right.",
+    "noul": 0.05
+  },
+  {
+    "id": "sample-26",
+    "title": "Claim preclusion",
+    "text": "A final judgment on the merits can preclude the same parties from relitigating the same claim.",
+    "noul": 0.16
+  },
+  {
+    "id": "sample-27",
+    "title": "Removal",
+    "text": "The removing party bears the burden of establishing the federal court subject matter jurisdiction.",
+    "noul": 0.01
+  },
+  {
+    "id": "sample-28",
+    "title": "Expert opinion",
+    "text": "Expert testimony must rest on reliable methods applied to sufficient facts and assist the trier of fact.",
+    "noul": 0.23
+  },
+  {
+    "id": "sample-29",
+    "title": "Jury instructions",
+    "text": "Jury instructions are assessed as a whole to determine whether they accurately convey the governing law.",
+    "noul": 0
+  },
+  {
+    "id": "sample-30",
+    "title": "Costs",
+    "text": "Recoverable litigation costs depend on the governing statute and the court exercise of its discretion.",
+    "noul": 0.24
+  }
+]

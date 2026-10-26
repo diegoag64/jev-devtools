@@ -1,0 +1,79 @@
+{
+  "category": [
+    "What is the single most applicable content-policy category for this post?",
+    {
+      "None": "No policy violation of any kind.",
+      "Harass": "Insults or demeans a person, with no threat of harm and no protected-class attack.",
+      "Hate": "Attacks a person or group over a protected characteristic (race, religion, gender, ...).",
+      "Violence": "Makes a credible threat of harm or incites violence against someone.",
+      "Spam": "Unsolicited promotion or link spam, with no personal attack.",
+      "Sexual": "Sexual or adult content."
+    }
+  ],
+  "primary_risk": [
+    "What is the primary moderation risk that should drive triage for this post?",
+    {
+      "Harassment": "Personal attack or targeted abuse is the main risk.",
+      "Violence": "A threat of harm or intimidation is the main risk.",
+      "LinkAbuse": "External-link or off-platform coordination risk is the main risk.",
+      "AccountHistory": "Prior account history or repeat behavior is the main risk.",
+      "LowRisk": "No meaningful moderation risk is present."
+    }
+  ],
+  "target": [
+    "Who or what is the content primarily directed at?",
+    {
+      "None": "Not directed at anyone in particular.",
+      "Person": "Directed at one specific individual.",
+      "Group": "Directed at a protected group or class.",
+      "Platform": "Directed at the community or platform itself, not a person."
+    }
+  ],
+  "action": [
+    "What enforcement action should be taken on this post?",
+    {
+      "Allow": "Leave the post up with no action.",
+      "Warn": "Leave the post up but attach a warning label.",
+      "Remove": "Remove the post, but do not penalize the account.",
+      "Strike": "Remove the post and add a strike to the account.",
+      "Escalate": "Take no automated action; hold for a human decision."
+    }
+  ],
+  "queue": [
+    "Which single moderation queue should own this post?",
+    {
+      "Auto": "Auto-resolve; no human queue needed.",
+      "General": "General moderation queue.",
+      "Threat": "Threat / violence response queue.",
+      "Spam": "Spam and platform-abuse queue.",
+      "TSLead": "Trust-and-safety lead / senior queue."
+    }
+  ],
+  "link_handling": [
+    "How should any external link or off-platform invite in the post be handled?",
+    {
+      "Allow": "Leave the link in place.",
+      "RmLink": "Strip or disable the link but keep the post.",
+      "Brigade": "Treat the link as coordinated brigading and action it as abuse.",
+      "Escalate": "Send the link to a specialist to assess before acting."
+    }
+  ],
+  "review_path": [
+    "Who should make the final call on this post?",
+    {
+      "Auto": "Automated action; no human review.",
+      "Human": "A frontline human moderator makes the call.",
+      "Senior": "A senior or specialist reviewer is required.",
+      "Legal": "Route to legal or law-enforcement escalation."
+    }
+  ],
+  "severity": [
+    "What is the overall severity of this post?",
+    {
+      "None": "No violation.",
+      "Low": "Rude or dismissive, but essentially harmless.",
+      "Medium": "Personal harassment with no clearly credible threat.",
+      "High": "Harassment together with a threat that could be read as credible."
+    }
+  ]
+}

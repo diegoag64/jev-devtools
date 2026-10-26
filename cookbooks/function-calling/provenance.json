@@ -1,0 +1,27 @@
+{
+  "source": "https://docs.typesafe.ai/cookbooks/function_calling",
+  "reviewedOn": "2026-10-26",
+  "upstreamCommit": "25e9d373f4853b3e7e300e55a194f50e54838f68",
+  "assets": [
+    {
+      "path": "dispatch.py",
+      "sha256": "c1b661565c90104d219d23faab6e09f738018f74a0bd89762d4f1bbba00fbd35",
+      "url": "https://raw.githubusercontent.com/typesafe-ai/typesafe-public-examples/25e9d373f4853b3e7e300e55a194f50e54838f68/cookbooks/function_calling/dispatch.py"
+    },
+    {
+      "path": "trader.py",
+      "sha256": "93827a813194087f19aa6a8d77387b48edb311a65ba0d6a48232144b06abfc48",
+      "url": "https://raw.githubusercontent.com/typesafe-ai/typesafe-public-examples/25e9d373f4853b3e7e300e55a194f50e54838f68/cookbooks/function_calling/trader.py"
+    },
+    {
+      "path": "spec.json",
+      "sha256": "26b603e7baad5c928a82f879f1065f6a027e7cbdb98fc5e62a3a12c486a9953a",
+      "url": "https://raw.githubusercontent.com/typesafe-ai/typesafe-public-examples/25e9d373f4853b3e7e300e55a194f50e54838f68/cookbooks/function_calling/spec.json"
+    }
+  ],
+  "transformation": "spec.json preserves upstream prompts/options. signatures.json extracts closed-set shapes, member order and all function defaults from trader.py annotations, replacing Python reflection. Dispatcher read/decision aggregation is ported to TypeScript tasks and a bounded map with a presence branch. Authored commands and synthetic answers are not cached inference or published measurements. Only proposes calls; omits Call.run(), market bars, charts and external effects. No usage is fabricated.",
+  "license": "MIT; LICENSE.typesafe retained",
+  "recipeSha256": "a3b296e445f9ba629c391053ef40bcfb1da7d4c32d657d58a4d539b44a611073",
+  "questionContractSha256": "a13b104daf3c36db5e3990afe28122a3572ec90d80fb735ba1a176988b117bac",
+  "questionContractMethod": "SHA-256 of recursively key-sorted compact JSON from pinned dispatch.py all_questions(), executed with trader.py signature-only stubs; preserves numeric-string option keys lexicographically."
+}

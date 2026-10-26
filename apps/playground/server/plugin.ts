@@ -1,3 +1,97 @@
+import { parallelQuestionsFlow } from "../../../cookbooks/parallel-questions/flow.js";
+import { parallelQuestionsSampleTransport } from "../../../cookbooks/parallel-questions/samples.js";
+import {
+  parallelQuestionsCases,
+  isParallelQuestionsCase,
+  type ParallelQuestionsCase,
+} from "../../../cookbooks/parallel-questions/cases.js";
+import { twitchFlow } from "../../../cookbooks/twitch-chat-filter/flow.js";
+import { twitchSampleTransport } from "../../../cookbooks/twitch-chat-filter/samples.js";
+import {
+  twitchCases,
+  isTwitchCase,
+  type TwitchCase,
+} from "../../../cookbooks/twitch-chat-filter/cases.js";
+import { entityFlow } from "../../../cookbooks/entity-alignment/flow.js";
+import { entitySampleTransport } from "../../../cookbooks/entity-alignment/samples.js";
+import {
+  entityCases,
+  isEntityCase,
+  type EntityCase,
+} from "../../../cookbooks/entity-alignment/cases.js";
+import { citationFlow } from "../../../cookbooks/citation-checking/flow.js";
+import { citationSampleTransport } from "../../../cookbooks/citation-checking/samples.js";
+import {
+  citationCases,
+  isCitationCase,
+  type CitationCase,
+} from "../../../cookbooks/citation-checking/cases.js";
+import { confidenceFlow } from "../../../cookbooks/confidence-fallback/flow.js";
+import { confidenceSampleTransport } from "../../../cookbooks/confidence-fallback/samples.js";
+import {
+  confidenceCases,
+  isConfidenceCase,
+  type ConfidenceCase,
+} from "../../../cookbooks/confidence-fallback/cases.js";
+import { lineSearchFlow } from "../../../cookbooks/line-search/flow.js";
+import { lineSearchSampleTransport } from "../../../cookbooks/line-search/samples.js";
+import {
+  lineSearchCases,
+  isLineSearchCase,
+  type LineSearchCase,
+} from "../../../cookbooks/line-search/cases.js";
+import { rerankingFlow } from "../../../cookbooks/reranking/flow.js";
+import { rerankingSampleTransport } from "../../../cookbooks/reranking/samples.js";
+import {
+  rerankingCases,
+  isRerankingCase,
+  type RerankingCase,
+} from "../../../cookbooks/reranking/cases.js";
+import { dateFlow } from "../../../cookbooks/date-extraction/flow.js";
+import { dateSampleTransport } from "../../../cookbooks/date-extraction/samples.js";
+import {
+  dateCases,
+  isDateCase,
+  type DateCase,
+} from "../../../cookbooks/date-extraction/cases.js";
+import { extractionFlow } from "../../../cookbooks/pre-parsed-extraction/flow.js";
+import { extractionSampleTransport } from "../../../cookbooks/pre-parsed-extraction/samples.js";
+import {
+  extractionCases,
+  isExtractionCase,
+  type ExtractionCase,
+} from "../../../cookbooks/pre-parsed-extraction/cases.js";
+import { functionFlow } from "../../../cookbooks/function-calling/flow.js";
+import { functionSampleTransport } from "../../../cookbooks/function-calling/samples.js";
+import {
+  functionCases,
+  isFunctionCase,
+  type FunctionCase,
+} from "../../../cookbooks/function-calling/cases.js";
+import { guardrailsFlow } from "../../../cookbooks/guardrails/flow.js";
+import { guardrailsSampleTransport } from "../../../cookbooks/guardrails/samples.js";
+import {
+  guardrailsCases,
+  isGuardrailsCase,
+  type GuardrailsCase,
+} from "../../../cookbooks/guardrails/cases.js";
+import { consistencyFlow } from "../../../cookbooks/consistency-choices/flow.js";
+import { consistencySampleTransport } from "../../../cookbooks/consistency-choices/samples.js";
+import {
+  consistencyCases,
+  isConsistencyCase,
+  type ConsistencyCase,
+} from "../../../cookbooks/consistency-choices/cases.js";
+import {
+  createNoulFlow,
+  flowName as noulFlowName,
+} from "../../../cookbooks/consistency-nouls/flow.js";
+import { createNoulSample } from "../../../cookbooks/consistency-nouls/samples.js";
+import {
+  noulCases,
+  isNoulCase,
+  type NoulCase,
+} from "../../../cookbooks/consistency-nouls/cases.js";
 import { memoryFlow } from "../../../cookbooks/simple-memory/flow.js";
 import { memorySampleTransport } from "../../../cookbooks/simple-memory/samples.js";
 import {
@@ -73,11 +167,13 @@ const validSession = (value: unknown): value is string =>
 export function jevInspectorServer(
   apiKey?: string,
   cookbookModel = defaultModel,
+  captureLimit?: number,
 ): Plugin {
   const cookbook = createSkillSuggestionFlow(cookbookModel);
   const inspector = createJevDevtools({
     enabled: true,
     origin: "http://127.0.0.1:4182",
+    limit: captureLimit,
   });
   const running = new Map<
     string,
@@ -136,8 +232,21 @@ export function jevInspectorServer(
             ragCase?: string;
             sdeCase?: string;
             hierarchyCase?: string;
+            twitchCase?: string;
             structureCase?: string;
+            entityCase?: string;
+            confidenceCase?: string;
             memoryCase?: string;
+            parallelQuestionsCase?: string;
+            citationCase?: string;
+            lineSearchCase?: string;
+            rerankingCase?: string;
+            dateCase?: string;
+            extractionCase?: string;
+            functionCase?: string;
+            guardrailsCase?: string;
+            consistencyCase?: string;
+            noulCase?: string;
           };
           try {
             let text = "";
@@ -178,8 +287,21 @@ export function jevInspectorServer(
               "flow-rag",
               "flow-sde",
               "flow-hierarchy",
+              "flow-twitch",
               "flow-structure",
+              "flow-entity",
+              "flow-confidence",
               "flow-memory",
+              "flow-parallel-questions",
+              "flow-citation",
+              "flow-line-search",
+              "flow-reranking",
+              "flow-date",
+              "flow-extraction",
+              "flow-function-calling",
+              "flow-guardrails",
+              "flow-consistency-choices",
+              "flow-nouls",
               "flow-manual",
               "flow-other",
               "flow-parallel",
@@ -191,12 +313,59 @@ export function jevInspectorServer(
             typeof body.message !== "string" ||
             body.message.length > 8000 ||
             (body.scenario === "stress" && !validStress(body.stress)) ||
+            (body.scenario === "flow-parallel-questions" &&
+              (!isParallelQuestionsCase(body.parallelQuestionsCase) ||
+                body.message !==
+                  parallelQuestionsCases[body.parallelQuestionsCase]
+                    .message)) ||
+            (body.scenario === "flow-citation" &&
+              (!isCitationCase(body.citationCase) ||
+                body.message !== citationCases[body.citationCase].message)) ||
+            (body.scenario === "flow-line-search" &&
+              (!isLineSearchCase(body.lineSearchCase) ||
+                body.message !==
+                  lineSearchCases[body.lineSearchCase].message)) ||
+            (body.scenario === "flow-reranking" &&
+              (!isRerankingCase(body.rerankingCase) ||
+                body.message !== rerankingCases[body.rerankingCase].message)) ||
+            (body.scenario === "flow-date" &&
+              (!isDateCase(body.dateCase) ||
+                body.message !== dateCases[body.dateCase].message)) ||
+            (body.scenario === "flow-extraction" &&
+              (!isExtractionCase(body.extractionCase) ||
+                body.message !==
+                  extractionCases[body.extractionCase].message)) ||
+            (body.scenario === "flow-function-calling" &&
+              (!isFunctionCase(body.functionCase) ||
+                body.message !== functionCases[body.functionCase].message)) ||
+            (body.scenario === "flow-guardrails" &&
+              (!isGuardrailsCase(body.guardrailsCase) ||
+                body.message !==
+                  guardrailsCases[body.guardrailsCase].message)) ||
+            (body.scenario === "flow-consistency-choices" &&
+              (!isConsistencyCase(body.consistencyCase) ||
+                body.message !==
+                  consistencyCases[body.consistencyCase].message)) ||
+            (body.scenario === "flow-nouls" &&
+              (body.mode !== "sample" ||
+                !isNoulCase(body.noulCase) ||
+                body.message !== noulCases[body.noulCase].message)) ||
             (body.scenario === "flow-memory" &&
               (!isMemoryCase(body.memoryCase) ||
                 body.message !== memoryCases[body.memoryCase].message)) ||
+            (body.scenario === "flow-entity" &&
+              (!isEntityCase(body.entityCase) ||
+                body.message !== entityCases[body.entityCase].message)) ||
+            (body.scenario === "flow-confidence" &&
+              (!isConfidenceCase(body.confidenceCase) ||
+                body.message !==
+                  confidenceCases[body.confidenceCase].message)) ||
             (body.scenario === "flow-structure" &&
               (!isStructureCase(body.structureCase) ||
                 body.message !== structureCases[body.structureCase].message)) ||
+            (body.scenario === "flow-twitch" &&
+              (!isTwitchCase(body.twitchCase) ||
+                body.message !== twitchCases[body.twitchCase].message)) ||
             (body.scenario === "flow-hierarchy" &&
               (!isHierarchyCase(body.hierarchyCase) ||
                 body.message !== hierarchyCases[body.hierarchyCase].message)) ||
@@ -256,55 +425,154 @@ export function jevInspectorServer(
                       : body.scenario === "flow-parallel"
                         ? parallelFlow
                         : refundFlow;
+              const noulSample =
+                body.scenario === "flow-nouls"
+                  ? createNoulSample(body.noulCase as NoulCase)
+                  : null;
               const client = inspector.createClient(
                 {
                   apiKey: body.mode === "live" ? apiKey : "sample-only",
                   fetch:
-                    body.scenario === "flow-memory"
-                      ? memorySampleTransport(body.memoryCase as MemoryCase)
-                      : body.scenario === "flow-structure"
-                        ? structureSampleTransport(
-                            body.structureCase as StructureCase,
-                          )
-                        : body.scenario === "flow-hierarchy"
-                          ? hierarchySampleTransport(
-                              body.hierarchyCase as HierarchyCase,
-                            )
-                          : body.scenario === "flow-sde"
-                            ? sdeSampleTransport(body.sdeCase as SdeCase)
-                            : body.scenario === "flow-rag"
-                              ? ragSampleTransport(body.ragCase as RagCase)
-                              : body.scenario === "flow-skills"
-                                ? body.mode === "live"
-                                  ? globalThis.fetch
-                                  : skillSampleTransport(
-                                      body.cookbookCase as keyof typeof skillCases,
+                    body.scenario === "flow-parallel-questions"
+                      ? parallelQuestionsSampleTransport(
+                          body.parallelQuestionsCase as ParallelQuestionsCase,
+                        )
+                      : body.scenario === "flow-twitch"
+                        ? twitchSampleTransport(body.twitchCase as TwitchCase)
+                        : body.scenario === "flow-entity"
+                          ? entitySampleTransport(body.entityCase as EntityCase)
+                          : body.scenario === "flow-citation"
+                            ? citationSampleTransport(
+                                body.citationCase as CitationCase,
+                              )
+                            : body.scenario === "flow-confidence"
+                              ? confidenceSampleTransport(
+                                  body.confidenceCase as ConfidenceCase,
+                                )
+                              : body.scenario === "flow-line-search"
+                                ? lineSearchSampleTransport(
+                                    body.lineSearchCase as LineSearchCase,
+                                  )
+                                : body.scenario === "flow-reranking"
+                                  ? rerankingSampleTransport(
+                                      body.rerankingCase as RerankingCase,
                                     )
-                                : flowTransport(body.scenario!),
+                                  : body.scenario === "flow-date"
+                                    ? dateSampleTransport(
+                                        body.dateCase as DateCase,
+                                      )
+                                    : body.scenario === "flow-extraction"
+                                      ? extractionSampleTransport(
+                                          body.extractionCase as ExtractionCase,
+                                        )
+                                      : body.scenario ===
+                                          "flow-function-calling"
+                                        ? functionSampleTransport(
+                                            body.functionCase as FunctionCase,
+                                          )
+                                        : body.scenario === "flow-guardrails"
+                                          ? guardrailsSampleTransport(
+                                              body.guardrailsCase as GuardrailsCase,
+                                            )
+                                          : body.scenario ===
+                                              "flow-consistency-choices"
+                                            ? consistencySampleTransport(
+                                                body.consistencyCase as ConsistencyCase,
+                                              )
+                                            : noulSample
+                                              ? noulSample.fetch
+                                              : body.scenario === "flow-memory"
+                                                ? memorySampleTransport(
+                                                    body.memoryCase as MemoryCase,
+                                                  )
+                                                : body.scenario ===
+                                                    "flow-structure"
+                                                  ? structureSampleTransport(
+                                                      body.structureCase as StructureCase,
+                                                    )
+                                                  : body.scenario ===
+                                                      "flow-hierarchy"
+                                                    ? hierarchySampleTransport(
+                                                        body.hierarchyCase as HierarchyCase,
+                                                      )
+                                                    : body.scenario ===
+                                                        "flow-sde"
+                                                      ? sdeSampleTransport(
+                                                          body.sdeCase as SdeCase,
+                                                        )
+                                                      : body.scenario ===
+                                                          "flow-rag"
+                                                        ? ragSampleTransport(
+                                                            body.ragCase as RagCase,
+                                                          )
+                                                        : body.scenario ===
+                                                            "flow-skills"
+                                                          ? body.mode === "live"
+                                                            ? globalThis.fetch
+                                                            : skillSampleTransport(
+                                                                body.cookbookCase as keyof typeof skillCases,
+                                                              )
+                                                          : flowTransport(
+                                                              body.scenario!,
+                                                            ),
                   logLevel: "off",
                   retry: { maxRetries: 0 },
                   timeout: 120_000,
                 },
                 {
                   label:
-                    body.scenario === "flow-memory"
-                      ? memoryFlow.definition.name
-                      : body.scenario === "flow-structure"
-                        ? structureFlow.definition.name
-                        : body.scenario === "flow-hierarchy"
-                          ? hierarchyFlow.definition.name
-                          : body.scenario === "flow-sde"
-                            ? sdeFlow.definition.name
-                            : flow.definition.name,
+                    body.scenario === "flow-parallel-questions"
+                      ? parallelQuestionsFlow.definition.name
+                      : body.scenario === "flow-twitch"
+                        ? twitchFlow.definition.name
+                        : body.scenario === "flow-entity"
+                          ? entityFlow.definition.name
+                          : body.scenario === "flow-citation"
+                            ? citationFlow.definition.name
+                            : body.scenario === "flow-confidence"
+                              ? confidenceFlow.definition.name
+                              : body.scenario === "flow-line-search"
+                                ? lineSearchFlow.definition.name
+                                : body.scenario === "flow-reranking"
+                                  ? rerankingFlow.definition.name
+                                  : body.scenario === "flow-date"
+                                    ? dateFlow.definition.name
+                                    : body.scenario === "flow-extraction"
+                                      ? extractionFlow.definition.name
+                                      : body.scenario ===
+                                          "flow-function-calling"
+                                        ? functionFlow.definition.name
+                                        : body.scenario === "flow-guardrails"
+                                          ? guardrailsFlow.definition.name
+                                          : body.scenario ===
+                                              "flow-consistency-choices"
+                                            ? consistencyFlow.definition.name
+                                            : noulSample
+                                              ? noulFlowName
+                                              : body.scenario === "flow-memory"
+                                                ? memoryFlow.definition.name
+                                                : body.scenario ===
+                                                    "flow-structure"
+                                                  ? structureFlow.definition
+                                                      .name
+                                                  : body.scenario ===
+                                                      "flow-hierarchy"
+                                                    ? hierarchyFlow.definition
+                                                        .name
+                                                    : body.scenario ===
+                                                        "flow-sde"
+                                                      ? sdeFlow.definition.name
+                                                      : flow.definition.name,
                   source: body.mode === "live" ? "live" : "sample",
                 },
               );
               const result =
-                body.scenario === "flow-memory"
-                  ? await memoryFlow.run(
+                body.scenario === "flow-parallel-questions"
+                  ? await parallelQuestionsFlow.run(
                       {
                         message: body.message,
-                        caseId: body.memoryCase as MemoryCase,
+                        caseId:
+                          body.parallelQuestionsCase as ParallelQuestionsCase,
                       },
                       {
                         client,
@@ -312,11 +580,11 @@ export function jevInspectorServer(
                         signal: controller.signal,
                       },
                     )
-                  : body.scenario === "flow-structure"
-                    ? await structureFlow.run(
+                  : body.scenario === "flow-twitch"
+                    ? await twitchFlow.run(
                         {
                           message: body.message,
-                          caseId: body.structureCase as StructureCase,
+                          caseId: body.twitchCase as TwitchCase,
                         },
                         {
                           client,
@@ -324,15 +592,11 @@ export function jevInspectorServer(
                           signal: controller.signal,
                         },
                       )
-                    : body.scenario === "flow-hierarchy"
-                      ? await (
-                          body.hierarchyCase === "limit"
-                            ? hierarchyLimitFlow
-                            : hierarchyFlow
-                        ).run(
+                    : body.scenario === "flow-entity"
+                      ? await entityFlow.run(
                           {
                             message: body.message,
-                            caseId: body.hierarchyCase as HierarchyCase,
+                            caseId: body.entityCase as EntityCase,
                           },
                           {
                             client,
@@ -340,11 +604,11 @@ export function jevInspectorServer(
                             signal: controller.signal,
                           },
                         )
-                      : body.scenario === "flow-sde"
-                        ? await sdeFlow.run(
+                      : body.scenario === "flow-citation"
+                        ? await citationFlow.run(
                             {
                               message: body.message,
-                              caseId: body.sdeCase as SdeCase,
+                              caseId: body.citationCase as CitationCase,
                             },
                             {
                               client,
@@ -352,17 +616,194 @@ export function jevInspectorServer(
                               signal: controller.signal,
                             },
                           )
-                        : await flow.run(
-                            {
-                              message: body.message,
-                              caseId: body.ragCase as RagCase,
-                            },
-                            {
-                              client,
-                              devtools: inspector,
-                              signal: controller.signal,
-                            },
-                          );
+                        : body.scenario === "flow-confidence"
+                          ? await confidenceFlow.run(
+                              {
+                                message: body.message,
+                                caseId: body.confidenceCase as ConfidenceCase,
+                              },
+                              {
+                                client,
+                                devtools: inspector,
+                                signal: controller.signal,
+                              },
+                            )
+                          : body.scenario === "flow-line-search"
+                            ? await lineSearchFlow.run(
+                                {
+                                  message: body.message,
+                                  caseId: body.lineSearchCase as LineSearchCase,
+                                },
+                                {
+                                  client,
+                                  devtools: inspector,
+                                  signal: controller.signal,
+                                },
+                              )
+                            : body.scenario === "flow-reranking"
+                              ? await rerankingFlow.run(
+                                  {
+                                    message: body.message,
+                                    caseId: body.rerankingCase as RerankingCase,
+                                  },
+                                  {
+                                    client,
+                                    devtools: inspector,
+                                    signal: controller.signal,
+                                  },
+                                )
+                              : body.scenario === "flow-date"
+                                ? await dateFlow.run(
+                                    {
+                                      message: body.message,
+                                      caseId: body.dateCase as DateCase,
+                                    },
+                                    {
+                                      client,
+                                      devtools: inspector,
+                                      signal: controller.signal,
+                                    },
+                                  )
+                                : body.scenario === "flow-extraction"
+                                  ? await extractionFlow.run(
+                                      {
+                                        message: body.message,
+                                        caseId:
+                                          body.extractionCase as ExtractionCase,
+                                      },
+                                      {
+                                        client,
+                                        devtools: inspector,
+                                        signal: controller.signal,
+                                      },
+                                    )
+                                  : body.scenario === "flow-function-calling"
+                                    ? await functionFlow.run(
+                                        {
+                                          message: body.message,
+                                          caseId:
+                                            body.functionCase as FunctionCase,
+                                        },
+                                        {
+                                          client,
+                                          devtools: inspector,
+                                          signal: controller.signal,
+                                        },
+                                      )
+                                    : body.scenario === "flow-guardrails"
+                                      ? await guardrailsFlow.run(
+                                          {
+                                            message: body.message,
+                                            caseId:
+                                              body.guardrailsCase as GuardrailsCase,
+                                          },
+                                          {
+                                            client,
+                                            devtools: inspector,
+                                            signal: controller.signal,
+                                          },
+                                        )
+                                      : body.scenario ===
+                                          "flow-consistency-choices"
+                                        ? await consistencyFlow.run(
+                                            {
+                                              message: body.message,
+                                              caseId:
+                                                body.consistencyCase as ConsistencyCase,
+                                            },
+                                            {
+                                              client,
+                                              devtools: inspector,
+                                              signal: controller.signal,
+                                            },
+                                          )
+                                        : noulSample
+                                          ? await createNoulFlow(
+                                              noulSample.returnedModels,
+                                            ).run(
+                                              {
+                                                message: body.message,
+                                                caseId:
+                                                  body.noulCase as NoulCase,
+                                              },
+                                              {
+                                                client,
+                                                devtools: inspector,
+                                                signal: controller.signal,
+                                              },
+                                            )
+                                          : body.scenario === "flow-memory"
+                                            ? await memoryFlow.run(
+                                                {
+                                                  message: body.message,
+                                                  caseId:
+                                                    body.memoryCase as MemoryCase,
+                                                },
+                                                {
+                                                  client,
+                                                  devtools: inspector,
+                                                  signal: controller.signal,
+                                                },
+                                              )
+                                            : body.scenario === "flow-structure"
+                                              ? await structureFlow.run(
+                                                  {
+                                                    message: body.message,
+                                                    caseId:
+                                                      body.structureCase as StructureCase,
+                                                  },
+                                                  {
+                                                    client,
+                                                    devtools: inspector,
+                                                    signal: controller.signal,
+                                                  },
+                                                )
+                                              : body.scenario ===
+                                                  "flow-hierarchy"
+                                                ? await (
+                                                    body.hierarchyCase ===
+                                                    "limit"
+                                                      ? hierarchyLimitFlow
+                                                      : hierarchyFlow
+                                                  ).run(
+                                                    {
+                                                      message: body.message,
+                                                      caseId:
+                                                        body.hierarchyCase as HierarchyCase,
+                                                    },
+                                                    {
+                                                      client,
+                                                      devtools: inspector,
+                                                      signal: controller.signal,
+                                                    },
+                                                  )
+                                                : body.scenario === "flow-sde"
+                                                  ? await sdeFlow.run(
+                                                      {
+                                                        message: body.message,
+                                                        caseId:
+                                                          body.sdeCase as SdeCase,
+                                                      },
+                                                      {
+                                                        client,
+                                                        devtools: inspector,
+                                                        signal:
+                                                          controller.signal,
+                                                      },
+                                                    )
+                                                  : await flow.run(
+                                                      {
+                                                        message: body.message,
+                                                        caseId:
+                                                          body.ragCase as RagCase,
+                                                      },
+                                                      {
+                                                        client,
+                                                        devtools: inspector,
+                                                        signal:
+                                                          controller.signal,
+                                                      },
+                                                    );
               send(res, 200, { ok: true, flow: result });
               return;
             }

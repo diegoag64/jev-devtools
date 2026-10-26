@@ -44,12 +44,21 @@ Use the installed `lib/flow/index.d.ts` as the version-matched API contract. Def
 
 The flow API includes `task()`, runtime `jev()` request factories, `.answers`, `map()`, `if()`, strict `.gt()` comparisons, and `loop()`. Loops check a state expression before each iteration and reject incomplete iteration-limit exhaustion with `FlowLoopLimitError`. A loop can contain a map; all expanded work shares one run-wide budget. There are no nested loops, loops inside maps, nested maps, durable jobs, or automatic task retries. Use installed declarations and bundled references for the exact version; check the changelog for publication status.
 
-- [Cookbook collection](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/README.md): Six runnable repository apps using APIs available since 0.4.0. Code and synthetic fixtures are not shipped in npm.
+- [Cookbook collection](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/README.md): Runnable repository apps using APIs available since 0.4.0. Code and synthetic fixtures are not shipped in npm.
+- [Twitch chat filter](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/twitch-chat-filter/README.md): Original finite 29-message feed, concurrency-eight input-order map, category Choice plus toxic/spoiler Nouls, inclusive 0.70 policy gates and quiet reapplication without requests. Synthetic fixtures; no live Twitch ingestion.
+- [Line-by-line search](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/line-search/README.md): Complete pinned document, one runtime Choice + Noul request, ranking and lookup tasks, and exact existence branches with synthetic responses.
+- [Choice self-consistency](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/consistency-choices/README.md): Original eight-question rubric, 15 sequential sample requests, probability gate and calculated agreement; synthetic responses, no measured consistency claim.
 - [SDE cascade](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/sde-cascade/README.md): Sample-only returning conditional, strict escalation gate and shared continuation.
 - [Hierarchical classification](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/hierarchical-classification/README.md): Bounded iteration, frontier collections, beam versus greedy search and iteration-limit failure.
 - [Structure Recovery](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/structure-recovery/README.md): Tasks, dynamic requests and returning conditionals; four sample-only cases.
+- [Confidence fallback](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/confidence-fallback/README.md): Original 75-group SIC Choice, API confidence >=0.90, and a deterministic parent-division task. Four synthetic samples; no SEC evaluation.
 - [Simple Memory](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/simple-memory/README.md): Tasks, dynamic requests, conditionals and loops; four sample-only timelines with customer-scoped run-local memory and an inclusive 50% save gate. No persistent storage.
+
+- [Pre-parsed value extraction](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/pre-parsed-extraction/README.md): Sample-only regex candidates, ordered helper requests, none bypasses and decimal-safe normalization.
 
 ## Replay and comparison (0.5.0)
 
 `flowFixture` exports captured answers with warnings, `replayClient` reuses them without Jev inference, and `compareWithFixture` compares replay with a supplied client. Tasks still execute; comparison can make live calls and its returned fixture contains unredacted responses. These APIs require 0.5.0 or later. Use [the version-matched flow recipe](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) and the installed declarations.
+
+- [LLM guardrails](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/guardrails/README.md): Sample-only input/output batteries, one assessment reused by strict and permissive policies, severity upgrades and action precedence.
+- [Noul self-consistency](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/consistency-nouls/README.md): Fifteen sequential requests, fourteen Nouls, inclusive review band and computed fixture statistics. Synthetic variation is not measured consistency or provider comparison.

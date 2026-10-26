@@ -1,0 +1,759 @@
+{
+  "email": [
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "From: Dana Whit <dana.whit@acme-corp.com>\nTo: billing@acme-corp.com\nCc: orders@acme-corp.com\nReply-To: dana.personal@gmail.com\n\nHi team - please don't use the billing alias for this one. Send my receipt to my\npersonal address instead. Thanks, Dana.",
+        "questions": {
+          "pick": {
+            "type": "choice",
+            "instructions": "Which email address does the sender want their receipt sent to?",
+            "criteria": {
+              "dana.whit@acme-corp.com": null,
+              "billing@acme-corp.com": null,
+              "orders@acme-corp.com": null,
+              "dana.personal@gmail.com": null,
+              "none": "None of these is the requested value."
+            }
+          }
+        }
+      },
+      "answers": {
+        "pick": {
+          "type": "choice",
+          "choice": "dana.personal@gmail.com",
+          "confidence": 0.42,
+          "probabilities": {
+            "dana.whit@acme-corp.com": 0.05,
+            "billing@acme-corp.com": 0.05,
+            "orders@acme-corp.com": 0.05,
+            "dana.personal@gmail.com": 0.8,
+            "none": 0.05
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "From: Dana Whit <dana.whit@acme-corp.com>\nTo: billing@acme-corp.com\nCc: orders@acme-corp.com\nReply-To: dana.personal@gmail.com\n\nHi team - please don't use the billing alias for this one. Send my receipt to my\npersonal address instead. Thanks, Dana.",
+        "questions": {
+          "pick": {
+            "type": "choice",
+            "instructions": "Which email address did this message come from (the From line)?",
+            "criteria": {
+              "dana.whit@acme-corp.com": null,
+              "billing@acme-corp.com": null,
+              "orders@acme-corp.com": null,
+              "dana.personal@gmail.com": null,
+              "none": "None of these is the requested value."
+            }
+          }
+        }
+      },
+      "answers": {
+        "pick": {
+          "type": "choice",
+          "choice": "dana.whit@acme-corp.com",
+          "confidence": 0.86,
+          "probabilities": {
+            "dana.whit@acme-corp.com": 0.8,
+            "billing@acme-corp.com": 0.05,
+            "orders@acme-corp.com": 0.05,
+            "dana.personal@gmail.com": 0.05,
+            "none": 0.05
+          }
+        }
+      }
+    }
+  ],
+  "phone": [
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Reach our San Francisco office at these numbers: main desk (415) 555-0199,\nbilling fax (415) 555-0142, and my direct cell (415) 555-0177. Call the cell if it's urgent.",
+        "questions": {
+          "pick": {
+            "type": "choice",
+            "instructions": "Which of these is the direct mobile / cell number?",
+            "criteria": {
+              "(415) 555-0199": null,
+              "(415) 555-0142": null,
+              "(415) 555-0177": null,
+              "none": "None of these is the requested value."
+            }
+          }
+        }
+      },
+      "answers": {
+        "pick": {
+          "type": "choice",
+          "choice": "(415) 555-0177",
+          "confidence": 0.86,
+          "probabilities": {
+            "(415) 555-0199": 0.06666666666666667,
+            "(415) 555-0142": 0.06666666666666667,
+            "(415) 555-0177": 0.8,
+            "none": 0.06666666666666667
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Reach our San Francisco office at these numbers: main desk (415) 555-0199,\nbilling fax (415) 555-0142, and my direct cell (415) 555-0177. Call the cell if it's urgent.",
+        "questions": {
+          "q": {
+            "type": "choice",
+            "instructions": "In what country is this office located?",
+            "criteria": {
+              "US": null,
+              "GB": null,
+              "DE": null,
+              "FR": null,
+              "CA": null,
+              "AU": null
+            }
+          }
+        }
+      },
+      "answers": {
+        "q": {
+          "type": "choice",
+          "choice": "US",
+          "confidence": 0.86,
+          "probabilities": {
+            "US": 0.8,
+            "GB": 0.04,
+            "DE": 0.04,
+            "FR": 0.04,
+            "CA": 0.04,
+            "AU": 0.04
+          }
+        }
+      }
+    }
+  ],
+  "money": [
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "q": {
+            "type": "choice",
+            "instructions": "What currency are these amounts in?",
+            "criteria": {
+              "USD": null,
+              "EUR": null,
+              "GBP": null,
+              "JPY": null,
+              "CAD": null
+            }
+          }
+        }
+      },
+      "answers": {
+        "q": {
+          "type": "choice",
+          "choice": "USD",
+          "confidence": 0.86,
+          "probabilities": {
+            "USD": 0.8,
+            "EUR": 0.05,
+            "GBP": 0.05,
+            "JPY": 0.05,
+            "CAD": 0.05
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "pick": {
+            "type": "choice",
+            "instructions": "Which amount is the total the customer must pay?",
+            "criteria": {
+              "$1,200.00": null,
+              "$115.50": null,
+              "$1,315.50": null,
+              "$50.00": null,
+              "none": "None of these is the requested value."
+            }
+          }
+        }
+      },
+      "answers": {
+        "pick": {
+          "type": "choice",
+          "choice": "$1,315.50",
+          "confidence": 0.86,
+          "probabilities": {
+            "$1,200.00": 0.05,
+            "$115.50": 0.05,
+            "$1,315.50": 0.8,
+            "$50.00": 0.05,
+            "none": 0.05
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "pick": {
+            "type": "choice",
+            "instructions": "Which amount is the courtesy credit that was applied?",
+            "criteria": {
+              "$1,200.00": null,
+              "$115.50": null,
+              "$1,315.50": null,
+              "$50.00": null,
+              "none": "None of these is the requested value."
+            }
+          }
+        }
+      },
+      "answers": {
+        "pick": {
+          "type": "choice",
+          "choice": "$50.00",
+          "confidence": 0.86,
+          "probabilities": {
+            "$1,200.00": 0.05,
+            "$115.50": 0.05,
+            "$1,315.50": 0.05,
+            "$50.00": 0.8,
+            "none": 0.05
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "q": {
+            "type": "noul",
+            "instructions": "Is the amount $1,315.50 a credit or refund to the customer, not a charge?"
+          }
+        }
+      },
+      "answers": {
+        "q": {
+          "type": "noul",
+          "noul": 0.07
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "q": {
+            "type": "noul",
+            "instructions": "Is the amount $50.00 a credit or refund to the customer, not a charge?"
+          }
+        }
+      },
+      "answers": {
+        "q": {
+          "type": "noul",
+          "noul": 0.91
+        }
+      }
+    }
+  ],
+  "boundary": [
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "q": {
+            "type": "choice",
+            "instructions": "What currency are these amounts in?",
+            "criteria": {
+              "USD": null,
+              "EUR": null,
+              "GBP": null,
+              "JPY": null,
+              "CAD": null
+            }
+          }
+        }
+      },
+      "answers": {
+        "q": {
+          "type": "choice",
+          "choice": "USD",
+          "confidence": 0.86,
+          "probabilities": {
+            "USD": 0.8,
+            "EUR": 0.05,
+            "GBP": 0.05,
+            "JPY": 0.05,
+            "CAD": 0.05
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "pick": {
+            "type": "choice",
+            "instructions": "Which amount is the total the customer must pay?",
+            "criteria": {
+              "$1,200.00": null,
+              "$115.50": null,
+              "$1,315.50": null,
+              "$50.00": null,
+              "none": "None of these is the requested value."
+            }
+          }
+        }
+      },
+      "answers": {
+        "pick": {
+          "type": "choice",
+          "choice": "$1,315.50",
+          "confidence": 0.86,
+          "probabilities": {
+            "$1,200.00": 0.05,
+            "$115.50": 0.05,
+            "$1,315.50": 0.8,
+            "$50.00": 0.05,
+            "none": 0.05
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "pick": {
+            "type": "choice",
+            "instructions": "Which amount is the courtesy credit that was applied?",
+            "criteria": {
+              "$1,200.00": null,
+              "$115.50": null,
+              "$1,315.50": null,
+              "$50.00": null,
+              "none": "None of these is the requested value."
+            }
+          }
+        }
+      },
+      "answers": {
+        "pick": {
+          "type": "choice",
+          "choice": "$50.00",
+          "confidence": 0.86,
+          "probabilities": {
+            "$1,200.00": 0.05,
+            "$115.50": 0.05,
+            "$1,315.50": 0.05,
+            "$50.00": 0.8,
+            "none": 0.05
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "q": {
+            "type": "noul",
+            "instructions": "Is the amount $1,315.50 a credit or refund to the customer, not a charge?"
+          }
+        }
+      },
+      "answers": {
+        "q": {
+          "type": "noul",
+          "noul": 0.5
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "q": {
+            "type": "noul",
+            "instructions": "Is the amount $50.00 a credit or refund to the customer, not a charge?"
+          }
+        }
+      },
+      "answers": {
+        "q": {
+          "type": "noul",
+          "noul": 0.501
+        }
+      }
+    }
+  ],
+  "below": [
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "q": {
+            "type": "choice",
+            "instructions": "What currency are these amounts in?",
+            "criteria": {
+              "USD": null,
+              "EUR": null,
+              "GBP": null,
+              "JPY": null,
+              "CAD": null
+            }
+          }
+        }
+      },
+      "answers": {
+        "q": {
+          "type": "choice",
+          "choice": "USD",
+          "confidence": 0.86,
+          "probabilities": {
+            "USD": 0.8,
+            "EUR": 0.05,
+            "GBP": 0.05,
+            "JPY": 0.05,
+            "CAD": 0.05
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "pick": {
+            "type": "choice",
+            "instructions": "Which amount is the total the customer must pay?",
+            "criteria": {
+              "$1,200.00": null,
+              "$115.50": null,
+              "$1,315.50": null,
+              "$50.00": null,
+              "none": "None of these is the requested value."
+            }
+          }
+        }
+      },
+      "answers": {
+        "pick": {
+          "type": "choice",
+          "choice": "$1,315.50",
+          "confidence": 0.86,
+          "probabilities": {
+            "$1,200.00": 0.05,
+            "$115.50": 0.05,
+            "$1,315.50": 0.8,
+            "$50.00": 0.05,
+            "none": 0.05
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "pick": {
+            "type": "choice",
+            "instructions": "Which amount is the courtesy credit that was applied?",
+            "criteria": {
+              "$1,200.00": null,
+              "$115.50": null,
+              "$1,315.50": null,
+              "$50.00": null,
+              "none": "None of these is the requested value."
+            }
+          }
+        }
+      },
+      "answers": {
+        "pick": {
+          "type": "choice",
+          "choice": "$50.00",
+          "confidence": 0.86,
+          "probabilities": {
+            "$1,200.00": 0.05,
+            "$115.50": 0.05,
+            "$1,315.50": 0.05,
+            "$50.00": 0.8,
+            "none": 0.05
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "q": {
+            "type": "noul",
+            "instructions": "Is the amount $1,315.50 a credit or refund to the customer, not a charge?"
+          }
+        }
+      },
+      "answers": {
+        "q": {
+          "type": "noul",
+          "noul": 0.499
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Invoice INV-2087.\nSubtotal: $1,200.00\nSales tax: $115.50\nTotal due: $1,315.50\nA $50.00 courtesy credit from last month has already been applied.",
+        "questions": {
+          "q": {
+            "type": "noul",
+            "instructions": "Is the amount $50.00 a credit or refund to the customer, not a charge?"
+          }
+        }
+      },
+      "answers": {
+        "q": {
+          "type": "noul",
+          "noul": 0.5
+        }
+      }
+    }
+  ],
+  "none": [
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Reference price: $10.00. No invoice total or courtesy credit is stated.",
+        "questions": {
+          "q": {
+            "type": "choice",
+            "instructions": "What currency are these amounts in?",
+            "criteria": {
+              "USD": null,
+              "EUR": null,
+              "GBP": null,
+              "JPY": null,
+              "CAD": null
+            }
+          }
+        }
+      },
+      "answers": {
+        "q": {
+          "type": "choice",
+          "choice": "USD",
+          "confidence": 0.86,
+          "probabilities": {
+            "USD": 0.8,
+            "EUR": 0.05,
+            "GBP": 0.05,
+            "JPY": 0.05,
+            "CAD": 0.05
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Reference price: $10.00. No invoice total or courtesy credit is stated.",
+        "questions": {
+          "pick": {
+            "type": "choice",
+            "instructions": "Which amount is the total the customer must pay?",
+            "criteria": {
+              "$10.00": null,
+              "none": "None of these is the requested value."
+            }
+          }
+        }
+      },
+      "answers": {
+        "pick": {
+          "type": "choice",
+          "choice": "none",
+          "confidence": 0.86,
+          "probabilities": {
+            "$10.00": 0.2,
+            "none": 0.8
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "Reference price: $10.00. No invoice total or courtesy credit is stated.",
+        "questions": {
+          "pick": {
+            "type": "choice",
+            "instructions": "Which amount is the courtesy credit that was applied?",
+            "criteria": {
+              "$10.00": null,
+              "none": "None of these is the requested value."
+            }
+          }
+        }
+      },
+      "answers": {
+        "pick": {
+          "type": "choice",
+          "choice": "none",
+          "confidence": 0.86,
+          "probabilities": {
+            "$10.00": 0.2,
+            "none": 0.8
+          }
+        }
+      }
+    }
+  ],
+  "phoneNone": [
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "San Francisco office main desk (415) 555-0199. No mobile number is listed.",
+        "questions": {
+          "pick": {
+            "type": "choice",
+            "instructions": "Which of these is the direct mobile / cell number?",
+            "criteria": {
+              "(415) 555-0199": null,
+              "none": "None of these is the requested value."
+            }
+          }
+        }
+      },
+      "answers": {
+        "pick": {
+          "type": "choice",
+          "choice": "none",
+          "confidence": 0.86,
+          "probabilities": {
+            "(415) 555-0199": 0.2,
+            "none": 0.8
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "San Francisco office main desk (415) 555-0199. No mobile number is listed.",
+        "questions": {
+          "q": {
+            "type": "choice",
+            "instructions": "In what country is this office located?",
+            "criteria": {
+              "US": null,
+              "GB": null,
+              "DE": null,
+              "FR": null,
+              "CA": null,
+              "AU": null
+            }
+          }
+        }
+      },
+      "answers": {
+        "q": {
+          "type": "choice",
+          "choice": "US",
+          "confidence": 0.86,
+          "probabilities": {
+            "US": 0.8,
+            "GB": 0.04,
+            "DE": 0.04,
+            "FR": 0.04,
+            "CA": 0.04,
+            "AU": 0.04
+          }
+        }
+      }
+    }
+  ],
+  "emailNone": [
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "From: DANA@example.com\nSend the receipt by post. DANA@example.com is the sender, not a receipt destination.",
+        "questions": {
+          "pick": {
+            "type": "choice",
+            "instructions": "Which email address does the sender want their receipt sent to?",
+            "criteria": {
+              "DANA@example.com": null,
+              "none": "None of these is the requested value."
+            }
+          }
+        }
+      },
+      "answers": {
+        "pick": {
+          "type": "choice",
+          "choice": "none",
+          "confidence": 0.42,
+          "probabilities": {
+            "DANA@example.com": 0.2,
+            "none": 0.8
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "jev-1.12",
+        "state": "From: DANA@example.com\nSend the receipt by post. DANA@example.com is the sender, not a receipt destination.",
+        "questions": {
+          "pick": {
+            "type": "choice",
+            "instructions": "Which email address did this message come from (the From line)?",
+            "criteria": {
+              "DANA@example.com": null,
+              "none": "None of these is the requested value."
+            }
+          }
+        }
+      },
+      "answers": {
+        "pick": {
+          "type": "choice",
+          "choice": "DANA@example.com",
+          "confidence": 0.86,
+          "probabilities": {
+            "DANA@example.com": 0.8,
+            "none": 0.2
+          }
+        }
+      }
+    }
+  ],
+  "empty": []
+}

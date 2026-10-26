@@ -1,0 +1,11 @@
+{
+  "source": "https://docs.typesafe.ai/cookbooks/pre_parsed_value_extraction_cookbook.md",
+  "reviewedOn": "2026-10-26",
+  "sourceSha256": "71e547a710e414c7a3e30ca6386c1cc39f8e7980a1e98684e73e1d29ffcd25e8",
+  "upstreamRepository": "https://github.com/typesafe-ai/typesafe-public-examples",
+  "upstreamCommit": "25e9d373f4853b3e7e300e55a194f50e54838f68",
+  "upstreamAssetReview": "The recursive tree at this commit contains no pre-parsed extraction recipe directory or assets. Reviewed the current published Markdown code and the repository MIT LICENSE. No illustration or cache responses copied.",
+  "transformation": "Preserve recipe documents, regexes, helper boundaries, prompt wording, option order, model, and strict credit > 0.5. Use public Flow tasks, sequential maps, returning conditionals and runtime requests. Replace Python phonenumbers with libphonenumber-js and Decimal with exact decimal strings in the documented US-style numeric locale. Explicitly bypass empty candidates and none; reject candidate overflow. Authored edge cases and synthetic response transcripts are not official model measurements.",
+  "license": "MIT; LICENSE.typesafe retained",
+  "phoneLibrary": "libphonenumber-js (MIT), exact version pinned in apps/playground/package.json and package-lock.json; dependency license retained by npm"
+}

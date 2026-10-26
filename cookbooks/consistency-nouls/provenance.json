@@ -1,0 +1,9 @@
+{
+  "source": "https://docs.typesafe.ai/cookbooks/consistency_noul_cookbook.md",
+  "reviewedOn": "2026-10-26",
+  "sourceSha256": "321e29f0a67e7060cab731f7deb9674cd15a35aba8880e617ab2e64d92010b46",
+  "upstreamRepository": "https://github.com/typesafe-ai/typesafe-public-examples/tree/25e9d373f4853b3e7e300e55a194f50e54838f68",
+  "upstreamAssets": "Reviewed repository tree: no consistency recipe directory or cache is present. Executable code, claim and questions are from the official docs page. No upstream response cache or plot is copied.",
+  "license": "Upstream repository MIT notice retained in LICENSE.typesafe; the repository notice alone does not establish a separate license for the docs site.",
+  "transformation": "Preserve the claim, all 14 question texts/order, jev-latest, 15 sequential requests, and strict <0.30 / >0.70 gates. Author deterministic fixture probabilities and synthetic returned model labels. Deterministic per-case/per-index UIDs replace random token_hex(4); they are not independent model draws. Descriptive population standard deviation, ranges and decision counts are computed locally. Exclude all other-provider experiments, timing, pricing, usage and quality claims."
+}

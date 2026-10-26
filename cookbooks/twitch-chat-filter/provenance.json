@@ -1,0 +1,13 @@
+{
+  "source": "https://docs.typesafe.ai/cookbooks/twitch_chat_filter.md",
+  "reviewedOn": "2026-10-26",
+  "sourceSha256": "dee24bd42eeeafd2212afcc41a630acc7b8e4ef7c80cede0d507b129ce1539c9",
+  "upstreamCache": {
+    "url": "https://github.com/typesafe-ai/typesafe-public-examples/blob/main/cookbooks/twitch_chat_filter/json_cache.json",
+    "gitBlob": "cf0fe9346486aa5e5e75b8df92efd6c14bbb464e",
+    "sha256": "768770a99cdbc544bfbc5ab088ee45e8a49d3b89cf58de18ca6e5096abd97dda",
+    "use": "Reviewed response semantics only; not vendored or replayed."
+  },
+  "transformation": "Preserve the original 29-message feed and stream, all three questions, category rules, inclusive 0.70 Noul thresholds, toxic/category-hide/spoiler precedence, quiet reapplication and input-order concurrency-eight finite map. Replace published model responses with labeled authored synthetic answers and omit introductory calls and disk caching. Add a separate nine-message boundary feed. No live Twitch ingestion, provider metrics or paid inference.",
+  "license": "MIT; upstream LICENSE.typesafe retained"
+}

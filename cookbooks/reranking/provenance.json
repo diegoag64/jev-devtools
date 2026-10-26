@@ -1,0 +1,59 @@
+{
+  "reviewedOn": "2026-10-26",
+  "recipe": {
+    "url": "https://docs.typesafe.ai/cookbooks/rerank_typesafe",
+    "markdownUrl": "https://docs.typesafe.ai/cookbooks/rerank_typesafe.md",
+    "sha256": "663abfeab390bb116369d89b765b0de0ee83d31b177654a6f090fd04a71110b9",
+    "pinKind": "Content hash of reviewed official Markdown; documentation URL is mutable. Saved audit snapshot agrees with the live page.",
+    "preserved": [
+      "Exact executable is_cited_source prompt and true/false criteria",
+      "jev-1.12; query_excerpt and candidate_passage state keys",
+      "One Noul request per query/candidate, 30 candidates, concurrency 12",
+      "Stable descending sort, ties retain retrieval order"
+    ]
+  },
+  "typesafeLicense": {
+    "url": "https://raw.githubusercontent.com/typesafe-ai/typesafe-public-examples/25e9d373f4853b3e7e300e55a194f50e54838f68/LICENSE",
+    "local": "LICENSE.typesafe",
+    "note": "TypeSafe examples MIT notice retained for adapted example logic. This source tree has no rerank_typesafe directory; no upstream cache or notebook is vendored."
+  },
+  "sourceRetrieval": {
+    "library": "bm25s",
+    "revision": "e43fc5c5d38ff408d29c28fbee319f941a8729dc",
+    "url": "https://github.com/xhluca/bm25s/tree/e43fc5c5d38ff408d29c28fbee319f941a8729dc",
+    "license": "MIT",
+    "licenseUrl": "https://github.com/xhluca/bm25s/blob/e43fc5c5d38ff408d29c28fbee319f941a8729dc/LICENSE",
+    "usedLocally": false,
+    "note": "Reference revision inspected for provenance; the source page does not pin its installed bm25s version. No claim of reconstructing that environment."
+  },
+  "sourceEvaluation": {
+    "dataset": "jhu-clsp/CLERC",
+    "revision": "ef042f8ab436f78704f17faa0a866d1b2b862f6f",
+    "url": "https://huggingface.co/datasets/jhu-clsp/CLERC/tree/ef042f8ab436f78704f17faa0a866d1b2b862f6f",
+    "file": "teva_train_dir/train_data.jsonl.gz",
+    "cardUrl": "https://huggingface.co/datasets/jhu-clsp/CLERC/blob/ef042f8ab436f78704f17faa0a866d1b2b862f6f/README.md",
+    "license": "No license declared in the inspected dataset card; dataset not downloaded or redistributed.",
+    "usedLocally": false,
+    "recipeParameters": {
+      "rows": 170,
+      "queries": 40,
+      "seed": 0,
+      "topK": 30,
+      "pool": "First 1000 eligible rows, positive passage plus exactly 20 negatives; random sample; SHA-1 text IDs; sorted corpus IDs; query sample excludes first 20 pooled rows.",
+      "retrieval": "BM25 default model; English stopwords; top 100 then first 30."
+    }
+  },
+  "localFixture": {
+    "path": "retrieval-fixture.json",
+    "sha256": "d2da44d89d1c53cf660b965c3fb5d1b783fa4181fdb0519844bd0803fbd14f83",
+    "origin": "Authored for this repository; not CLERC, BM25 output, official cached inference, legal advice or an evaluation dataset.",
+    "license": "Repository MIT license (../../LICENSE)",
+    "transformation": "Fixed ordered shortlist supplies all 30 passages. Retrieval task assigns 1-based original ranks. Authored probabilities are kept server-side and excluded from request state. The ties case substitutes 0.5 for every candidate."
+  },
+  "excluded": [
+    "BM25 execution and CLERC corpus loading",
+    "40-query benchmark and source accuracy charts",
+    "Token usage, latency, cost and quality claims",
+    "Live paid inference"
+  ]
+}

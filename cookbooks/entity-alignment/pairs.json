@@ -1,0 +1,66 @@
+[
+  {
+    "id": "c446",
+    "entity_a": {
+      "name": "Thomas Hooker Old Marley Barleywine",
+      "brewery": "Thomas Hooker Brewing Company",
+      "style": "American Barleywine",
+      "abv": "10.00 %"
+    },
+    "entity_b": {
+      "name": "Thomas Hooker Old Marley Barleywine",
+      "brewery": "Thomas Hooker Brewing Company",
+      "style": "Barley Wine",
+      "abv": "10 %"
+    },
+    "known_same_as": true
+  },
+  {
+    "id": "c427",
+    "entity_a": {
+      "name": "Frost Quake Bourbon Barrel Aged Barley Wine",
+      "brewery": "Wellington County Brewery",
+      "style": "American Barleywine",
+      "abv": "9.80 %"
+    },
+    "entity_b": {
+      "name": "Lompoc Bourbon Barrel Aged Proletariat Red Ale",
+      "brewery": "Lompoc Brewing",
+      "style": "Amber Ale",
+      "abv": "6.40 %"
+    },
+    "known_same_as": false
+  },
+  {
+    "id": "c100",
+    "entity_a": {
+      "name": "Belle Gueule Rousse",
+      "brewery": "Brasseurs R.J.",
+      "style": "American Amber / Red Ale",
+      "abv": "5.20 %"
+    },
+    "entity_b": {
+      "name": "Belle Gueule Rousse",
+      "brewery": "Brasseurs RJ",
+      "style": "Amber Lager/Vienna",
+      "abv": "5.20 %"
+    },
+    "known_same_as": true
+  },
+  {
+    "id": "c428",
+    "entity_a": {
+      "name": "Ambleside Amber Ale",
+      "brewery": "Bridge Brewing Company",
+      "style": "American Amber / Red Ale",
+      "abv": "5.30 %"
+    },
+    "entity_b": {
+      "name": "Bridge Ambleside Amber Ale - Pomegranate & Galena Hops",
+      "brewery": "Bridge Brewing Company",
+      "style": "Amber Ale",
+      "abv": "5.30 %"
+    },
+    "known_same_as": false
+  }
+]
