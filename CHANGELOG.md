@@ -33,8 +33,8 @@ Flow expression types now reject non-scalar equality and array method selection 
 
 #### Fixed
 
-- **Scalar equality types.** Reject object, array, and `undefined` receivers for `.eq()` while preserving literal, branded, and generic scalar comparisons. Finite numbers and matching resolved scalar types remain runtime requirements.
-- **Array selection types.** Limit `.get()` on arrays to indices and `length`, preserving readonly arrays, tuple inference, common union fields, and constrained generic helpers. Array bounds and missing optional fields remain runtime checks.
+- **Scalar equality types.** Reject object, array, and `undefined` receivers for `.eq()` while preserving literal, branded, and generic scalar comparisons. Finite numbers and matching resolved scalar types remain runtime requirements. ([#121](https://github.com/diegoag64/jev-devtools/pull/121))
+- **Array selection types.** Limit `.get()` on arrays to indices and `length`, preserving readonly arrays, tuple inference, common union fields, and constrained generic helpers. Array bounds and missing optional fields remain runtime checks. ([#121](https://github.com/diegoag64/jev-devtools/pull/121))
 
 ## 0.5.4 — Prepared release
 
