@@ -6,6 +6,12 @@ Each app pairs its result with the requests, function steps, and decisions that 
 
 Run these community-maintained apps from the repository. The npm package contains the library and setup skill, but does not include cookbook code or fixtures. Every cookbook has labeled synthetic samples that run without an API key. Sample outputs demonstrate execution and inspection, not live model accuracy or performance.
 
+## Port another workflow
+
+Use the shared [port-jev-to-flow skill](../.agents/skills/port-jev-to-flow/SKILL.md) to port Jev logic or audit whether it fits the current Flow API. It covers source behavior, API composition, semantic pitfalls, and verification, with examples from these cookbooks.
+
+The skill is versioned in `.agents/skills/port-jev-to-flow/`. In Codex, invoke `$port-jev-to-flow` from this checkout. Other agents can read `SKILL.md` directly. This repository skill is separate from the setup skill shipped in npm.
+
 ## Choose an example
 
 ### Added in this round

@@ -11,6 +11,8 @@ For repository contributions, use the rules and task pointers below. For install
 
 ## Read for the task
 
+- **Porting Jev logic or auditing Flow API fit:** use [port-jev-to-flow](.agents/skills/port-jev-to-flow/SKILL.md) for source fidelity, supported composition, and verification.
+
 - **Implementation or review:** follow [boundary and contract verification](CONTRIBUTING.md#boundary-and-contract-verification) for affected guarantees, bug reproduction, supported combinations, public types, composed limits, capture metadata, and regression proof. For capture work, also trace the [flow capture boundaries](docs/architecture.md#flow-capture-boundaries).
 - **Opening or updating a PR:** follow [PR titles](CONTRIBUTING.md#pr-titles), [PR descriptions](CONTRIBUTING.md#pr-descriptions), and the [template](.github/pull_request_template.md). For source changes, complete [verification](CONTRIBUTING.md#verification-details): `npm run verify:all`, or `npm run verify:receipts` only for eligible existing receipt edits. Visually verify UI changes when browser access is available and disclose gaps.
 - **User-visible changes, including docs and tooling:** update Unreleased using [changelog guidance](CONTRIBUTING.md#keep-the-changelog-current). Preserve compatibility notes, publication facts, and PR links.
