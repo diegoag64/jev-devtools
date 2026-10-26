@@ -28,7 +28,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **Confidence fallback cookbook.** Explore one 75-group industry Choice, the inclusive API-confidence cutoff and a deterministic parent-division task with four synthetic no-key cases. Preserves the original SIC taxonomy; no SEC evaluation or live inference.
+- **Confidence fallback cookbook.** Explore one 75-group industry Choice, the inclusive API-confidence cutoff and a deterministic parent-division task with four synthetic no-key cases. Preserves the original SIC taxonomy; no SEC evaluation or live inference. ([#110](https://github.com/diegoag64/jev-devtools/pull/110))
 
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
