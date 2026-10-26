@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | No additional changes yet.                                                                                 |
+| [Unreleased](#unreleased)                   | Not published                                                                      | Docs reference corrections.                                                                                |
 | [0.5.3](#053--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) | Shared flow encoding; simpler releases and publication helpers; flow regression coverage.                  |
 | [0.5.2](#052--october-25-2026-experimental) | 2026-10-25                                                                         | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
 | [0.5.1](#051--october-25-2026-experimental) | 2026-10-25                                                                         | Task input validation and expression types; setup guidance; release and website maintenance.               |
@@ -24,7 +24,11 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No additional changes yet.
+### Changes
+
+#### Documentation
+
+- **Readable API contracts.** Fix the server options table and replace stale unreleased labels in type descriptions, hover help, and the replay example with their 0.5.0 availability.
 
 ## 0.5.3 — Prepared release
 

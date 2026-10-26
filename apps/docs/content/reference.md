@@ -91,15 +91,15 @@ Creates an independent adapter and its in-memory histories. **Returns:** an obje
 
 #### Inputs
 
-| Input                                                  | Default             | Meaning                                              |
-| ------------------------------------------------------ | ------------------- | ---------------------------------------------------- | ------------------------------------------------------------- |
-| `origin: string`                                       | Required            | Exact browser origin, including port.                |
-| `enabled?: boolean`                                    | `false`             | Enable recording and HTTP endpoints.                 |
-| `endpoint?: string`                                    | `/api/jev-devtools` | Absolute path without query or fragment.             |
-| `limit?: number`                                       | `50`                | Global trace retention; clamped to 1–200.            |
-| `redact?: (path: string[], value: unknown) => unknown` | None                | Transform the captured copy before storage/delivery. |
-| `authorize?: (request: Request) => boolean             | Promise<boolean>`   | None                                                 | Access check; required for enabled non-loopback origins.      |
-| `getSession?: (request: Request) => string             | Promise<string>`    | `"local"`                                            | Trusted recording scope, nonempty and at most 200 characters. |
+| Input                                                           | Default             | Meaning                                                       |
+| --------------------------------------------------------------- | ------------------- | ------------------------------------------------------------- |
+| `origin: string`                                                | Required            | Exact browser origin, including port.                         |
+| `enabled?: boolean`                                             | `false`             | Enable recording and HTTP endpoints.                          |
+| `endpoint?: string`                                             | `/api/jev-devtools` | Absolute path without query or fragment.                      |
+| `limit?: number`                                                | `50`                | Global trace retention; clamped to 1–200.                     |
+| `redact?: (path: string[], value: unknown) => unknown`          | None                | Transform the captured copy before storage/delivery.          |
+| `authorize?: (request: Request) => boolean \| Promise<boolean>` | None                | Access check; required for enabled non-loopback origins.      |
+| `getSession?: (request: Request) => string \| Promise<string>`  | `"local"`           | Trusted recording scope, nonempty and at most 200 characters. |
 
 Invalid origin/path configuration throws; enabled non-loopback origins without authorization throw. Share this instance between inference and inspector routes. [Access guide](@/guides/privacy/).
 

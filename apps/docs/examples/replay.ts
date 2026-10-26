@@ -1,4 +1,4 @@
-// Unreleased: use the working-tree package, not npm 0.4.1.
+// Requires jev-devtools 0.5.0 or later.
 import { choice } from "@typesafe-ai/sdk";
 import {
   defineJevFlow,
