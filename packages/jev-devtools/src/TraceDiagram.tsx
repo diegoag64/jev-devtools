@@ -31,7 +31,7 @@ function Result({
                   }
                 >
                   {answer.type === "score" && answer.legend?.[key]
-                    ? `${key} · ${answer.legend[key]}`
+                    ? `${key} · ${typeof answer.legend[key] === "string" ? answer.legend[key] : JSON.stringify(answer.legend[key])}`
                     : key}
                 </span>
                 <code title={`Exact probability: ${value}`}>
