@@ -269,7 +269,7 @@ Diagrams show captured inputs, responses, and routing rules you explicitly defin
 
 ## Explore cookbook examples
 
-Cookbooks are small, runnable adaptations of official TypeSafe recipes that show how requests and application logic fit into inspectable flows. Explore passage classification, skill selection, structured extraction, memory, and more using labeled sample responses. The six examples use the 0.4.0 flow API and run from this repository without an API key; cookbook application code and fixtures are not bundled in npm.
+Cookbooks are small, runnable adaptations of official TypeSafe recipes that show how requests and application logic fit into inspectable flows. Explore passage classification, skill selection, structured extraction, memory, line search, and more using labeled sample responses. The examples use the 0.4.0 flow API and run from this repository without an API key; cookbook application code and fixtures are not bundled in npm.
 
 [Browse the cookbooks and run an example →](cookbooks/README.md)
 
