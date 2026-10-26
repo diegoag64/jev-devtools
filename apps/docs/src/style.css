@@ -1324,6 +1324,14 @@ dialog::backdrop {
 .api-panel-close {
   flex-shrink: 0;
 }
+.api-panel-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  line-height: 1;
+}
 .api-panel-header h2 {
   font-size: 20px;
   margin: 4px 0 0;
@@ -1366,7 +1374,6 @@ dialog::backdrop {
     height: 32px;
   }
   .api-preview-actions button,
-  .api-panel-close,
   .api-panel-back,
   .api-panel-retry {
     min-height: 44px;
