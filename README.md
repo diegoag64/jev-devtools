@@ -8,7 +8,7 @@ A React inspector for TypeSafe Jev.<br />
 Explore requests, returned probabilities, and the paths your application takes.<br />
 Works with React and Next.js App Router.
 
-[![npm version 0.5.3](https://img.shields.io/badge/npm-v0.5.3-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.5.3)
+[![npm version 0.5.4](https://img.shields.io/badge/npm-v0.5.4-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.5.4)
 [![CI](https://github.com/diegoag64/jev-devtools/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/diegoag64/jev-devtools/actions/workflows/ci.yml)
 [![React 18 / 19](https://img.shields.io/badge/React-18%20%2F%2019-61DAFB?logo=react&logoColor=61DAFB&labelColor=0D0A0F)](#add-to-your-app)
 [![Next.js App Router](https://img.shields.io/badge/Next.js-App%20Router-white?logo=nextdotjs&labelColor=0D0A0F)](https://docs.jevtools.dev/guides/nextjs/)
@@ -31,7 +31,7 @@ Mount the React drawer, connect a server adapter, and make Jev calls through its
 pnpm add jev-devtools @typesafe-ai/sdk
 ```
 
-Requires React **18/19** and Node **22.12+**. **Source version: 0.5.3.** [See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) Install published releases from npm, or use the local archive below for this checkout. APIs remain experimental before 1.0. See the [release status](CHANGELOG.md). Your API key stays on the server. Capture and display are opt-in and disabled by default.
+Requires React **18/19** and Node **22.12+**. **Source version: 0.5.4.** [See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.4) Install published releases from npm, or use the local archive below for this checkout. APIs remain experimental before 1.0. See the [release status](CHANGELOG.md). Your API key stays on the server. Capture and display are opt-in and disabled by default.
 
 Use ESM imports and TypeSafe SDK **0.7.x**. TypeScript consumers need **5.4+** and compatible React/Node types. See [compatibility and public imports](docs/integration.md#compatibility-and-public-imports), including the Node-only `/server` and `/flow` entry points.
 
@@ -312,7 +312,7 @@ Pack the local checkout, then install the archive in your app:
 npm run pack:devtools
 
 # In your React application:
-npm install /absolute/path/to/jev-devtools/jev-devtools-0.5.3.tgz
+npm install /absolute/path/to/jev-devtools/jev-devtools-0.5.4.tgz
 ```
 
 The archive contains the code and bundled setup skill from your checkout. Use it to try local changes before a future release. Keep the drawer and server adapter on the same build.
