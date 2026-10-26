@@ -77,7 +77,13 @@ try {
   await page
     .getByRole("article", { name: "Request score-candidate", exact: true })
     .waitFor();
-  await page.getByRole("button", { name: "Hide Flow", exact: true }).click();
+  await page
+    .getByRole("article", {
+      name: "Collection Score the shortlist",
+      exact: true,
+    })
+    .getByRole("button", { name: "Hide Flow", exact: true })
+    .click();
   await page
     .getByLabel("Flow step", { exact: true })
     .selectOption("sort-candidates");
