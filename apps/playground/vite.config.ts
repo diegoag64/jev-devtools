@@ -13,6 +13,8 @@ export default defineConfig(({ mode }) => {
       jevInspectorServer(
         process.env.TYPESAFE_API_KEY || env.TYPESAFE_API_KEY,
         process.env.TYPESAFE_COOKBOOK_MODEL || env.TYPESAFE_COOKBOOK_MODEL,
+        // Complete capture comparisons must not depend on observing traces before eviction.
+        mode === "capture-verification" ? 200 : undefined,
       ),
     ],
     server: { host: "127.0.0.1", port: 4182, strictPort: true },

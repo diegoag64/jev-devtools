@@ -1,4 +1,5 @@
-// Preserve streamed answers before history eviction and compare them with complete application results.
+// Compare final retained captures with complete application results. The dedicated
+// server mode retains 200 requests; the collection probe separately tests default-50 eviction.
 import { browserOutput } from "./cookbook-browser-context.mjs";
 import assert from "node:assert/strict";
 import { createServer } from "vite";
@@ -10,6 +11,7 @@ process.env.TYPESAFE_API_KEY = "";
 const server = await createServer({
   root: root + "/apps/playground",
   configFile: root + "/apps/playground/vite.config.ts",
+  mode: "capture-verification",
   server: { host: "127.0.0.1", port: 4182, strictPort: true },
 });
 let browser;
@@ -30,51 +32,44 @@ try {
     await page.goto("http://127.0.0.1:4182/?cookbook=" + slug);
     await page.locator("#scenario").waitFor();
     await page.evaluate(async () => {
-      await fetch("/api/jev-devtools/clear", { method: "DELETE" });
-      window.captures = new Map();
-      window.stream = new EventSource("/api/jev-devtools/events");
-      await new Promise((resolve, reject) => {
-        const timer = setTimeout(() => {
-          window.stream.close();
-          reject(Error("Capture stream did not become ready"));
-        }, 5000);
-        window.stream.addEventListener("snapshot", (e) => {
-          for (const t of JSON.parse(e.data).traces)
-            window.captures.set(t.id, t);
-          clearTimeout(timer);
-          resolve();
-        });
+      const response = await fetch("/api/jev-devtools/clear", {
+        method: "DELETE",
       });
+      if (!response.ok)
+        throw new Error("Could not clear prior capture history");
     });
     const response = page.waitForResponse((r) =>
       r.url().includes("/__jev/run"),
     );
     await page.getByRole("button", { name: "Run sample", exact: true }).click();
     const data = await (await response).json();
-    try {
-      await page.waitForFunction(
-        (n) =>
-          [...window.captures.values()].filter((t) => t.status === "success")
-            .length === n,
-        count,
-      );
-    } catch (error) {
-      const observed = await page.evaluate(() =>
-        [...window.captures.values()].map((t) => ({
-          id: t.id,
-          status: t.status,
-        })),
-      );
-      throw new Error(
-        `${slug}: expected ${count} successful captures; observed ${JSON.stringify(observed)}. ${error.message}`,
-      );
-    }
-    const traces = await page.evaluate(() => {
-      window.stream.close();
-      return [...window.captures.values()]
-        .filter((t) => t.status === "success")
-        .sort((a, b) => a.startedAt - b.startedAt);
-    });
+    // Subscribe after completion: the initial snapshot must contain every
+    // request, regardless of delivery coalescing or backpressure during the run.
+    const traces = await page.evaluate(
+      () =>
+        new Promise((resolve, reject) => {
+          const stream = new EventSource("/api/jev-devtools/events");
+          const timer = setTimeout(() => {
+            stream.close();
+            reject(new Error("Final capture snapshot timed out"));
+          }, 5000);
+          stream.addEventListener("snapshot", (event) => {
+            clearTimeout(timer);
+            stream.close();
+            resolve(
+              JSON.parse(event.data).traces.sort(
+                (a, b) => a.startedAt - b.startedAt,
+              ),
+            );
+          });
+        }),
+    );
+    assert.equal(
+      traces.length,
+      count,
+      `${slug}: complete final capture history`,
+    );
+    assert.ok(traces.every((trace) => trace.status === "success"));
     const value = data.flow.value;
     await writeFile(
       output + "/capture-" + slug + ".json",

@@ -167,11 +167,13 @@ const validSession = (value: unknown): value is string =>
 export function jevInspectorServer(
   apiKey?: string,
   cookbookModel = defaultModel,
+  captureLimit?: number,
 ): Plugin {
   const cookbook = createSkillSuggestionFlow(cookbookModel);
   const inspector = createJevDevtools({
     enabled: true,
     origin: "http://127.0.0.1:4182",
+    limit: captureLimit,
   });
   const running = new Map<
     string,
