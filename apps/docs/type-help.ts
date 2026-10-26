@@ -159,9 +159,9 @@ export const typeHelp: Record<string, Help> = {
       "A typed reference to a value that becomes available when the flow runs. It is not the value itself and is not a promise to await.",
     signature: "FlowExpression<T>",
     props: {
-      get: "Select an own field from a future object or array; primitive properties are unsupported.",
+      get: "Select an own object field, array index, or array length. Array methods and primitive properties are unsupported.",
       "eq / lt / gt / gte":
-        "Build comparisons for flow conditions. These are evaluated during execution.",
+        "Build scalar equality or numeric ordering conditions. Execution validates matching scalar types and finite numbers.",
     },
   },
   FlowBuilder: {

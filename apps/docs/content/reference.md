@@ -1025,21 +1025,27 @@ Selects an own property from a referenced object or array. Chain calls to reach 
 #### Signature
 
 ```ts
-expression.get<K extends keyof T & (string | number)>(
+expression.get<
+  K extends keyof T &
+    keyof ExpressionFields<T> &
+    (string | number)
+>(
   this: FlowExpression<object>, key: K
 ): FlowExpression<T[K]>
 ```
 
 #### Inputs
 
-| Parameter / option           | Type                           |
-| ---------------------------- | ------------------------------ |
-| `this` (expression receiver) | `FlowExpression<object>`       |
-| `key`                        | `keyof T & (string \| number)` |
+| Parameter / option           | Type                                                       |
+| ---------------------------- | ---------------------------------------------------------- |
+| `this` (expression receiver) | `FlowExpression<object>`                                   |
+| `key`                        | `keyof T & keyof ExpressionFields<T> & (string \| number)` |
 
-Choose a string or number key from the referenced object or array's type. The receiver is the expression before `.get()`, not an extra argument. Chain calls to select nested fields.
+Choose an own object field, a numeric array index, or array `length`. `ExpressionFields<T>` retains object fields and filters arrays to indices and `length`, including tuple string indices such as `"0"`. Array methods such as `map`, `slice`, and `push` are rejected by TypeScript. For unions, the key must be supported by every member. The receiver is the expression before `.get()`, not an extra argument.
 
-Missing, inherited, or `undefined` properties fail when execution reaches them. This operation does not provide optional chaining.
+Missing, inherited, or `undefined` properties fail when execution reaches them. Ordinary array bounds, including numeric tuple indices, remain runtime checks. Optional fields retain `undefined` in their inferred type. This operation does not provide optional chaining.
+
+For a generic field-selection helper, constrain its key with `K extends keyof T & Parameters<FlowExpression<T>["get"]>[0]` and return `FlowExpression<T[K]>`. A helper that accepts every `keyof T` can otherwise admit array methods. General structural object types cannot prove that a property is owned by an instance.
 
 **0.5.1 type correction:** primitive receivers and unions that may contain primitives are rejected during type checking. Version 0.5.0 can accept these calls in TypeScript but rejects primitive property access at runtime. To compute a string's length, pass the string reference into a task and read `.length` inside its callback.
 
@@ -1055,7 +1061,7 @@ Missing, inherited, or `undefined` properties fail when execution reaches them. 
 
 #### How it works
 
-`get("tags")` selects the input array. Its `get(0)` selects the first item, and `get("length")` selects its length. `get("message")` selects a string, so the task computes its length using the resolved `message` value. Calling `tryFieldSelection()` runs the flow with `"abc"` and two tags, returning `{ firstTag: "new", tagCount: 2, messageLength: 3 }` as its value. All `.get()` calls construct references during definition; the runner reads their values during execution.
+`get("tags")` selects the input array. Its `get(0)` selects the first item, and `get("length")` selects its length. `get("message")` selects a string, so the task computes its length using the resolved `message` value. `firstIsNew` compares the first tag with `"new"`. Calling `tryFieldSelection()` runs the flow with `"abc"` and two tags, returning `{ firstTag: "new", tagCount: 2, messageLength: 3, firstIsNew: true }` as its value. All `.get()` calls construct references during definition; the runner reads their values during execution.
 
 ### expression.eq
 
@@ -1064,16 +1070,22 @@ Builds a condition that checks whether two scalar values are equal when the flow
 #### Signature
 
 ```ts
-expression.eq(value: T | Expression<T>): Expression<boolean>
+expression.eq(
+  this: FlowExpression<string | number | boolean | null>,
+  value: T | FlowExpression<T>
+): FlowExpression<boolean>
 ```
 
 #### Inputs
 
-| Parameter / option | Type                     |
-| ------------------ | ------------------------ |
-| `value`            | `T \| FlowExpression<T>` |
+| Parameter / option           | Type                                                  |
+| ---------------------------- | ----------------------------------------------------- |
+| `this` (expression receiver) | `FlowExpression<string \| number \| boolean \| null>` |
+| `value`                      | `T \| FlowExpression<T>`                              |
 
 Pass a literal or compatible expression. The resolved operands must have matching scalar types: string, number, Boolean, or null. This method does not perform deep object equality.
+
+TypeScript rejects object, array, `undefined`, and unknown receivers, including unions with unsupported members. Literal labels, branded scalars, and generic scalar helpers retain their operand types. Scalar unions remain supported, but the resolved operands must have matching types. JavaScript callers, non-finite numbers, and mismatched union values still require runtime validation.
 
 It returns a Boolean expression that evaluates during the run. Invalid scalar comparisons reject execution.
 

@@ -208,9 +208,9 @@ test("definition validation rejects duplicate, foreign, unavailable lane referen
 test("mis-scoped builders and non-terminal branch returns fail during definition", () => {
   assert.throws(
     () =>
-      defineJevFlow("scope", (f) =>
+      defineJevFlow<string>("scope", (f) =>
         f.branch("choice", {
-          when: f.input.eq({}),
+          when: f.input.eq("same"),
           then: (p) => {
             f.jev("wrong", { state: "x", questions });
             return p.output("done");
