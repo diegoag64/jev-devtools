@@ -1,3 +1,4 @@
+import { apiPreviews, markApiLinks } from "./api-previews.js";
 import { copyFile, readFile, mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -6,7 +7,11 @@ import { renderChangelog } from "./changelog.js";
 import { readBuildSnapshot, type DocsBuildMode } from "./build-info.js";
 import { publicTypeReference } from "./type-reference.js";
 import { codeRenderer } from "./highlight.js";
-import { layoutReference, referenceGroups, referenceLabel } from "./reference-layout.js";
+import {
+  layoutReference,
+  referenceGroups,
+  referenceLabel,
+} from "./reference-layout.js";
 import { groups, pages, type Page } from "./pages.js";
 
 import { repositoryURL as repo, renderGitHubLinks } from "./github.js";
@@ -60,20 +65,33 @@ export async function compile(markdown: string, base = "/", reference = false) {
   return { html, headings };
 }
 
-function renderOutline(headings: { id: string; title: string; depth: number }[], page: Page) {
+function renderOutline(
+  headings: { id: string; title: string; depth: number }[],
+  page: Page,
+) {
   const isReference = page.slug === "api/reference";
   const link = (h: (typeof headings)[number]) => {
-    const label = page.tocLabels?.[h.id] ?? (isReference
-      ? h.depth === 2 ? referenceGroups[h.id]?.label ?? h.title : referenceLabel(h.id, h.title)
-      : h.title);
+    const label =
+      page.tocLabels?.[h.id] ??
+      (isReference
+        ? h.depth === 2
+          ? (referenceGroups[h.id]?.label ?? h.title)
+          : referenceLabel(h.id, h.title)
+        : h.title);
     return `<a data-toc-link href="#${h.id}">${escape(label)}</a>`;
   };
-  if (!isReference) return headings.filter((h) => h.depth === 2).map(link).join("");
+  if (!isReference)
+    return headings
+      .filter((h) => h.depth === 2)
+      .map(link)
+      .join("");
   let result = "";
   for (const [index, heading] of headings.entries()) {
     if (heading.depth !== 2) continue;
     const next = headings.findIndex((h, i) => i > index && h.depth === 2);
-    const methods = headings.slice(index + 1, next < 0 ? undefined : next).filter((h) => h.depth === 3);
+    const methods = headings
+      .slice(index + 1, next < 0 ? undefined : next)
+      .filter((h) => h.depth === 3);
     result += methods.length
       ? `<details class="toc-group" open><summary>${link(heading)}</summary><div class="toc-methods">${methods.map(link).join("")}</div></details>`
       : link(heading);
@@ -83,7 +101,10 @@ function renderOutline(headings: { id: string; title: string; depth: number }[],
 
 async function expandExamples(source: string) {
   if (source.includes("<!-- public-api-types -->"))
-    source = source.replace("<!-- public-api-types -->", publicTypeReference(source));
+    source = source.replace(
+      "<!-- public-api-types -->",
+      publicTypeReference(source),
+    );
   const matches = [
     ...source.matchAll(/<!-- example: ([\w-]+\.(?:ts|tsx))( twoslash)? -->/g),
   ];
@@ -101,18 +122,45 @@ export async function generate(
   generated: string,
   buildMode: DocsBuildMode = "working-tree",
 ) {
-  const { manifest, changelog } = readBuildSnapshot(resolve(appRoot, "../.."), buildMode);
+  const { manifest, changelog } = readBuildSnapshot(
+    resolve(appRoot, "../.."),
+    buildMode,
+  );
   const githubLinks = await renderGitHubLinks();
-  const logo = (await readFile(resolve(appRoot, "assets/logo.svg"), "utf8")).trim();
+  const logo = (
+    await readFile(resolve(appRoot, "assets/logo.svg"), "utf8")
+  ).trim();
   const href = (slug: string) => base + (slug ? slug + "/" : "");
   const siteURL = "https://docs.jevtools.dev";
-  const shareImageURL = new URL(base + "social/jevtools-docs.png", siteURL).href;
-  const shareImageAlt = "Jev DevTools Documentation. Guides, Examples, API reference.";
+  const shareImageURL = new URL(base + "social/jevtools-docs.png", siteURL)
+    .href;
+  const shareImageAlt =
+    "Jev DevTools Documentation. Guides, Examples, API reference.";
   const search: { title: string; group: string; url: string; text: string }[] =
     [];
   const inputs: Record<string, string> = {};
   await mkdir(resolve(generated, "public/raw"), { recursive: true });
-  await writeFile(resolve(generated, "public/version.json"), JSON.stringify(manifest, null, 2) + "\n");
+  await writeFile(
+    resolve(generated, "public/version.json"),
+    JSON.stringify(manifest, null, 2) + "\n",
+  );
+  const referenceMarkdown = (
+    await expandExamples(
+      await readFile(resolve(appRoot, "content/reference.md"), "utf8"),
+    )
+  ).replace(/\]\(@\/([^)]*)\)/g, (_, path: string) => `](${base}${path})`);
+  const reference = await compile(referenceMarkdown, base, true);
+  const previews = apiPreviews(reference.html, base);
+  await mkdir(resolve(generated, "public/api-previews"), { recursive: true });
+  await writeFile(
+    resolve(generated, "public/api-preview-index.json"),
+    JSON.stringify(previews.index),
+  );
+  for (const [id, fragment] of Object.entries(previews.fragments))
+    await writeFile(
+      resolve(generated, "public/api-previews", `${id}.html`),
+      fragment,
+    );
   for (const [index, page] of pages.entries()) {
     const isChangelog = page.slug === "changelog";
     const markdown = await expandExamples(
@@ -125,10 +173,21 @@ export async function generate(
       /\]\(@\/([^)]*)\)/g,
       (_, path: string) => `](${base}${path})`,
     );
-    const { html, headings } = isChangelog ? renderChangelog(linked, manifest.changelog.sourceUrl) : await compile(linked, base, page.slug === "api/reference");
-    const articleHtml = page.slug === "api/reference" ? layoutReference(html) : html;
+    const { html, headings } = isChangelog
+      ? renderChangelog(linked, manifest.changelog.sourceUrl)
+      : page.slug === "api/reference"
+        ? reference
+        : await compile(linked, base);
+    const articleHtml = markApiLinks(
+      page.slug === "api/reference" ? layoutReference(html) : html,
+      base,
+      previews.index,
+      page.slug === "api/reference",
+    );
     const changelogStatus = `Built ${manifest.build.createdAt.slice(0, 10)} · ${buildMode === "publication" ? `commit ${manifest.source.commit.slice(0, 7)}` : "working-tree copy"}.`;
-    const editURL = isChangelog ? `${repo}/edit/main/CHANGELOG.md` : `${repo}/edit/main/apps/docs/content/${page.file}`;
+    const editURL = isChangelog
+      ? `${repo}/edit/main/CHANGELOG.md`
+      : `${repo}/edit/main/apps/docs/content/${page.file}`;
     const file = resolve(generated, page.slug, "index.html");
     const source = (name: string) =>
       relative(dirname(file), resolve(appRoot, "src", name))
@@ -184,30 +243,41 @@ export async function generate(
       `${page.slug || "introduction"}.md`,
     );
     await mkdir(dirname(raw), { recursive: true });
-    await writeFile(raw, isChangelog ? markdown : `# ${page.title}\n\n${page.description}\n\n${linked}`);
+    await writeFile(
+      raw,
+      isChangelog
+        ? markdown
+        : `# ${page.title}\n\n${page.description}\n\n${linked}`,
+    );
     if (page.slug === "api/reference") {
       // Search resolves an API directly to its stable heading, not the top of
       // a long glossary. Exact declarations stay out of the search payload.
-      const sections = [...html.matchAll(/<h3 id="([^"]+)">([\s\S]*?)(?=<h[23] |$)/g)];
+      const sections = [
+        ...html.matchAll(/<h3 id="([^"]+)">([\s\S]*?)(?=<h[23] |$)/g),
+      ];
       for (const section of sections) {
         const heading = headings.find((item) => item.id === section[1])!;
         search.push({
           title: heading.title,
           group: page.group,
           url: href(page.slug) + "#" + heading.id,
-          text: section[2].replace(/<details>[\s\S]*?<\/details>/g, "").replace(/<[^>]*>/g, " "),
+          text: section[2]
+            .replace(/<details>[\s\S]*?<\/details>/g, "")
+            .replace(/<[^>]*>/g, " "),
         });
       }
-    } else search.push({
-      title: page.title,
-      group: page.group,
-      url: href(page.slug),
-      text: `${page.description} ${markdown.replace(/<[^>]*>/g, "").replace(/[#*`|]/g, " ")}`,
-    });
+    } else
+      search.push({
+        title: page.title,
+        group: page.group,
+        url: href(page.slug),
+        text: `${page.description} ${markdown.replace(/<[^>]*>/g, "").replace(/[#*`|]/g, " ")}`,
+      });
   }
   await writeFile(
     resolve(generated, "public/third-party-notices.txt"),
-    "GitHub Octicons: https://github.com/primer/octicons\n\n" + await readFile(resolve(appRoot, "assets/octicons-LICENSE.txt"), "utf8"),
+    "GitHub Octicons: https://github.com/primer/octicons\n\n" +
+      (await readFile(resolve(appRoot, "assets/octicons-LICENSE.txt"), "utf8")),
   );
   await writeFile(
     resolve(generated, "public/search-index.json"),
@@ -217,7 +287,10 @@ export async function generate(
     resolve(generated, "public/llms.txt"),
     `# Jev DevTools\n\nSource package v${manifest.package.version}; ${buildMode} documentation. Check the changelog before using explicitly marked unreleased APIs.\n\nBuild details: ${base}version.json\n\n${pages.map((p) => `- [${p.title}](${base}raw/${p.slug || "introduction"}.md): ${p.description}`).join("\n")}\n`,
   );
-  const favicon = await readFile(resolve(appRoot, "assets/favicon-light.svg"), "utf8");
+  const favicon = await readFile(
+    resolve(appRoot, "assets/favicon-light.svg"),
+    "utf8",
+  );
   await writeFile(resolve(generated, "public/favicon-light.svg"), favicon);
   await writeFile(resolve(generated, "public/favicon.svg"), favicon);
   await mkdir(resolve(generated, "public/social"), { recursive: true });

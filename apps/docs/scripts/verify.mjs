@@ -1,3 +1,4 @@
+import { verifyApiPreviews } from "./verify-api-previews.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createServer } from "node:http";
@@ -284,9 +285,15 @@ try {
     ),
   );
   await page.keyboard.press("Control+k");
-  assert.equal(await page.locator("dialog").evaluate((e) => e.open), true);
+  assert.equal(
+    await page.locator("#search-dialog").evaluate((e) => e.open),
+    true,
+  );
   await page.keyboard.press("Escape");
-  assert.equal(await page.locator("dialog").evaluate((e) => e.open), false);
+  assert.equal(
+    await page.locator("#search-dialog").evaluate((e) => e.open),
+    false,
+  );
   await page.getByRole("button", { name: "Switch color theme" }).click();
   await page.reload();
   assert.equal(await page.locator("html").getAttribute("data-theme"), "dark");
@@ -1100,6 +1107,7 @@ try {
       readable.url().endsWith("#041--october-24-2026-experimental-fixed"),
     );
   }
+  await verifyApiPreviews({ browser, origin, base, evidence });
   assert.deepEqual(errors, []);
   console.log(
     `Verified ${links.length} pages, sample switching, lazy search, keyboard navigation, copy, persistent theme, mobile layout, raw Markdown, 404s, type hovers (pointer/keyboard/touch), clean copying, and no-JS reading at base ${base}.`,

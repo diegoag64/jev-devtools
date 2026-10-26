@@ -55,3 +55,5 @@ Before public hosting: choose the canonical URL, add sitemap/social metadata, ke
 API explanations separate parameter rules, execution behavior, and failures. Keep signatures and checked examples intact during prose edits, and distinguish builder references from resolved values, capture limits from execution limits, and replayed answers from application tasks that run again.
 
 Resource pages direct readers to runnable sample apps, cookbook workflows, and checked method examples. Coding-agent guidance points to the installed setup skill and adjacent references, distinguishes online snapshots from installed contracts, and asks for observable integration evidence.
+
+API reference links offer summaries and an optional reading panel generated from the glossary itself. Keep full-page navigation and no-JavaScript links intact, load reference content on demand, and preserve keyboard focus and the reader's page position when closing the panel.

@@ -107,3 +107,11 @@ Command syntax follows the official [pnpm](https://pnpm.io/cli/add), [npm](https
 ### Brand assets
 
 `assets/logo.svg` reuses the landing page’s flow symbol (`landing/src/main.ts` on `codex/landing`). It inherits the docs text color so it stays light in dark mode and dark in light mode. The header uses the same `jevtools.` wordmark. `assets/favicon-light.svg` preserves the landing favicon geometry with a pale pink background and dark pink symbol. Both SVGs render without JavaScript; the favicon is copied at build time.
+
+## API link previews
+
+Links to individual glossary methods and public types get an adjacent preview button. Hovering or focusing the link opens a summary with **Open reference** and **Read in side panel** actions. Ordinary link activation keeps native navigation, including new-tab shortcuts. Touch users use the preview button. Escape, the close button, or the panel backdrop dismiss the panel and return focus to its source control without changing the guide URL or scroll position. Without JavaScript, links remain ordinary anchors.
+
+`api-previews.ts` derives summaries and per-entry HTML fragments from the same compiled glossary used for the reference page. Only known glossary entries are enhanced, and section links in fragments resolve to the full reference under the configured base path. The browser lazily fetches the metadata index on first use and each full entry on demand. Failed loads retain the full-page link and allow a retry. No external preview service is used.
+
+The panel namespaces IDs and accessibility references to coexist with the original glossary, preserves code help, and uses the shared delegated copy handler. Keep generated fragments free of application scripts. `verify-api-previews.mjs`, called by `verify:docs`, checks pointer/keyboard/touch access, native navigation, reader position, copy, focus restoration, ID uniqueness, and network-failure recovery. Run it with a subdirectory `DOCS_BASE` when changing link resolution.

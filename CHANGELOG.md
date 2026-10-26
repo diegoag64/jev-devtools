@@ -26,6 +26,10 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ### Changes
 
+#### Added
+
+- **API reference previews.** Hover or focus a supported API link for its summary, then open the full reference or read its contract and examples in a side panel. Touch controls, keyboard navigation, copy buttons, and failed-load recovery keep reference reading available without losing the current page.
+
 #### Documentation
 
 - **Useful resource entry points.** Rewrite Examples & cookbooks with sample run instructions, expected results, and clearer cookbook descriptions. Rewrite For coding agents around the installed setup skill, version-matched contracts, Markdown access, and verification evidence. Preserve existing section links.

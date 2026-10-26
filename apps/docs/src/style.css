@@ -1112,7 +1112,10 @@ dialog::backdrop {
   flex: 1;
   min-width: 0;
   margin: 0;
-  font: 600 20px/1.4 "SFMono-Regular", Consolas, monospace;
+  font:
+    600 20px/1.4 "SFMono-Regular",
+    Consolas,
+    monospace;
   letter-spacing: -0.6px;
   overflow-wrap: anywhere;
 }
@@ -1189,5 +1192,170 @@ dialog::backdrop {
   }
   .reference-group-header h2 {
     font-size: 25px;
+  }
+}
+
+/* Reference links keep native navigation; the adjacent button exposes previews
+   to touch and keyboard users without changing the link's role. */
+.api-preview-trigger {
+  display: inline-flex;
+  vertical-align: middle;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 2px;
+  margin-left: 3px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+.api-preview-trigger:hover,
+.api-preview-trigger:focus-visible,
+.api-preview-trigger[aria-expanded="true"] {
+  color: var(--accent);
+  background: var(--tint);
+  border-color: var(--line);
+}
+.api-link-preview {
+  position: fixed;
+  z-index: 30;
+  width: min(390px, calc(100vw - 24px));
+  max-height: min(400px, calc(100dvh - 24px));
+  overflow: auto;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 16px 50px #0004;
+  font:
+    14px/1.65 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  white-space: normal;
+  text-align: left;
+}
+.api-link-preview[hidden] {
+  display: none;
+}
+.api-preview-meta,
+.api-preview-title,
+.api-preview-summary {
+  display: block;
+}
+.api-preview-meta {
+  font-size: 11px;
+  color: var(--muted);
+}
+.api-preview-title {
+  font-size: 16px;
+  margin: 5px 0 10px;
+  overflow-wrap: anywhere;
+}
+.api-preview-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.api-preview-actions button,
+.api-panel-close,
+.api-panel-retry {
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 10px;
+  cursor: pointer;
+  font: inherit;
+}
+.api-preview-actions .api-preview-read {
+  background: var(--tint);
+  color: var(--accent);
+}
+.api-preview-actions a {
+  font-size: 12px;
+}
+.api-preview-actions .api-preview-dismiss {
+  margin-left: auto;
+  padding: 3px 9px;
+}
+.api-panel-open {
+  overflow: hidden;
+}
+.api-reference-panel {
+  inset: 0 0 0 auto;
+  margin: 0;
+  width: min(760px, 100%);
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 0;
+  padding: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.api-panel-header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.api-panel-header small {
+  color: var(--muted);
+}
+.api-panel-header h2 {
+  font-size: 20px;
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+.api-panel-toolbar {
+  padding: 16px 24px 0;
+  font-size: 13px;
+}
+.api-panel-content {
+  font-size: 15px;
+  line-height: 1.8;
+}
+.api-panel-content > p {
+  margin: 18px 0;
+}
+.api-panel-content .heading-link {
+  display: none;
+}
+.api-panel-content pre {
+  max-width: 100%;
+}
+@media (pointer: coarse) {
+  .api-preview-trigger {
+    width: 32px;
+    height: 32px;
+  }
+  .api-preview-actions button,
+  .api-panel-close,
+  .api-panel-retry {
+    min-height: 44px;
+  }
+}
+@media (max-width: 760px) {
+  .api-panel-header {
+    padding: 16px;
+  }
+  .api-panel-toolbar {
+    padding: 16px 16px 0;
+  }
+  .api-panel-content {
+    padding: 0 16px 24px;
   }
 }
