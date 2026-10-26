@@ -29,7 +29,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Fixed
 
-- **Render transformed captures safely.** Custom redactors can replace request roots or numeric answer fields without crashing the drawer. Unavailable structured sections retain their bounded redacted JSON in `Trace.capture`, show warnings, and leave application execution unchanged.
+- **Render transformed captures safely.** Custom redactors can replace request roots or numeric answer fields without crashing the drawer. Unavailable structured sections retain their bounded redacted JSON in `Trace.capture`, show warnings, and leave application execution unchanged. ([#123](https://github.com/diegoag64/jev-devtools/pull/123))
 
 - **Malformed stream recovery.** Validate trace and nested flow records before publishing updates, and reconnect without partially changing cached history. Preserve version-1 optional metadata, compatible unknown fields, and redacted content. ([#122](https://github.com/diegoag64/jev-devtools/pull/122))
 
