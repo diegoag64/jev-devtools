@@ -1,4 +1,4 @@
-import { traceCaptureView } from "./capture-view.js";
+import { projectTraceCapture } from "./capture-view.js";
 import type { FlowDefinition, FlowRun } from "./flow-protocol.js";
 import type { Trace } from "./protocol.js";
 
@@ -43,7 +43,7 @@ export function flowFixture(
             );
       if (node.kind !== "jev" || step?.status !== "completed") continue;
       const captured = step.traceId ? traces.get(step.traceId) : undefined;
-      const trace = captured && traceCaptureView(captured);
+      const trace = captured && projectTraceCapture(captured);
       for (const warning of trace?.captureWarnings ?? []) warnings.add(warning);
       if (!trace?.result) {
         missing.push(prefix + node.id);

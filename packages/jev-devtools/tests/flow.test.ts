@@ -329,7 +329,16 @@ test("concurrent scoped runs retain independent decisions, request links, redact
       assert.equal(run.steps.other.status, "untaken");
       const traces = (await history(inspector, session, "/events")).traces;
       assert.equal(traces.length, 2);
-      assert.equal(traces[0].result.answers.eligible.noul, "[redacted]");
+      assert.equal(traces[0].result, undefined);
+      assert.equal(
+        traces[0].capture.result.answers.eligible.noul,
+        "[redacted]",
+      );
+      assert.ok(
+        traces[0].captureWarnings.some((warning: string) =>
+          warning.includes("structured view unavailable"),
+        ),
+      );
       const inputs = conditionInputs(
         captured.definitions[0].nodes.find((n) => n.id === "approval")!
           .conditionRule!,
