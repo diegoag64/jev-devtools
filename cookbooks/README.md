@@ -1,94 +1,98 @@
 # Cookbook examples
 
-Explore small applications that turn TypeSafe recipes into connected, inspectable Jev flows. Each example pairs an application result with the requests, function steps, and routing decisions that produced it.
+This collection contains 19 runnable TypeScript adaptations of the [official TypeSafe cookbooks](https://docs.typesafe.ai/cookbooks). Thirteen ports join the six existing examples in this round. Autoresearch is the only recipe from the reviewed 20-recipe catalog that remains unimplemented.
 
-These are community-maintained TypeScript adaptations of the [official TypeSafe cookbooks](https://docs.typesafe.ai/cookbooks). The examples below run locally with labeled synthetic samples and no API key. They use the **0.4.0 flow API**. Run the cookbook apps from this repository; the npm package contains the library and setup skill, not cookbook code or fixtures. Sample results demonstrate execution and inspection; they are not live model evaluations.
+Each app pairs its result with the requests, function steps, and decisions that produced it. The examples use the public Flow API in this checkout. The [package manifest](../packages/jev-devtools/package.json) records the current version, and the [Flow guide](../docs/flows.md) describes the supported methods.
+
+Run these community-maintained apps from the repository. The npm package contains the library and setup skill, but does not include cookbook code or fixtures. Every cookbook has labeled synthetic samples that run without an API key. Sample outputs demonstrate execution and inspection, not live model accuracy or performance.
 
 ## Choose an example
 
-| Example                                                              | What you can explore                                                                                                  | Run locally                                                         |
-| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| [Skill suggestion](skill-suggestion/README.md)                       | Narrow 182 skills to a shortlist, then inspect a suggestion or abstention.                                            | [Open](http://127.0.0.1:4182/?cookbook=skill-suggestion)            |
-| [RAG passage classification](rag-passages/README.md)                 | Assess twelve passages with bounded concurrency and inspect each item's evidence routing.                             | [Open](http://127.0.0.1:4182/?cookbook=rag-passages)                |
-| [SDE cascade](sde-cascade/README.md)                                 | Follow field verification, conditional escalation, and a merge into the final record.                                 | [Open](http://127.0.0.1:4182/?cookbook=sde-cascade)                 |
-| [Hierarchical classification](hierarchical-classification/README.md) | Compare beam and greedy search through iterations, frontier requests, and retained/pruned paths.                      | [Open](http://127.0.0.1:4182/?cookbook=hierarchical-classification) |
-| [Simple Memory](simple-memory/README.md)                             | Replay customer tickets and compare routing with and without saved context within a run.                              | [Open](http://127.0.0.1:4182/?cookbook=simple-memory)               |
-| [Structure Recovery](structure-recovery/README.md)                   | Turn broken lines into a classified, formatted document through two batched requests and function steps.              | [Open](http://127.0.0.1:4182/?cookbook=structure-recovery)          |
-| [Parallel questions](parallel-questions/README.md)                   | Compare five batched requests with 65 sequential single-question requests and inspect all 13 answer metrics.          | [Open](http://127.0.0.1:4182/?cookbook=parallel-questions)          |
-| [Twitch chat filter](twitch-chat-filter/README.md)                   | Filter the original 29-message feed with eight concurrent requests and compare normal/quiet policy without new calls. | [Open](http://127.0.0.1:4182/?cookbook=twitch-chat-filter)          |
-| [Entity alignment](entity-alignment/README.md)                       | Compare two beer records and inspect Score-only unlink, curator-review and proposed-sameAs routing.                   | [Open](http://127.0.0.1:4182/?cookbook=entity-alignment)            |
-| [Citation checking](citation-checking/README.md)                     | Normalize quotes, inspect actual source sections and route Choice confidence to automatic verdict or human review.    | [Open](http://127.0.0.1:4182/?cookbook=citation-checking)           |
-| [Confidence fallback](confidence-fallback/README.md)                 | Route one 75-group Choice on API confidence ≥0.90, with a deterministic parent-division fallback.                     | [Open](http://127.0.0.1:4182/?cookbook=confidence-fallback)         |
-| [Line-by-line search](line-search/README.md)                         | Rank the complete pinned document and distinguish an answer from a strong near match.                                 | [Open](http://127.0.0.1:4182/?cookbook=line-search)                 |
-| [Re-ranking](reranking/README.md)                                    | Inspect independent candidate probabilities, bounded requests and stable before/after ordering.                       | [Open](http://127.0.0.1:4182/?cookbook=reranking)                   |
-| [Date extraction](date-extraction/README.md)                         | Read seven date parts per role, resolve the calendar date in a task, and inspect confidence review.                   | [Open](http://127.0.0.1:4182/?cookbook=date-extraction)             |
-| [Pre-parsed value extraction](pre-parsed-extraction/README.md)       | Follow regex spans through separate Choice helpers, missing-value bypasses and deterministic normalization.           | [Open](http://127.0.0.1:4182/?cookbook=pre-parsed-extraction)       |
-| [Function calling](function-calling/README.md)                       | Inspect a proposed tool call, omitted defaults, set membership and relevant decision confidence.                      | [Open](http://127.0.0.1:4182/?cookbook=function-calling)            |
-| [LLM guardrails](guardrails/README.md)                               | Compare strict and permissive policies on one assessment, including severity upgrades and overlapping hazards.        | [Open](http://127.0.0.1:4182/?cookbook=guardrails)                  |
-| [Choice self-consistency](consistency-choices/README.md)             | Compare every repeated probability vector with argmax labels, abstention and aggregate agreement.                     | [Open](http://127.0.0.1:4182/?cookbook=consistency-choices)         |
-| [Noul self-consistency](consistency-nouls/README.md)                 | Inspect fifteen sequential rubric requests, all probabilities, computed statistics and inclusive uncertainty routing. | [Open](http://127.0.0.1:4182/?cookbook=consistency-nouls)           |
+### Added in this round
+
+These 13 ports preserve the source recipes' assessment and routing logic using the existing Flow API. Each README describes the source, fixtures, thresholds, and adaptation limits.
+
+| Example                                                        | What you can explore                                                                                                        | Run locally                                                   |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| [Parallel questions](parallel-questions/README.md)             | Compare five batched requests with 65 sequential single-question requests and inspect all 13 answer metrics.                | [Open](http://127.0.0.1:4182/?cookbook=parallel-questions)    |
+| [Twitch chat filter](twitch-chat-filter/README.md)             | Filter the original 29-message feed with eight concurrent requests and compare normal and quiet policies without new calls. | [Open](http://127.0.0.1:4182/?cookbook=twitch-chat-filter)    |
+| [Entity alignment](entity-alignment/README.md)                 | Compare two beer records and inspect Score-only unlink, curator-review and proposed-sameAs routing.                         | [Open](http://127.0.0.1:4182/?cookbook=entity-alignment)      |
+| [Citation checking](citation-checking/README.md)               | Normalize quotes, inspect actual source sections and route Choice confidence to automatic verdict or human review.          | [Open](http://127.0.0.1:4182/?cookbook=citation-checking)     |
+| [Confidence fallback](confidence-fallback/README.md)           | Route one 75-group Choice on API confidence ≥0.90, with a deterministic parent-division fallback.                           | [Open](http://127.0.0.1:4182/?cookbook=confidence-fallback)   |
+| [Line-by-line search](line-search/README.md)                   | Rank the complete pinned document and distinguish an answer from a strong near match.                                       | [Open](http://127.0.0.1:4182/?cookbook=line-search)           |
+| [Re-ranking](reranking/README.md)                              | Inspect independent candidate probabilities, bounded requests and stable ordering before and after ranking.                 | [Open](http://127.0.0.1:4182/?cookbook=reranking)             |
+| [Date extraction](date-extraction/README.md)                   | Read seven date parts per role, resolve the calendar date in a task, and inspect confidence review.                         | [Open](http://127.0.0.1:4182/?cookbook=date-extraction)       |
+| [Pre-parsed value extraction](pre-parsed-extraction/README.md) | Follow regex spans through separate Choice helpers, missing-value bypasses and deterministic normalization.                 | [Open](http://127.0.0.1:4182/?cookbook=pre-parsed-extraction) |
+| [Function calling](function-calling/README.md)                 | Inspect a proposed tool call, omitted defaults, set membership and relevant decision confidence.                            | [Open](http://127.0.0.1:4182/?cookbook=function-calling)      |
+| [LLM guardrails](guardrails/README.md)                         | Compare strict and permissive policies on one assessment, including severity upgrades and overlapping hazards.              | [Open](http://127.0.0.1:4182/?cookbook=guardrails)            |
+| [Choice self-consistency](consistency-choices/README.md)       | Compare every repeated probability vector with argmax labels, abstention and aggregate agreement.                           | [Open](http://127.0.0.1:4182/?cookbook=consistency-choices)   |
+| [Noul self-consistency](consistency-nouls/README.md)           | Inspect fifteen sequential rubric requests, all probabilities, computed statistics and inclusive uncertainty routing.       | [Open](http://127.0.0.1:4182/?cookbook=consistency-nouls)     |
+
+### Existing cookbooks
+
+These six examples remain available alongside the new ports.
+
+| Example                                                              | What you can explore                                                                                     | Run locally                                                         |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| [Skill suggestion](skill-suggestion/README.md)                       | Narrow 182 skills to a shortlist, then inspect a suggestion or abstention.                               | [Open](http://127.0.0.1:4182/?cookbook=skill-suggestion)            |
+| [RAG passage classification](rag-passages/README.md)                 | Assess twelve passages with bounded concurrency and inspect each item's evidence routing.                | [Open](http://127.0.0.1:4182/?cookbook=rag-passages)                |
+| [SDE cascade](sde-cascade/README.md)                                 | Follow field verification, conditional escalation, and a merge into the final record.                    | [Open](http://127.0.0.1:4182/?cookbook=sde-cascade)                 |
+| [Hierarchical classification](hierarchical-classification/README.md) | Compare beam and greedy search through iterations, frontier requests, and retained/pruned paths.         | [Open](http://127.0.0.1:4182/?cookbook=hierarchical-classification) |
+| [Simple memory](simple-memory/README.md)                             | Replay customer tickets and compare routing with and without saved context within a run.                 | [Open](http://127.0.0.1:4182/?cookbook=simple-memory)               |
+| [Structure recovery](structure-recovery/README.md)                   | Turn broken lines into a classified, formatted document through two batched requests and function steps. | [Open](http://127.0.0.1:4182/?cookbook=structure-recovery)          |
 
 ## Run a sample
 
-From the repository root, with Node 22.12+:
+From the repository root, use Node 22.12 or later. The [.nvmrc](../.nvmrc) file pins the development version.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open an example using the table above, choose a sample, and run it. Open **Jev DevTools → Flows** to inspect the connected requests and decisions alongside the application's result. Each example's README explains its samples, policy thresholds, source recipe, and limitations. Fixed sample responses do not become live inference when you edit the input.
+Open an example from the table, choose a sample, and click **Run sample**. Open **Jev DevTools**, select **Flows**, and inspect the requests and decisions alongside the app's result. Each example's README explains its controls and known limitations.
 
-For the general playground and optional live-mode setup, see the [playground guide](../apps/playground/README.md). Live availability varies by example; check its README before configuring a key.
+Fixed responses remain synthetic when you edit an input. The 13 new ports validate fixed sample inputs on the server and do not enable live inference. For the general playground and any live options in the existing examples, see the [playground guide](../apps/playground/README.md) and the relevant cookbook README.
+
+## Verification added after the retrospective
+
+The ports include recipe checks. Separate retrospective work connects those checks to routine verification and validates saved evidence against the tested source.
+
+`npm run verify:cookbooks` runs 15 browser checks: the 13 new recipe probes, a smoke check across all 19 cookbooks, and comparisons between captured requests and application results. The same suite runs in `verify:all` and CI with React 18 and 19.
+
+After installing dependencies, stop the playground server to free port 4182. Install Chromium once, then run the suite:
+
+```sh
+npx playwright install chromium --only-shell
+npm run verify:cookbooks
+```
+
+For one recipe, use a focused run:
+
+```sh
+npm run verify:cookbooks -- --only confidence-fallback
+```
+
+Each run writes a unique `summary.json` and supporting evidence under ignored `benchmarks/results/cookbook-browser/`. The report records the source revision, content hash, scope, and result. `npm run verify:evidence` rejects incomplete, failed, stale, or mismatched reports. A focused run does not establish full-suite coverage.
+
+See [contributor verification guidance](../CONTRIBUTING.md#verification-details) for full verification and report validation. These checks use samples and block external provider fetches. They do not measure live accuracy, latency, or cost.
 
 ## Recipe catalog and research
 
-The research below was recorded on **2026-10-23** against Jev DevTools **0.3.0**. It catalogs 20 official recipes and their fit at that baseline. The examples above are runnable; the remaining ports are proposals.
+The [original research](RESEARCH.md) reviewed 20 official recipes on 2026-10-23 against Jev DevTools 0.3.0. Its proposed roadmap and API limitations describe that historical baseline. The runnable collection above records the current implementation status.
 
-The [research and implementation plan](RESEARCH.md) covers fidelity, API gaps, fixtures, UI, and verification. [Source snapshots](sources.json) record reviewed pages and content hashes; research downloads are not vendored here. The skill-suggestion example includes its attributed, pinned roster. The [flow guide](../docs/flows.md) documents the APIs now available in the checkout.
+[Source snapshots](sources.json) preserve the reviewed URLs and content hashes. Their research-only status also belongs to the original review. Each cookbook README links its source recipe and records any pinned assets, attribution, and differences from the original evaluation.
 
-## All 20 published cookbooks
+### Autoresearch remains out of scope
 
-“Core now” means the recipe's Jev assessment and routing could use the published 0.3.0 flow API at the research baseline. It does **not** mean the entire original notebook, evaluation, or downstream action is captured. “App boundary” means some work should remain explicitly outside the diagram. “Extension” means a faithful, fully connected version needs additional execution/capture support.
+[Autoresearch feature discovery](https://docs.typesafe.ai/cookbooks/autoresearch_feature_discovery) was excluded from this round. Its full pipeline includes feature proposals, model training, and iterative feedback. No Autoresearch app or complete pipeline port is included here.
 
-| Official cookbook                                                                                      | Proposed local experience                                                      | Fit with published 0.3.0                                                                                                                                                                                                                                                             |
-| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [Function calling](https://docs.typesafe.ai/cookbooks/function_calling)                                | Inspect a proposed function and its selected arguments.                        | **Now implemented locally with existing APIs:** one multi-question request, selected-argument branches, default preservation and decision confidence. Proposed calls only; no tool execution. [Run it](function-calling/README.md).                                                  |
-| [Skill suggestion](https://docs.typesafe.ai/cookbooks/skill_suggestion)                                | See a large skill list narrow to a shortlist, then a suggestion or abstention. | **Extension, now implemented locally:** arithmetic gate, runtime top-k, and later questions built from selected skills. [Run it](skill-suggestion/README.md).                                                                                                                        |
-| [Guardrails for LLMs](https://docs.typesafe.ai/cookbooks/llm_guardrails)                               | Compare strict/permissive routing on the same assessment.                      | **Now implemented locally:** exact input/output batteries, inclusive thresholds, severity upgrades and action precedence; one selected side per run with authored synthetic fixtures. [Run it](guardrails/README.md).                                                                |
-| [Double-checking citations](https://docs.typesafe.ai/cookbooks/citation_check)                         | Highlight a quote and show verification or review.                             | **Now implemented locally with existing APIs:** deterministic normalization/matching, missing-quote inference bypass and Choice-confidence review gate. [Run five samples](citation-checking/README.md).                                                                             |
-| [Classifying RAG passages](https://docs.typesafe.ai/cookbooks/classifying_rag_passages)                | Follow candidate passages into include, conflict, or exclude buckets.          | **Core now + app boundary:** fixed parallel lanes and per-passage policies; retrieval and final generation stay outside.                                                                                                                                                             |
-| [Simple memory system](https://docs.typesafe.ai/cookbooks/basic_memory)                                | Watch a ticket route, pass a memory gate, and affect the next ticket.          | **Now implemented locally with existing APIs:** sequential route/gate requests, readable-answer conversion, per-customer run-local memory and four sample timelines. [Run it](simple-memory/README.md).                                                                              |
-| [Hierarchical classification](https://docs.typesafe.ai/cookbooks/hierarchical_classification)          | Explore competing taxonomy paths across levels.                                | **Extension, now implemented locally:** bounded loop, frontier collections, beam versus greedy traversal and four sample cases on a small authored taxonomy. [Run it](hierarchical-classification/README.md).                                                                        |
-| [Classification using confidence](https://docs.typesafe.ai/cookbooks/classification_using_confidence)  | Show a precise industry classification or broader fallback.                    | **Now implemented locally with existing APIs:** one original 75-group Choice, inclusive API-confidence gate, and parent lookup inside a task. [Run it](confidence-fallback/README.md).                                                                                               |
-| [Twitch chat filter](https://docs.typesafe.ai/cookbooks/twitch_chat_filter)                            | Replay a chat feed and see show/highlight/dim/blur/hide decisions.             | **Now implemented locally:** original finite 29-message feed, concurrency-eight ordered map, Choice + two Nouls, inclusive thresholds and normal/quiet policies. [Run it](twitch-chat-filter/README.md). Ongoing ingestion remains outside.                                          |
-| [SDE cascade](https://docs.typesafe.ai/cookbooks/sde_cascade)                                          | Inspect extracted fields and the reason for escalation.                        | **Extension, now implemented locally:** conditional escalation and shared continuation, candidate-dependent verification and four sample cases. Extractors are labeled fixtures. [Run it](sde-cascade/README.md).                                                                    |
-| [Date extraction](https://docs.typesafe.ai/cookbooks/date_extraction_cookbook)                         | Compare source text, selected date components, and a validated date.           | **Now implemented locally with existing APIs:** seven Choice questions per role, calendar assembly in a task, and an inspectable confidence review branch. [Run it](date-extraction/README.md).                                                                                      |
-| [Pre-parsed value extraction](https://docs.typesafe.ai/cookbooks/pre_parsed_value_extraction_cookbook) | Highlight the selected email, phone, or amount in its source.                  | **Now implemented locally with existing APIs:** document-order regex candidates, separate runtime Choice helpers, amount-dependent Nouls and deterministic normalization. [Run it](pre-parsed-extraction/README.md).                                                                 |
-| [Structure recovery](https://docs.typesafe.ai/cookbooks/autoformat)                                    | Compare rough text, joined blocks, and formatted Markdown.                     | **Extension, now implemented locally with existing APIs:** stitch line pairs, merge blocks, build dynamic classification questions, then render Markdown in code. [Run four samples](structure-recovery/README.md).                                                                  |
-| [Re-ranking](https://docs.typesafe.ai/cookbooks/rerank_typesafe)                                       | Watch retrieved passages reorder by relevance.                                 | **Now implemented locally with existing APIs:** one bounded map over an authored retrieval fixture, one Noul per candidate and a stable sorting task. [Run it](reranking/README.md).                                                                                                 |
-| [Line-by-line search](https://docs.typesafe.ai/cookbooks/semantic_find)                                | Highlight likely lines and distinguish an answer from a near match.            | **Now implemented locally with existing APIs:** tagging, runtime Choice + Noul request, ranking/lookup tasks and exact existence branches. [Run it](line-search/README.md).                                                                                                          |
-| [Knowledge graph entity alignment](https://docs.typesafe.ai/cookbooks/entity_alignment)                | Compare two records and see unlink, curator review, or proposed match.         | **Now implemented locally with existing APIs:** one Score, three companion Nouls, exact nearest-level boundaries and attributed example pairs with synthetic responses. [Run it](entity-alignment/README.md). No database merge.                                                     |
-| [Self-consistency: choices](https://docs.typesafe.ai/cookbooks/consistency_choice_cookbook)            | Inspect repeat runs beside a label/probability heatmap.                        | **Now implemented locally with existing APIs:** 15 sequential requests, original eight-question rubric, argmax and ≥0.60 policy, statistics and interactive heatmap. Authored synthetic responses; provider comparison excluded. [Run it](consistency-choices/README.md).            |
-| [Self-consistency: nouls](https://docs.typesafe.ai/cookbooks/consistency_noul_cookbook)                | Inspect repeat runs and yes/uncertain/no outcomes.                             | **Now implemented locally with existing APIs:** fifteen sequential requests, all fourteen Nouls, exact uncertainty thresholds and computed fixture statistics. Synthetic variation is not measured consistency; provider comparison excluded. [Run it](consistency-nouls/README.md). |
-| [Parallel questions](https://docs.typesafe.ai/cookbooks/parallel_questions)                            | Compare one batched request with individual calls over the same document.      | **Now implemented locally with existing APIs:** five batched repeats, then five sequential 13-item maps; computed means and sample deviations over synthetic answers. [Run it](parallel-questions/README.md).                                                                        |
-| [Autoresearch feature discovery](https://docs.typesafe.ai/cookbooks/autoresearch_feature_discovery)    | Follow text into numeric features and a training/refinement timeline.          | **Extension for full pipeline:** proposal model, changing questions, model training, and iterative feedback. A fixed feature-extraction batch is usable now.                                                                                                                         |
+To list the implemented flow definitions from the repository root:
 
-## Original implementation roadmap (research baseline)
-
-The original research proposed the following order. It is retained as planning context; the runnable collection above reflects what exists now:
-
-1. **Parallel questions:** establish the shared runner, fixture contract, and inspection of every answer.
-2. **Twitch chat filter:** make thresholds and routing tangible through a familiar UI.
-3. **Entity alignment:** show Score semantics and uncertainty with two comparable records.
-4. **Citation checking:** show a deterministic prerequisite and a route that makes no model call.
-5. **RAG passage classification:** demonstrate multiple requests, parallel lanes, a join, and different outcomes.
-6. **Simple memory:** demonstrate a later request using an earlier result, plus state across runs. Resolve the description-lookup fidelity choice before implementing it.
-
-Then add confidence fallback, re-ranking, line search, and guardrails. Use **skill suggestion** as the first serious design case for any API extension; do not expand the flow API merely to make all 20 fit at once.
-
-These cookbooks mainly exercise Choice, Noul, and Score. The reviewed examples do not provide a Box showcase. Keep a separately labeled original Box example rather than inventing an “official cookbook” for it.
+```sh
+rg --files cookbooks -g flow.ts
+```
 
 ## Related flow sample
 
-The playground also includes **Flow · Functions + dynamic questions (synthetic)**, an original sample demonstrating function steps and runtime request factories. See the [flow guide](../docs/flows.md#function-steps-and-runtime-requests). It is separate from the cookbook adaptations above.
+The playground also includes **Flow · Functions + dynamic questions (synthetic)**, an original sample of function steps and runtime request factories. See the [Flow guide](../docs/flows.md#function-steps-and-runtime-requests). This sample is separate from the official cookbook adaptations. The reviewed recipes exercise Choice, Noul, and Score; they do not provide a Box showcase.

@@ -58,6 +58,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **Current cookbook collection guide.** Separate the thirteen new ports from the six existing examples, document routine browser verification, and replace outdated API-fit proposals with current implementation status. Preserve the original research as historical context and identify Autoresearch as excluded. ([#119](https://github.com/diegoag64/jev-devtools/pull/119))
+
 - **Even API panel close control.** Give the close button a square touch target with a centered X in desktop and mobile layouts. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
 - **Current API reference links.** Mute links inside the reading panel that point to its open entry and label them “current,” updating the indication when following references or going Back. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
