@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | Rewritten onboarding, guides, and API explanations.                                                        |
+| [Unreleased](#unreleased)                   | Not published                                                                      | Rewritten docs; clearer landing copy and community branding.                                               |
 | [0.5.3](#053--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) | Shared flow encoding; simpler releases and publication helpers; flow regression coverage.                  |
 | [0.5.2](#052--october-25-2026-experimental) | 2026-10-25                                                                         | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
 | [0.5.1](#051--october-25-2026-experimental) | 2026-10-25                                                                         | Task input validation and expression types; setup guidance; release and website maintenance.               |
@@ -31,6 +31,10 @@ Dates below use UTC and were checked against npm's publication history. The hist
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
 - **API reference previews.** Hover or focus a supported API link for its summary, then open the full reference or read its contract and examples in a side panel. Touch controls, keyboard navigation, copy buttons, and failed-load recovery keep reference reading available without losing the current page. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
+
+#### Changed
+
+- **Clearer landing copy.** Explain captured requests, sample flows, and application-defined decisions in plain language, and add a community-project and TypeSafe AI non-affiliation notice beneath the hero actions. Preserve the drawer and Flow API heading treatments, accent the second line of the System One primitives heading, and remove decorative card numbers. The landing page has not been deployed.
 
 #### Fixed
 

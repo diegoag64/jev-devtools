@@ -23,13 +23,14 @@ app.innerHTML = `
   <main id="main">
     <section class="hero wrap" aria-labelledby="hero-title">
       <h1 id="hero-title">Visualize your<br /><span>System One flows.</span></h1>
-      <p class="hero-description">Models, primitives, and your code. One clear picture.<br class="desktop-break" /> Make complex Jev flows easy to understand.</p>
-      <div class="hero-actions"><a class="button primary" href="${DOCS}">Read the Docs</a><a class="button secondary" href="${GITHUB}">${github} View on GitHub</a></div>
+      <p class="hero-description">Inspect System One requests, returned probabilities,<br class="desktop-break" /> and application logic in your app.</p>
+      <div class="hero-actions"><a class="button primary" href="${DOCS}">Read the docs</a><a class="button secondary" href="${GITHUB}">${github} View on GitHub</a></div>
+      <p class="hero-disclaimer">Independent community project. Not affiliated with TypeSafe AI.</p>
     </section>
     <section id="flows" class="flow-stage wrap" aria-label="Animated flow examples" aria-roledescription="carousel">
       <div class="diagram-scroll" tabindex="0" role="region" aria-label="Flow diagram; scroll horizontally on small screens"><svg id="diagram" viewBox="0 0 1140 520" role="img"></svg></div>
       <div class="flow-caption">
-        <div class="flow-caption-copy">${flows.map((flow, index) => `<div class="flow-caption-item" aria-hidden="true"><p class="flow-caption-heading"><span class="flow-number">${String(index + 1).padStart(2, "0")} / ${String(flows.length).padStart(2, "0")}</span><span>${escape(flow.label)}</span><span class="sample-label">Simulated flow</span></p><p class="flow-description">${escape(flow.description)}</p></div>`).join("")}</div>
+        <div class="flow-caption-copy">${flows.map((flow, index) => `<div class="flow-caption-item" aria-hidden="true"><p class="flow-caption-heading"><span class="flow-number">${String(index + 1).padStart(2, "0")} / ${String(flows.length).padStart(2, "0")}</span><span>${escape(flow.label)}</span><span class="sample-label">Sample flow</span></p><p class="flow-description">${escape(flow.description)}</p></div>`).join("")}</div>
         <div class="playback"><button id="previous" aria-label="Previous flow" title="Previous flow">Previous</button><button id="play" aria-label="Pause animation" title="Pause animation">Ⅱ</button><button id="next" aria-label="Next flow" title="Next flow">Next</button></div>
       </div>
       <p class="mobile-hint">Swipe to explore the diagram <span aria-hidden="true">↔</span></p>
@@ -37,17 +38,17 @@ app.innerHTML = `
     </section>
     ${drawerShowcase}
     <section class="primitives-section wrap" aria-labelledby="primitives-title">
-      <div class="section-heading"><div><h2 id="primitives-title">Every System One <br/> Primitive Supported</h2></div></div>
+      <div class="section-heading"><div><h2 id="primitives-title">Every System One<br /><span>Primitive Supported</span></h2></div></div>
       <div class="primitive-grid">
-        <article class="primitive"><div class="primitive-title"><span class="primitive-symbol">◈</span><h3>Choice</h3><span class="mono">01</span></div><p>A distribution over competing options.</p><div class="choice-rows"><div><span>Billing</span><b>76%</b><i style="--value:76%"></i></div><div><span>Delivery</span><b>18%</b><i style="--value:18%"></i></div><div><span>Other</span><b>6%</b><i style="--value:6%"></i></div></div></article>
-        <article class="primitive"><div class="primitive-title"><span class="primitive-symbol">◐</span><h3>Noul</h3><span class="mono">02</span></div><p>The probability that an answer is yes.</p><div class="noul-value">0.94<span>probability of yes</span></div><div class="noul-track"><i></i></div><div class="scale-labels"><span>No</span><span>Uncertain</span><span>Yes</span></div></article>
-        <article class="primitive"><div class="primitive-title"><span class="primitive-symbol">▥</span><h3>Score</h3><span class="mono">03</span></div><p>A distribution across ordered criteria.</p><div class="score-chart" role="img" aria-label="Sample ordered probabilities: low 10%, medium 25%, high 65%. Expected index 1.55 out of 2."><div><i style="--value:15%"></i><span>Low</span></div><div><i style="--value:38%"></i><span>Med</span></div><div><i style="--value:100%"></i><span>High</span></div><strong>1.55<small>of 2</small></strong></div></article>
-        <article class="primitive"><div class="primitive-title"><span class="primitive-symbol">⌗</span><h3>Box</h3><span class="mono">04</span></div><p>A region, expressed as coordinates.</p><div class="box-scene" role="img" aria-label="Illustrative box around a mug; coordinates do not establish object presence."><svg viewBox="0 0 200 110" aria-hidden="true"><path d="M75 38h43v42q-22 12-43 0Z" fill="#5e4359"/><path d="M118 45h10q17 15-10 24" fill="none" stroke="#78516c" stroke-width="5"/><path d="M84 26q-7-8 0-16m17 16q-7-8 0-16" fill="none" stroke="#61505c" stroke-width="2"/><rect x="63" y="29" width="78" height="64" rx="2" fill="none" stroke="#e551ba" stroke-dasharray="4 3"/><path d="M63 39V29h10m58 0h10v10M63 83v10h10m58 0h10V83" fill="none" stroke="#f28dce" stroke-width="2"/></svg><span>REGION / SAMPLE</span></div></article>
+        <article class="primitive"><div class="primitive-title"><span class="primitive-symbol">◈</span><h3>Choice</h3></div><p>The probability of each option.</p><div class="choice-rows"><div><span>Billing</span><b>76%</b><i style="--value:76%"></i></div><div><span>Delivery</span><b>18%</b><i style="--value:18%"></i></div><div><span>Other</span><b>6%</b><i style="--value:6%"></i></div></div></article>
+        <article class="primitive"><div class="primitive-title"><span class="primitive-symbol">◐</span><h3>Noul</h3></div><p>The probability that an answer is yes.</p><div class="noul-value">0.94<span>probability of yes</span></div><div class="noul-track"><i></i></div><div class="scale-labels"><span>No</span><span>Uncertain</span><span>Yes</span></div></article>
+        <article class="primitive"><div class="primitive-title"><span class="primitive-symbol">▥</span><h3>Score</h3></div><p>Probabilities for ordered ratings, such as low, medium, and high.</p><div class="score-chart" role="img" aria-label="Sample ordered probabilities: low 10%, medium 25%, high 65%. Expected index 1.55 out of 2."><div><i style="--value:15%"></i><span>Low</span></div><div><i style="--value:38%"></i><span>Med</span></div><div><i style="--value:100%"></i><span>High</span></div><strong>1.55<small>of 2</small></strong></div></article>
+        <article class="primitive"><div class="primitive-title"><span class="primitive-symbol">⌗</span><h3>Box</h3></div><p>Coordinates that describe a region.</p><div class="box-scene" role="img" aria-label="Illustrative box around a mug; coordinates do not establish object presence."><svg viewBox="0 0 200 110" aria-hidden="true"><path d="M75 38h43v42q-22 12-43 0Z" fill="#5e4359"/><path d="M118 45h10q17 15-10 24" fill="none" stroke="#78516c" stroke-width="5"/><path d="M84 26q-7-8 0-16m17 16q-7-8 0-16" fill="none" stroke="#61505c" stroke-width="2"/><rect x="63" y="29" width="78" height="64" rx="2" fill="none" stroke="#e551ba" stroke-dasharray="4 3"/><path d="M63 39V29h10m58 0h10v10M63 83v10h10m58 0h10V83" fill="none" stroke="#f28dce" stroke-width="2"/></svg><span>REGION / SAMPLE</span></div></article>
       </div>
     </section>
     ${flowApiShowcase}
     <section class="integration wrap" aria-labelledby="integration-title">
-      <div class="integration-copy"><h2 id="integration-title">Keep your code.<br />See the connections.</h2><p>Mount the React drawer, connect a server adapter, and inspect your Jev requests right where you build. Add connected flows when you need the whole picture.</p><a class="text-link" href="${DOCS}">Find your integration guide</a><div class="integration-tags"><span>React 18 / 19</span><span>Next.js App Router</span></div></div>
+      <div class="integration-copy"><h2 id="integration-title">Add the inspector<br />to your app</h2><p>Mount the React drawer and connect a server adapter to capture Jev requests. Use the Flow API to record connections between requests and application steps.</p><a class="text-link" href="${DOCS}">Find your integration guide</a><div class="integration-tags"><span>React 18 / 19</span><span>Next.js App Router</span></div></div>
       <div class="code-window"><div class="code-heading"><span><span class="code-dot"></span> Your application</span><span>React / Vite</span></div><div class="install-command"><code>pnpm add jev-devtools @typesafe-ai/sdk</code><button id="copy" aria-label="Copy install command" title="Copy install command">Copy</button></div><pre><code><span class="syntax-purple">import</span> { JevDevtools } <span class="syntax-purple">from</span> <span class="syntax-green">'jev-devtools'</span>;
 
 <span class="syntax-purple">export function</span> <span class="syntax-pink">Root</span>() {
@@ -57,9 +58,9 @@ app.innerHTML = `
       &lt;<span class="syntax-pink">JevDevtools</span> enabled={import.meta.env.DEV} /&gt;
     &lt;/&gt;
   );
-}</code></pre><p class="code-note">The browser side is this small. The integration guide covers the server adapter and request capture.</p><span class="sr-only" id="copy-status" role="status"></span></div>
+}</code></pre><p class="code-note">This example mounts the browser drawer. Follow the integration guide to connect the server adapter and capture requests.</p><span class="sr-only" id="copy-status" role="status"></span></div>
     </section>
-    <section class="closing section-band" data-theme="plum"><div class="wrap"><h2>System One<br /><span>Visualized</span></h2><p>Open source, actively evolving, and ready for your next idea.<br />Explore the docs. Try it in your app. Help shape what’s next.</p><div class="hero-actions"><a class="button primary" href="${DOCS}">Explore the docs</a><a class="text-link" href="${GITHUB}">Build with us</a></div><span class="experimental">Experimental software. APIs may evolve before 1.0.</span></div></section>
+    <section class="closing section-band" data-theme="plum"><div class="wrap"><h2>Add Jev DevTools<br /><span>to your app</span></h2><p>Follow the setup guide for React or Next.js.<br />Source code and issues are on GitHub.</p><div class="hero-actions"><a class="button primary" href="${DOCS}/getting-started/">Read the setup guide</a><a class="text-link" href="${GITHUB}">View on GitHub</a></div><span class="experimental">Under active development. APIs may change before 1.0.</span></div></section>
   </main>
   <footer class="site-footer wrap"><p>Jev DevTools is an independent, open-source community project. It is not affiliated with TypeSafe AI.</p></footer>
 `;
@@ -137,7 +138,7 @@ function render() {
       caption.classList.toggle("is-active", active);
       caption.setAttribute("aria-hidden", String(!active));
     });
-  svg.innerHTML = `<title>${escape(flow.label)} — simulated flow</title><desc>${escape(flow.description)} ${flow.nodes.map((n) => `${n.title}: ${n.subtitle}${n.muted ? " (inactive path)" : ""}`).join(". ")}. Fixed illustrative data; no inference is performed.</desc>${flow.group ? `<g class="flow-group"><rect x="${flow.group.x}" y="${flow.group.y}" width="${flow.group.w}" height="${flow.group.h}" rx="12"/><text x="${flow.group.x + 20}" y="${flow.group.y + 24}">${flow.group.label}</text></g>` : ""}${flow.edges.map((e) => connection(e, flow)).join("")}${flow.nodes.map(card).join("")}`;
+  svg.innerHTML = `<title>${escape(flow.label)}. Sample flow</title><desc>${escape(flow.description)} ${flow.nodes.map((n) => `${n.title}: ${n.subtitle}${n.muted ? " (inactive path)" : ""}`).join(". ")}. Fixed illustrative data; no inference is performed.</desc>${flow.group ? `<g class="flow-group"><rect x="${flow.group.x}" y="${flow.group.y}" width="${flow.group.w}" height="${flow.group.h}" rx="12"/><text x="${flow.group.x + 20}" y="${flow.group.y + 24}">${flow.group.label}</text></g>` : ""}${flow.edges.map((e) => connection(e, flow)).join("")}${flow.nodes.map(card).join("")}`;
   timed = [...svg.querySelectorAll<SVGElement>("[data-at]")];
   elapsed = reducedMotion.matches || paused ? DURATION : 0;
   lastFrame = 0;

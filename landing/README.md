@@ -25,6 +25,8 @@ Open the printed localhost URL (default `http://127.0.0.1:4190`). Run `npm run b
 
 The designs reference the Jev DevTools drawer and [diagram-motion-lab](https://github.com/diegoag64/diagram-motion-lab). The renderer, graph data, and illustrations are newly authored; no third-party implementation or cookbook datasets are copied.
 
+The hero includes a small community-project and TypeSafe AI non-affiliation notice below its actions. Landing copy describes captured request data and application-defined decisions; sample captions and controls distinguish authored examples from model calls. The drawer and Flow API headings retain their split lines and accent colors.
+
 Diagrams sit directly beneath the hero without an explorer frame, header, or tabs. Six examples cycle automatically, with a hold after each build animation. Previous, pause/play, and next controls sit beneath the diagram; offscreen and hidden-tab playback suspends. Reduced motion displays the complete graph without animation or automatic cycling. All controls support keyboard navigation. On narrow screens, diagrams scroll horizontally to preserve readable node labels.
 
 The installation snippet shows only the browser mount. Visitors must follow the linked docs to connect their server adapter. The website itself has no server integration.

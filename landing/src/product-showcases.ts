@@ -1,12 +1,11 @@
-const flowGuide =
-  "https://docs.jevtools.dev/api/flow/";
+const flowGuide = "https://docs.jevtools.dev/api/flow/";
 
 export const drawerShowcase = `
 <section id="drawer" class="drawer-showcase section-band" data-theme="plum" aria-labelledby="drawer-title">
   <div class="wrap">
   <div class="product-heading">
     <h2 id="drawer-title">System One Diagrams<br /><span>Anywhere in your App</span></h2>
-    <div><p>Open the drawer without leaving your app. Follow a request from its input to its answer, inspect the probabilities, and see the details behind every step.</p><a class="text-link" href="https://docs.jevtools.dev">Add the drawer to your app</a></div>
+    <div><p>Open the drawer to inspect request inputs, answers, and returned probabilities. View captured steps in a connected flow.</p><a class="text-link" href="https://docs.jevtools.dev">Add the drawer to your app</a></div>
   </div>
   <figure class="drawer-demo">
     <video id="drawer-video" controls playsinline muted preload="metadata" width="1920" height="1066" aria-label="Recorded demo of Jev DevTools in the React playground" aria-describedby="drawer-description">
@@ -15,9 +14,9 @@ export const drawerShowcase = `
     </video>
   </figure>
   <div class="drawer-details" id="drawer-description">
-    <div><h3>Stay in your app</h3><p>The React drawer sits alongside the interface you’re building. Open it when you need it, close it when you’re done.</p></div>
-    <div><h3>Look inside each request</h3><p>Explore questions, returned probabilities, shared context, transport details, and raw captured data.</p></div>
-    <div><h3>Follow the connections</h3><p>Move from a request diagram to a connected flow. Pan, zoom, and inspect the steps that produced the result.</p></div>
+    <div><h3>Open the inspector</h3><p>Toggle the React drawer alongside your application UI.</p></div>
+    <div><h3>Inspect request data</h3><p>Inspect questions, returned probabilities, shared context, transport details, and raw captured data.</p></div>
+    <div><h3>Inspect flow steps</h3><p>Pan and zoom through connected flows to inspect captured steps and their results.</p></div>
   </div>
   </div>
 </section>`;
@@ -27,7 +26,7 @@ export const flowApiShowcase = `
   <div class="wrap">
   <div class="product-heading">
     <h2 id="flow-api-title">Code to diagrams<br /><span>via the Flow API</span></h2>
-    <div><p>The Flow API turns an explicit TypeScript definition into an inspectable graph. Combine System One requests with your functions, branches, parallel work, maps, and loops—then see how each run unfolded.</p><a class="text-link" href="${flowGuide}">Explore the Flow API</a></div>
+    <div><p>Use the Flow API to define System One requests and application logic in TypeScript. It supports functions, branches, parallel steps, maps, and loops. Inspect recorded runs as diagrams.</p><a class="text-link" href="${flowGuide}">Explore the Flow API</a></div>
   </div>
   <div class="api-comparison">
     <div class="api-source code-window">
@@ -65,7 +64,7 @@ export const flowApiShowcase = `
         <g id="api-approve-node" class="api-outcome" transform="translate(22 274)"><rect width="190" height="60" rx="8"/><text class="api-node-title" x="17" y="26">approve</text><text class="api-outcome-state" x="17" y="45"></text></g>
         <g id="api-review-node" class="api-outcome" transform="translate(288 274)"><rect width="190" height="60" rx="8"/><text class="api-node-title" x="17" y="26">manual-review</text><text class="api-outcome-state" x="17" y="45"></text></g>
       </svg>
-      <div class="api-sample-controls" role="group" aria-label="Choose an illustrative flow outcome"><button data-api-sample="approve" aria-pressed="true">Eligible sample <span>0.94</span></button><button data-api-sample="review" aria-pressed="false">Review sample <span>0.62</span></button></div>
+      <div class="api-sample-controls" role="group" aria-label="Choose an illustrative flow outcome"><button data-api-sample="approve" aria-pressed="true">Approve sample <span>0.94</span></button><button data-api-sample="review" aria-pressed="false">Manual-review sample <span>0.62</span></button></div>
       <p id="api-sample-status" role="status"></p>
     </div>
   </div>
@@ -111,10 +110,10 @@ export function setupProductShowcases() {
       ),
     );
     const summary = approved
-      ? "Sample: 0.94 ≥ 0.90 → approve."
-      : "Sample: 0.62 < 0.90 → manual-review.";
+      ? "The sample value 0.94 meets the 0.90 threshold, so the branch returns approve."
+      : "The sample value 0.62 is below the 0.90 threshold, so the branch returns manual-review.";
     document.querySelector("#api-sample-status")!.textContent =
-      summary + " No model call is made.";
+      summary + " This demo makes no model calls.";
     document.querySelector("#api-diagram-description")!.textContent =
       "Eligibility request, then application-defined branch, then approve or manual-review. " +
       summary;
