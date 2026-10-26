@@ -29,6 +29,12 @@ The retention limit applies across all sessions, not separately to each one. Sna
 
 For an incremental viewer, call `changes(session)` once for the initial data, then pass the returned revision on later reads. Apply `upserts`, remove locally cached IDs missing from `order`, and save the new revision. An empty `upserts` array does not mean nothing changed: traces may have been cleared or evicted.
 
+## Transformed captures
+
+A custom redactor can change a field's type or replace a whole request or response. When the resulting JSON no longer supports the structured view, `Trace.capture.request` or `Trace.capture.result` retains it, including `null`. The corresponding request view is empty or the result is omitted. `captureWarnings` explains the omission, and the drawer shows an unavailable placeholder with the captured content in Raw.
+
+One incompatible field makes that entire request or response view unavailable. Application execution still receives its original values. Fixture export lists unavailable responses in `missing` and retains their warnings. Existing `Trace.request`, `Trace.result`, `QuestionView`, and `AnswerView` declarations are unchanged; `Trace.capture` is optional. Check field presence rather than interpreting strings such as `[redacted]` as metadata.
+
 ## Custom flow observers
 
 Import the [`FlowObserver`](@/api/reference/#type-flowobserver) type from `jev-devtools/flow` and pass your implementation as `devtools` to a run. The server adapter already implements it.

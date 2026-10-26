@@ -57,6 +57,12 @@ if (process.env.JEV_VERIFY_REACT) {
   pkg.dependencies["react-dom"] = process.env.JEV_VERIFY_REACT;
 }
 pkg.dependencies["jev-devtools"] = dependency;
+// Root and server declaration examples require the consumer's React/Node types.
+const workspace = JSON.parse(
+  await readFile(join(root, "package.json"), "utf8"),
+);
+for (const name of ["@types/react", "@types/node"])
+  pkg.devDependencies[name] = workspace.devDependencies[name];
 await writeFile(join(consumer, "package.json"), JSON.stringify(pkg, null, 2));
 npm(
   [
@@ -91,6 +97,8 @@ await cp(
   join(root, "scripts/fixtures/packed-resolved-templates.test.mjs"),
   join(types, "packed-resolved-templates.test.mjs"),
 );
+for (const file of ["packed-capture.ts", "packed-capture.test.mjs"])
+  await cp(join(root, "scripts/fixtures", file), join(types, file));
 // No skipLibCheck: it would also skip the archive's own declarations.
 await writeFile(
   join(types, "tsconfig.json"),
@@ -102,9 +110,9 @@ await writeFile(
       moduleResolution: "Bundler",
       strict: true,
       noEmitOnError: true,
-      types: [],
+      types: ["node"],
     },
-    files: ["flow.ts", "packed-resolved-templates.ts"],
+    files: ["flow.ts", "packed-resolved-templates.ts", "packed-capture.ts"],
   }),
 );
 execFileSync(
@@ -115,7 +123,11 @@ execFileSync(
 console.log("Packed flow types: passed");
 execFileSync(
   process.execPath,
-  ["--test", join(types, "packed-resolved-templates.test.mjs")],
+  [
+    "--test",
+    join(types, "packed-resolved-templates.test.mjs"),
+    join(types, "packed-capture.test.mjs"),
+  ],
   { cwd: consumer, stdio: "inherit" },
 );
 npm(["run", "build"], { cwd: consumer, stdio: "inherit" });

@@ -1,3 +1,6 @@
+import { defineJevFlow } from "../flow/index.js";
+import { flowFixture } from "../src/flow-fixture.js";
+import { traceCaptureView } from "../src/capture-view.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { setImmediate as nextTurn } from "node:timers/promises";
@@ -107,3 +110,127 @@ for (const mode of ["normal", "root-null", "score-string"] as const) {
     }
   });
 }
+
+// Older snapshots asserted SDK shapes even after root/field replacement. The
+// compatibility projection must preserve raw JSON and valid-record identity.
+test("legacy JSON captures render without treating user strings as metadata", () => {
+  const base = {
+    version: 1,
+    id: "legacy",
+    session: "local",
+    label: "Legacy",
+    source: "sample",
+    startedAt: 0,
+    status: "success",
+    attempts: [],
+    captureWarnings: [],
+    request: { model: "fixture", ...input },
+    result,
+  };
+  for (const replacement of [
+    null,
+    false,
+    42,
+    "[redacted]",
+    [],
+    { model: "redacted" },
+  ]) {
+    const [trace] = new TraceStore().apply("snapshot", {
+      version: 1,
+      traces: [{ ...base, request: replacement }],
+    });
+    assert.match(
+      renderToString(createElement(RequestDetail, { trace })),
+      /Request unavailable in this capture/,
+    );
+    const view = traceCaptureView(trace);
+    assert.deepEqual(view.capture?.request, replacement);
+    assert.equal(traceCaptureView(view), view);
+  }
+  for (const changed of [
+    { ...result, answers: { q: { type: "score", score: "[redacted]" } } },
+    { ...result, answers: null },
+    {
+      ...result,
+      answers: {
+        q: {
+          type: "box",
+          box: { left: "hidden", top: 0, right: 1, bottom: 1 },
+        },
+      },
+    },
+    { ...result, answers: { q: { type: "noul", noul: "hidden" } } },
+    {
+      ...result,
+      answers: { q: { type: "choice", choice: {}, probabilities: { x: 1 } } },
+    },
+    {
+      ...result,
+      answers: { q: { type: "choice", probabilities: { x: "hidden" } } },
+    },
+    { ...result, usage: { input_tokens: "hidden", output_tokens: 1 } },
+  ]) {
+    const [trace] = new TraceStore().apply("snapshot", {
+      version: 1,
+      traces: [{ ...base, result: changed }],
+    });
+    assert.match(
+      renderToString(createElement(TraceDiagram, { trace })),
+      /Response unavailable in this capture/,
+    );
+    assert.deepEqual(traceCaptureView(trace).capture?.result, changed);
+  }
+  const [normal] = new TraceStore().apply("snapshot", {
+    version: 1,
+    traces: [base],
+  });
+  assert.equal(traceCaptureView(normal), normal);
+  assert.equal(normal.capture, undefined);
+  assert.match(
+    renderToString(createElement(TraceDiagram, { trace: normal })),
+    /\[redacted\]/,
+  );
+});
+
+test("unavailable response captures remain missing fixtures with warnings while flows use actual answers", async (t) => {
+  const adapter = createJevDevtools({
+    enabled: true,
+    origin,
+    redact: (path, value) => (path.at(-1) === "score" ? "hidden" : value),
+  });
+  t.after(() => adapter.dispose());
+  const client = adapter.createClient({
+    apiKey: "sample",
+    logLevel: "off",
+    fetch: async () => Response.json(result),
+  });
+  const flow = defineJevFlow("capture-fixture", (f) => {
+    const rating = f.jev("rate", input);
+    return f.output("done", rating.answer("q").score);
+  });
+  const outcome = await flow.run(null, { client, devtools: adapter });
+  assert.equal(outcome.value, 1);
+  await nextTurn();
+  await nextTurn();
+  const read = async (path: string) => {
+    const response = await adapter.handle(
+      new Request(`${origin}/api/jev-devtools${path}`, { headers: { origin } }),
+    );
+    const reader = response.body!.getReader();
+    const { value } = await reader.read();
+    await reader.cancel();
+    return JSON.parse(new TextDecoder().decode(value).split("data: ")[1]);
+  };
+  const flows = await read("/flows/events");
+  const snapshot = await read("/events");
+  const traces = new TraceStore().apply("snapshot", snapshot);
+  const built = flowFixture(
+    flows.definitions[0],
+    flows.upserts[0],
+    new Map(traces.map((trace) => [trace.id, trace])),
+  );
+  assert.deepEqual(built.missing, ["rate"]);
+  assert.deepEqual(built.fixture.steps, {});
+  assert.match(built.warnings.join(" "), /structured view unavailable/);
+  assert.match(built.warnings.join(" "), /redacted values/);
+});

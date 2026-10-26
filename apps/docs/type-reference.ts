@@ -7,14 +7,14 @@ const descriptions: Record<string, string> = {
     Object.entries(typeHelp).map(([name, help]) => [name, help.description]),
   ),
   Trace:
-    "One captured request, its attempts, answers, timing, status, and capture warnings.",
+    "One captured request, attempts, timing, status, and warnings. Optional capture retains redacted JSON when a structured request or result view is unavailable.",
   Snapshot: "Version 1 full trace history message.",
   StreamSnapshot: "Version 2 initial trace history with a revision cursor.",
   TraceDelta:
     "Version 2 incremental update. order is authoritative: remove retained IDs absent from it.",
   Json: "The JSON-safe shape used for captured data, which may be redacted or truncated.",
   AnswerView:
-    "Captured SDK answer fields; available fields depend on the question type.",
+    "Validated structured answer fields; available fields depend on the question type. Incompatible redacted response content remains in Trace.capture.result.",
   QuestionView: "Captured question type, instructions, and criteria.",
   FlowDefinition:
     "Static recipe graph, including its identity, name, and node metadata.",
