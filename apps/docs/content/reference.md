@@ -1580,7 +1580,7 @@ new JevRecorder(options?: CaptureOptions): JevRecorder
 | ------------------ | ---------------- |
 | `options?`         | `CaptureOptions` |
 
-The optional `limit` defaults to 50 and is clamped to 1–200 across all sessions. The optional `redact(path, value)` callback transforms captured values.
+The optional `limit` defaults to 50 and is clamped to 1–200 across all sessions. The optional `redact(path, value)` callback transforms captured values. If transformed JSON cannot support a structured request or result view, `Trace.capture` retains it and `captureWarnings` explains the unavailable view. The drawer displays usable fields beside placeholders for incompatible fields. Fixture export still reports an incompatible response as missing.
 
 History is bounded process memory, not durable storage. Pair `instrument()` with `transport()` to record both logical SDK calls and their HTTP attempts.
 

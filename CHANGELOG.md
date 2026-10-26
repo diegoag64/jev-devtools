@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | Scalar equality and array-key type checks; shared Jev-to-Flow porting skill.                               |
+| [Unreleased](#unreleased)                   | Not published                                                                      | Renderable redacted captures; scalar equality and array-key checks; shared porting skill.                  |
 | [0.5.4](#054--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.4) | Thirteen Flow cookbooks; routine browser verification; rewritten docs.                                     |
 | [0.5.3](#053--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) | Shared flow encoding; simpler releases and publication helpers; flow regression coverage.                  |
 | [0.5.2](#052--october-25-2026-experimental) | 2026-10-25                                                                         | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
@@ -33,6 +33,7 @@ Flow expression types now reject non-scalar equality and array method selection 
 
 #### Fixed
 
+- **Render transformed captures safely.** Custom redactors can replace request roots or numeric answer fields without crashing the drawer. The drawer keeps usable questions, answer fields, and context visible beside unavailable-field placeholders; display masking preserves SDK map names in partial captures. `Trace.capture` retains bounded redacted JSON with warnings; application execution and complete-response fixture requirements stay unchanged. ([#123](https://github.com/diegoag64/jev-devtools/pull/123))
 - **Scalar equality types.** Reject object, array, and `undefined` receivers for `.eq()` while preserving literal, branded, and generic scalar comparisons. Finite numbers and matching resolved scalar types remain runtime requirements. ([#121](https://github.com/diegoag64/jev-devtools/pull/121))
 - **Array selection types.** Limit `.get()` on arrays to indices and `length`, preserving readonly arrays, tuple inference, common union fields, and constrained generic helpers. Array bounds and missing optional fields remain runtime checks. ([#121](https://github.com/diegoag64/jev-devtools/pull/121))
 

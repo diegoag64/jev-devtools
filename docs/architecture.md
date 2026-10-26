@@ -12,6 +12,10 @@ Application code uses three JavaScript entry points: the SSR-safe React componen
 
 `examples/react-vite` installs a packed tarball. The verification script copies it outside the workspace so it cannot accidentally resolve internal source or hoisted dependencies. CI checks React 18 and 19 and Node 22.12 and 24. The regular build intentionally creates a local-only notice; a separate check compiles the full development UI.
 
+## Request capture views
+
+`capture()` bounds and redacts request and response content. `projectTraceCapture()` in `src/capture-view.ts` validates that JSON before the recorder assigns typed views. It retains incompatible content in `Trace.capture` with warnings and supplies an empty request view or omits the result. It never reads original application values to reconstruct a view. Browser consumers validate individual captured fields and retain usable siblings, with unavailable paths held in a browser-only WeakMap. The display uses only captured JSON, including legacy captures; valid records preserve identity. Replay export still rejects responses with incompatible structured shapes. Transport validation owns the structural envelope separately. See [transformed captures](stream-protocol.md#transformed-request-and-response-captures).
+
 ## Connected flows
 
 `defineJevFlow()` builds a bounded graph once; each `run()` executes an independent instance in the Node process. Version 0.4.0 supports Jev requests, server function tasks, runtime request factories, parallel lanes, terminal branches, value-returning conditionals, collections, and stateful loops. A shared inspector links each Jev step to its full request capture. Task data, collection items, and iteration state use bounded/redacted snapshots; runtime values remain independent of capture limits.

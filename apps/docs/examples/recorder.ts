@@ -29,3 +29,15 @@ export async function recordMessage(message: string) {
   console.log(recorder.snapshot("local")); // The recorded request
   return result;
 }
+
+// Raw captures retain bounded redacted JSON; the drawer displays usable fields.
+export function capturedContent(trace: import("jev-devtools").Trace) {
+  return {
+    request:
+      trace.capture?.request !== undefined
+        ? trace.capture.request
+        : trace.request,
+    result:
+      trace.capture?.result !== undefined ? trace.capture.result : trace.result,
+  };
+}

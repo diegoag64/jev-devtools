@@ -1,3 +1,4 @@
+import { projectTraceCapture } from "./capture-view.js";
 import type { FlowDefinition, FlowRun } from "./flow-protocol.js";
 import type { Trace } from "./protocol.js";
 
@@ -41,13 +42,14 @@ export function flowFixture(
               `${prefix}${node.id}/${item.index}/`,
             );
       if (node.kind !== "jev" || step?.status !== "completed") continue;
-      const trace = step.traceId ? traces.get(step.traceId) : undefined;
-      if (!trace?.result) {
+      const captured = step.traceId ? traces.get(step.traceId) : undefined;
+      const trace = captured && projectTraceCapture(captured);
+      for (const warning of trace?.captureWarnings ?? []) warnings.add(warning);
+      if (!trace?.result || trace.capture?.result !== undefined) {
         missing.push(prefix + node.id);
         continue;
       }
       steps[prefix + node.id] = structuredClone(trace.result);
-      for (const warning of trace.captureWarnings) warnings.add(warning);
     }
   };
   collect(definition, run, "");

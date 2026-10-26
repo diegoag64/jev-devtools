@@ -7,6 +7,7 @@ import type {
   SystemOneRequest,
   RequestOptions,
 } from "@typesafe-ai/sdk";
+import { projectTraceCapture } from "../src/capture-view.js";
 import type { Json, Trace } from "../src/protocol.js";
 
 // Whole field names only: tokenCount, sessionId, apiKeyName, etc. stay useful.
@@ -266,32 +267,31 @@ export class JevRecorder {
           const id = randomUUID(),
             started = performance.now(),
             warnings = new Set<string>();
-          let captured: Trace["request"];
+          let captured: Json;
           try {
             captured = capture(
               { ...request, model: request.model ?? client.defaultModel },
               warnings,
               this.options.redact,
-            ) as Trace["request"];
+            );
           } catch {
-            captured = {
-              model: client.defaultModel,
-              state: "[capture unavailable]",
-              questions: {},
-            };
+            captured = null;
             warnings.add("Input snapshot failed; request continues normally.");
           }
-          this.traces.set(id, {
-            version: 1,
+          this.traces.set(
             id,
-            ...(typeof meta === "function" ? meta() : meta),
-            flow: this.flowContext.getStore()?.link,
-            startedAt: Date.now(),
-            status: "pending",
-            request: captured,
-            attempts: [],
-            captureWarnings: [...warnings],
-          });
+            projectTraceCapture({
+              version: 1,
+              id,
+              ...(typeof meta === "function" ? meta() : meta),
+              flow: this.flowContext.getStore()?.link,
+              startedAt: Date.now(),
+              status: "pending",
+              request: captured,
+              attempts: [],
+              captureWarnings: [...warnings],
+            }),
+          );
           const trace = this.traces.get(id)!;
           try {
             this.flowContext.getStore()?.onTrace(id);
@@ -330,14 +330,10 @@ export class JevRecorder {
             void promise
               .asResponse()
               .then(async (response) => {
-                let result: Trace["result"];
+                let result: Json | undefined;
                 try {
                   const data = await response.clone().json();
-                  result = capture(
-                    data,
-                    warnings,
-                    this.options.redact,
-                  ) as Trace["result"];
+                  result = capture(data, warnings, this.options.redact);
                 } catch {
                   // Capture failures are not SDK failures, and redactor errors
                   // may contain the sensitive values they were meant to hide.
@@ -348,8 +344,16 @@ export class JevRecorder {
                   t.durationMs = performance.now() - started;
                   t.requestId =
                     response.headers.get("x-typesafe-request-id") ?? undefined;
-                  t.result = result;
-                  t.captureWarnings = [...warnings];
+                  Object.assign(
+                    t,
+                    projectTraceCapture({
+                      ...t,
+                      result,
+                      captureWarnings: [
+                        ...new Set([...t.captureWarnings, ...warnings]),
+                      ],
+                    }),
+                  );
                 });
               }, fail)
               .catch(() => {

@@ -1,3 +1,10 @@
+import { CaptureFields, PartialBox } from "./CaptureFields.js";
+import {
+  captureFieldUnavailable,
+  captureQuestionEntries,
+  capturedValue,
+  traceCaptureView,
+} from "./capture-view.js";
 import {
   memo,
   useCallback,
@@ -19,6 +26,7 @@ import { Answer, findImage, JsonBlock } from "./TraceContent.js";
 import type { AnswerView, QuestionView, Trace } from "./protocol.js";
 
 const QuestionContent = memo(function QuestionContent({
+  trace,
   name,
   question,
   answer,
@@ -26,6 +34,7 @@ const QuestionContent = memo(function QuestionContent({
   legendOpen,
   onLegendChange,
 }: {
+  trace: Trace;
   name: string;
   question: QuestionView;
   answer?: AnswerView;
@@ -39,27 +48,27 @@ const QuestionContent = memo(function QuestionContent({
         <h3>{name}</h3>
         <span className="type">{question.type}</span>
       </header>
-      <JsonBlock value={question} />
-      <Answer
-        answer={answer}
-        image={image}
-        legendOpen={legendOpen}
-        onLegendToggle={(open) => onLegendChange(name, open)}
-      />
+      <CaptureFields trace={trace} path={["request", "questions", name]} />
+      <JsonBlock value={capturedValue(trace, ["request", "questions", name])} />
+      <CaptureFields trace={trace} path={["result", "answers", name]} />
+      <PartialBox trace={trace} name={name} />
+      {!captureFieldUnavailable(trace, ["result", "answers", name]) && (
+        <Answer
+          answer={answer}
+          image={image}
+          legendOpen={legendOpen}
+          onLegendToggle={(open) => onLegendChange(name, open)}
+        />
+      )}
     </>
   );
 });
 
 /** Variable-height rows retain full answers; only offscreen DOM is omitted. */
 export function Questions({ trace }: { trace: Trace }) {
+  trace = traceCaptureView(trace);
   const helpId = useId();
-  const entries = useMemo(
-    () =>
-      Object.entries(trace.request.questions ?? {}).filter(
-        ([, q]) => q && typeof q === "object" && typeof q.type === "string",
-      ),
-    [trace.request.questions],
-  );
+  const entries = useMemo(() => captureQuestionEntries(trace), [trace]);
   const image = useMemo(
     () => findImage(trace.request.state),
     [trace.request.state],
@@ -211,7 +220,18 @@ export function Questions({ trace }: { trace: Trace }) {
     [entries, destination, goTo, helpId],
   );
   if (!entries.length)
-    return <p className="muted">No questions available in this capture.</p>;
+    return captureFieldUnavailable(trace, ["request", "questions"]) ? (
+      <CaptureFields
+        trace={trace}
+        path={
+          captureFieldUnavailable(trace, ["request"])
+            ? ["request"]
+            : ["request", "questions"]
+        }
+      />
+    ) : (
+      <p className="muted">No questions available in this capture.</p>
+    );
   return (
     <div className="questions-list">
       {navigation}
@@ -345,6 +365,7 @@ export function Questions({ trace }: { trace: Trace }) {
                     </div>
                   ) : (
                     <QuestionContent
+                      trace={trace}
                       name={name}
                       question={question}
                       answer={trace.result?.answers[name]}

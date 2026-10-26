@@ -4,7 +4,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { build } from "vite";
 import { defineJevFlow } from "jev-devtools/flow";
-import { choice } from "@typesafe-ai/sdk";
+import { choice, score } from "@typesafe-ai/sdk";
 import { scenarios, recordedFixture, fixture, invoke } from "./fixtures.mjs";
 const root = dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.BENCH_PORT || 4190);
@@ -31,11 +31,24 @@ for (const spec of scenarios) {
   const payload = JSON.stringify(snapshot);
   datasets.set(spec.id, { payload, spec, bytes: Buffer.byteLength(payload) });
   if (transportMode === "adapter") {
+    let captureMode = "normal";
     const adapter = createJevDevtools({
       enabled: true,
       origin: `http://127.0.0.1:${port}`,
       endpoint: `/api/${spec.id}`,
       limit: spec.history,
+      redact: (path, value) =>
+        captureMode === "root-null" && path.length === 0
+          ? null
+          : captureMode === "score-string" &&
+              path.at(-2) === "q" &&
+              path.at(-1) === "score"
+            ? "[redacted]"
+            : captureMode === "probability-string" &&
+                path.at(-2) === "probabilities" &&
+                path.at(-1) === "Low"
+              ? "[redacted]"
+              : value,
     });
     const { request, clientOptions } = fixture(spec);
     let sequence = 0,
@@ -55,6 +68,9 @@ for (const spec of scenarios) {
     for (let i = 0; i < spec.history; i++) await invoke(client, request);
     adapters.set(spec.id, {
       adapter,
+      setCaptureMode: (mode) => {
+        captureMode = mode;
+      },
       client,
       request,
       requestId: () => `benchmark-${sequence}`,
@@ -183,6 +199,86 @@ const server = createServer(async (req, res) => {
       res.write(`event: snapshot\ndata: ${dataset.payload}\n\n`);
       req.on("close", () => streams.delete(entry));
       return;
+    }
+    if (
+      url.pathname === "/bench/capture" &&
+      req.method === "POST" &&
+      transportMode === "adapter"
+    ) {
+      if (req.headers.origin !== `http://127.0.0.1:${port}`)
+        return res.writeHead(403).end();
+      const mode = url.searchParams.get("mode");
+      if (
+        !["normal", "root-null", "score-string", "probability-string"].includes(
+          mode,
+        )
+      )
+        return res.writeHead(400).end();
+      const { adapter, setCaptureMode } = adapters.get("small");
+      const requestId = `capture-${mode}`;
+      const client = adapter.createClient(
+        {
+          apiKey: "sample",
+          logLevel: "off",
+          fetch: async () =>
+            Response.json(
+              {
+                model: "fixture",
+                answers: {
+                  q:
+                    mode === "probability-string"
+                      ? {
+                          type: "choice",
+                          choice: "High",
+                          probabilities: { Low: 0, High: 1 },
+                        }
+                      : {
+                          type: "score",
+                          score: 1,
+                          probabilities: { 0: 0, 1: 1 },
+                          legend: { 0: "Low", 1: "High" },
+                        },
+                  email: {
+                    type: "score",
+                    score: 0,
+                    probabilities: { 0: 1, 1: 0 },
+                  },
+                },
+                metadata: { email: "capture-personal@example.test" },
+              },
+              { headers: { "x-typesafe-request-id": requestId } },
+            ),
+        },
+        { source: "sample", label: requestId },
+      );
+      setCaptureMode(mode);
+      try {
+        const result = await client.systemOne({
+          state: {
+            text: "[redacted]",
+            email: "capture-personal@example.test",
+            password: "capture-secret",
+          },
+          questions: {
+            q:
+              mode === "probability-string"
+                ? choice("Rating?", { Low: "Low rating", High: "High rating" })
+                : score("Rating?", ["Low", "High"]),
+            email: score("Other rating?", ["Low", "High"]),
+          },
+        });
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        if (
+          mode === "probability-string"
+            ? result.answers.q.choice !== "High"
+            : result.answers.q.score !== 1
+        )
+          throw new Error("Capture changed application result");
+      } finally {
+        setCaptureMode("normal");
+      }
+      res.setHeader("content-type", "application/json");
+      return res.end(JSON.stringify({ requestId }));
     }
     if (
       url.pathname === "/bench/redaction" &&

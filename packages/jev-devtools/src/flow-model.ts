@@ -23,10 +23,10 @@ export function flowAnswer(answer?: AnswerView) {
         eyebrow: label === answer.choice ? "RETURNED CHOICE" : "ALTERNATIVE",
       }),
     );
-  if (answer.type === "score")
+  if (answer.type === "score" && answer.score !== undefined)
     return [
       {
-        label: `Score ${answer.score ?? "unavailable"}`,
+        label: `Score ${answer.score}`,
         detail: "Returned by Jev",
         active: true,
         eyebrow: "RETURNED SCORE",
@@ -49,7 +49,7 @@ export function flowAnswer(answer?: AnswerView) {
         probability: 1 - answer.noul,
       },
     ];
-  if (answer.type === "box")
+  if (answer.type === "box" && answer.box)
     return [
       {
         label: "Region coordinates",
