@@ -28,7 +28,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **Line-by-line search cookbook.** Search the complete pinned document with synthetic Choice and Noul responses, inspect exact existence routing and view every line option in the playground.
+- **Line-by-line search cookbook.** Search the complete pinned document with synthetic Choice and Noul responses, inspect exact existence routing and view every line option in the playground. ([#113](https://github.com/diegoag64/jev-devtools/pull/113))
 
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
