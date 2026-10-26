@@ -17,7 +17,7 @@ export const pages: Page[] = [
     slug: "",
     title: "Introduction",
     description:
-      "See what your Jev calls are doing. A local development inspector for TypeSafe applications.",
+      "Inspect TypeSafe requests and application flows during local development.",
     group: "Getting started",
     file: "introduction.md",
   },

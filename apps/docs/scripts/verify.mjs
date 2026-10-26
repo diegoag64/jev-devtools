@@ -86,15 +86,14 @@ try {
     ["Yarn", "yarn add"],
     ["Bun", "bun add"],
   ];
-  for (const [route, packages] of [
-    ["", "jev-devtools @typesafe-ai/sdk"],
+  for (const [index, [route, packages]] of [
     ["getting-started/", "jev-devtools @typesafe-ai/sdk"],
     ["guides/nextjs/", "jev-devtools @typesafe-ai/sdk server-only"],
-  ]) {
+  ].entries()) {
     await page.goto(origin + base + route);
     await install
       .getByRole("tab", {
-        name: route ? "Bun" : "pnpm",
+        name: index ? "Bun" : "pnpm",
         selected: true,
         exact: true,
       })

@@ -17,7 +17,7 @@ These are selected useful patterns, not a benchmark or popularity ranking. The r
 
 ## Proposed information architecture
 
-- Getting started: introduction, quick start, how the client/recorder/drawer fit together.
+- Getting started: an Introduction that explains what the inspector captures and where to begin, a Quick start for setup, and an explanation of how the client, recorder, and drawer fit together. Keep installation steps in the setup guides.
 - Guides: Next.js, connected flows, privacy/access, troubleshooting; later dedicated Vite proxy and custom viewer guides.
 - API reference: React component and styles, server adapter, flow builder, expressions, recorder and public types.
 - Resources: independent examples and cookbooks, coding-agent guidance, integrated changelog.
@@ -48,4 +48,4 @@ Before public hosting: choose the canonical URL, add sitemap/social metadata, ke
 
 `/api/reference/` owns stable links for all public callable APIs and their methods. Readable entries describe arguments, return values, lifecycle/errors, and usage. Public type declarations are extracted from the installed package exports at build time, with explanatory summaries and separately labeled supporting structural types. Rebuild the package when its source changes. The browser gets only HTML; exact declarations expand with native details elements.
 
-`/guides/flow-basics/` teaches each builder operation independently, beginning with a task-only example. Complete source examples are type-checked with Twoslash and their stated outputs are executed in the docs tests. SDK examples are verified with saved responses, not live inference. Existing connected-flow and advanced reference URLs remain valid. Inline API names and receiver-aware code-reference lists point to glossary anchors, which are also individual search results.
+`/guides/flow-basics/` builds a greeting flow through a no-network tutorial with runnable commands and expected output. The glossary retains complete examples and contracts for the other builder operations. Complete source examples are type-checked with Twoslash and their stated outputs are executed in the docs tests. SDK examples are verified with saved responses, not live inference. Existing connected-flow and advanced reference URLs remain valid. Inline API names and receiver-aware code-reference lists point to glossary anchors, which are also individual search results.

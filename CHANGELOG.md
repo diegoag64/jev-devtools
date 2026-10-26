@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | Guided setup and flow tutorials; API reference corrections.                                                |
+| [Unreleased](#unreleased)                   | Not published                                                                      | Introduction, setup, and flow guides; API reference corrections.                                           |
 | [0.5.3](#053--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) | Shared flow encoding; simpler releases and publication helpers; flow regression coverage.                  |
 | [0.5.2](#052--october-25-2026-experimental) | 2026-10-25                                                                         | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
 | [0.5.1](#051--october-25-2026-experimental) | 2026-10-25                                                                         | Task input validation and expression types; setup guidance; release and website maintenance.               |
@@ -27,6 +27,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 ### Changes
 
 #### Documentation
+
+- **Introduction for new users.** Explain request inspection, optional flows, the React and Node connection, and capture privacy before directing readers to setup guides. Keep the fixed-answer demo and existing section links.
 
 - **Guided first runs.** Rewrite Quick start around a Vite and Express setup and Flows from scratch around a no-network greeting. Add expected results and keep full method contracts and examples in the API reference, preserving existing section links.
 
