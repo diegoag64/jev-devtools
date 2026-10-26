@@ -69,6 +69,8 @@ const result = await refundFlow.run(
 
 Mount the existing `<JevDevtools enabled={...} />` and serve the inspector endpoint as in the [integration guide](integration.md). In Next.js, define and run the flow in Node server code; keep the drawer in its existing client component. Do not import `/flow` into the browser.
 
+For a complete sample of assessment reuse and application routing, run [LLM guardrails](../cookbooks/guardrails/README.md). One input or output battery feeds strict and permissive policy tasks; the diagram exposes the default strict route. Messages and answers are synthetic, with no LLM generation.
+
 ## Operations and references
 
 - `jev(id, request)` queues one ordinary SDK `systemOne` call. Preserve SDK questions, model selection, assets, and multiple questions. `state` may contain nested expressions. SDK assets remain SDK assets; the flow does not invent another question format.

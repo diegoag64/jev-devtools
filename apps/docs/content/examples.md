@@ -33,7 +33,7 @@ For Next.js, follow the [example's run instructions](https://github.com/diegoag6
 
 ## Explore complete flows
 
-The six cookbooks below run inside the playground. Each README explains the sample cases, application policies, source recipe, and limitations.
+The cookbooks below run inside the playground. Each README explains the sample cases, application policies, source recipe, and limitations.
 
 | Cookbook                                                                                                                 | What to inspect                                                                                                |
 | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
@@ -43,6 +43,7 @@ The six cookbooks below run inside the playground. Each README explains the samp
 | [Simple memory](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/simple-memory)                             | Ticket routing with customer-scoped memory that starts fresh for each run.                                     |
 | [RAG passages](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/rag-passages)                               | Passage assessment with bounded concurrency and explicit rules for including, excluding, or flagging evidence. |
 | [Skill suggestion](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/skill-suggestion)                       | Dynamic questions, shortlist ranking, and a final suggestion or abstention. No skill is executed.              |
+| [LLM guardrails](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/guardrails)                               | Input/output hazard batteries, policy reuse, severity upgrades and precedence. Sample-only; no LLM generation. |
 
 From the **repository root**, start the playground:
 
@@ -53,7 +54,7 @@ npm run dev
 
 Open [http://127.0.0.1:4182](http://127.0.0.1:4182/), choose a cookbook and sample, then click **Run sample**. Open **Jev DevTools → Flows** and select the latest run. Compare the application's result with the executed steps, linked requests, and routing decisions. The [cookbook index](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/README.md#choose-an-example) has direct local links to each example.
 
-All six have samples that need no API key. Their synthetic responses demonstrate execution and inspection, not model accuracy. Editing an input does not turn a fixed response into live inference. Some examples reject inputs that do not match their fixtures. Live support varies by example, so read its README before configuring a key.
+All have samples that need no API key. Their synthetic responses demonstrate execution and inspection, not model accuracy. Editing an input does not turn a fixed response into live inference. Some examples reject inputs that do not match their fixtures. Live support varies by example, so read its README before configuring a key.
 
 ## Learn one method at a time
 

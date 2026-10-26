@@ -15,7 +15,9 @@ Open http://127.0.0.1:4182/. Sample mode needs no API key. Run a scenario to see
 
 ## Cookbook examples
 
-The [cookbook guide](../../cookbooks/README.md) lists six runnable examples, their local URLs, and the flow patterns they demonstrate. They use the 0.4.0 flow API. The playground, cookbook code, and fixtures live in this repository and are not bundled in the npm package.
+The [cookbook guide](../../cookbooks/README.md) lists runnable examples, their local URLs, and the flow patterns they demonstrate. They use the 0.4.0 flow API. The playground, cookbook code, and fixtures live in this repository and are not bundled in the npm package.
+
+The [LLM guardrails cookbook](../../cookbooks/guardrails/README.md) screens one selected input or output message per run. It reuses one synthetic assessment under strict and permissive policies; no LLM generation or live inference is enabled.
 
 ## Manual edge-case sandbox
 

@@ -307,6 +307,8 @@ Loops may contain one level of map, plus tasks, requests, conditions and paralle
 
 `cookbooks/hierarchical-classification` is an executable sample at `/?cookbook=hierarchical-classification`. It follows the official executable algorithm’s **separate concurrent requests per frontier node**, despite introductory prose describing batching. Preserve geometric-mean decision-edge scores, epsilon 1e-9, single-child inference bypass, completed-leaf retention and top-k pruning. Samples are a small authored taxonomy and synthetic probabilities, not a replay of official benchmark data. Verify recovery, no-request paths, an initial leaf and intentional depth exhaustion before considering live execution.
 
+For guardrail routing, see the repository [LLM guardrails example](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/guardrails) at `/?cookbook=guardrails`. It screens one input or output message with a single Noul/Score battery, then reuses that assessment in strict/permissive policy tasks. Preserve inclusive action thresholds 0.70/0.85, review 0.35, severity ≥ 2 upgrades of triggered reviews only, and support > block > review > pass precedence. Synthetic fixtures are sample-only; there is no LLM generation or live transport.
+
 ## Replay captures and compare runs (new in 0.5.0)
 
 For human examples, see [the flow reference](https://docs.jevtools.dev/api/flow/) and [API glossary](https://docs.jevtools.dev/api/reference/#fixtures-and-comparison). These operations require 0.5.0 or later; inspect the installed declarations before using them with older packages.

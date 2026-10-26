@@ -1,4 +1,9 @@
 import {
+  guardrailsCases,
+  type GuardrailsCase,
+} from "../../../cookbooks/guardrails/cases.js";
+import { GuardrailsCookbookResult } from "./GuardrailsCookbookResult.js";
+import {
   memoryCases,
   type MemoryCase,
 } from "../../../cookbooks/simple-memory/cases.js";
@@ -53,6 +58,8 @@ const ragRequested =
   new URLSearchParams(location.search).get("cookbook") === "rag-passages";
 const sdeRequested =
   new URLSearchParams(location.search).get("cookbook") === "sde-cascade";
+const guardrailsRequested =
+  new URLSearchParams(location.search).get("cookbook") === "guardrails";
 const memoryRequested =
   new URLSearchParams(location.search).get("cookbook") === "simple-memory";
 const structureRequested =
@@ -72,6 +79,8 @@ const post = (
 function App() {
   const activeRequest = useRef<AbortController | null>(null);
   useEffect(() => () => activeRequest.current?.abort(), []);
+  const [guardrailsCase, setGuardrailsCase] =
+    useState<GuardrailsCase>("policy");
   const [memoryCase, setMemoryCase] = useState<MemoryCase>("timeline");
   const [structureCase, setStructureCase] = useState<StructureCase>("memo");
   const [hierarchyCase, setHierarchyCase] = useState<HierarchyCase>("recovery");
@@ -97,38 +106,42 @@ function App() {
     setFeedback("Ready to capture a request.");
   };
   const [scenario, setScenario] = useState(
-      memoryRequested
-        ? "flow-memory"
-        : structureRequested
-          ? "flow-structure"
-          : hierarchyRequested
-            ? "flow-hierarchy"
-            : sdeRequested
-              ? "flow-sde"
-              : ragRequested
-                ? "flow-rag"
-                : cookbookRequested
-                  ? "flow-skills"
-                  : sandbox
-                    ? "stress"
-                    : "triage",
+      guardrailsRequested
+        ? "flow-guardrails"
+        : memoryRequested
+          ? "flow-memory"
+          : structureRequested
+            ? "flow-structure"
+            : hierarchyRequested
+              ? "flow-hierarchy"
+              : sdeRequested
+                ? "flow-sde"
+                : ragRequested
+                  ? "flow-rag"
+                  : cookbookRequested
+                    ? "flow-skills"
+                    : sandbox
+                      ? "stress"
+                      : "triage",
     ),
     [mode, setMode] = useState("sample"),
     [live, setLive] = useState(false);
   const [message, setMessage] = useState(
-    memoryRequested
-      ? memoryCases.timeline.message
-      : structureRequested
-        ? structureCases.memo.message
-        : hierarchyRequested
-          ? hierarchyCases.recovery.message
-          : sdeRequested
-            ? sdeCases.fabricated.message
-            : ragRequested
-              ? ragCases.premise.message
-              : cookbookRequested
-                ? skillCases.deck.message
-                : "I was charged twice and checkout is blocked. I need a human to help me today.",
+    guardrailsRequested
+      ? guardrailsCases.policy.message
+      : memoryRequested
+        ? memoryCases.timeline.message
+        : structureRequested
+          ? structureCases.memo.message
+          : hierarchyRequested
+            ? hierarchyCases.recovery.message
+            : sdeRequested
+              ? sdeCases.fabricated.message
+              : ragRequested
+                ? ragCases.premise.message
+                : cookbookRequested
+                  ? skillCases.deck.message
+                  : "I was charged twice and checkout is blocked. I need a human to help me today.",
   );
   const [runId, setRunId] = useState<string>(),
     [feedback, setFeedback] = useState("Ready to capture a request.");
@@ -164,6 +177,7 @@ function App() {
           hierarchyCase,
           structureCase,
           memoryCase,
+          guardrailsCase,
         },
         {
           signal: controller.signal,
@@ -203,6 +217,30 @@ function App() {
   return (
     <>
       <main className="playground dark">
+        {scenario === "flow-guardrails" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · one assessment, two policies
+            </span>
+            <h1>LLM guardrails</h1>
+            <p>
+              Screen a user message or model reply with four hazard Nouls and
+              one severity Score. Compare strict and permissive routing on the
+              same assessment.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/llm_guardrails"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Official guardrails recipe ↗
+            </a>
+            <p className="sample-note">
+              Authored messages and synthetic answers · no API key, inference,
+              or LLM generation. Each run screens one selected side.
+            </p>
+          </div>
+        )}
         {scenario === "flow-memory" && (
           <div className="cookbook-intro">
             <span className="cookbook-eyebrow">
@@ -357,6 +395,7 @@ function App() {
             "flow-hierarchy",
             "flow-structure",
             "flow-memory",
+            "flow-guardrails",
           ].includes(scenario) && (
             <p>
               Sample-only flow. Run a sample, open Jev DevTools, and choose
@@ -371,6 +410,7 @@ function App() {
             "flow-hierarchy",
             "flow-structure",
             "flow-memory",
+            "flow-guardrails",
           ].includes(scenario) && (
             <div role="status">
               <strong>Outcome: {flowResult.outcome}</strong>
@@ -389,6 +429,8 @@ function App() {
                 onChange={(e) => {
                   setScenario(e.target.value);
                   resetOutcome();
+                  if (e.target.value === "flow-guardrails")
+                    setMessage(guardrailsCases[guardrailsCase].message);
                   if (e.target.value === "flow-memory")
                     setMessage(memoryCases[memoryCase].message);
                   if (e.target.value === "flow-structure")
@@ -416,6 +458,7 @@ function App() {
                   "flow-hierarchy": "Cookbook · Hierarchical classification",
                   "flow-structure": "Cookbook · Structure recovery",
                   "flow-memory": "Cookbook · Simple memory",
+                  "flow-guardrails": "Cookbook · LLM guardrails",
                   "flow-sde": "Cookbook · SDE cascade",
                   "flow-rag": "Cookbook · RAG passages (12 items)",
                   "flow-manual": "Flow · Manual review",
@@ -472,6 +515,28 @@ function App() {
                 </NativeSelectOption>
               </NativeSelect>
             </div>
+            {scenario === "flow-guardrails" && (
+              <div className="form-field">
+                <Label htmlFor="guardrails-case">Guardrails sample</Label>
+                <NativeSelect
+                  id="guardrails-case"
+                  value={guardrailsCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as GuardrailsCase;
+                    setGuardrailsCase(next);
+                    setMessage(guardrailsCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(guardrailsCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
             {scenario === "flow-memory" && (
               <div className="form-field">
                 <Label htmlFor="memory-case">Memory sample</Label>
@@ -735,6 +800,7 @@ function App() {
                     "flow-hierarchy",
                     "flow-structure",
                     "flow-memory",
+                    "flow-guardrails",
                   ].includes(scenario) && mode === "sample"
                 }
                 id="context"
@@ -784,23 +850,28 @@ function App() {
             <span role="status">{feedback}</span>
           </div>
           <p id="sample-note" className="sample-note">
-            {scenario === "flow-memory"
-              ? "Run a sample, then open Jev DevTools → Flows. Choose a ticket iteration and View Flow to inspect routing, the memory gate and the selected save path."
-              : scenario === "flow-structure"
-                ? "Run a sample, then open Jev DevTools → Flows. Inspect both batched requests, the line-merge decisions and the deterministic Markdown renderer."
-                : scenario === "flow-hierarchy"
-                  ? "Run a sample, then open Flows. Choose an iteration in either Loop card and View Flow; expand a frontier item to inspect its request. The limit case returns FlowLoopLimitError on purpose."
-                  : scenario === "flow-sde"
-                    ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
-                    : scenario === "flow-rag"
-                      ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
-                      : scenario === "flow-skills" && mode === "sample"
-                        ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
-                        : mode === "sample"
-                          ? "Fixed sample answers, including when you edit context. No external API calls."
-                          : "Live inference uses your server key and may incur API charges."}
+            {scenario === "flow-guardrails"
+              ? "Fixed message and battery, enforced on the server. Open Jev DevTools → Flows to inspect assessment reuse and strict routing."
+              : scenario === "flow-memory"
+                ? "Run a sample, then open Jev DevTools → Flows. Choose a ticket iteration and View Flow to inspect routing, the memory gate and the selected save path."
+                : scenario === "flow-structure"
+                  ? "Run a sample, then open Jev DevTools → Flows. Inspect both batched requests, the line-merge decisions and the deterministic Markdown renderer."
+                  : scenario === "flow-hierarchy"
+                    ? "Run a sample, then open Flows. Choose an iteration in either Loop card and View Flow; expand a frontier item to inspect its request. The limit case returns FlowLoopLimitError on purpose."
+                    : scenario === "flow-sde"
+                      ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
+                      : scenario === "flow-rag"
+                        ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
+                        : scenario === "flow-skills" && mode === "sample"
+                          ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
+                          : mode === "sample"
+                            ? "Fixed sample answers, including when you edit context. No external API calls."
+                            : "Live inference uses your server key and may incur API charges."}
           </p>
         </section>
+        {scenario === "flow-guardrails" && flowResult && (
+          <GuardrailsCookbookResult key={outcome.id} result={flowResult} />
+        )}
         {scenario === "flow-memory" && flowResult && (
           <MemoryCookbookResult result={flowResult} />
         )}
