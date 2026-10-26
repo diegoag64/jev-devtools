@@ -89,7 +89,10 @@ function renderSearch() {
     : "No matching pages. Try a shorter search.";
 }
 async function openSearch() {
-  if (!dialog.open) dialog.showModal();
+  if (!dialog.open) {
+    document.dispatchEvent(new Event("docs:search-open"));
+    dialog.showModal();
+  }
   input.focus();
   if (pages) {
     renderSearch();

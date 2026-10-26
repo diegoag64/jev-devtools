@@ -32,6 +32,10 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 - **API reference previews.** Hover or focus a supported API link for its summary, then open the full reference or read its contract and examples in a side panel. Touch controls, keyboard navigation, copy buttons, and failed-load recovery keep reference reading available without losing the current page.
 
+#### Fixed
+
+- **Search from an API reading panel.** Opening search dismisses the reference panel and keeps focus in search, so glossary results appear without an old panel covering the destination.
+
 #### Documentation
 
 - **Even API panel close control.** Give the close button a square touch target with a centered X in desktop and mobile layouts.

@@ -237,6 +237,71 @@ export async function verifyApiPreviews({ browser, origin, base, evidence }) {
     );
     await panel.waitFor({ state: "hidden" });
 
+    // Search must take over the modal, including same-document glossary results.
+    // The earlier search and panel checks exercise these interactions separately.
+    for (const shortcut of ["Control+k", "Meta+k"]) {
+      const beforeSearch = page.url();
+      await page
+        .locator('article a[data-api-preview="adapter-createclient"] + button')
+        .first()
+        .click();
+      await popup.getByRole("button", { name: "Read in side panel" }).click();
+      await panel.getByRole("heading", { name: /^Returns/ }).waitFor();
+      await page.keyboard.press(shortcut);
+      const search = page.locator("#search-dialog");
+      const searchInput = search.locator("#search-input");
+      await searchInput.fill("defineJevFlow");
+      assert.ok(
+        !(await panel.isVisible()),
+        "Opening search dismisses the reference panel",
+      );
+      await page.waitForFunction(
+        () => !document.documentElement.classList.contains("api-panel-open"),
+      );
+      assert.ok(
+        await searchInput.evaluate((el) => el === document.activeElement),
+        "Panel cleanup does not steal search focus",
+      );
+      if (shortcut === "Control+k") {
+        await search
+          .getByRole("button", { name: "Close search", exact: true })
+          .click();
+        await search.waitFor({ state: "hidden" });
+        assert.equal(
+          page.url(),
+          beforeSearch,
+          "Cancelling search preserves the current URL",
+        );
+      } else {
+        const result = search
+          .locator("#search-results a")
+          .filter({ hasText: "defineJevFlow" })
+          .first();
+        await result.focus();
+        await page.keyboard.press("Enter");
+        await page.waitForURL(origin + base + "api/reference/#definejevflow");
+        await search.waitFor({ state: "hidden" });
+        await page.waitForFunction(() => {
+          const heading = document.querySelector(
+            "#definejevflow .api-entry-header h3",
+          );
+          const rect = heading?.getBoundingClientRect();
+          return rect && rect.top >= 0 && rect.bottom <= innerHeight;
+        });
+        await page.screenshot({
+          path: resolve(evidence, "api-panel-search-result.png"),
+        });
+      }
+      assert.ok(
+        !(await panel.isVisible()),
+        "Search leaves its destination unobstructed",
+      );
+      assert.ok(
+        !(await popup.isVisible()),
+        "Closing search does not reopen the old preview",
+      );
+    }
+
     // A failed metadata request leaves both navigation and fragment reading available.
     await page.route("**/api-preview-index.json", (route) => route.abort());
     await page.goto(url);

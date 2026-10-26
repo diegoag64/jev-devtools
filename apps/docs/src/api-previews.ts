@@ -314,6 +314,13 @@ panelBack.addEventListener("click", () => {
   void loadPanel(previous, true);
 });
 panelClose.addEventListener("click", () => panel.close());
+document.addEventListener("docs:search-open", () => {
+  hide();
+  if (!panel.open) return;
+  // Search owns focus now; the queued close event must not restore the trigger.
+  returnFocus = undefined;
+  panel.close();
+});
 panel.addEventListener("close", () => {
   panelVersion++;
   panelHistory.length = 0;
