@@ -1,3 +1,4 @@
+import { traceCaptureView } from "./capture-view.js";
 import type { Trace } from "./protocol.js";
 import type { FlowDefinition, FlowRun } from "./flow-protocol.js";
 
@@ -78,6 +79,8 @@ export function createDisplayRedactor() {
   const answer = (value: unknown) =>
     fields(value, { probabilities: contents, legend: contents });
   const trace = memoize<Trace>((value) => {
+    value = traceCaptureView(value);
+    const capture = value.capture && fields(value.capture);
     const request = fields(value.request, {
         questions: (items) => mapValues(items, question),
         assets: contents,
@@ -85,9 +88,11 @@ export function createDisplayRedactor() {
       result = fields(value.result, {
         answers: (items) => mapValues(items, answer),
       });
-    return request === value.request && result === value.result
+    return request === value.request &&
+      result === value.result &&
+      capture === value.capture
       ? value
-      : { ...value, request, result };
+      : { ...value, request, result, capture };
   });
   const run: (value: FlowRun) => FlowRun = memoize<FlowRun>((value) => {
     let changed = false;

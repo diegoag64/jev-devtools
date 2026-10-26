@@ -42,6 +42,10 @@ export type Trace = {
     answers: Record<string, AnswerView>;
     usage?: { input_tokens: number; output_tokens: number };
   };
+  /** Bounded redacted JSON whose structured request/result view is unavailable.
+   * Presence, including null, identifies an unavailable section. Never infer
+   * availability from user strings. The recorder owns this metadata. */
+  capture?: { request?: Json; result?: Json };
   requestId?: string;
   error?: { name: string; message: string; status?: number };
   attempts: {

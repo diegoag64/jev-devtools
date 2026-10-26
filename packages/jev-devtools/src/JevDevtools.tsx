@@ -1,3 +1,4 @@
+import { traceCaptureView } from "./capture-view.js";
 import { emptyFlows, type FlowHistory } from "./flow-stream.js";
 import {
   lazy,
@@ -62,6 +63,7 @@ export const RequestDetail = memo(function RequestDetail({
 }: {
   trace?: Trace;
 }) {
+  trace = trace && traceCaptureView(trace);
   // Keep tab selection across request switches and clear, as before. Local tab
   // changes no longer rerender the history list.
   const [tab, setTab] = useState("Flow");
@@ -94,7 +96,11 @@ export const RequestDetail = memo(function RequestDetail({
             </div>
           </header>
           <div className="detail-meta">
-            <code>{trace.result?.model || trace.request.model}</code>
+            <code>
+              {trace.result?.model ||
+                trace.request.model ||
+                "Model unavailable in this capture"}
+            </code>
             <code>
               {trace.requestId ||
                 (trace.status === "pending"
@@ -153,14 +159,23 @@ export const RequestDetail = memo(function RequestDetail({
                     masking follows the component prop. Captures are size
                     limited.
                   </p>
-                  {findImage(trace.request.state) && (
-                    <img
-                      className="context-image"
-                      src={findImage(trace.request.state)}
-                      alt="Captured context"
-                    />
+                  {trace.capture?.request !== undefined && (
+                    <p className="muted">
+                      Request unavailable in this capture. See Raw for captured
+                      content.
+                    </p>
                   )}
-                  <JsonBlock value={trace.request.state} />
+                  {trace.capture?.request === undefined &&
+                    findImage(trace.request.state) && (
+                      <img
+                        className="context-image"
+                        src={findImage(trace.request.state)}
+                        alt="Captured context"
+                      />
+                    )}
+                  {trace.capture?.request === undefined && (
+                    <JsonBlock value={trace.request.state} />
+                  )}
                   {trace.request.assets && (
                     <JsonBlock value={trace.request.assets} />
                   )}
@@ -214,7 +229,7 @@ export const RequestDetail = memo(function RequestDetail({
 });
 
 export function JevPanel({
-  traces,
+  traces: incomingTraces,
   flows = emptyFlows,
   connection,
   onClear,
@@ -224,6 +239,10 @@ export function JevPanel({
   connection: string;
   onClear: () => Promise<unknown>;
 }) {
+  const traces = useMemo(
+    () => incomingTraces.map(traceCaptureView),
+    [incomingTraces],
+  );
   const [view, setView] = useState("requests");
   const [selectedRun, setSelectedRun] = useState<string>();
   const run = flows.runs.find((r) => r.id === selectedRun) ?? flows.runs[0];
