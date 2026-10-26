@@ -78,21 +78,25 @@ export function createDisplayRedactor() {
   const question = (value: unknown) => fields(value, { criteria: contents });
   const answer = (value: unknown) =>
     fields(value, { probabilities: contents, legend: contents });
+  const request = <T>(value: T) =>
+    fields(value, {
+      questions: (items) => mapValues(items, question),
+      assets: contents,
+    });
+  const result = <T>(value: T) =>
+    fields(value, { answers: (items) => mapValues(items, answer) });
   const trace = memoize<Trace>((value) => {
     value = traceCaptureView(value);
-    const capture = value.capture && fields(value.capture);
-    const request = fields(value.request, {
-        questions: (items) => mapValues(items, question),
-        assets: contents,
-      }),
-      result = fields(value.result, {
-        answers: (items) => mapValues(items, answer),
-      });
-    return request === value.request &&
-      result === value.result &&
+    // Fallback JSON keeps the same SDK map roles as structured views, even
+    // when a sibling field has been replaced. Personal content still masks.
+    const capture = value.capture && fields(value.capture, { request, result });
+    const maskedRequest = request(value.request),
+      maskedResult = result(value.result);
+    return maskedRequest === value.request &&
+      maskedResult === value.result &&
       capture === value.capture
       ? value
-      : { ...value, request, result, capture };
+      : { ...value, request: maskedRequest, result: maskedResult, capture };
   });
   const run: (value: FlowRun) => FlowRun = memoize<FlowRun>((value) => {
     let changed = false;

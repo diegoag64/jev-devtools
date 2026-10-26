@@ -97,9 +97,9 @@ await cp(
   join(root, "scripts/fixtures/packed-resolved-templates.test.mjs"),
   join(types, "packed-resolved-templates.test.mjs"),
 );
+for (const file of ["packed-capture.ts", "packed-capture.test.mjs"])
+  await cp(join(root, "scripts/fixtures", file), join(types, file));
 for (const file of [
-  "packed-capture.ts",
-  "packed-capture.test.mjs",
   "packed-expression-contracts.ts",
   "packed-expression-contracts.test.mjs",
 ]) {
@@ -121,8 +121,8 @@ await writeFile(
     files: [
       "flow.ts",
       "packed-resolved-templates.ts",
-      "packed-capture.ts",
       "packed-expression-contracts.ts",
+      "packed-capture.ts",
     ],
   }),
 );

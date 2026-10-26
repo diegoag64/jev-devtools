@@ -7,7 +7,7 @@ const descriptions: Record<string, string> = {
     Object.entries(typeHelp).map(([name, help]) => [name, help.description]),
   ),
   Trace:
-    "One captured request, attempts, timing, status, and warnings. Optional capture retains redacted JSON when a structured request or result view is unavailable.",
+    "One captured request, attempts, timing, status, and warnings. Optional capture retains redacted JSON when a structured request or result view is unavailable. The drawer can display usable fields from that JSON.",
   Snapshot: "Version 1 full trace history message.",
   StreamSnapshot: "Version 2 initial trace history with a revision cursor.",
   TraceDelta:

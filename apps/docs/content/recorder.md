@@ -31,9 +31,9 @@ For an incremental viewer, call `changes(session)` once for the initial data, th
 
 ## Transformed captures
 
-A custom redactor can change a field's type or replace a whole request or response. When the resulting JSON no longer supports the structured view, `Trace.capture.request` or `Trace.capture.result` retains it, including `null`. The corresponding request view is empty or the result is omitted. `captureWarnings` explains the omission, and the drawer shows an unavailable placeholder with the captured content in Raw.
+A custom redactor can change a field's type or replace a whole request or response. When the resulting JSON no longer supports the structured view, `Trace.capture.request` or `Trace.capture.result` retains it, including `null`. The corresponding request view is empty or the result is omitted. `captureWarnings` explains the omission, and Raw retains the captured content.
 
-One incompatible field makes that entire request or response view unavailable. Application execution still receives its original values. Fixture export lists unavailable responses in `missing` and retains their warnings. Existing `Trace.request`, `Trace.result`, `QuestionView`, and `AnswerView` declarations are unchanged; `Trace.capture` is optional. Check field presence rather than interpreting strings such as `[redacted]` as metadata.
+The drawer separately displays usable fields and puts an unavailable placeholder beside each incompatible field. A string score leaves its question, probabilities, context, and other answers visible. A missing box coordinate prevents the overlay; incomplete probabilities prevent the score scale. Valid numbers remain visible. If the redactor replaces the entire request with `null`, that request stays unavailable. Application execution still receives its original values. Fixture export lists responses with incompatible structured shapes in `missing`, including partially displayed responses, and retains their warnings. Existing `Trace.request`, `Trace.result`, `QuestionView`, and `AnswerView` declarations are unchanged; `Trace.capture` is optional. Check field presence rather than interpreting strings such as `[redacted]` as metadata.
 
 ## Custom flow observers
 

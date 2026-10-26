@@ -9,7 +9,12 @@ export async function checkCapture({ browser, url }) {
     process.env.JEV_CAPTURE_EVIDENCE || "benchmarks/results/capture-view";
   await mkdir(directory, { recursive: true });
   const failures = [];
-  for (const mode of ["normal", "root-null", "score-string"]) {
+  for (const mode of [
+    "normal",
+    "root-null",
+    "score-string",
+    "probability-string",
+  ]) {
     const page = await browser.newPage({
       viewport: { width: 1440, height: 1000 },
     });
@@ -31,6 +36,9 @@ export async function checkCapture({ browser, url }) {
       await expect(
         page.getByRole("button", { name: "Flow", exact: true }),
       ).toBeVisible();
+      await page
+        .getByRole("button", { name: "Expand Jev drawer", exact: true })
+        .click();
       await page.evaluate(async (mode) => {
         const response = await fetch(`/bench/capture?mode=${mode}`, {
           method: "POST",
@@ -53,15 +61,66 @@ export async function checkCapture({ browser, url }) {
       await page.screenshot({ path: `${directory}/${mode}-flow.png` });
       assert.deepEqual(errors, [], `${mode}: browser exceptions`);
       const body = page.locator(".detail-body");
+      if (mode === "root-null") {
+        await expect(page.locator(".detail-meta .muted")).toHaveCount(0);
+        await expect(body).not.toContainText("No questions available");
+      }
       if (mode === "normal") await expect(body).toContainText("Score 1.00");
       else {
         await expect(body).toContainText("unavailable in this capture");
-        await expect(body).toContainText("structured view unavailable");
+      }
+      if (mode === "score-string") {
+        await expect(body).toContainText("Score unavailable in this capture");
+        await expect(body).toContainText("Rating?");
+        await expect(body).toContainText("High");
+        await expect(body).not.toContainText("RETURNED SCORE");
+        await page
+          .getByLabel("Diagram question", { exact: true })
+          .selectOption("email");
+        await expect(body).toContainText("Score 0.00");
+        await expect(body).not.toContainText(
+          "Score unavailable in this capture",
+        );
+        await page
+          .getByLabel("Diagram question", { exact: true })
+          .selectOption("q");
+        await page.screenshot({ path: `${directory}/${mode}-flow.png` });
+      }
+      if (mode === "probability-string") {
+        await expect(body).toContainText(
+          "Probabilities · Low unavailable in this capture",
+        );
+        await expect(body).toContainText("Selected: High");
+        await page
+          .getByRole("button", {
+            name: "Available probabilities (1)",
+            exact: true,
+          })
+          .click();
+        await expect(page.getByRole("caption")).toContainText(
+          "Low unavailable in this capture",
+        );
+        await expect(page.getByRole("table")).toContainText("High");
+        await expect(page.getByRole("table")).toContainText("100%");
+        await page.screenshot({
+          path: `${directory}/${mode}-probabilities.png`,
+        });
+        await page
+          .getByRole("button", { name: "Back to overview", exact: true })
+          .click();
       }
       for (const view of ["Questions", "Context", "Transport", "Raw"]) {
         await page.getByRole("button", { name: view, exact: true }).click();
         await expect(body).not.toContainText("capture-secret");
         await expect(body).not.toContainText("capture-personal@example.test");
+        if (mode === "score-string" && view === "Questions") {
+          await expect(body).toContainText("Score unavailable in this capture");
+          await expect(body).toContainText("Other rating?");
+          await expect(body).toContainText("0.00");
+          await page.screenshot({ path: `${directory}/${mode}-questions.png` });
+        }
+        if (mode === "score-string" && view === "Context")
+          await expect(body).toContainText('"text": "[redacted]"');
         if (view === "Raw") {
           await expect(body).toContainText(
             mode === "normal" ? '"score": 1' : '"capture"',

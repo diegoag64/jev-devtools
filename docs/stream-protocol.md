@@ -26,7 +26,7 @@ An empty `order` and empty `upserts` clear the viewer. An ID that was evicted an
 
 `Trace.capture?: { request?: Json; result?: Json }` retains bounded redacted content that cannot supply the corresponding structured view. Any JSON value is valid in those fields, including `null`. An unavailable request has the empty display view `{ model: "", state: null, questions: {} }`; an unavailable response omits `Trace.result`. `captureWarnings` explains the unavailable section. The trace ID, status, attempts and flow link still describe the actual SDK call.
 
-The drawer projects legacy redacted request/result JSON through the same view boundary. It preserves valid structured captures and their object identity. Parsers must distinguish the structural trace envelope from arbitrary captured JSON, including the optional `capture` fields. User strings such as `[redacted]` do not control availability. Raw retains the captured content, and fixture export reports an unavailable response as missing rather than inventing answers.
+The drawer builds a partial display from this captured JSON and from legacy redacted request/result JSON. Usable fields remain visible beside unavailable-field placeholders. This display does not change the wire declarations or make an incomplete response suitable for fixture export. It preserves valid structured captures and their object identity. Parsers must distinguish the structural trace envelope from arbitrary captured JSON, including the optional `capture` fields. User strings such as `[redacted]` do not control availability. Raw retains the captured content, and fixture export reports an unavailable response as missing rather than inventing answers.
 
 ## Delivery and recovery
 

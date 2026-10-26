@@ -1,4 +1,9 @@
-import { traceCaptureView } from "./capture-view.js";
+import { CaptureFields } from "./CaptureFields.js";
+import {
+  capturedValue,
+  captureFieldUnavailable,
+  traceCaptureView,
+} from "./capture-view.js";
 import { emptyFlows, type FlowHistory } from "./flow-stream.js";
 import {
   lazy,
@@ -64,6 +69,15 @@ export const RequestDetail = memo(function RequestDetail({
   trace?: Trace;
 }) {
   trace = trace && traceCaptureView(trace);
+  const tokens = (field: string) => {
+    if (!trace) return "—";
+    const value = capturedValue(trace, ["result", "usage", field]);
+    return typeof value === "number" && Number.isFinite(value)
+      ? value
+      : captureFieldUnavailable(trace, ["result", "usage", field])
+        ? "Unavailable"
+        : "—";
+  };
   // Keep tab selection across request switches and clear, as before. Local tab
   // changes no longer rerender the history list.
   const [tab, setTab] = useState("Flow");
@@ -88,9 +102,7 @@ export const RequestDetail = memo(function RequestDetail({
                 <small>Attempts</small>
               </span>
               <span>
-                {trace.result?.usage
-                  ? `${trace.result.usage.input_tokens} / ${trace.result.usage.output_tokens}`
-                  : "—"}
+                {`${tokens("input_tokens")} / ${tokens("output_tokens")}`}
                 <small>Tokens in / out</small>
               </span>
             </div>
@@ -107,6 +119,15 @@ export const RequestDetail = memo(function RequestDetail({
                   ? "Request ID pending"
                   : "No request ID")}
             </code>
+            {(["request", "result"] as const).map((section) =>
+              !captureFieldUnavailable(trace, [section]) &&
+              captureFieldUnavailable(trace, [section, "model"]) ? (
+                <p className="muted" key={section}>
+                  {section === "request" ? "Request" : "Response"} model
+                  unavailable in this capture.
+                </p>
+              ) : null,
+            )}
           </div>
           <nav className="detail-tabs" aria-label="Request views">
             {["Flow", "Questions", "Context", "Transport", "Raw"].map(
@@ -159,22 +180,18 @@ export const RequestDetail = memo(function RequestDetail({
                     masking follows the component prop. Captures are size
                     limited.
                   </p>
-                  {trace.capture?.request !== undefined && (
-                    <p className="muted">
-                      Request unavailable in this capture. See Raw for captured
-                      content.
-                    </p>
-                  )}
-                  {trace.capture?.request === undefined &&
-                    findImage(trace.request.state) && (
-                      <img
-                        className="context-image"
-                        src={findImage(trace.request.state)}
-                        alt="Captured context"
-                      />
-                    )}
-                  {trace.capture?.request === undefined && (
-                    <JsonBlock value={trace.request.state} />
+                  <CaptureFields trace={trace} path={["request", "state"]} />
+                  {!captureFieldUnavailable(trace, ["request", "state"]) && (
+                    <>
+                      {findImage(trace.request.state) && (
+                        <img
+                          className="context-image"
+                          src={findImage(trace.request.state)}
+                          alt="Captured context"
+                        />
+                      )}
+                      <JsonBlock value={trace.request.state} />
+                    </>
                   )}
                   {trace.request.assets && (
                     <JsonBlock value={trace.request.assets} />
