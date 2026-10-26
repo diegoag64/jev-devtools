@@ -51,12 +51,24 @@ try {
     );
     await page.getByRole("button", { name: "Run sample", exact: true }).click();
     const data = await (await response).json();
-    await page.waitForFunction(
-      (n) =>
-        [...window.captures.values()].filter((t) => t.status === "success")
-          .length === n,
-      count,
-    );
+    try {
+      await page.waitForFunction(
+        (n) =>
+          [...window.captures.values()].filter((t) => t.status === "success")
+            .length === n,
+        count,
+      );
+    } catch (error) {
+      const observed = await page.evaluate(() =>
+        [...window.captures.values()].map((t) => ({
+          id: t.id,
+          status: t.status,
+        })),
+      );
+      throw new Error(
+        `${slug}: expected ${count} successful captures; observed ${JSON.stringify(observed)}. ${error.message}`,
+      );
+    }
     const traces = await page.evaluate(() => {
       window.stream.close();
       return [...window.captures.values()]

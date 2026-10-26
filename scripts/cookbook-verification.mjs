@@ -122,14 +122,25 @@ export async function runLoggedProcess(
     () => stop("Browser verification timed out"),
     timeoutMs,
   );
+  let tail = "";
+  const remember = (chunk) => {
+    tail = (tail + chunk.toString()).slice(-8192);
+  };
+  child.stdout.on("data", remember);
+  child.stderr.on("data", remember);
   child.stdout.pipe(log, { end: false });
   child.stderr.pipe(log, { end: false });
   try {
     const [code, exitSignal] = await once(child, "close");
-    if (reason || code !== 0)
+    if (reason || code !== 0) {
+      if (tail)
+        console.error(
+          `Browser failure output (last 8192 characters):\n${tail}`,
+        );
       throw new Error(
         `${reason ?? `Browser check failed (${exitSignal ?? code})`}; see ${logPath}`,
       );
+    }
   } finally {
     clearTimeout(timeout);
     clearTimeout(forceTimer);
