@@ -67,7 +67,6 @@ jobs:
           path: |
             benchmarks/results/flows/**/*.png
             benchmarks/results/flows/**/server.log
-            benchmarks/results/cookbook-browser/**
           if-no-files-found: ignore
           retention-days: 7
 
