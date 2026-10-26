@@ -28,6 +28,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
+- **Inspect candidate re-ranking.** Run a no-key cookbook with an authored retrieval fixture, independent synthetic Nouls, bounded candidate requests and a stable sorting task. Compare before/after order and tied probabilities without claiming benchmark accuracy.
+
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
 - **API reference previews.** Hover or focus a supported API link for its summary, then open the full reference or read its contract and examples in a side panel. Touch controls, keyboard navigation, copy buttons, and failed-load recovery keep reference reading available without losing the current page. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))

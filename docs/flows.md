@@ -335,6 +335,8 @@ The collection card shows progress and an item selector. **View Flow** expands t
 
 Item input/output and result snapshots follow the same capture limits and redaction as other steps. Custom redaction paths are prefixed with `steps`, map ID, `items`, index before child paths. Template conditions are prefixed with `conditions`, map ID, `items`. Inputs never become structural labels. Runtime values stay untruncated; capture failures do not change execution. Clear/eviction still cannot resurrect a run.
 
+The [re-ranking cookbook](../cookbooks/reranking/README.md) scores a fixed 30-candidate retrieval fixture with 12 concurrent requests, then executes a stable sorting task. Its probabilities are synthetic and its retrieval does not run BM25.
+
 Try the [RAG passage cookbook](../cookbooks/rag-passages/README.md) for a twelve-item sample with four concurrent requests and every passage inspectable.
 
 ## Returning conditionals: `flow.if()`

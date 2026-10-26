@@ -33,7 +33,7 @@ For Next.js, follow the [example's run instructions](https://github.com/diegoag6
 
 ## Explore complete flows
 
-The six cookbooks below run inside the playground. Each README explains the sample cases, application policies, source recipe, and limitations.
+The cookbooks below run inside the playground. Each README explains the sample cases, application policies, source recipe, and limitations.
 
 | Cookbook                                                                                                                 | What to inspect                                                                                                |
 | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
@@ -42,6 +42,7 @@ The six cookbooks below run inside the playground. Each README explains the samp
 | [Structure recovery](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/structure-recovery)                   | Tasks that join text, requests built from those results, and formatting based on returned labels.              |
 | [Simple memory](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/simple-memory)                             | Ticket routing with customer-scoped memory that starts fresh for each run.                                     |
 | [RAG passages](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/rag-passages)                               | Passage assessment with bounded concurrency and explicit rules for including, excluding, or flagging evidence. |
+| [Re-ranking](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/reranking)                                    | Independent candidate Nouls, bounded requests and stable sorting over an authored retrieval fixture.           |
 | [Skill suggestion](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/skill-suggestion)                       | Dynamic questions, shortlist ranking, and a final suggestion or abstention. No skill is executed.              |
 
 From the **repository root**, start the playground:
