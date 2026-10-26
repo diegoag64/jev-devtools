@@ -1,6 +1,9 @@
 import { defineJevFlow } from "../flow/index.js";
 import { flowFixture } from "../src/flow-fixture.js";
-import { traceCaptureView } from "../src/capture-view.js";
+import {
+  captureFieldUnavailable,
+  traceCaptureView,
+} from "../src/capture-view.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { setImmediate as nextTurn } from "node:timers/promises";
@@ -17,7 +20,10 @@ import { TraceStore } from "../src/trace-store.js";
 const origin = "http://localhost:5196";
 const input = {
   state: { email: "personal@example.test", text: "[redacted]" },
-  questions: { q: score("Rating?", ["Low", "High"]) },
+  questions: {
+    q: score("Rating?", ["Low", "High"]),
+    other: score("Other rating?", ["Low", "High"]),
+  },
 };
 const result = {
   model: "fixture",
@@ -28,6 +34,7 @@ const result = {
       probabilities: { "0": 0, "1": 1 },
       legend: { "0": "Low", "1": "High" },
     },
+    other: { type: "score", score: 0, probabilities: { "0": 1, "1": 0 } },
   },
   metadata: { email: "personal@example.test" },
 };
@@ -57,7 +64,9 @@ for (const mode of [
               path.at(-2) === "legend" &&
               path.at(-1) === "0"
             ? { toString: null }
-            : mode === "score-string" && path.at(-1) === "score"
+            : mode === "score-string" &&
+                path.at(-2) === "q" &&
+                path.at(-1) === "score"
               ? "[redacted]"
               : value,
     });
@@ -91,7 +100,9 @@ for (const mode of [
         assert.doesNotThrow(() =>
           renderToString(createElement(component, { trace })),
         );
-      const diagram = renderToString(createElement(TraceDiagram, { trace }));
+      const diagram = renderToString(
+        createElement(TraceDiagram, { trace }),
+      ).replaceAll("<!-- -->", "");
       if (mode === "legend-json") {
         assert.match(diagram, /toString/);
         assert.match(diagram.replaceAll("<!-- -->", ""), /Score 1.00/);
@@ -105,6 +116,18 @@ for (const mode of [
         assert.deepEqual(trace.result, result);
         assert.deepEqual(trace.captureWarnings, []);
       } else {
+        if (mode === "score-string") {
+          assert.match(diagram, /Score unavailable in this capture/);
+          assert.match(diagram, /Rating\?/);
+          assert.match(diagram, /High/);
+          assert.doesNotMatch(diagram, /RETURNED SCORE/);
+          const view = traceCaptureView(trace);
+          assert.equal(view.result?.answers.other.score, 0);
+          assert.equal(view.result?.answers.q.score, undefined);
+          assert.equal(view.result?.answers.q.probabilities?.["1"], 1);
+        }
+        if (mode === "request-only")
+          assert.match(diagram.replaceAll("<!-- -->", ""), /Score 1.00/);
         assert.match(diagram, /unavailable in this capture/);
         assert.match(trace.captureWarnings.join(" "), /redacted values/);
         assert.match(
@@ -169,7 +192,7 @@ test("legacy JSON captures render without treating user strings as metadata", ()
     });
     assert.match(
       renderToString(createElement(RequestDetail, { trace })),
-      /Request unavailable in this capture/,
+      /unavailable in this capture/,
     );
     const view = traceCaptureView(trace);
     assert.deepEqual(view.capture?.request, replacement);
@@ -197,16 +220,42 @@ test("legacy JSON captures render without treating user strings as metadata", ()
       answers: { q: { type: "choice", probabilities: { x: "hidden" } } },
     },
     { ...result, usage: { input_tokens: "hidden", output_tokens: 1 } },
+    {
+      ...result,
+      answers: {
+        q: {
+          type: "score",
+          score: 1,
+          probabilities: { "0": "hidden", "1": 0.8 },
+        },
+      },
+    },
   ]) {
     const [trace] = new TraceStore().apply("snapshot", {
       version: 1,
       traces: [{ ...base, result: changed }],
     });
     assert.match(
-      renderToString(createElement(TraceDiagram, { trace })),
-      /Response unavailable in this capture/,
+      renderToString(createElement(RequestDetail, { trace })),
+      /unavailable/i,
     );
     assert.deepEqual(traceCaptureView(trace).capture?.result, changed);
+    const diagram = renderToString(
+      createElement(TraceDiagram, { trace }),
+    ).replaceAll("<!-- -->", "");
+    if (changed.answers?.q && "box" in changed.answers.q) {
+      assert.match(diagram, /top 0.00 · right 1.00 · bottom 1.00/);
+      assert.doesNotMatch(diagram, /class="lab-box"/);
+    }
+    if (
+      changed.answers?.q &&
+      "probabilities" in changed.answers.q &&
+      changed.answers.q.probabilities?.["0"] === "hidden"
+    ) {
+      assert.match(diagram, /Score 1.00/);
+      assert.match(diagram, /Score scale unavailable/);
+      assert.doesNotMatch(diagram, /class="lab-scale"/);
+    }
   }
   const [normal] = new TraceStore().apply("snapshot", {
     version: 1,
@@ -257,8 +306,96 @@ test("unavailable response captures remain missing fixtures with warnings while 
     flows.upserts[0],
     new Map(traces.map((trace) => [trace.id, trace])),
   );
+  const displayed = flowFixture(
+    flows.definitions[0],
+    flows.upserts[0],
+    new Map(traces.map((trace) => [trace.id, traceCaptureView(trace)])),
+  );
+  assert.deepEqual(displayed.missing, ["rate"]);
+  assert.deepEqual(displayed.fixture.steps, {});
   assert.deepEqual(built.missing, ["rate"]);
   assert.deepEqual(built.fixture.steps, {});
   assert.match(built.warnings.join(" "), /structured view unavailable/);
   assert.match(built.warnings.join(" "), /redacted values/);
+});
+
+// A single incompatible field used to hide the entire response. Exercise the
+// browser projection from wire JSON so legacy and current captures share proof.
+test("partial capture fields preserve siblings without inventing numeric values", () => {
+  const request = {
+    model: 42,
+    ...input,
+    questions: {
+      ...input.questions,
+      q: { type: null, instructions: "Retained instructions" },
+    },
+  };
+  const response = {
+    model: "fixture",
+    answers: {
+      q: {
+        type: "score",
+        score: "hidden",
+        confidence: 0.75,
+        probabilities: { "0": "hidden", "1": 0.8 },
+      },
+      other: result.answers.other,
+      region: {
+        type: "box",
+        box: { left: "hidden", top: 0.2, right: 0.9, bottom: 0.8 },
+      },
+      hidden: null,
+    },
+    usage: { input_tokens: "hidden", output_tokens: 19 },
+  };
+  const [trace] = new TraceStore().apply("snapshot", {
+    version: 1,
+    traces: [
+      {
+        version: 1,
+        id: "partial",
+        session: "local",
+        label: "Partial",
+        source: "sample",
+        startedAt: 0,
+        status: "success",
+        attempts: [],
+        captureWarnings: [],
+        request,
+        result: response,
+      },
+    ],
+  });
+  const view = traceCaptureView(trace);
+  assert.equal(view.result?.answers.q.confidence, 0.75);
+  assert.deepEqual(view.result?.answers.q.probabilities, { "1": 0.8 });
+  assert.equal(view.result?.answers.other.score, 0);
+  assert.equal(view.result?.answers.region.box, undefined);
+  assert.equal(
+    captureFieldUnavailable(view, ["result", "answers", "q", "score"]),
+    true,
+  );
+  assert.equal(
+    captureFieldUnavailable(view, ["result", "answers", "other", "score"]),
+    false,
+  );
+  const html = renderToString(
+    createElement(RequestDetail, { trace }),
+  ).replaceAll("<!-- -->", "");
+  assert.match(html, /Score unavailable in this capture/);
+  assert.match(html, /Probabilities · 0 unavailable in this capture/);
+  assert.match(html, /Retained instructions/);
+  assert.match(html, /Confidence 75%/);
+  assert.match(html, /80%/);
+  assert.match(html, /Unavailable \/ 19/);
+  assert.doesNotMatch(html, /RETURNED SCORE|Score 0.00/);
+  assert.deepEqual(view.capture?.request, request);
+  assert.deepEqual(view.capture?.result, response);
+  const masked = createDisplayRedactor().trace(view);
+  const maskedView = traceCaptureView(masked);
+  assert.equal(
+    captureFieldUnavailable(maskedView, ["result", "answers", "q", "score"]),
+    true,
+  );
+  assert.doesNotMatch(JSON.stringify(maskedView), /personal@example/);
 });

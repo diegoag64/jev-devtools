@@ -14,7 +14,7 @@ Application code uses three JavaScript entry points: the SSR-safe React componen
 
 ## Request capture views
 
-`capture()` bounds and redacts request and response content. `projectTraceCapture()` in `src/capture-view.ts` validates that JSON before the recorder assigns typed views. It retains incompatible content in `Trace.capture` with warnings and supplies an empty request view or omits the result. It never reads original application values to reconstruct a view. Browser consumers use the same projection for legacy captures; valid records preserve identity. Transport validation owns the structural envelope separately. See [transformed captures](stream-protocol.md#transformed-request-and-response-captures).
+`capture()` bounds and redacts request and response content. `projectTraceCapture()` in `src/capture-view.ts` validates that JSON before the recorder assigns typed views. It retains incompatible content in `Trace.capture` with warnings and supplies an empty request view or omits the result. It never reads original application values to reconstruct a view. Browser consumers validate individual captured fields and retain usable siblings, with unavailable paths held in a browser-only WeakMap. The display uses only captured JSON, including legacy captures; valid records preserve identity. Replay export still rejects responses with incompatible structured shapes. Transport validation owns the structural envelope separately. See [transformed captures](stream-protocol.md#transformed-request-and-response-captures).
 
 ## Connected flows
 

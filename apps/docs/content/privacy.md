@@ -27,7 +27,7 @@ const inspector = createJevDevtools({
 
 The callback changes the inspection copy before storage or streaming. It does not change SDK inputs, responses, or application runtime values. If you use `getJevDevtools()`, put the same options in its factory and restart after changing the policy.
 
-Redaction can also replace a request root with `null` or a score with a string. If that removes the structured shape, the drawer shows an unavailable placeholder and warning. Raw retains the bounded redacted JSON in `Trace.capture`; application values remain unchanged. See [transformed captures](@/api/recorder/#transformed-captures).
+Redaction can also replace a request root with `null` or a score with a string. The drawer keeps usable fields visible and shows a placeholder only for each incompatible field, with a capture warning. Replacing a whole value leaves that whole value unavailable. Raw retains the bounded redacted JSON in `Trace.capture`; application values remain unchanged. See [transformed captures](@/api/recorder/#transformed-captures).
 
 Known credential fields are always redacted. Extend the policy for your own data: field-name matching cannot detect every secret embedded in prose, URLs, images, or unusual field names.
 

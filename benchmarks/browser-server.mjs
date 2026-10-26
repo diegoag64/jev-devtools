@@ -40,9 +40,15 @@ for (const spec of scenarios) {
       redact: (path, value) =>
         captureMode === "root-null" && path.length === 0
           ? null
-          : captureMode === "score-string" && path.at(-1) === "score"
+          : captureMode === "score-string" &&
+              path.at(-2) === "q" &&
+              path.at(-1) === "score"
             ? "[redacted]"
-            : value,
+            : captureMode === "probability-string" &&
+                path.at(-2) === "probabilities" &&
+                path.at(-1) === "Low"
+              ? "[redacted]"
+              : value,
     });
     const { request, clientOptions } = fixture(spec);
     let sequence = 0,
@@ -202,7 +208,11 @@ const server = createServer(async (req, res) => {
       if (req.headers.origin !== `http://127.0.0.1:${port}`)
         return res.writeHead(403).end();
       const mode = url.searchParams.get("mode");
-      if (!["normal", "root-null", "score-string"].includes(mode))
+      if (
+        !["normal", "root-null", "score-string", "probability-string"].includes(
+          mode,
+        )
+      )
         return res.writeHead(400).end();
       const { adapter, setCaptureMode } = adapters.get("small");
       const requestId = `capture-${mode}`;
@@ -215,11 +225,23 @@ const server = createServer(async (req, res) => {
               {
                 model: "fixture",
                 answers: {
-                  q: {
+                  q:
+                    mode === "probability-string"
+                      ? {
+                          type: "choice",
+                          choice: "High",
+                          probabilities: { Low: 0, High: 1 },
+                        }
+                      : {
+                          type: "score",
+                          score: 1,
+                          probabilities: { 0: 0, 1: 1 },
+                          legend: { 0: "Low", 1: "High" },
+                        },
+                  other: {
                     type: "score",
-                    score: 1,
-                    probabilities: { 0: 0, 1: 1 },
-                    legend: { 0: "Low", 1: "High" },
+                    score: 0,
+                    probabilities: { 0: 1, 1: 0 },
                   },
                 },
                 metadata: { email: "capture-personal@example.test" },
@@ -237,10 +259,20 @@ const server = createServer(async (req, res) => {
             email: "capture-personal@example.test",
             password: "capture-secret",
           },
-          questions: { q: score("Rating?", ["Low", "High"]) },
+          questions: {
+            q:
+              mode === "probability-string"
+                ? choice("Rating?", { Low: "Low rating", High: "High rating" })
+                : score("Rating?", ["Low", "High"]),
+            other: score("Other rating?", ["Low", "High"]),
+          },
         });
         await new Promise((resolve) => setTimeout(resolve, 10));
-        if (result.answers.q.score !== 1)
+        if (
+          mode === "probability-string"
+            ? result.answers.q.choice !== "High"
+            : result.answers.q.score !== 1
+        )
           throw new Error("Capture changed application result");
       } finally {
         setCaptureMode("normal");

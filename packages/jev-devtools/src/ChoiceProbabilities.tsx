@@ -1,7 +1,13 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import type { AnswerView } from "./protocol.js";
 
-export function ChoiceProbabilities({ answer }: { answer: AnswerView }) {
+export function ChoiceProbabilities({
+  answer,
+  captureNotice,
+}: {
+  answer: AnswerView;
+  captureNotice?: ReactNode;
+}) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const rows = useMemo(
@@ -47,6 +53,7 @@ export function ChoiceProbabilities({ answer }: { answer: AnswerView }) {
       >
         <table>
           <caption>
+            {captureNotice}
             Captured probabilities. Values are not renormalized. Returned
             choice: {answer.choice ?? "unavailable"}.
           </caption>

@@ -107,7 +107,7 @@ const capture = {
   limit:
     "Maximum retained request traces across sessions. Defaults to 50; clamped to 1–200.",
   redact:
-    "Transform the captured copy before storage or streaming. Incompatible structured content remains as JSON in Trace.capture with warnings. SDK inputs and application values stay unchanged.",
+    "Transform the captured copy before storage or streaming. Incompatible structured content remains as JSON in Trace.capture with warnings. The drawer keeps usable fields visible beside unavailable placeholders. SDK inputs and application values stay unchanged.",
 };
 const adapter = {
   enabled:

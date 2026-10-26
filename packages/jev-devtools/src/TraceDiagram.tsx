@@ -1,4 +1,10 @@
-import { traceCaptureView } from "./capture-view.js";
+import { CaptureFields, PartialBox } from "./CaptureFields.js";
+import {
+  captureFieldUnavailable,
+  captureQuestionEntries,
+  unavailableCaptureFields,
+  traceCaptureView,
+} from "./capture-view.js";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useDiagramViewport } from "./useDiagramViewport.js";
 import type { AnswerView, Trace } from "./protocol.js";
@@ -10,10 +16,12 @@ function Result({
   answer,
   image,
   probabilities,
+  scaleAvailable,
 }: {
   answer?: AnswerView;
   image?: string;
   probabilities?: [string, number][];
+  scaleAvailable: boolean;
 }) {
   if (!answer) return <p className="lab-copy">No answer received.</p>;
   return (
@@ -59,28 +67,32 @@ function Result({
       {answer.score !== undefined && (
         <>
           <p className="lab-result">Score {answer.score.toFixed(2)}</p>
-          <div className="lab-scale">
-            <span
-              style={{
-                left: pct(
-                  Math.max(
-                    0,
-                    Math.min(
-                      1,
-                      answer.score /
-                        Math.max(
-                          1,
-                          Object.keys(answer.probabilities ?? {}).length - 1,
-                        ),
+          {scaleAvailable ? (
+            <div className="lab-scale">
+              <span
+                style={{
+                  left: pct(
+                    Math.max(
+                      0,
+                      Math.min(
+                        1,
+                        answer.score /
+                          Math.max(
+                            1,
+                            Object.keys(answer.probabilities ?? {}).length - 1,
+                          ),
+                      ),
                     ),
                   ),
-                ),
-              }}
-            />
-            {Object.keys(answer.probabilities ?? {}).map((k) => (
-              <small key={k}>{k}</small>
-            ))}
-          </div>
+                }}
+              />
+              {Object.keys(answer.probabilities ?? {}).map((k) => (
+                <small key={k}>{k}</small>
+              ))}
+            </div>
+          ) : (
+            <p className="muted">Score scale unavailable in this capture.</p>
+          )}
         </>
       )}
       {answer.noul !== undefined && (
@@ -163,9 +175,7 @@ export function TraceDiagram({
       to: number;
     } | null>(null),
     [probabilityView, setProbabilityView] = useState<string | null>(null);
-  const entries = Object.entries(trace.request.questions ?? {}).filter(
-      ([, q]) => q && typeof q === "object" && typeof q.type === "string",
-    ),
+  const entries = captureQuestionEntries(trace),
     [key, question] = entries.find(([key]) => key === selected) ??
       entries[0] ?? ["", undefined];
   const answer = trace.result?.answers[key],
@@ -177,6 +187,15 @@ export function TraceDiagram({
         Object.entries(answer?.probabilities ?? {}).sort((a, b) => b[1] - a[1]),
       [answer?.probabilities],
     );
+  const probabilitiesUnavailable =
+    captureFieldUnavailable(trace, [
+      "result",
+      "answers",
+      key,
+      "probabilities",
+    ]) ||
+    unavailableCaptureFields(trace, ["result", "answers", key, "probabilities"])
+      .length > 0;
   const compact = answer?.type === "choice" && allProbabilities.length > 6;
   const shownProbabilities = compact
     ? allProbabilities.slice(0, 3)
@@ -210,16 +229,23 @@ export function TraceDiagram({
   const spacing = compact ? 112 : 136;
   const showProbabilities =
     probabilityView === key && answer?.type === "choice";
-  const resultHeight = Math.max(
-    280,
-    (compact ? 230 : 166) +
-      (compact
-        ? shownProbabilities.length
-        : Object.keys(answer?.probabilities ?? {}).length) *
-        44 +
-      (answer?.score !== undefined ? 50 : 0),
-    answer?.box ? 390 : 0,
-  );
+  const unavailableCount = unavailableCaptureFields(trace, [
+    "result",
+    "answers",
+    key,
+  ]).length;
+  const resultHeight =
+    unavailableCount * 44 +
+    Math.max(
+      280,
+      (compact ? 230 : 166) +
+        (compact
+          ? shownProbabilities.length
+          : Object.keys(answer?.probabilities ?? {}).length) *
+          44 +
+        (answer?.score !== undefined ? 50 : 0),
+      answer?.box ? 390 : 0,
+    );
   const height = Math.max(
       520,
       resultHeight + 90,
@@ -229,28 +255,29 @@ export function TraceDiagram({
     mid = ry + resultHeight / 2;
   const { viewport, canvas, zoom, zoomBy, fit, preserveCamera } =
     useDiagramViewport(1120, height, key);
-  if (trace.capture?.request !== undefined)
-    return (
-      <p className="muted">
-        Request unavailable in this capture. See Raw for captured content.
-      </p>
-    );
-  if (trace.capture?.result !== undefined)
-    return (
-      <p className="muted">
-        Response unavailable in this capture. See Raw for captured content.
-      </p>
-    );
   if (!question)
-    return <p className="muted">No questions available in this capture.</p>;
+    return (
+      <>
+        <CaptureFields trace={trace} path={["request"]} />
+        <p className="muted">No questions available in this capture.</p>
+      </>
+    );
   const sourcePath = (y: number) => `M260 ${y} C325 ${y},325 ${mid},390 ${mid}`;
   const enteringDelay = (index: number) =>
     entering?.question === key && index >= entering.from && index < entering.to
       ? `${(index - entering.from) * 55}ms`
       : undefined;
   const paths = [
-    { id: "state", d: sourcePath(122), active: true },
-    { id: "question", d: sourcePath(378), active: true },
+    {
+      id: "state",
+      d: sourcePath(122),
+      active: !captureFieldUnavailable(trace, ["request", "state"]),
+    },
+    {
+      id: "question",
+      d: sourcePath(378),
+      active: !captureFieldUnavailable(trace, ["request", "questions", key]),
+    },
     ...outputs.map((output, i) => ({
       id: `output-${key}-${output.label}`,
       delay: enteringDelay(i),
@@ -292,7 +319,7 @@ export function TraceDiagram({
             >
               {showProbabilities
                 ? "Back to overview"
-                : `All probabilities (${allProbabilities.length})`}
+                : `${probabilitiesUnavailable ? "Available" : "All"} probabilities (${allProbabilities.length})`}
             </button>
           )}
           {!showProbabilities && (
@@ -337,7 +364,16 @@ export function TraceDiagram({
         </div>
       </div>
       {showProbabilities && answer && (
-        <ChoiceProbabilities key={key} answer={answer} />
+        <ChoiceProbabilities
+          key={key}
+          answer={answer}
+          captureNotice={
+            <CaptureFields
+              trace={trace}
+              path={["result", "answers", key, "probabilities"]}
+            />
+          }
+        />
       )}
       <div
         hidden={showProbabilities}
@@ -402,7 +438,9 @@ export function TraceDiagram({
               {image ? "IMAGE STATE" : "STATE"}
             </span>
             <h3>Shared context</h3>
-            {image ? (
+            {captureFieldUnavailable(trace, ["request", "state"]) ? (
+              <CaptureFields trace={trace} path={["request", "state"]} />
+            ) : image ? (
               <img
                 className="lab-source-image"
                 src={image}
@@ -422,6 +460,7 @@ export function TraceDiagram({
           >
             <span className="lab-eyebrow">INSTRUCTIONS</span>
             <h3>Question · {question.type}</h3>
+            <CaptureFields trace={trace} path={["request", "questions", key]} />
             <DiagramContent
               key={`${trace.id}:${key}`}
               value={question.instructions}
@@ -447,11 +486,16 @@ export function TraceDiagram({
                 probabilities
               </p>
             )}
-            <Result
-              answer={answer}
-              image={image}
-              probabilities={compact ? shownProbabilities : undefined}
-            />
+            <CaptureFields trace={trace} path={["result", "answers", key]} />
+            <PartialBox trace={trace} name={key} />
+            {!captureFieldUnavailable(trace, ["result", "answers", key]) && (
+              <Result
+                answer={answer}
+                image={image}
+                probabilities={compact ? shownProbabilities : undefined}
+                scaleAvailable={!probabilitiesUnavailable}
+              />
+            )}
           </article>
           {outputs.map((output, i) => (
             <article

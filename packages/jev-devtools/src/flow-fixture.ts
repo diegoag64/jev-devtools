@@ -45,7 +45,7 @@ export function flowFixture(
       const captured = step.traceId ? traces.get(step.traceId) : undefined;
       const trace = captured && projectTraceCapture(captured);
       for (const warning of trace?.captureWarnings ?? []) warnings.add(warning);
-      if (!trace?.result) {
+      if (!trace?.result || trace.capture?.result !== undefined) {
         missing.push(prefix + node.id);
         continue;
       }

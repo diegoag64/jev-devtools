@@ -30,7 +30,7 @@ export async function recordMessage(message: string) {
   return result;
 }
 
-// Unavailable structured sections retain only the bounded redacted JSON.
+// Raw captures retain bounded redacted JSON; the drawer displays usable fields.
 export function capturedContent(trace: import("jev-devtools").Trace) {
   return {
     request:
