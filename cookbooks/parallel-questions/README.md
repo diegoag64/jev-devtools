@@ -17,7 +17,7 @@ A runnable TypeScript adaptation of the [official Parallel Questions cookbook](h
 
 ## Fidelity and adaptations
 
-`questions.json` preserves every original instruction and criterion, including the upstream `o f` spelling in two fine descriptions. `provenance.json` pins the reviewed source hash and upstream repository commit. The upstream repository has no parallel-questions directory or cached assets at that commit; the official page's executable Python is the source for this port. `LICENSE.typesafe` retains the upstream MIT notice for adapted questions and algorithm.
+`questions.json` preserves every original instruction and criterion. `provenance.json` pins the reviewed source hash and upstream repository commit. The upstream repository has no parallel-questions directory or cached assets at that commit; the official page's executable Python is the source for this port. `LICENSE.typesafe` retains the upstream MIT notice for adapted questions and algorithm.
 
 The original uses the 53,777-character Wikipedia GDPR article at revision 1363040264. This sample substitutes a short authored briefing; it redistributes no Wikipedia text. All responses are synthetic, not original cached results, legal advice, model evaluations or measured batching independence. Fixed documents are read-only in the browser, and the server rejects changed inputs and live mode. Adding an API key does not enable this cookbook's live execution. The sample transport checks model, document, complete questions, request count and order, and rejects mismatches.
 

@@ -7,7 +7,7 @@
   "upstreamAssetReview": "The recursive upstream tree contains no parallel_questions directory or cached article/answers for this recipe. The executable code on the official page is the implementation source. Upstream MIT license retained.",
   "originalDocument": "https://en.wikipedia.org/?oldid=1363040264",
   "adaptations": [
-    "All 13 question instructions and criteria preserved exactly, including upstream o f spelling.",
+    "All 13 question instructions and criteria preserved exactly.",
     "Short authored sample document replaces the 53,777-character pinned Wikipedia article; no Wikipedia text is redistributed.",
     "Authored synthetic answers replace live/cached inference. Two cases exercise identical and varying repeat values.",
     "Five batched requests precede five sequential maps of 13 single requests. No concurrent speed comparison.",
