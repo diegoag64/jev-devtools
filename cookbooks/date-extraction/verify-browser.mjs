@@ -160,11 +160,17 @@ try {
   ])
     await question.selectOption(part);
   await question.selectOption("day_anchor");
+  const nestedStep = page.getByLabel("Flow step", { exact: true }).nth(1);
+  await nestedStep.selectOption("needs-review");
+  await page.waitForTimeout(250);
   await page.screenshot({
     path: fileURLToPath(new URL("03-accepted-flow.png", output)),
-    fullPage: true,
+    fullPage: false,
   });
   await picker.selectOption("3");
+  await nestedStep.selectOption("read-date-parts");
+  await nestedStep.selectOption("needs-review");
+  await page.waitForTimeout(250);
   await page
     .getByRole("button", {
       name: "Step review-date, task, completed",
@@ -173,7 +179,7 @@ try {
     .waitFor();
   await page.screenshot({
     path: fileURLToPath(new URL("04-missing-confidence-flow.png", output)),
-    fullPage: true,
+    fullPage: false,
   });
   await page
     .getByRole("button", { name: "Close Jev DevTools", exact: true })
