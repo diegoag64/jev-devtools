@@ -28,7 +28,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **Date extraction cookbook.** Add a no-key playground adaptation with seven Choice questions per role, fixed-reference calendar assembly, ISO dates, and inspectable confidence review. Synthetic fixtures cover official examples, calendar boundaries, invalid dates and the strict 0.60 gate; missing used confidence requires review.
+- **Date extraction cookbook.** Add a no-key playground adaptation with seven Choice questions per role, fixed-reference calendar assembly, ISO dates, and inspectable confidence review. Synthetic fixtures cover official examples, calendar boundaries, invalid dates and the strict 0.60 gate; missing used confidence requires review. ([#114](https://github.com/diegoag64/jev-devtools/pull/114))
 
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
