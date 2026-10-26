@@ -16,6 +16,11 @@ test("API previews reuse compiled entry content and keep links at a subdirectory
     fragments["adapter-run"],
     /href="\/docs\/api\/reference\/#adapter-handle"/,
   );
+  assert.match(
+    fragments["adapter-run"],
+    /data-api-entry="adapter-handle" data-api-title="adapter.handle"/,
+  );
+  assert.doesNotMatch(fragments["adapter-run"], /data-api-preview=/);
   assert.match(fragments["adapter-run"], /not a heading/);
   assert.doesNotMatch(fragments["adapter-run"], /Serves requests/);
   const links =

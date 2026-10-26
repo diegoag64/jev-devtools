@@ -78,8 +78,95 @@ export async function verifyApiPreviews({ browser, origin, base, evidence }) {
     await page.screenshot({
       path: resolve(evidence, "api-reference-panel.png"),
     });
+    // Explore multiple references without adding browser history or losing place.
+    const back = panel.getByRole("button", { name: /^Back to / });
+    assert.equal(await back.count(), 0);
+    const createLink = panel
+      .locator('a[data-api-entry="createjevdevtools"]')
+      .first();
+    await createLink.scrollIntoViewIfNeeded();
+    const entryScroll = await panel.evaluate((el) => el.scrollTop);
+    const historyLength = await page.evaluate(() => history.length);
+    await createLink.focus();
+    await page.keyboard.press("Enter");
+    await panel
+      .getByRole("heading", { name: "createJevDevtools", exact: true })
+      .waitFor();
+    await panel
+      .locator('a[data-api-entry="type-jevdevtoolsserveroptions"]')
+      .first()
+      .click();
+    await panel
+      .getByRole("heading", {
+        name: "Type: JevDevtoolsServerOptions",
+        exact: true,
+      })
+      .waitFor();
+    await panel
+      .locator(".api-panel-content > p")
+      .filter({ hasText: "Server adapter configuration." })
+      .waitFor();
+    assert.equal(page.url(), url);
+    assert.equal(await page.evaluate(() => history.length), historyLength);
+    assert.equal(await page.evaluate(() => scrollY), before);
+    assert.ok(
+      (await panel.locator(".api-panel-visit").getAttribute("href")).endsWith(
+        "#type-jevdevtoolsserveroptions",
+      ),
+    );
+    await page.screenshot({ path: resolve(evidence, "api-panel-history.png") });
+    await panel
+      .getByText("Exact TypeScript declaration", { exact: true })
+      .click();
+    const captureLink = panel.locator(
+      'a[data-api-entry="type-captureoptions"]',
+    );
+    await captureLink.scrollIntoViewIfNeeded();
+    const typeScroll = await panel.evaluate((el) => el.scrollTop);
+    await captureLink.click();
+    await panel
+      .getByRole("heading", { name: "Type: CaptureOptions", exact: true })
+      .waitFor();
+    await back.click();
+    await panel
+      .getByRole("heading", {
+        name: "Type: JevDevtoolsServerOptions",
+        exact: true,
+      })
+      .waitFor();
+    assert.ok(await panel.locator("details").evaluate((el) => el.open));
+    assert.equal(await panel.evaluate((el) => el.scrollTop), typeScroll);
+    assert.ok(
+      await captureLink.evaluate((el) => el === document.activeElement),
+    );
+    await back.click();
+    await panel
+      .getByRole("heading", { name: "createJevDevtools", exact: true })
+      .waitFor();
+    await back.click();
+    await panel
+      .getByRole("heading", { name: "getJevDevtools", exact: true })
+      .waitFor();
+    assert.equal(await panel.evaluate((el) => el.scrollTop), entryScroll);
+    assert.ok(await createLink.evaluate((el) => el === document.activeElement));
+    assert.equal(await back.count(), 0);
+    // A self-link does not create a redundant Back entry.
+    await panel.locator('a[data-api-entry="getjevdevtools"]').first().click();
+    assert.equal(await back.count(), 0);
+    // Modified activation retains the browser's native new-tab behavior.
+    const newTab = context.waitForEvent("page");
+    await createLink.click({ button: "middle" });
+    const opened = await newTab;
+    await opened.waitForURL(origin + base + "api/reference/#createjevdevtools");
+    await opened.close();
+    assert.ok(await panel.isVisible());
     await page.keyboard.press("Escape");
     await panel.waitFor({ state: "hidden" });
+    // The native dialog's close event (which restores focus) follows hiding it.
+    await page.waitForFunction(
+      (el) => el === document.activeElement,
+      await trigger.elementHandle(),
+    );
     assert.ok(
       await trigger.evaluate((el) => el === document.activeElement),
       "Closing returns focus to its trigger",
@@ -147,6 +234,62 @@ export async function verifyApiPreviews({ browser, origin, base, evidence }) {
     await page.unroute("**/api-previews/getjevdevtools.html");
     await panel.getByRole("button", { name: "Try again" }).click();
     await panel.getByRole("heading", { name: /^Returns/ }).waitFor();
+    // Metadata failure must not prevent internal navigation or Back from an error.
+    await page.route(
+      "**/api-previews/type-jevdevtoolsserveroptions.html",
+      (route) => route.abort(),
+    );
+    await panel
+      .locator('a[data-api-entry="type-jevdevtoolsserveroptions"]')
+      .first()
+      .click();
+    await panel.getByRole("button", { name: "Try again" }).waitFor();
+    assert.equal(page.url(), url);
+    await panel.getByRole("button", { name: /^Back to / }).click();
+    await panel.getByRole("heading", { name: /^Returns/ }).waitFor();
+    await page.unroute("**/api-previews/type-jevdevtoolsserveroptions.html");
+    // Back remains usable while a new entry is still loading. A late response
+    // must not replace the entry the reader returned to.
+    let release;
+    const gate = new Promise((resolve) => {
+      release = resolve;
+    });
+    await page.route(
+      "**/api-previews/type-jevdevtoolsserveroptions.html",
+      async (route) => {
+        await gate;
+        await route.continue();
+      },
+    );
+    const requested = page.waitForRequest(
+      "**/api-previews/type-jevdevtoolsserveroptions.html",
+    );
+    await panel
+      .locator('a[data-api-entry="type-jevdevtoolsserveroptions"]')
+      .first()
+      .click();
+    await requested;
+    await panel.getByRole("button", { name: /^Back to / }).click();
+    await panel.getByRole("heading", { name: /^Returns/ }).waitFor();
+    const response = page.waitForResponse(
+      "**/api-previews/type-jevdevtoolsserveroptions.html",
+    );
+    release();
+    await (await response).finished();
+    await page.evaluate(
+      () =>
+        new Promise((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(resolve)),
+        ),
+    );
+    assert.match(
+      await panel.locator("#api-panel-title").innerText(),
+      /getJevDevtools/,
+    );
+    assert.equal(
+      await panel.getByRole("button", { name: /^Back to / }).count(),
+      0,
+    );
     await panel.getByRole("button", { name: "Close API reference" }).click();
     assert.deepEqual(errors, []);
   } finally {
@@ -179,6 +322,27 @@ export async function verifyApiPreviews({ browser, origin, base, evidence }) {
     await page.screenshot({
       path: resolve(evidence, "api-reference-panel-mobile.png"),
     });
+    await panel
+      .locator('a[data-api-entry="type-jevdevtoolsserveroptions"]')
+      .first()
+      .tap();
+    await panel
+      .getByRole("heading", {
+        name: "Type: JevDevtoolsServerOptions",
+        exact: true,
+      })
+      .waitFor();
+    await panel
+      .locator(".api-panel-content > p")
+      .filter({ hasText: "Server adapter configuration." })
+      .waitFor();
+    await page.screenshot({
+      path: resolve(evidence, "api-panel-history-mobile.png"),
+    });
+    await panel.getByRole("button", { name: /^Back to / }).tap();
+    await panel.getByRole("heading", { name: /^Returns/ }).waitFor();
+    assert.equal(page.url(), url);
+
     await panel.getByRole("button", { name: "Close API reference" }).tap();
     await panel.waitFor({ state: "hidden" });
   } finally {
@@ -200,6 +364,6 @@ export async function verifyApiPreviews({ browser, origin, base, evidence }) {
     await noJS.close();
   }
   console.log(
-    `Verified API previews, panel reading/copy, native links, keyboard/touch, focus, failed-load recovery, and preserved reader position at ${base}.`,
+    `Verified API previews, panel navigation/history, reading/copy, native links, keyboard/touch, focus, failed-load recovery, and preserved reader position at ${base}.`,
   );
 }

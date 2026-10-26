@@ -28,6 +28,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
+- **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide.
+
 - **API reference previews.** Hover or focus a supported API link for its summary, then open the full reference or read its contract and examples in a side panel. Touch controls, keyboard navigation, copy buttons, and failed-load recovery keep reference reading available without losing the current page.
 
 #### Documentation

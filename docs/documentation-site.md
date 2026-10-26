@@ -57,3 +57,5 @@ API explanations separate parameter rules, execution behavior, and failures. Kee
 Resource pages direct readers to runnable sample apps, cookbook workflows, and checked method examples. Coding-agent guidance points to the installed setup skill and adjacent references, distinguishes online snapshots from installed contracts, and asks for observable integration evidence.
 
 API reference links offer summaries and an optional reading panel generated from the glossary itself. Keep full-page navigation and no-JavaScript links intact, load reference content on demand, and preserve keyboard focus and the reader's page position when closing the panel.
+
+The reference panel supports following API links in place, with a Back button that restores the previous entry’s reading position. Keep this history local to the open panel and retain explicit full-page navigation.

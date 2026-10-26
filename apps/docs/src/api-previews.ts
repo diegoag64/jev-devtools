@@ -18,12 +18,23 @@ const read = popup.querySelector<HTMLButtonElement>(".api-preview-read")!;
 const panel = document.createElement("dialog");
 panel.className = "api-reference-panel";
 panel.setAttribute("aria-labelledby", "api-panel-title");
-panel.innerHTML = `<header class="api-panel-header"><span><small>API reference</small><h2 id="api-panel-title"></h2></span><button type="button" class="api-panel-close" aria-label="Close API reference">×</button></header><div class="api-panel-toolbar"><a class="api-panel-visit">Open full reference ↗</a></div><div class="api-panel-content api-entry-body"></div>`;
+panel.innerHTML = `<header class="api-panel-header"><button type="button" class="api-panel-back" hidden>← Back</button><span><small>API reference</small><h2 id="api-panel-title" tabindex="-1"></h2></span><button type="button" class="api-panel-close" aria-label="Close API reference">×</button></header><div class="api-panel-toolbar"><a class="api-panel-visit">Open full reference ↗</a></div><div class="api-panel-content api-entry-body"></div>`;
 document.body.append(popup, panel);
 const panelTitle = panel.querySelector<HTMLElement>("#api-panel-title")!;
 const panelContent = panel.querySelector<HTMLElement>(".api-panel-content")!;
 const panelVisit = panel.querySelector<HTMLAnchorElement>(".api-panel-visit")!;
 const panelClose = panel.querySelector<HTMLButtonElement>(".api-panel-close")!;
+const panelBack = panel.querySelector<HTMLButtonElement>(".api-panel-back")!;
+type PanelEntry = {
+  id: string;
+  title: string;
+  href: string;
+  scrollTop: number;
+  linkIndex?: number;
+  openDetails?: number[];
+};
+let currentEntry: PanelEntry | undefined;
+const panelHistory: PanelEntry[] = [];
 let active: HTMLAnchorElement | undefined;
 let returnFocus: HTMLElement | undefined;
 let opening: ReturnType<typeof setTimeout> | undefined;
@@ -188,8 +199,18 @@ document.addEventListener(
   true,
 );
 
-async function loadPanel(id: string) {
+async function loadPanel(entry: PanelEntry, restore = false) {
+  const { id } = entry;
   const version = ++panelVersion;
+  currentEntry = entry;
+  panelTitle.textContent = entry.title;
+  panelVisit.href = entry.href;
+  const previous = panelHistory.at(-1);
+  panelBack.hidden = !previous;
+  panelBack.setAttribute(
+    "aria-label",
+    previous ? `Back to ${previous.title}` : "Back",
+  );
   panelContent.innerHTML = `<p role="status">Loading reference…</p>`;
   panel.scrollTop = 0;
   try {
@@ -237,6 +258,16 @@ async function loadPanel(id: string) {
     ))
       button.hidden = false;
     panelContent.replaceChildren(template.content);
+    if (restore) {
+      panelContent.querySelectorAll("details").forEach((details, index) => {
+        details.open = entry.openDetails?.includes(index) ?? false;
+      });
+      if (entry.linkIndex !== undefined)
+        panelContent
+          .querySelectorAll<HTMLAnchorElement>("a")
+          [entry.linkIndex]?.focus({ preventScroll: true });
+      panel.scrollTop = entry.scrollTop;
+    }
     if (panelContent.querySelector("[data-type-info]"))
       void import("./type-hovers.js");
   } catch {
@@ -244,7 +275,7 @@ async function loadPanel(id: string) {
     panelContent.innerHTML = `<p role="status">The reference could not load. Try again or open the full page.</p><button type="button" class="api-panel-retry">Try again</button>`;
     panelContent.querySelector("button")!.addEventListener("click", () => {
       panelClose.focus();
-      void loadPanel(id);
+      void loadPanel(entry, restore);
     });
   }
 }
@@ -252,17 +283,29 @@ read.addEventListener("click", () => {
   if (!active) return;
   const link = active;
   returnFocus = buttons.get(link);
-  panelTitle.textContent = title.textContent;
-  panelVisit.href = link.href;
+  panelHistory.length = 0;
   hide();
   panel.showModal();
   document.documentElement.classList.add("api-panel-open");
   panelClose.focus();
-  void loadPanel(link.dataset.apiPreview!);
+  void loadPanel({
+    id: link.dataset.apiPreview!,
+    title: title.textContent ?? "API reference",
+    href: link.href,
+    scrollTop: 0,
+  });
+});
+panelBack.addEventListener("click", () => {
+  const previous = panelHistory.pop();
+  if (!previous) return;
+  panelTitle.focus({ preventScroll: true });
+  void loadPanel(previous, true);
 });
 panelClose.addEventListener("click", () => panel.close());
 panel.addEventListener("close", () => {
   panelVersion++;
+  panelHistory.length = 0;
+  currentEntry = undefined;
   document.documentElement.classList.remove("api-panel-open");
   restoringFocus = true;
   returnFocus?.focus({ preventScroll: true });
@@ -276,9 +319,34 @@ panel.addEventListener("click", (event) => {
     !event.ctrlKey &&
     !event.metaKey &&
     !event.shiftKey &&
+    !event.altKey &&
+    !event.defaultPrevented &&
+    !link.hasAttribute("download") &&
+    (!link.target || link.target === "_self") &&
     event.button === 0
-  )
+  ) {
+    if (link.dataset.apiEntry && currentEntry) {
+      event.preventDefault();
+      if (link.dataset.apiEntry === currentEntry.id) return;
+      currentEntry.scrollTop = panel.scrollTop;
+      currentEntry.openDetails = [
+        ...panelContent.querySelectorAll("details"),
+      ].flatMap((details, index) => (details.open ? [index] : []));
+      currentEntry.linkIndex = [...panelContent.querySelectorAll("a")].indexOf(
+        link,
+      );
+      panelHistory.push(currentEntry);
+      panelTitle.focus({ preventScroll: true });
+      void loadPanel({
+        id: link.dataset.apiEntry,
+        title: link.dataset.apiTitle!,
+        href: link.href,
+        scrollTop: 0,
+      });
+      return;
+    }
     panel.close();
+  }
   if (event.target !== panel) return;
   const box = panel.getBoundingClientRect();
   if (

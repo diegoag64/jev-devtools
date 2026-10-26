@@ -1265,6 +1265,7 @@ dialog::backdrop {
 }
 .api-preview-actions button,
 .api-panel-close,
+.api-panel-back,
 .api-panel-retry {
   color: var(--text);
   background: var(--bg);
@@ -1315,6 +1316,14 @@ dialog::backdrop {
 .api-panel-header small {
   color: var(--muted);
 }
+.api-panel-header > span {
+  flex: 1;
+  min-width: 0;
+}
+.api-panel-back,
+.api-panel-close {
+  flex-shrink: 0;
+}
 .api-panel-header h2 {
   font-size: 20px;
   margin: 4px 0 0;
@@ -1344,6 +1353,7 @@ dialog::backdrop {
   }
   .api-preview-actions button,
   .api-panel-close,
+  .api-panel-back,
   .api-panel-retry {
     min-height: 44px;
   }
@@ -1351,6 +1361,10 @@ dialog::backdrop {
 @media (max-width: 760px) {
   .api-panel-header {
     padding: 16px;
+    gap: 10px;
+  }
+  .api-panel-header h2 {
+    font-size: 16px;
   }
   .api-panel-toolbar {
     padding: 16px 16px 0;

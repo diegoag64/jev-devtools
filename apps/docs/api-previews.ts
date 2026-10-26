@@ -67,6 +67,8 @@ export function apiPreviews(html: string, base: string) {
       `href="${base}api/reference/#`,
     );
   }
+  for (const id of Object.keys(fragments))
+    fragments[id] = markApiLinks(fragments[id], base, index, false, true);
   return { index, fragments };
 }
 
@@ -75,6 +77,7 @@ export function markApiLinks(
   base: string,
   index: Record<string, ApiPreview>,
   glossary: boolean,
+  panel = false,
 ) {
   return html.replace(
     /<a\b([^>]*?)href="([^"]+)"([^>]*)>/g,
@@ -86,9 +89,13 @@ export function markApiLinks(
         : glossary && href.startsWith("#")
           ? href.slice(1)
           : "";
-      return Object.hasOwn(index, id)
-        ? `<a${before}href="${href}"${after} data-api-preview="${id}">`
-        : tag;
+      if (!Object.hasOwn(index, id)) return tag;
+      const title = index[id].title.replace(
+        /[&"<>]/g,
+        (char) =>
+          ({ "&": "&amp;", '"': "&quot;", "<": "&lt;", ">": "&gt;" })[char]!,
+      );
+      return `<a${before}href="${href}"${after} ${panel ? `data-api-entry="${id}" data-api-title="${title}"` : `data-api-preview="${id}"`}>`;
     },
   );
 }
