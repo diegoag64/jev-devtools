@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | Rewritten onboarding and guides; API reference corrections.                                                |
+| [Unreleased](#unreleased)                   | Not published                                                                      | Rewritten onboarding, guides, and API explanations.                                                        |
 | [0.5.3](#053--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) | Shared flow encoding; simpler releases and publication helpers; flow regression coverage.                  |
 | [0.5.2](#052--october-25-2026-experimental) | 2026-10-25                                                                         | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
 | [0.5.1](#051--october-25-2026-experimental) | 2026-10-25                                                                         | Task input validation and expression types; setup guidance; release and website maintenance.               |
@@ -27,6 +27,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 ### Changes
 
 #### Documentation
+
+- **Clearer API explanations.** Revise the glossary and React, server, flow, expression, and recorder references. Separate parameter rules, execution behavior, and errors; explain replay and comparison results; add missing server parameter types. Preserve examples, signatures, and section links.
 
 - **Concepts and practical guides.** Rename How it fits together to Concepts and explain capture, flows, and drawer controls. Rewrite the Next.js, Build a flow, Privacy & access, and Troubleshooting guides with setup steps, expected results, and diagnostic checks. Preserve existing page and section links.
 

@@ -1,28 +1,31 @@
+Use `JevDevtools` to display the requests and flows captured by your server adapter. This page covers its props, rendering, and lifecycle. For the complete server connection, use [Quick start](@/getting-started/) or [Next.js](@/guides/nextjs/).
+
 ## Import and mount
 
 <!-- example: client.tsx -->
 
-**Example walkthrough:** `import.meta.env.DEV` enables the inspector in Vite development builds. `defaultOpen={false}` starts at the launcher, so users open the drawer when they need it. The component is a sibling of the application's main content.
+`Root` renders the inspector beside the application content. In Vite, `import.meta.env.DEV` enables it during development. `defaultOpen={false}` starts with the launcher so the user can open the drawer when needed.
 
 ### Rendered output
 
-| Value | Type | Description |
-| --- | --- | --- |
+| Value            | Type                    | Description                                                                                |
+| ---------------- | ----------------------- | ------------------------------------------------------------------------------------------ |
 | Component return | React element or `null` | Nothing during SSR or while disabled; the connected inspector after mounting when enabled. |
 
-
-Mount once near the application root. The component is safe to import during SSR: it renders nothing until mounted and enabled. Its launcher and drawer render into a Shadow DOM boundary under `document.body`.
+Mount once near the application root. The component is safe to import during SSR and renders nothing until it is both mounted and enabled. Its launcher and drawer render in a Shadow DOM under `document.body`.
 
 ## Props
 
-| Prop                            | Type      | Default             | Behavior                                                                                      |
-| ------------------------------- | --------- | ------------------- | --------------------------------------------------------------------------------------------- |
-| `enabled`                       | `boolean` | `false`             | Opt in to loading and connecting the inspector.                                               |
-| `endpoint`                      | `string`  | `/api/jev-devtools` | Same-origin adapter path. Must match the server.                                              |
-| `defaultOpen`                   | `boolean` | `true`              | Initial expanded state; set false to start at the launcher.                                   |
+| Prop                                                            | Type      | Default             | Behavior                                                                                 |
+| --------------------------------------------------------------- | --------- | ------------------- | ---------------------------------------------------------------------------------------- |
+| `enabled`                                                       | `boolean` | `false`             | Opt in to loading and connecting the inspector.                                          |
+| `endpoint`                                                      | `string`  | `/api/jev-devtools` | Same-origin adapter path. Must match the server.                                         |
+| `defaultOpen`                                                   | `boolean` | `true`              | Initial expanded state; set false to start at the launcher.                              |
 | [`redactAdditionalSensitiveData`](@/api/reference/#jevdevtools) | `boolean` | `true`              | **0.5.0.** Mask supported personal fields in the display. Does not remove captured data. |
 
-[`JevDevtoolsProps`](@/api/reference/#type-jevdevtoolsprops) is exported from `jev-devtools` for component wrappers. Production disabling is a runtime opt-in policy, not a promise that every bundler removes inspector assets.
+Import [`JevDevtoolsProps`](@/api/reference/#type-jevdevtoolsprops) from `jev-devtools` when typing a wrapper component.
+
+`enabled` controls loading and connecting at runtime. Setting it to false in production does not guarantee that your bundler removes every inspector asset. Display masking also does not remove data from captures: use [server redaction](@/guides/privacy/#choose-what-leaves-the-server) for fields that must never reach the browser.
 
 ## Styles
 
@@ -32,7 +35,9 @@ Document-level transforms, clipping, and page JavaScript can still affect the ho
 
 ## Lifecycle
 
-Closing preserves selection, filters, and view state while incoming traces continue to update history. The panel first mounts on opening when `defaultOpen` is false. Disabling or unmounting disconnects the component; it does not stop independent server capture.
+When `defaultOpen` is false, the panel first mounts when opened. After that, closing it preserves selection, filters, and view state while incoming traces continue to update history.
+
+Disabling or unmounting the component closes its subscription. Server capture continues independently until the server adapter is disabled or disposed.
 
 ## Browser-safe types
 
@@ -42,4 +47,4 @@ Closing preserves selection, filters, and view state while incoming traces conti
 
 ## Fixture export
 
-The root entry also exports browser-safe [`flowFixture`](@/api/reference/#flowfixture), [`FlowFixture`](@/api/reference/#type-flowfixture), and [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture). See [building a fixture](@/api/flow/#build-a-fixture) for parameters, missing captures, and masking behavior. These exports are new in **0.5.0**.
+Since **0.5.0**, the root entry exports browser-safe [`flowFixture()`](@/api/reference/#flowfixture) and the types [`FlowFixture`](@/api/reference/#type-flowfixture) and [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture). Use these to export captured Jev responses from browser code. See [Build a fixture](@/api/flow/#build-a-fixture) for parameters, missing responses, and masking behavior.
