@@ -34,7 +34,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Changed
 
-- **Clearer landing copy.** Explain captured requests, sample flows, and application-defined decisions in plain language, and add a community-project and TypeSafe AI non-affiliation notice beneath the hero actions. Preserve the drawer and Flow API heading treatments, accent the second line of the System One primitives heading, and remove decorative card numbers. The landing page has not been deployed.
+- **Clearer landing copy.** Explain captured requests, sample flows, and application-defined decisions in plain language, and add a community-project and TypeSafe AI non-affiliation notice beneath the hero actions. Preserve the drawer and Flow API heading treatments, accent the second line of the System One primitives heading, and remove decorative card numbers. The landing page has not been deployed. ([#105](https://github.com/diegoag64/jev-devtools/pull/105))
 
 #### Fixed
 
