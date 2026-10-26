@@ -1,0 +1,16 @@
+{
+  "source": "https://docs.typesafe.ai/cookbooks/classification_using_confidence",
+  "reviewedOn": "2026-10-26",
+  "sourceSha256": "82c46b83463ab96ebd3e11065f19a402184d3e637dbba15462f697f08fb6ba94",
+  "upstreamRepository": "https://github.com/typesafe-ai/typesafe-public-examples",
+  "upstreamCommit": "25e9d373f4853b3e7e300e55a194f50e54838f68",
+  "taxonomy": {
+    "path": "cookbooks/classification_using_confidence/sic_codes.tsv",
+    "sha256": "1840a42970bdf2c06361f73bcfd8385cbf9e72156124347cb6b7a9dbc34379d3",
+    "upstreamOrigin": "SEC list fetched 2026-08-10 according to the official recipe",
+    "transformation": "Normalize CRLF to LF only; runtime lowercases titles, groups sorted codes by first two digits, uses umbrella and first eight non-umbrella industries.",
+    "upstreamSha256": "dabb9c53dce3b8d39e42e2cee8c99e36aa10919d1e4a38782825001fa96eadad"
+  },
+  "license": "MIT; verbatim upstream LICENSE retained as LICENSE.typesafe",
+  "adaptation": "Exact Choice question, jev-1.12 model identifier, 75 groups, 10 division ranges and API confidence >= 0.90. Authored company descriptions and independently specified synthetic confidence/probabilities replace filings and cached inference. No full SEC evaluation or accuracy claims. Original 91-99 public administration convention retained."
+}

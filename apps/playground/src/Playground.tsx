@@ -1,4 +1,9 @@
 import {
+  confidenceCases,
+  type ConfidenceCase,
+} from "../../../cookbooks/confidence-fallback/cases.js";
+import { ConfidenceCookbookResult } from "./ConfidenceCookbookResult.js";
+import {
   memoryCases,
   type MemoryCase,
 } from "../../../cookbooks/simple-memory/cases.js";
@@ -55,6 +60,9 @@ const sdeRequested =
   new URLSearchParams(location.search).get("cookbook") === "sde-cascade";
 const memoryRequested =
   new URLSearchParams(location.search).get("cookbook") === "simple-memory";
+const confidenceRequested =
+  new URLSearchParams(location.search).get("cookbook") ===
+  "confidence-fallback";
 const structureRequested =
   new URLSearchParams(location.search).get("cookbook") === "structure-recovery";
 const hierarchyRequested =
@@ -73,6 +81,7 @@ function App() {
   const activeRequest = useRef<AbortController | null>(null);
   useEffect(() => () => activeRequest.current?.abort(), []);
   const [memoryCase, setMemoryCase] = useState<MemoryCase>("timeline");
+  const [confidenceCase, setConfidenceCase] = useState<ConfidenceCase>("below");
   const [structureCase, setStructureCase] = useState<StructureCase>("memo");
   const [hierarchyCase, setHierarchyCase] = useState<HierarchyCase>("recovery");
   const [sdeCase, setSdeCase] = useState<SdeCase>("fabricated");
@@ -97,38 +106,42 @@ function App() {
     setFeedback("Ready to capture a request.");
   };
   const [scenario, setScenario] = useState(
-      memoryRequested
-        ? "flow-memory"
-        : structureRequested
-          ? "flow-structure"
-          : hierarchyRequested
-            ? "flow-hierarchy"
-            : sdeRequested
-              ? "flow-sde"
-              : ragRequested
-                ? "flow-rag"
-                : cookbookRequested
-                  ? "flow-skills"
-                  : sandbox
-                    ? "stress"
-                    : "triage",
+      confidenceRequested
+        ? "flow-confidence"
+        : memoryRequested
+          ? "flow-memory"
+          : structureRequested
+            ? "flow-structure"
+            : hierarchyRequested
+              ? "flow-hierarchy"
+              : sdeRequested
+                ? "flow-sde"
+                : ragRequested
+                  ? "flow-rag"
+                  : cookbookRequested
+                    ? "flow-skills"
+                    : sandbox
+                      ? "stress"
+                      : "triage",
     ),
     [mode, setMode] = useState("sample"),
     [live, setLive] = useState(false);
   const [message, setMessage] = useState(
-    memoryRequested
-      ? memoryCases.timeline.message
-      : structureRequested
-        ? structureCases.memo.message
-        : hierarchyRequested
-          ? hierarchyCases.recovery.message
-          : sdeRequested
-            ? sdeCases.fabricated.message
-            : ragRequested
-              ? ragCases.premise.message
-              : cookbookRequested
-                ? skillCases.deck.message
-                : "I was charged twice and checkout is blocked. I need a human to help me today.",
+    confidenceRequested
+      ? confidenceCases.below.message
+      : memoryRequested
+        ? memoryCases.timeline.message
+        : structureRequested
+          ? structureCases.memo.message
+          : hierarchyRequested
+            ? hierarchyCases.recovery.message
+            : sdeRequested
+              ? sdeCases.fabricated.message
+              : ragRequested
+                ? ragCases.premise.message
+                : cookbookRequested
+                  ? skillCases.deck.message
+                  : "I was charged twice and checkout is blocked. I need a human to help me today.",
   );
   const [runId, setRunId] = useState<string>(),
     [feedback, setFeedback] = useState("Ready to capture a request.");
@@ -163,6 +176,7 @@ function App() {
           sdeCase,
           hierarchyCase,
           structureCase,
+          confidenceCase,
           memoryCase,
         },
         {
@@ -228,6 +242,30 @@ function App() {
           </div>
         )}
 
+        {scenario === "flow-confidence" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · confidence fallback
+            </span>
+            <h1>Choose how specific to be.</h1>
+            <p>
+              Classify into one of 75 original SIC industry groups. Keep the
+              group at API confidence ≥0.90; otherwise look up its parent
+              division in code.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/classification_using_confidence"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official confidence cookbook ↗
+            </a>
+            <p className="sample-note">
+              Authored descriptions · synthetic answers · one request · no API
+              key.
+            </p>
+          </div>
+        )}
         {scenario === "flow-structure" && (
           <div className="cookbook-intro">
             <span className="cookbook-eyebrow">
@@ -356,6 +394,7 @@ function App() {
             "flow-sde",
             "flow-hierarchy",
             "flow-structure",
+            "flow-confidence",
             "flow-memory",
           ].includes(scenario) && (
             <p>
@@ -370,6 +409,7 @@ function App() {
             "flow-sde",
             "flow-hierarchy",
             "flow-structure",
+            "flow-confidence",
             "flow-memory",
           ].includes(scenario) && (
             <div role="status">
@@ -391,6 +431,8 @@ function App() {
                   resetOutcome();
                   if (e.target.value === "flow-memory")
                     setMessage(memoryCases[memoryCase].message);
+                  if (e.target.value === "flow-confidence")
+                    setMessage(confidenceCases[confidenceCase].message);
                   if (e.target.value === "flow-structure")
                     setMessage(structureCases[structureCase].message);
                   if (e.target.value === "flow-hierarchy")
@@ -415,6 +457,7 @@ function App() {
                   "flow-skills": "Cookbook · Skill suggestion (182 skills)",
                   "flow-hierarchy": "Cookbook · Hierarchical classification",
                   "flow-structure": "Cookbook · Structure recovery",
+                  "flow-confidence": "Cookbook · Confidence fallback",
                   "flow-memory": "Cookbook · Simple memory",
                   "flow-sde": "Cookbook · SDE cascade",
                   "flow-rag": "Cookbook · RAG passages (12 items)",
@@ -487,6 +530,28 @@ function App() {
                   }}
                 >
                   {Object.entries(memoryCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-confidence" && (
+              <div className="form-field">
+                <Label htmlFor="confidence-case">Confidence sample</Label>
+                <NativeSelect
+                  id="confidence-case"
+                  value={confidenceCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as ConfidenceCase;
+                    setConfidenceCase(next);
+                    setMessage(confidenceCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(confidenceCases).map(([key, value]) => (
                     <NativeSelectOption key={key} value={key}>
                       {value.label}
                     </NativeSelectOption>
@@ -734,6 +799,7 @@ function App() {
                     "flow-sde",
                     "flow-hierarchy",
                     "flow-structure",
+                    "flow-confidence",
                     "flow-memory",
                   ].includes(scenario) && mode === "sample"
                 }
@@ -784,25 +850,30 @@ function App() {
             <span role="status">{feedback}</span>
           </div>
           <p id="sample-note" className="sample-note">
-            {scenario === "flow-memory"
-              ? "Run a sample, then open Jev DevTools → Flows. Choose a ticket iteration and View Flow to inspect routing, the memory gate and the selected save path."
-              : scenario === "flow-structure"
-                ? "Run a sample, then open Jev DevTools → Flows. Inspect both batched requests, the line-merge decisions and the deterministic Markdown renderer."
-                : scenario === "flow-hierarchy"
-                  ? "Run a sample, then open Flows. Choose an iteration in either Loop card and View Flow; expand a frontier item to inspect its request. The limit case returns FlowLoopLimitError on purpose."
-                  : scenario === "flow-sde"
-                    ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
-                    : scenario === "flow-rag"
-                      ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
-                      : scenario === "flow-skills" && mode === "sample"
-                        ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
-                        : mode === "sample"
-                          ? "Fixed sample answers, including when you edit context. No external API calls."
-                          : "Live inference uses your server key and may incur API charges."}
+            {scenario === "flow-confidence"
+              ? "Run a sample, then open Jev DevTools → Flows. Inspect API confidence ≥0.90 and the actual parent-division task; largest class probability does not control routing."
+              : scenario === "flow-memory"
+                ? "Run a sample, then open Jev DevTools → Flows. Choose a ticket iteration and View Flow to inspect routing, the memory gate and the selected save path."
+                : scenario === "flow-structure"
+                  ? "Run a sample, then open Jev DevTools → Flows. Inspect both batched requests, the line-merge decisions and the deterministic Markdown renderer."
+                  : scenario === "flow-hierarchy"
+                    ? "Run a sample, then open Flows. Choose an iteration in either Loop card and View Flow; expand a frontier item to inspect its request. The limit case returns FlowLoopLimitError on purpose."
+                    : scenario === "flow-sde"
+                      ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
+                      : scenario === "flow-rag"
+                        ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
+                        : scenario === "flow-skills" && mode === "sample"
+                          ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
+                          : mode === "sample"
+                            ? "Fixed sample answers, including when you edit context. No external API calls."
+                            : "Live inference uses your server key and may incur API charges."}
           </p>
         </section>
         {scenario === "flow-memory" && flowResult && (
           <MemoryCookbookResult result={flowResult} />
+        )}
+        {scenario === "flow-confidence" && flowResult && (
+          <ConfidenceCookbookResult result={flowResult} />
         )}
         {scenario === "flow-structure" && flowResult && (
           <StructureCookbookResult result={flowResult} />

@@ -535,3 +535,7 @@ for (const { name, input, fixture } of savedCases) {
 Recording observer failures or mutations to run snapshots do not change comparison results. The comparison copies each resolved client response on capture, so an observer that retains a response cannot rewrite the captured answers or live fixture during later run updates.
 
 Save `comparison.liveFixture` to update the case. It is the fixture `flowFixture` builds from the live run, item steps included, with unredacted, untruncated responses, so review it before committing it.
+
+## Confidence fallback cookbook
+
+The [confidence fallback example](../cookbooks/confidence-fallback/README.md) uses a runtime Choice request with the original 75 SIC groups, `flow.if()` on API confidence ≥0.90, and a task that looks up the selected group’s actual parent division below the cutoff. It makes one request per description. Four no-key samples cover below, equal and above the threshold, plus a different parent division; their confidence and class probabilities are explicitly synthetic and independently specified.

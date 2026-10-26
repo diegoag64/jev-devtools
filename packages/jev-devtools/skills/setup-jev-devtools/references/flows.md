@@ -276,6 +276,8 @@ The drawer generates a Selected result merge, highlights only its selected incom
 
 The repository's `cookbooks/sde-cascade` provides a complete local example at `/?cookbook=sde-cascade`: cheap extraction → runtime field verification → **any per-field probability > 0.70** → stronger extractor or keep cheap → shared comparison. The overall judge is displayed but excluded from the gate. Empty fields receive only `absence_wrong`. All four cases use synthetic probabilities and local extractor fixtures; no real provider performance or original evaluation is reproduced. Do not turn on live extraction just by adding an API key.
 
+The repository’s `cookbooks/confidence-fallback` is a sample at `/?cookbook=confidence-fallback`. Preserve its 75 SIC groups, API `confidence >= 0.90` gate and parent-division lookup task. Largest class probability is a separate field, not a replacement for confidence or a Score. Verify below/equal/above boundary cases and one request on both routes; fixtures are synthetic and do not evaluate SEC filings.
+
 ## Bounded loops: `flow.loop()` (0.4.0)
 
 Use `flow.loop()` to carry JSON-compatible state across bounded iterations. Literal initial state, whole-state references and nested reference templates are supported. Whole-state references and scalar initial values preserve their `S` payload, including generic types. For literal/template state, the gate, iteration, body return and final result use `Resolved<S>`, preserving branded primitives: for `initial: { count: flow.input.get("count") }`, task callbacks receive numeric `state.count` and can return `{ count: state.count + 1 }`. Expression methods belong on builder references, not resolved task values. Syntax:
