@@ -8,14 +8,23 @@ import { createServer } from "vite";
 import { chromium } from "playwright";
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const lock = "/private/tmp/jev-cookbook-verification.lock";
-try {
-  await mkdir(lock);
-} catch (error) {
-  if (error.code === "EEXIST")
-    throw new Error(
-      `Verification lock occupied: ${await readFile(join(lock, "owner.json"), "utf8").catch(() => "owner initializing")}`,
+let reportedOwner = "";
+for (;;) {
+  try {
+    await mkdir(lock);
+    break;
+  } catch (error) {
+    if (error.code !== "EEXIST") throw error;
+    const owner = await readFile(join(lock, "owner.json"), "utf8").catch(
+      () => "owner initializing",
     );
-  throw error;
+    if (!process.argv.includes("--wait"))
+      throw new Error(`Verification lock occupied: ${owner}`);
+    if (owner !== reportedOwner)
+      console.log(`Waiting for verification lock: ${owner}`);
+    reportedOwner = owner;
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
 }
 let server, browser, context;
 const output = join(root, "benchmarks/results/pre-parsed-extraction/browser");
@@ -108,6 +117,28 @@ try {
   await whole
     .getByLabel("Flow step", { exact: true })
     .selectOption("separate-helper-calls");
+  // Nested flows preserve the shared camera. Pan with its public keyboard
+  // controls so the request is actually in the screenshot, not just in the DOM.
+  const centerRequest = async (request) => {
+    const canvas = page.getByRole("region", {
+      name: "Flow canvas",
+      exact: true,
+    });
+    await canvas.focus();
+    for (let attempt = 0; attempt < 100; attempt++) {
+      const view = await canvas.boundingBox();
+      const card = await request.boundingBox();
+      assert.ok(view && card);
+      const dx = card.x + card.width / 2 - view.x - view.width / 2;
+      const dy = card.y + card.height / 2 - view.y - view.height / 2;
+      if (Math.abs(dx) <= 60 && Math.abs(dy) <= 60) return;
+      if (Math.abs(dx) > 60)
+        await canvas.press(dx > 0 ? "Shift+ArrowRight" : "Shift+ArrowLeft");
+      if (Math.abs(dy) > 60)
+        await canvas.press(dy > 0 ? "Shift+ArrowDown" : "Shift+ArrowUp");
+    }
+    throw new Error("Could not pan to the nested request");
+  };
   const helpers = whole.getByRole("article", {
     name: "Collection Select values sequentially",
     exact: true,
@@ -129,6 +160,9 @@ try {
     })
     .first()
     .waitFor();
+  await centerRequest(
+    item.getByRole("article", { name: "Request select", exact: true }),
+  );
   await page.screenshot({
     path: join(output, "selection-flow.png"),
     fullPage: true,
@@ -150,6 +184,9 @@ try {
     )
     .first()
     .waitFor();
+  await centerRequest(
+    item.getByRole("article", { name: "Request is-credit", exact: true }),
+  );
   await page.screenshot({
     path: join(output, "credit-flow.png"),
     fullPage: true,
