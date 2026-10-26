@@ -95,7 +95,18 @@ try {
     .getByRole("button", { name: "Inspect request", exact: true })
     .click();
   await page.getByRole("button", { name: "Questions", exact: true }).click();
-  await page.getByText("severity", { exact: true }).first().waitFor();
+  await page
+    .getByRole("region", { name: "Questions and answers", exact: true })
+    .waitFor();
+  await page
+    .getByRole("combobox", { name: "Jump to question", exact: true })
+    .selectOption("4");
+  await page.getByRole("heading", { name: "severity", exact: true }).waitFor();
+  await page.getByText("Score legend", { exact: true }).click();
+  await page
+    .getByText(/Severe: complying causes serious physical harm/)
+    .last()
+    .waitFor();
   await page.screenshot({ path: `${evidence}/battery.png` });
   await page
     .getByRole("button", { name: "Close Jev DevTools", exact: true })
