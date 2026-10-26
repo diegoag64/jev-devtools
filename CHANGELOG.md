@@ -28,7 +28,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **Entity alignment cookbook.** Inspect attributed beer pairs with one Score, three companion Nouls and exact unlink/review/proposed-sameAs boundaries. Includes no-key synthetic examples and boundary cases; no database mutation or full evaluation.
+- **Entity alignment cookbook.** Inspect attributed beer pairs with one Score, three companion Nouls and exact unlink/review/proposed-sameAs boundaries. Includes no-key synthetic examples and boundary cases; no database mutation or full evaluation. ([#109](https://github.com/diegoag64/jev-devtools/pull/109))
 
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 

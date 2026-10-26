@@ -33,3 +33,5 @@ The diagram exposes the equivalent numeric comparisons. The evidence task comput
 ## Verification contract
 
 `apps/playground/tests/entity-alignment.test.ts` runs the actual flow through a real SDK client with a custom local fetch. It protects exact source prompts/levels, raw request state, reference-label exclusion, one-request execution order, task transformations, all three routes, both sides/equality of both thresholds, independence from companion probabilities/confidence, rejection before dispatch, fixture matching and cancellation. These are new cookbook contracts, not a repair to the Flow API.
+
+Run `node cookbooks/entity-alignment/verify-browser.mjs` after building the package for the ten-case playground/browser check. It takes the shared cookbook verification lock, starts and stops its own server, checks desktop/mobile and request inspection, and saves evidence under ignored `benchmarks/results/entity-alignment/`.
