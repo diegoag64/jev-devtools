@@ -71,11 +71,18 @@ try {
   await page.getByRole("button", { name: "Fit flow", exact: true }).click();
   await page
     .getByRole("article", { name: "Request score-candidate", exact: true })
+    .getByText("100%", { exact: true })
+    .first()
     .waitFor();
-  await page.screenshot({ path: `${output}/candidate-flow.png` });
+  await page.screenshot({
+    path: `${output}/candidate-flow.png`,
+    animations: "disabled",
+  });
   await picker.selectOption("29");
   await page
     .getByRole("article", { name: "Request score-candidate", exact: true })
+    .getByText("24%", { exact: true })
+    .first()
     .waitFor();
   await page
     .getByRole("article", {
