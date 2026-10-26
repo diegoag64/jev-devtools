@@ -274,7 +274,7 @@ export const extractionFlow = defineJevFlow<{
           },
         ),
     },
-    { title: "Does this document contain money?" },
+    { title: "Is this the money example?" },
   );
   const result = flow.task(
     "assemble-result",

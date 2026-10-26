@@ -28,7 +28,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **Pre-parsed extraction cookbook.** Explore document-order regex candidates, separate email/phone/money Choice helpers, amount-dependent credit routing and deterministic normalization with fixed synthetic samples. Includes missing-value routes and exact decimal strings; no live inference or public API changes.
+- **Pre-parsed extraction cookbook.** Explore document-order regex candidates, separate email/phone/money Choice helpers, amount-dependent credit routing and deterministic normalization with fixed synthetic samples. Includes missing-value routes and exact decimal strings; no live inference or public API changes. ([#111](https://github.com/diegoag64/jev-devtools/pull/111))
 
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
