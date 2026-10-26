@@ -39,6 +39,8 @@ Flow expression types now reject non-scalar equality and array method selection 
 
 #### Documentation
 
+- **README for new users.** Lead with request inspection and the no-key playground, link to complete framework setup guides, and introduce optional flows with one request and one branch. Preserve existing section links, compatibility requirements, security boundaries, and attribution.
+
 - **Shared porting skill.** Version `port-jev-to-flow` in the repository with semantic guidance, cookbook examples, and agent discovery links. The skill supports Jev-to-Flow ports and capability audits; npm contents and public APIs are unchanged. ([#124](https://github.com/diegoag64/jev-devtools/pull/124))
 
 ## 0.5.4 — Prepared release
