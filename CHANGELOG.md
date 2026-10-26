@@ -28,7 +28,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **Parallel Questions cookbook.** Compare five batched requests with 65 sequential single-question requests over a fixed synthetic sample, with all 13 original questions, inspectable loops and computed answer statistics. No live timing or cost savings are claimed.
+- **Parallel Questions cookbook.** Compare five batched requests with 65 sequential single-question requests over a fixed synthetic sample, with all 13 original questions, inspectable loops and computed answer statistics. No live timing or cost savings are claimed. ([#106](https://github.com/diegoag64/jev-devtools/pull/106))
 
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
