@@ -69,6 +69,8 @@ const result = await refundFlow.run(
 
 Mount the existing `<JevDevtools enabled={...} />` and serve the inspector endpoint as in the [integration guide](integration.md). In Next.js, define and run the flow in Node server code; keep the drawer in its existing client component. Do not import `/flow` into the browser.
 
+Try the [entity-alignment cookbook](../cookbooks/entity-alignment/README.md) for an executable one-request example: tasks load an attributed pair and prepare evidence, then `branch()` routes its Score at 0.5 and 1.5. Companion Nouls explain agreement without choosing the outcome. All responses are synthetic and sameAs remains a proposal.
+
 ## Operations and references
 
 - `jev(id, request)` queues one ordinary SDK `systemOne` call. Preserve SDK questions, model selection, assets, and multiple questions. `state` may contain nested expressions. SDK assets remain SDK assets; the flow does not invent another question format.

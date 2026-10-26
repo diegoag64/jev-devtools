@@ -1,4 +1,9 @@
 import {
+  entityCases,
+  type EntityCase,
+} from "../../../cookbooks/entity-alignment/cases.js";
+import { EntityCookbookResult } from "./EntityCookbookResult.js";
+import {
   memoryCases,
   type MemoryCase,
 } from "../../../cookbooks/simple-memory/cases.js";
@@ -55,6 +60,8 @@ const sdeRequested =
   new URLSearchParams(location.search).get("cookbook") === "sde-cascade";
 const memoryRequested =
   new URLSearchParams(location.search).get("cookbook") === "simple-memory";
+const entityRequested =
+  new URLSearchParams(location.search).get("cookbook") === "entity-alignment";
 const structureRequested =
   new URLSearchParams(location.search).get("cookbook") === "structure-recovery";
 const hierarchyRequested =
@@ -73,6 +80,7 @@ function App() {
   const activeRequest = useRef<AbortController | null>(null);
   useEffect(() => () => activeRequest.current?.abort(), []);
   const [memoryCase, setMemoryCase] = useState<MemoryCase>("timeline");
+  const [entityCase, setEntityCase] = useState<EntityCase>("same");
   const [structureCase, setStructureCase] = useState<StructureCase>("memo");
   const [hierarchyCase, setHierarchyCase] = useState<HierarchyCase>("recovery");
   const [sdeCase, setSdeCase] = useState<SdeCase>("fabricated");
@@ -109,9 +117,11 @@ function App() {
                 ? "flow-rag"
                 : cookbookRequested
                   ? "flow-skills"
-                  : sandbox
-                    ? "stress"
-                    : "triage",
+                  : entityRequested
+                    ? "flow-entity"
+                    : sandbox
+                      ? "stress"
+                      : "triage",
     ),
     [mode, setMode] = useState("sample"),
     [live, setLive] = useState(false);
@@ -128,7 +138,9 @@ function App() {
               ? ragCases.premise.message
               : cookbookRequested
                 ? skillCases.deck.message
-                : "I was charged twice and checkout is blocked. I need a human to help me today.",
+                : entityRequested
+                  ? entityCases.same.message
+                  : "I was charged twice and checkout is blocked. I need a human to help me today.",
   );
   const [runId, setRunId] = useState<string>(),
     [feedback, setFeedback] = useState("Ready to capture a request.");
@@ -163,6 +175,7 @@ function App() {
           sdeCase,
           hierarchyCase,
           structureCase,
+          entityCase,
           memoryCase,
         },
         {
@@ -228,6 +241,30 @@ function App() {
           </div>
         )}
 
+        {scenario === "flow-entity" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · entity alignment
+            </span>
+            <h1>Compare records. Inspect the match.</h1>
+            <p>
+              One Score chooses between different, related and identical
+              products. Three companion Nouls explain name, brewery and style
+              agreement.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/entity_alignment"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official Entity Alignment cookbook ↗
+            </a>
+            <p className="sample-note">
+              Attributed beer pairs · synthetic judgments · no API key or
+              database changes.
+            </p>
+          </div>
+        )}
         {scenario === "flow-structure" && (
           <div className="cookbook-intro">
             <span className="cookbook-eyebrow">
@@ -356,6 +393,7 @@ function App() {
             "flow-sde",
             "flow-hierarchy",
             "flow-structure",
+            "flow-entity",
             "flow-memory",
           ].includes(scenario) && (
             <p>
@@ -370,6 +408,7 @@ function App() {
             "flow-sde",
             "flow-hierarchy",
             "flow-structure",
+            "flow-entity",
             "flow-memory",
           ].includes(scenario) && (
             <div role="status">
@@ -391,6 +430,8 @@ function App() {
                   resetOutcome();
                   if (e.target.value === "flow-memory")
                     setMessage(memoryCases[memoryCase].message);
+                  if (e.target.value === "flow-entity")
+                    setMessage(entityCases[entityCase].message);
                   if (e.target.value === "flow-structure")
                     setMessage(structureCases[structureCase].message);
                   if (e.target.value === "flow-hierarchy")
@@ -415,6 +456,7 @@ function App() {
                   "flow-skills": "Cookbook · Skill suggestion (182 skills)",
                   "flow-hierarchy": "Cookbook · Hierarchical classification",
                   "flow-structure": "Cookbook · Structure recovery",
+                  "flow-entity": "Cookbook · Entity alignment",
                   "flow-memory": "Cookbook · Simple memory",
                   "flow-sde": "Cookbook · SDE cascade",
                   "flow-rag": "Cookbook · RAG passages (12 items)",
@@ -487,6 +529,28 @@ function App() {
                   }}
                 >
                   {Object.entries(memoryCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-entity" && (
+              <div className="form-field">
+                <Label htmlFor="entity-case">Entity sample</Label>
+                <NativeSelect
+                  id="entity-case"
+                  value={entityCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as EntityCase;
+                    setEntityCase(next);
+                    setMessage(entityCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(entityCases).map(([key, value]) => (
                     <NativeSelectOption key={key} value={key}>
                       {value.label}
                     </NativeSelectOption>
@@ -734,6 +798,7 @@ function App() {
                     "flow-sde",
                     "flow-hierarchy",
                     "flow-structure",
+                    "flow-entity",
                     "flow-memory",
                   ].includes(scenario) && mode === "sample"
                 }
@@ -784,25 +849,30 @@ function App() {
             <span role="status">{feedback}</span>
           </div>
           <p id="sample-note" className="sample-note">
-            {scenario === "flow-memory"
-              ? "Run a sample, then open Jev DevTools → Flows. Choose a ticket iteration and View Flow to inspect routing, the memory gate and the selected save path."
-              : scenario === "flow-structure"
-                ? "Run a sample, then open Jev DevTools → Flows. Inspect both batched requests, the line-merge decisions and the deterministic Markdown renderer."
-                : scenario === "flow-hierarchy"
-                  ? "Run a sample, then open Flows. Choose an iteration in either Loop card and View Flow; expand a frontier item to inspect its request. The limit case returns FlowLoopLimitError on purpose."
-                  : scenario === "flow-sde"
-                    ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
-                    : scenario === "flow-rag"
-                      ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
-                      : scenario === "flow-skills" && mode === "sample"
-                        ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
-                        : mode === "sample"
-                          ? "Fixed sample answers, including when you edit context. No external API calls."
-                          : "Live inference uses your server key and may incur API charges."}
+            {scenario === "flow-entity"
+              ? "Fixed attributed pairs and synthetic judgments. Run a sample, then inspect the Score boundaries in Jev DevTools → Flows."
+              : scenario === "flow-memory"
+                ? "Run a sample, then open Jev DevTools → Flows. Choose a ticket iteration and View Flow to inspect routing, the memory gate and the selected save path."
+                : scenario === "flow-structure"
+                  ? "Run a sample, then open Jev DevTools → Flows. Inspect both batched requests, the line-merge decisions and the deterministic Markdown renderer."
+                  : scenario === "flow-hierarchy"
+                    ? "Run a sample, then open Flows. Choose an iteration in either Loop card and View Flow; expand a frontier item to inspect its request. The limit case returns FlowLoopLimitError on purpose."
+                    : scenario === "flow-sde"
+                      ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
+                      : scenario === "flow-rag"
+                        ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
+                        : scenario === "flow-skills" && mode === "sample"
+                          ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
+                          : mode === "sample"
+                            ? "Fixed sample answers, including when you edit context. No external API calls."
+                            : "Live inference uses your server key and may incur API charges."}
           </p>
         </section>
         {scenario === "flow-memory" && flowResult && (
           <MemoryCookbookResult result={flowResult} />
+        )}
+        {scenario === "flow-entity" && flowResult && (
+          <EntityCookbookResult result={flowResult} />
         )}
         {scenario === "flow-structure" && flowResult && (
           <StructureCookbookResult result={flowResult} />
