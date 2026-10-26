@@ -28,6 +28,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
+- **Function calling cookbook.** Explore a proposed tool call from a batched request, with selected-argument branches, omitted defaults, set membership and source-faithful confidence arithmetic. Synthetic samples only; no tool execution.
+
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
 - **API reference previews.** Hover or focus a supported API link for its summary, then open the full reference or read its contract and examples in a side panel. Touch controls, keyboard navigation, copy buttons, and failed-load recovery keep reference reading available without losing the current page. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))

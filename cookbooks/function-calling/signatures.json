@@ -1,0 +1,153 @@
+{
+  "list_symbols": {},
+  "market_summary": {
+    "window": {
+      "shape": "choice",
+      "members": ["1d", "1w", "1mo", "3mo"],
+      "default": "1d"
+    }
+  },
+  "plot_price": {
+    "symbol": {
+      "shape": "choice",
+      "members": ["SPY", "NVDA", "AMD", "AAPL", "MSFT", "TSLA"]
+    },
+    "style": {
+      "shape": "choice",
+      "members": ["line", "candles"],
+      "default": "line"
+    },
+    "resolution": {
+      "shape": "choice",
+      "members": ["1m", "5m", "15m", "1h", "1d"],
+      "default": "15m"
+    },
+    "window": {
+      "shape": "choice",
+      "members": ["1d", "1w", "1mo", "3mo"],
+      "default": "1w"
+    },
+    "include_volume": {
+      "shape": "flag",
+      "default": false
+    },
+    "moving_average": {
+      "shape": "choice",
+      "members": ["9", "20", "50"],
+      "default": null
+    },
+    "log_scale": {
+      "shape": "flag",
+      "default": false
+    }
+  },
+  "intraday_pattern": {
+    "symbol": {
+      "shape": "choice",
+      "members": ["SPY", "NVDA", "AMD", "AAPL", "MSFT", "TSLA"]
+    },
+    "window": {
+      "shape": "choice",
+      "members": ["1d", "1w", "1mo", "3mo"],
+      "default": "1mo"
+    },
+    "metric": {
+      "shape": "choice",
+      "members": ["volume", "volatility", "return"],
+      "default": "volume"
+    }
+  },
+  "compare_returns": {
+    "symbols": {
+      "shape": "set",
+      "members": ["SPY", "NVDA", "AMD", "AAPL", "MSFT", "TSLA"]
+    },
+    "window": {
+      "shape": "choice",
+      "members": ["1d", "1w", "1mo", "3mo"],
+      "default": "1mo"
+    },
+    "normalize": {
+      "shape": "flag",
+      "default": true
+    }
+  },
+  "rolling_correlation": {
+    "symbol": {
+      "shape": "choice",
+      "members": ["SPY", "NVDA", "AMD", "AAPL", "MSFT", "TSLA"]
+    },
+    "benchmark": {
+      "shape": "choice",
+      "members": ["SPY", "NVDA", "AMD", "AAPL", "MSFT", "TSLA"],
+      "default": "SPY"
+    },
+    "window": {
+      "shape": "choice",
+      "members": ["1d", "1w", "1mo", "3mo"],
+      "default": "1mo"
+    },
+    "resolution": {
+      "shape": "choice",
+      "members": ["1m", "5m", "15m", "1h", "1d"],
+      "default": "1h"
+    }
+  },
+  "summary_stats": {
+    "symbol": {
+      "shape": "choice",
+      "members": ["SPY", "NVDA", "AMD", "AAPL", "MSFT", "TSLA"]
+    },
+    "window": {
+      "shape": "choice",
+      "members": ["1d", "1w", "1mo", "3mo"],
+      "default": "1mo"
+    }
+  },
+  "volatility": {
+    "symbol": {
+      "shape": "choice",
+      "members": ["SPY", "NVDA", "AMD", "AAPL", "MSFT", "TSLA"]
+    },
+    "window": {
+      "shape": "choice",
+      "members": ["1d", "1w", "1mo", "3mo"],
+      "default": "1mo"
+    },
+    "annualized": {
+      "shape": "flag",
+      "default": true
+    }
+  },
+  "top_movers": {
+    "window": {
+      "shape": "choice",
+      "members": ["1d", "1w", "1mo", "3mo"],
+      "default": "1d"
+    },
+    "direction": {
+      "shape": "choice",
+      "members": ["gainers", "losers"],
+      "default": "gainers"
+    },
+    "limit": {
+      "shape": "unquestioned",
+      "default": 3
+    }
+  },
+  "drawdown": {
+    "symbol": {
+      "shape": "choice",
+      "members": ["SPY", "NVDA", "AMD", "AAPL", "MSFT", "TSLA"]
+    },
+    "window": {
+      "shape": "choice",
+      "members": ["1d", "1w", "1mo", "3mo"],
+      "default": "3mo"
+    },
+    "plot": {
+      "shape": "flag",
+      "default": false
+    }
+  }
+}

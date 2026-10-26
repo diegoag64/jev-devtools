@@ -337,6 +337,8 @@ Item input/output and result snapshots follow the same capture limits and redact
 
 Try the [RAG passage cookbook](../cookbooks/rag-passages/README.md) for a twelve-item sample with four concurrent requests and every passage inspectable.
 
+The [Function calling cookbook](../cookbooks/function-calling/README.md) uses a collection to interpret only the selected tool’s arguments after one batched request. Each item uses `flow.if()` to omit an unstated argument or assemble its closed-set value. Its final `flow.output()` returns a proposed call; it does not invoke a tool.
+
 ## Returning conditionals: `flow.if()`
 
 Use `flow.if(id, { when, then, else }, display?)` when one path should produce a value and **both paths continue into shared work**. `flow.branch()` still ends its block with a named outcome. Returning conditionals and strict `.gt()` comparisons are included in **0.4.0**.
