@@ -15,7 +15,7 @@ Open http://127.0.0.1:4182/. Sample mode needs no API key. Run a scenario to see
 
 ## Cookbook examples
 
-The [cookbook guide](../../cookbooks/README.md) lists six runnable examples, their local URLs, and the flow patterns they demonstrate. They use the 0.4.0 flow API. The playground, cookbook code, and fixtures live in this repository and are not bundled in the npm package.
+The [cookbook guide](../../cookbooks/README.md) lists runnable examples, their local URLs, and the flow patterns they demonstrate. They use the 0.4.0 flow API. The playground, cookbook code, and fixtures live in this repository and are not bundled in the npm package.
 
 ## Manual edge-case sandbox
 
@@ -30,3 +30,5 @@ For optional live mode, copy `apps/playground/.env.example` to `apps/playground/
 ## Development
 
 The playground consumes built public package exports. Restart `npm run dev` after library edits, or run `npm run build:package` separately. The full verification commands and package checks are in [Contributing](../../CONTRIBUTING.md).
+
+The [pre-parsed extraction sample](http://127.0.0.1:4182/?cookbook=pre-parsed-extraction) preserves the official separate email, phone and money helper calls. It runs real regex and normalization tasks with synthetic selections; fixed inputs and sample-only mode are enforced on the server. See its [fidelity and locale limits](../../cookbooks/pre-parsed-extraction/README.md).

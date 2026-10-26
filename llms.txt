@@ -44,11 +44,13 @@ Use the installed `lib/flow/index.d.ts` as the version-matched API contract. Def
 
 The flow API includes `task()`, runtime `jev()` request factories, `.answers`, `map()`, `if()`, strict `.gt()` comparisons, and `loop()`. Loops check a state expression before each iteration and reject incomplete iteration-limit exhaustion with `FlowLoopLimitError`. A loop can contain a map; all expanded work shares one run-wide budget. There are no nested loops, loops inside maps, nested maps, durable jobs, or automatic task retries. Use installed declarations and bundled references for the exact version; check the changelog for publication status.
 
-- [Cookbook collection](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/README.md): Six runnable repository apps using APIs available since 0.4.0. Code and synthetic fixtures are not shipped in npm.
+- [Cookbook collection](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/README.md): Runnable repository apps using APIs available since 0.4.0. Code and synthetic fixtures are not shipped in npm.
 - [SDE cascade](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/sde-cascade/README.md): Sample-only returning conditional, strict escalation gate and shared continuation.
 - [Hierarchical classification](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/hierarchical-classification/README.md): Bounded iteration, frontier collections, beam versus greedy search and iteration-limit failure.
 - [Structure Recovery](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/structure-recovery/README.md): Tasks, dynamic requests and returning conditionals; four sample-only cases.
 - [Simple Memory](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/simple-memory/README.md): Tasks, dynamic requests, conditionals and loops; four sample-only timelines with customer-scoped run-local memory and an inclusive 50% save gate. No persistent storage.
+
+- [Pre-parsed value extraction](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/pre-parsed-extraction/README.md): Sample-only regex candidates, ordered helper requests, none bypasses and decimal-safe normalization.
 
 ## Replay and comparison (0.5.0)
 

@@ -1,4 +1,9 @@
 import {
+  extractionCases,
+  type ExtractionCase,
+} from "../../../cookbooks/pre-parsed-extraction/cases.js";
+import { ExtractionCookbookResult } from "./ExtractionCookbookResult.js";
+import {
   memoryCases,
   type MemoryCase,
 } from "../../../cookbooks/simple-memory/cases.js";
@@ -53,6 +58,9 @@ const ragRequested =
   new URLSearchParams(location.search).get("cookbook") === "rag-passages";
 const sdeRequested =
   new URLSearchParams(location.search).get("cookbook") === "sde-cascade";
+const extractionRequested =
+  new URLSearchParams(location.search).get("cookbook") ===
+  "pre-parsed-extraction";
 const memoryRequested =
   new URLSearchParams(location.search).get("cookbook") === "simple-memory";
 const structureRequested =
@@ -72,6 +80,7 @@ const post = (
 function App() {
   const activeRequest = useRef<AbortController | null>(null);
   useEffect(() => () => activeRequest.current?.abort(), []);
+  const [extractionCase, setExtractionCase] = useState<ExtractionCase>("email");
   const [memoryCase, setMemoryCase] = useState<MemoryCase>("timeline");
   const [structureCase, setStructureCase] = useState<StructureCase>("memo");
   const [hierarchyCase, setHierarchyCase] = useState<HierarchyCase>("recovery");
@@ -109,9 +118,11 @@ function App() {
                 ? "flow-rag"
                 : cookbookRequested
                   ? "flow-skills"
-                  : sandbox
-                    ? "stress"
-                    : "triage",
+                  : extractionRequested
+                    ? "flow-extraction"
+                    : sandbox
+                      ? "stress"
+                      : "triage",
     ),
     [mode, setMode] = useState("sample"),
     [live, setLive] = useState(false);
@@ -128,7 +139,9 @@ function App() {
               ? ragCases.premise.message
               : cookbookRequested
                 ? skillCases.deck.message
-                : "I was charged twice and checkout is blocked. I need a human to help me today.",
+                : extractionRequested
+                  ? extractionCases.email.message
+                  : "I was charged twice and checkout is blocked. I need a human to help me today.",
   );
   const [runId, setRunId] = useState<string>(),
     [feedback, setFeedback] = useState("Ready to capture a request.");
@@ -164,6 +177,7 @@ function App() {
           hierarchyCase,
           structureCase,
           memoryCase,
+          extractionCase,
         },
         {
           signal: controller.signal,
@@ -203,6 +217,30 @@ function App() {
   return (
     <>
       <main className="playground dark">
+        {scenario === "flow-extraction" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · Pre-parsed value extraction
+            </span>
+            <h1>Find the spans. Select the value.</h1>
+            <p>
+              Use regex candidates, separate Choice calls and deterministic code
+              to extract email addresses, phone numbers and invoice amounts.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/pre_parsed_value_extraction_cookbook"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official recipe ↗
+            </a>
+            <p className="sample-note">
+              Fixed documents and synthetic answers. No API key or live
+              inference. Original helper order and strict credit threshold are
+              preserved.
+            </p>
+          </div>
+        )}
         {scenario === "flow-memory" && (
           <div className="cookbook-intro">
             <span className="cookbook-eyebrow">
@@ -357,6 +395,7 @@ function App() {
             "flow-hierarchy",
             "flow-structure",
             "flow-memory",
+            "flow-extraction",
           ].includes(scenario) && (
             <p>
               Sample-only flow. Run a sample, open Jev DevTools, and choose
@@ -371,6 +410,7 @@ function App() {
             "flow-hierarchy",
             "flow-structure",
             "flow-memory",
+            "flow-extraction",
           ].includes(scenario) && (
             <div role="status">
               <strong>Outcome: {flowResult.outcome}</strong>
@@ -389,6 +429,8 @@ function App() {
                 onChange={(e) => {
                   setScenario(e.target.value);
                   resetOutcome();
+                  if (e.target.value === "flow-extraction")
+                    setMessage(extractionCases[extractionCase].message);
                   if (e.target.value === "flow-memory")
                     setMessage(memoryCases[memoryCase].message);
                   if (e.target.value === "flow-structure")
@@ -415,6 +457,7 @@ function App() {
                   "flow-skills": "Cookbook · Skill suggestion (182 skills)",
                   "flow-hierarchy": "Cookbook · Hierarchical classification",
                   "flow-structure": "Cookbook · Structure recovery",
+                  "flow-extraction": "Cookbook · Pre-parsed value extraction",
                   "flow-memory": "Cookbook · Simple memory",
                   "flow-sde": "Cookbook · SDE cascade",
                   "flow-rag": "Cookbook · RAG passages (12 items)",
@@ -487,6 +530,28 @@ function App() {
                   }}
                 >
                   {Object.entries(memoryCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-extraction" && (
+              <div className="form-field">
+                <Label htmlFor="extraction-case">Extraction sample</Label>
+                <NativeSelect
+                  id="extraction-case"
+                  value={extractionCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as ExtractionCase;
+                    setExtractionCase(next);
+                    setMessage(extractionCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(extractionCases).map(([key, value]) => (
                     <NativeSelectOption key={key} value={key}>
                       {value.label}
                     </NativeSelectOption>
@@ -735,6 +800,7 @@ function App() {
                     "flow-hierarchy",
                     "flow-structure",
                     "flow-memory",
+                    "flow-extraction",
                   ].includes(scenario) && mode === "sample"
                 }
                 id="context"
@@ -784,23 +850,28 @@ function App() {
             <span role="status">{feedback}</span>
           </div>
           <p id="sample-note" className="sample-note">
-            {scenario === "flow-memory"
-              ? "Run a sample, then open Jev DevTools → Flows. Choose a ticket iteration and View Flow to inspect routing, the memory gate and the selected save path."
-              : scenario === "flow-structure"
-                ? "Run a sample, then open Jev DevTools → Flows. Inspect both batched requests, the line-merge decisions and the deterministic Markdown renderer."
-                : scenario === "flow-hierarchy"
-                  ? "Run a sample, then open Flows. Choose an iteration in either Loop card and View Flow; expand a frontier item to inspect its request. The limit case returns FlowLoopLimitError on purpose."
-                  : scenario === "flow-sde"
-                    ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
-                    : scenario === "flow-rag"
-                      ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
-                      : scenario === "flow-skills" && mode === "sample"
-                        ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
-                        : mode === "sample"
-                          ? "Fixed sample answers, including when you edit context. No external API calls."
-                          : "Live inference uses your server key and may incur API charges."}
+            {scenario === "flow-extraction"
+              ? "Fixed synthetic sample. Open Flows to inspect sequential helper calls, missing-value bypasses and deterministic normalization."
+              : scenario === "flow-memory"
+                ? "Run a sample, then open Jev DevTools → Flows. Choose a ticket iteration and View Flow to inspect routing, the memory gate and the selected save path."
+                : scenario === "flow-structure"
+                  ? "Run a sample, then open Jev DevTools → Flows. Inspect both batched requests, the line-merge decisions and the deterministic Markdown renderer."
+                  : scenario === "flow-hierarchy"
+                    ? "Run a sample, then open Flows. Choose an iteration in either Loop card and View Flow; expand a frontier item to inspect its request. The limit case returns FlowLoopLimitError on purpose."
+                    : scenario === "flow-sde"
+                      ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
+                      : scenario === "flow-rag"
+                        ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
+                        : scenario === "flow-skills" && mode === "sample"
+                          ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
+                          : mode === "sample"
+                            ? "Fixed sample answers, including when you edit context. No external API calls."
+                            : "Live inference uses your server key and may incur API charges."}
           </p>
         </section>
+        {scenario === "flow-extraction" && flowResult && (
+          <ExtractionCookbookResult result={flowResult} />
+        )}
         {scenario === "flow-memory" && flowResult && (
           <MemoryCookbookResult result={flowResult} />
         )}
