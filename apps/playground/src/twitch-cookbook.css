@@ -1,0 +1,52 @@
+.twitch-policy {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+.twitch-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
+.twitch-feed {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+.twitch-message {
+  border: 1px solid #cbd5e1;
+  border-left: 4px solid #64748b;
+  border-radius: 0.5rem;
+  padding: 0.8rem 1rem;
+  overflow-wrap: anywhere;
+}
+.twitch-message p {
+  margin: 0.45rem 0;
+}
+.twitch-action {
+  font-size: 0.8rem;
+  font-weight: 650;
+  text-transform: uppercase;
+}
+.twitch-highlight {
+  border-left-color: #2563eb;
+  background: #eff6ff;
+}
+/* Dim only the preview, preserving readable inspector controls and answers. */
+.twitch-dim > p {
+  color: #64748b;
+}
+.twitch-hide {
+  border-left-color: #b91c1c;
+}
+.twitch-blur {
+  border-left-color: #a16207;
+}
+.twitch-message summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+}

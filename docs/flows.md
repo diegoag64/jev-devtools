@@ -337,6 +337,8 @@ Item input/output and result snapshots follow the same capture limits and redact
 
 Try the [RAG passage cookbook](../cookbooks/rag-passages/README.md) for a twelve-item sample with four concurrent requests and every passage inspectable.
 
+The [Twitch chat filter cookbook](../cookbooks/twitch-chat-filter/README.md) maps the original finite 29-message feed with concurrency eight, preserving input order. Each item asks one Choice and two Nouls together, then uses returning conditionals for toxic ≥ 0.70 → hide, category hide → hide, spoiler ≥ 0.70 → blur, or the remaining category action. A function reapplies the quiet policy to the same answers with no new requests; fixtures are synthetic.
+
 ## Returning conditionals: `flow.if()`
 
 Use `flow.if(id, { when, then, else }, display?)` when one path should produce a value and **both paths continue into shared work**. `flow.branch()` still ends its block with a named outcome. Returning conditionals and strict `.gt()` comparisons are included in **0.4.0**.

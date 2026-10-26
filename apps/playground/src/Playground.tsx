@@ -1,4 +1,9 @@
 import {
+  twitchCases,
+  type TwitchCase,
+} from "../../../cookbooks/twitch-chat-filter/cases.js";
+import { TwitchCookbookResult } from "./TwitchCookbookResult.js";
+import {
   memoryCases,
   type MemoryCase,
 } from "../../../cookbooks/simple-memory/cases.js";
@@ -57,6 +62,8 @@ const memoryRequested =
   new URLSearchParams(location.search).get("cookbook") === "simple-memory";
 const structureRequested =
   new URLSearchParams(location.search).get("cookbook") === "structure-recovery";
+const twitchRequested =
+  new URLSearchParams(location.search).get("cookbook") === "twitch-chat-filter";
 const hierarchyRequested =
   new URLSearchParams(location.search).get("cookbook") ===
   "hierarchical-classification";
@@ -72,6 +79,7 @@ const post = (
 function App() {
   const activeRequest = useRef<AbortController | null>(null);
   useEffect(() => () => activeRequest.current?.abort(), []);
+  const [twitchCase, setTwitchCase] = useState<TwitchCase>("original");
   const [memoryCase, setMemoryCase] = useState<MemoryCase>("timeline");
   const [structureCase, setStructureCase] = useState<StructureCase>("memo");
   const [hierarchyCase, setHierarchyCase] = useState<HierarchyCase>("recovery");
@@ -97,38 +105,42 @@ function App() {
     setFeedback("Ready to capture a request.");
   };
   const [scenario, setScenario] = useState(
-      memoryRequested
-        ? "flow-memory"
-        : structureRequested
-          ? "flow-structure"
-          : hierarchyRequested
-            ? "flow-hierarchy"
-            : sdeRequested
-              ? "flow-sde"
-              : ragRequested
-                ? "flow-rag"
-                : cookbookRequested
-                  ? "flow-skills"
-                  : sandbox
-                    ? "stress"
-                    : "triage",
+      twitchRequested
+        ? "flow-twitch"
+        : memoryRequested
+          ? "flow-memory"
+          : structureRequested
+            ? "flow-structure"
+            : hierarchyRequested
+              ? "flow-hierarchy"
+              : sdeRequested
+                ? "flow-sde"
+                : ragRequested
+                  ? "flow-rag"
+                  : cookbookRequested
+                    ? "flow-skills"
+                    : sandbox
+                      ? "stress"
+                      : "triage",
     ),
     [mode, setMode] = useState("sample"),
     [live, setLive] = useState(false);
   const [message, setMessage] = useState(
-    memoryRequested
-      ? memoryCases.timeline.message
-      : structureRequested
-        ? structureCases.memo.message
-        : hierarchyRequested
-          ? hierarchyCases.recovery.message
-          : sdeRequested
-            ? sdeCases.fabricated.message
-            : ragRequested
-              ? ragCases.premise.message
-              : cookbookRequested
-                ? skillCases.deck.message
-                : "I was charged twice and checkout is blocked. I need a human to help me today.",
+    twitchRequested
+      ? twitchCases.original.message
+      : memoryRequested
+        ? memoryCases.timeline.message
+        : structureRequested
+          ? structureCases.memo.message
+          : hierarchyRequested
+            ? hierarchyCases.recovery.message
+            : sdeRequested
+              ? sdeCases.fabricated.message
+              : ragRequested
+                ? ragCases.premise.message
+                : cookbookRequested
+                  ? skillCases.deck.message
+                  : "I was charged twice and checkout is blocked. I need a human to help me today.",
   );
   const [runId, setRunId] = useState<string>(),
     [feedback, setFeedback] = useState("Ready to capture a request.");
@@ -162,6 +174,7 @@ function App() {
           ragCase,
           sdeCase,
           hierarchyCase,
+          twitchCase,
           structureCase,
           memoryCase,
         },
@@ -248,6 +261,30 @@ function App() {
             <p className="sample-note">
               Authored short documents · synthetic Jev answers · no API key or
               text-generation calls.
+            </p>
+          </div>
+        )}
+        {scenario === "flow-twitch" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · Twitch chat filter
+            </span>
+            <h2>One feed, five visible actions</h2>
+            <p>
+              Replay the original 29 messages with synthetic answers. Eight
+              concurrent requests each ask category, toxic and spoiler together.
+              Compare normal and quiet policies using the same answers.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/twitch_chat_filter"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official Twitch chat filter cookbook ↗
+            </a>
+            <p className="sample-note">
+              Finite sample only. No Twitch connection, live inference, or
+              measured moderation quality.
             </p>
           </div>
         )}
@@ -355,6 +392,7 @@ function App() {
             "flow-rag",
             "flow-sde",
             "flow-hierarchy",
+            "flow-twitch",
             "flow-structure",
             "flow-memory",
           ].includes(scenario) && (
@@ -369,6 +407,7 @@ function App() {
             "flow-rag",
             "flow-sde",
             "flow-hierarchy",
+            "flow-twitch",
             "flow-structure",
             "flow-memory",
           ].includes(scenario) && (
@@ -393,6 +432,8 @@ function App() {
                     setMessage(memoryCases[memoryCase].message);
                   if (e.target.value === "flow-structure")
                     setMessage(structureCases[structureCase].message);
+                  if (e.target.value === "flow-twitch")
+                    setMessage(twitchCases[twitchCase].message);
                   if (e.target.value === "flow-hierarchy")
                     setMessage(hierarchyCases[hierarchyCase].message);
                   if (e.target.value === "flow-sde")
@@ -414,6 +455,7 @@ function App() {
                     "Flow · Functions + dynamic questions (synthetic)",
                   "flow-skills": "Cookbook · Skill suggestion (182 skills)",
                   "flow-hierarchy": "Cookbook · Hierarchical classification",
+                  "flow-twitch": "Cookbook · Twitch chat filter",
                   "flow-structure": "Cookbook · Structure recovery",
                   "flow-memory": "Cookbook · Simple memory",
                   "flow-sde": "Cookbook · SDE cascade",
@@ -509,6 +551,28 @@ function App() {
                   }}
                 >
                   {Object.entries(structureCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-twitch" && (
+              <div className="form-field">
+                <Label htmlFor="twitch-case">Twitch sample</Label>
+                <NativeSelect
+                  id="twitch-case"
+                  value={twitchCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as TwitchCase;
+                    setTwitchCase(next);
+                    setMessage(twitchCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(twitchCases).map(([key, value]) => (
                     <NativeSelectOption key={key} value={key}>
                       {value.label}
                     </NativeSelectOption>
@@ -733,6 +797,7 @@ function App() {
                     "flow-rag",
                     "flow-sde",
                     "flow-hierarchy",
+                    "flow-twitch",
                     "flow-structure",
                     "flow-memory",
                   ].includes(scenario) && mode === "sample"
@@ -784,23 +849,28 @@ function App() {
             <span role="status">{feedback}</span>
           </div>
           <p id="sample-note" className="sample-note">
-            {scenario === "flow-memory"
-              ? "Run a sample, then open Jev DevTools → Flows. Choose a ticket iteration and View Flow to inspect routing, the memory gate and the selected save path."
-              : scenario === "flow-structure"
-                ? "Run a sample, then open Jev DevTools → Flows. Inspect both batched requests, the line-merge decisions and the deterministic Markdown renderer."
-                : scenario === "flow-hierarchy"
-                  ? "Run a sample, then open Flows. Choose an iteration in either Loop card and View Flow; expand a frontier item to inspect its request. The limit case returns FlowLoopLimitError on purpose."
-                  : scenario === "flow-sde"
-                    ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
-                    : scenario === "flow-rag"
-                      ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
-                      : scenario === "flow-skills" && mode === "sample"
-                        ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
-                        : mode === "sample"
-                          ? "Fixed sample answers, including when you edit context. No external API calls."
-                          : "Live inference uses your server key and may incur API charges."}
+            {scenario === "flow-twitch"
+              ? "Open Jev DevTools → Flows, choose a message in the collection and View Flow to inspect the three-question request and ordered policy conditions."
+              : scenario === "flow-memory"
+                ? "Run a sample, then open Jev DevTools → Flows. Choose a ticket iteration and View Flow to inspect routing, the memory gate and the selected save path."
+                : scenario === "flow-structure"
+                  ? "Run a sample, then open Jev DevTools → Flows. Inspect both batched requests, the line-merge decisions and the deterministic Markdown renderer."
+                  : scenario === "flow-hierarchy"
+                    ? "Run a sample, then open Flows. Choose an iteration in either Loop card and View Flow; expand a frontier item to inspect its request. The limit case returns FlowLoopLimitError on purpose."
+                    : scenario === "flow-sde"
+                      ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
+                      : scenario === "flow-rag"
+                        ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
+                        : scenario === "flow-skills" && mode === "sample"
+                          ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
+                          : mode === "sample"
+                            ? "Fixed sample answers, including when you edit context. No external API calls."
+                            : "Live inference uses your server key and may incur API charges."}
           </p>
         </section>
+        {scenario === "flow-twitch" && flowResult && (
+          <TwitchCookbookResult key={outcome.id} result={flowResult} />
+        )}
         {scenario === "flow-memory" && flowResult && (
           <MemoryCookbookResult result={flowResult} />
         )}
