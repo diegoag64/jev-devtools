@@ -8,7 +8,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | Rewritten docs; clearer landing copy and community branding.                                               |
+| [Unreleased](#unreleased)                   | Not published                                                                      | No changes recorded.                                                                                       |
+| [0.5.4](#054--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.4) | Thirteen Flow cookbooks; routine browser verification; rewritten docs.                                     |
 | [0.5.3](#053--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) | Shared flow encoding; simpler releases and publication helpers; flow regression coverage.                  |
 | [0.5.2](#052--october-25-2026-experimental) | 2026-10-25                                                                         | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
 | [0.5.1](#051--october-25-2026-experimental) | 2026-10-25                                                                         | Task input validation and expression types; setup guidance; release and website maintenance.               |
@@ -23,6 +24,18 @@ Dates below use UTC and were checked against npm's publication history. The hist
 | [0.1.0](#010--october-23-2026-experimental) | 2026-10-23                                                                         | React inspector; Node capture; Next.js integration.                                                        |
 
 ## Unreleased
+
+No changes recorded.
+
+## 0.5.4 — Prepared release
+
+[See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.4)
+
+### Compatibility and upgrade
+
+- **Supported environments are unchanged.** Node 22.12+, React/React DOM 18 or 19, ESM, TypeScript 5.4+, and TypeSafe SDK 0.7.x remain supported. No migration is required from 0.5.3; public APIs, package exports, and the version-1 capture format are unchanged.
+- **Cookbooks use the existing Flow API.** The playground now includes nineteen cookbooks: thirteen new ports and six existing examples. The new ports use synthetic samples and require no API key. Autoresearch remains excluded. No live inference, measured model accuracy, or provider performance is claimed.
+- **Verification improvements are separate from the ports.** Full verification now runs the existing cookbook browser checks and validates evidence against the current source. These development tools do not change installed package behavior.
 
 ### Changes
 
@@ -48,9 +61,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Changed
 
-- **Routine cookbook browser verification and current evidence.** Run the existing recipe and collection browser checks in full verification and React 18/19 CI, with matching playground/root React versions and color-independent server readiness. Preserve each run’s source identity and evidence separately, and validate current source/reviewed HEAD before handoff. ([#119](https://github.com/diegoag64/jev-devtools/pull/119))
-
-- **Clearer landing copy.** Explain captured requests, sample flows, and application-defined decisions in plain language, and add a community-project and TypeSafe AI non-affiliation notice beneath the hero actions. Preserve the drawer and Flow API heading treatments, accent the second line of the System One primitives heading, and remove decorative card numbers. The landing page has not been deployed. ([#105](https://github.com/diegoag64/jev-devtools/pull/105))
+- **Clearer landing copy.** Explain captured requests, sample flows, and application-defined decisions in plain language, and add a community-project and TypeSafe AI non-affiliation notice beneath the hero actions. Preserve the drawer and Flow API heading treatments, accent the second line of the System One primitives heading, and remove decorative card numbers. ([#105](https://github.com/diegoag64/jev-devtools/pull/105))
 
 #### Fixed
 
@@ -75,6 +86,10 @@ Dates below use UTC and were checked against npm's publication history. The hist
 - **Guided first runs.** Rewrite Quick start around a Vite and Express setup and Flows from scratch around a no-network greeting. Add expected results and keep full method contracts and examples in the API reference, preserving existing section links. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
 - **Readable API contracts.** Fix the server options table and replace stale unreleased labels in type descriptions, hover help, and the replay example with their 0.5.0 availability. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
+
+#### Maintenance
+
+- **Routine cookbook browser verification and current evidence.** Run the existing recipe and collection browser checks in full verification and React 18/19 CI, with matching playground/root React versions and color-independent server readiness. Preserve each run’s source identity and evidence separately, and validate current source/reviewed HEAD before handoff. ([#119](https://github.com/diegoag64/jev-devtools/pull/119))
 
 ## 0.5.3 — Prepared release
 
