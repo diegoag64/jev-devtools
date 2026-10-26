@@ -54,7 +54,7 @@ npm run dev
 
 Open [http://127.0.0.1:4182](http://127.0.0.1:4182/), choose a cookbook and sample, then click **Run sample**. Open **Jev DevTools → Flows** and select the latest run. Compare the application's result with the executed steps, linked requests, and routing decisions. The [cookbook index](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/README.md#choose-an-example) has direct local links to each example.
 
-All six have samples that need no API key. Their synthetic responses demonstrate execution and inspection, not model accuracy. Editing an input does not turn a fixed response into live inference. Some examples reject inputs that do not match their fixtures. Live support varies by example, so read its README before configuring a key.
+These cookbooks have samples that need no API key. Their synthetic responses demonstrate execution and inspection, not model accuracy. Editing an input does not turn a fixed response into live inference. Some examples reject inputs that do not match their fixtures. Live support varies by example, so read its README before configuring a key.
 
 ## Learn one method at a time
 
