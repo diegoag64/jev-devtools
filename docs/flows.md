@@ -171,6 +171,8 @@ const evaluation = flow.task(
 
 From the repository root run `npm run dev`, open `http://127.0.0.1:4182/`, and select **Flow · Functions + dynamic questions (synthetic)**. Run the sample, open **Jev DevTools → Flows**, and select **Keep the top three skills**. Inspect its output, then the next request's three Choice criteria. Both model responses are synthetic fixtures; no API key or remote call is required. This demonstrates the API, not a faithful port of the official cookbook.
 
+For a complete one-request adaptation, try the [line-search cookbook](../cookbooks/line-search/README.md): tagging → runtime Choice + Noul request → ranking/lookup → existence branches. It uses the complete pinned document and synthetic responses; the result UI retains every line beyond bounded capture previews.
+
 ## Capture completeness
 
 Captured outcome values and condition rules retain optional warnings beside their data: `FlowRun.captureWarnings` describes `value`, and `FlowNode.conditionCaptureWarnings` describes `conditionRule`. Step data continues to use `FlowStep.captureWarnings`. These fields also apply inside maps and loops. The drawer shows rule warnings on cards and in selected-step details, and outcome warnings in **Captured outcome value**. Redaction and capture failures never substitute shortened values into execution.
