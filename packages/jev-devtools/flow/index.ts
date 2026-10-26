@@ -76,6 +76,12 @@ function freezeAst(ast: Ast, depth = 0): AstBudget {
   return budget;
 }
 declare const valueTypeBrand: unique symbol;
+type Scalar = string | number | boolean | null;
+// Distribute over unions before taking common keys, so an object member cannot
+// make an inherited array method selectable. Preserve tuple string indices.
+type ExpressionFields<T> = T extends readonly unknown[]
+  ? Pick<T, number | "length" | Extract<keyof T, `${number}`>>
+  : T;
 /** Inspectable expression, not an application callback. Use get() for input fields. */
 export class FlowExpression<T> {
   // Not private: declaration emit drops private member types.
@@ -88,14 +94,18 @@ export class FlowExpression<T> {
     freezeAst(ast);
     Object.freeze(this);
   }
-  /** Select an own field from an object or array; primitive properties are unsupported. */
-  get<K extends keyof T & (string | number)>(
+  /** Select an own object field, array index, or array length. Missing values fail at runtime. */
+  get<K extends keyof T & keyof ExpressionFields<T> & (string | number)>(
     this: FlowExpression<object>,
     key: K,
   ): FlowExpression<T[K]> {
     return expression({ op: "get", from: this.ast, key: String(key) }, [this]);
   }
-  eq(value: T | FlowExpression<T>): FlowExpression<boolean> {
+  /** Compare matching scalar values; numbers must be finite at runtime. */
+  eq(
+    this: FlowExpression<Scalar>,
+    value: T | FlowExpression<T>,
+  ): FlowExpression<boolean> {
     return operation("eq", [this, value]);
   }
   lt(
@@ -162,8 +172,8 @@ type Request<Q extends Questions> = Omit<SystemOneRequest<Q>, "state"> & {
 export type Resolved<T> =
   T extends FlowExpression<infer V>
     ? V
-    // Branded primitives can extend object but remain scalar runtime values.
-    : T extends string | number | boolean | null | undefined
+    : // Branded primitives can extend object but remain scalar runtime values.
+      T extends string | number | boolean | null | undefined
       ? T
       : T extends readonly unknown[]
         ? { [K in keyof T]: Resolved<T[K]> }
@@ -386,7 +396,7 @@ function conditionRule(
           ? path.length === 3 && ["noul", "choice", "score"].includes(path[2])
             ? path[1]
             : path.slice(1).join(" ")
-          : path.at(-1) ?? "Input",
+          : (path.at(-1) ?? "Input"),
         ...(base.op === "ref" && requests.has(base.id)
           ? { stepId: base.id, path }
           : base.op === "ref" && tasks.has(base.id)
@@ -500,7 +510,8 @@ export interface FlowBuilder<T> {
       // Object wrappers still fail the runtime JSON validation.
       items:
         | FlowExpression<readonly I[]>
-        | (readonly I[] & readonly (string | number | { valueOf(): boolean } | null)[]);
+        | (readonly I[] &
+            readonly (string | number | { valueOf(): boolean } | null)[]);
       input: C;
       concurrency?: number;
       maxItems: number;
@@ -540,7 +551,14 @@ export interface FlowBuilder<T> {
       input: C;
       while: (state: FlowExpression<NoInfer<S>>) => FlowExpression<boolean>;
       maxIterations: number;
-    } & { initial: FlowExpression<S> | string | number | { valueOf(): boolean } | null },
+    } & {
+      initial:
+        | FlowExpression<S>
+        | string
+        | number
+        | { valueOf(): boolean }
+        | null;
+    },
     build: (
       iteration: FlowBuilder<{ state: S; index: number; context: Resolved<C> }>,
     ) => FlowExpression<NoInfer<S>>,
@@ -1369,7 +1387,11 @@ export function defineJevFlow<T>(
               abortCheck();
             } else if (step.kind === "task") {
               const input = jsonSnapshot(
-                mapValue(step.input, (e) => evaluate(e.ast, data, values), true),
+                mapValue(
+                  step.input,
+                  (e) => evaluate(e.ast, data, values),
+                  true,
+                ),
               );
               state.data = { input };
               emit();

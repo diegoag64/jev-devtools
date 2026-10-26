@@ -99,6 +99,12 @@ await cp(
 );
 for (const file of ["packed-capture.ts", "packed-capture.test.mjs"])
   await cp(join(root, "scripts/fixtures", file), join(types, file));
+for (const file of [
+  "packed-expression-contracts.ts",
+  "packed-expression-contracts.test.mjs",
+]) {
+  await cp(join(root, "scripts/fixtures", file), join(types, file));
+}
 // No skipLibCheck: it would also skip the archive's own declarations.
 await writeFile(
   join(types, "tsconfig.json"),
@@ -112,7 +118,12 @@ await writeFile(
       noEmitOnError: true,
       types: ["node"],
     },
-    files: ["flow.ts", "packed-resolved-templates.ts", "packed-capture.ts"],
+    files: [
+      "flow.ts",
+      "packed-resolved-templates.ts",
+      "packed-expression-contracts.ts",
+      "packed-capture.ts",
+    ],
   }),
 );
 execFileSync(
@@ -127,6 +138,7 @@ execFileSync(
     "--test",
     join(types, "packed-resolved-templates.test.mjs"),
     join(types, "packed-capture.test.mjs"),
+    join(types, "packed-expression-contracts.test.mjs"),
   ],
   { cwd: consumer, stdio: "inherit" },
 );

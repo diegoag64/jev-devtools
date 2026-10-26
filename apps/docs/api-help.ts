@@ -93,7 +93,7 @@ const flowHelp = {
     title: "expression.eq()",
     signature: "expression.eq(value)",
     description:
-      "Build an equality condition. It compares matching scalar values when the flow runs; it does not compare values during definition.",
+      "Build an equality condition for strings, numbers, booleans, or null. TypeScript rejects non-scalar receivers; execution checks matching types and finite numbers.",
   },
 } satisfies Record<string, Help>;
 
@@ -285,7 +285,7 @@ export const apiHelp: Record<string, Help> = {
   get: entry(
     "expression.get()",
     "expression.get(key)",
-    "Select a field from a referenced object or array. Only own properties are supported; use a task for string operations. A missing field is an execution error.",
+    "Select a field owned by an object, an array index, or array length. TypeScript rejects array methods. Missing fields and array bounds remain execution checks; use a task for string operations.",
   ),
   lt: entry(
     "expression.lt()",
