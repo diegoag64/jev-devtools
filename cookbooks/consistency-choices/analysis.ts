@@ -22,8 +22,32 @@ function numeric(value: unknown): number | null {
     typeof value !== "boolean"
   )
     return null;
-  if (typeof value === "string" && !value.trim()) return null;
-  const number = Number(value);
+  let parsed = value;
+  if (typeof value === "string") {
+    // Python float() accepts Unicode decimal digits and underscores between
+    // digits, but not JS radix literals or the BOM that String.trim() removes.
+    // Nonfinite spellings also fail this grammar, matching _numeric_value's
+    // subsequent isfinite check. Never partially parse or normalize a vector.
+    const decimal = value
+      .replace(/^\p{White_Space}+|\p{White_Space}+$/gu, "")
+      .replace(/\p{Decimal_Number}/gu, (digit) => {
+        const point = digit.codePointAt(0)!;
+        let start = point;
+        // Nd code points occur in consecutive groups of the digits 0–9;
+        // adjacent groups (e.g. mathematical digits) share one contiguous run.
+        while (/\p{Decimal_Number}/u.test(String.fromCodePoint(start - 1)))
+          start--;
+        return String((point - start) % 10);
+      });
+    if (
+      !/^[+-]?(?:[0-9](?:_?[0-9])*(?:\.(?:[0-9](?:_?[0-9])*)?)?|\.[0-9](?:_?[0-9])*)(?:[eE][+-]?[0-9](?:_?[0-9])*)?$/.test(
+        decimal,
+      )
+    )
+      return null;
+    parsed = decimal.replaceAll("_", "");
+  }
+  const number = Number(parsed);
   return Number.isFinite(number) ? number : null;
 }
 function analyzeDistribution(

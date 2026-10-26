@@ -200,6 +200,139 @@ test("argmax ignores returned choice/confidence; ties retain rubric order; missi
   near(stats.automaticRate, 119 / 120);
   near(stats.meanProbabilityStd, 0);
 });
+// Source oracle: Python float(value), then math.isfinite. Exercise the real SDK
+// response boundary: its declared number type does not sanitize numeric strings.
+test("Python-compatible probability strings reject radix literals without discarding decimal, exponent, underscore or Unicode forms", async () => {
+  const input = {
+    caseId: "stable" as const,
+    message: consistencyCases.stable.message,
+  };
+  const hexadecimal = await consistencyFlow.run(input, {
+    client: client(async () => {
+      const answers = fixtureAnswers("stable", 0);
+      return Response.json({
+        model: "synthetic-parser-probe",
+        answers: {
+          ...answers,
+          category: {
+            ...answers.category,
+            probabilities: {
+              None: 0,
+              Harass: 0,
+              Hate: 0,
+              Violence: "0x1",
+              Spam: 0,
+              Sexual: 0,
+            },
+          },
+        },
+      });
+    }),
+  });
+  const hex = hexadecimal.value as ConsistencyResult;
+  assert.ok(
+    hex.rows[0].cells.every(
+      (cell) => cell.rawLabel === null && cell.decision === null && !cell.valid,
+    ),
+    "hexadecimal is a parse failure, never an automatic label",
+  );
+  near(hex.rows[0].rawAgreement, 0);
+  near(hex.rows[0].policyAgreement, 0);
+  near(hex.stats.parseFailureRate, 1 / 8);
+  near(hex.stats.decisionFailureRate, 1 / 8);
+  near(hex.stats.rawAgreement, 7 / 8);
+  near(hex.stats.policyAgreement, 7 / 8);
+  near(hex.stats.automaticRate, 7 / 8);
+  near(hex.stats.uncertainRate, 0);
+  assert.equal(hex.samples[0].answers.category.probabilities.Violence, "0x1");
+
+  // Expected numbers checked independently with Python's float(), not this parser.
+  const probes: [unknown, number | null][] = [
+    ["0x1", null],
+    ["0b1", null],
+    ["0o1", null],
+    ["  +.6e+0  ", 0.6],
+    ["6.e-1", 0.6],
+    ["0_0.6_0", 0.6],
+    ["6_0e-2", 0.6],
+    ["０.６", 0.6],
+    ["٠.٦", 0.6],
+    ["𝟢.𝟨", 0.6],
+    ["\u00850.6\u0085", 0.6],
+    ["\ufeff0.6", null],
+    ["\u001c0.6", null],
+    ["0._6", null],
+    ["0.6_", null],
+    ["0__6", null],
+    ["0.6junk", null],
+    ["", null],
+    [" ", null],
+    ["0.6 0", null],
+    ["NaN", null],
+    ["-Infinity", null],
+    ["1e309", null],
+    ["1e-9999", 0],
+    ["+0.599", 0.599],
+    [".600", 0.6],
+    ["6.01E-1", 0.601],
+    [true, 1],
+    [false, 0],
+    [null, null],
+    [[], null],
+    [{}, null],
+    ["²", null],
+    ["-0.1", -0.1],
+    ["1.1", 1.1],
+  ];
+  let repeat = 0;
+  const result = await consistencyFlow.run(input, {
+    client: client(async () => {
+      const answers = fixtureAnswers("stable", 0);
+      const index = repeat++;
+      return Response.json({
+        model: "synthetic-parser-probe",
+        answers: Object.fromEntries(
+          Object.entries(answers).map(([key, answer], q) => [
+            key,
+            {
+              ...answer,
+              probabilities: Object.fromEntries(
+                Object.keys(answer.probabilities).map((label, i) => [
+                  label,
+                  i === 0 ? probes[(index * 8 + q) % probes.length][0] : 0,
+                ]),
+              ),
+            },
+          ]),
+        ),
+      });
+    }),
+  });
+  const data = result.value as ConsistencyResult;
+  assert.equal(repeat, 15);
+  data.samples.forEach((sample, index) =>
+    sample.cells.forEach((cell, q) => {
+      const [raw, expected] = probes[(index * 8 + q) % probes.length];
+      assert.equal(cell.values[0], expected, JSON.stringify(raw));
+      assert.deepEqual(
+        sample.answers[cell.key].probabilities[cell.labels[0]],
+        raw,
+      );
+      assert.equal(
+        cell.valid,
+        expected !== null && expected >= 0 && expected <= 1,
+      );
+      assert.equal(
+        cell.decision,
+        expected === null || expected < 0 || expected > 1
+          ? null
+          : expected >= 0.6
+            ? cell.labels[0]
+            : "uncertain",
+      );
+    }),
+  );
+});
 test("server-side flow and fixture validation reject edited input, wrong model/rubric/state/order; cancellation settles transport and dispatches no queued repeat", async () => {
   let calls = 0;
   await assert.rejects(
