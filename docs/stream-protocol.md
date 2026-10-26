@@ -22,6 +22,12 @@ A version 2 `delta` contains:
 
 An empty `order` and empty `upserts` clear the viewer. An ID that was evicted and later finishes its SDK call is not resurrected. The recorder's history limit is still global across sessions, so a request in one session can evict a trace from another. The evicted session receives only its own new retained order, never the other session's trace.
 
+## Transformed request and response captures
+
+`Trace.capture?: { request?: Json; result?: Json }` retains bounded redacted content that cannot supply the corresponding structured view. Any JSON value is valid in those fields, including `null`. An unavailable request has the empty display view `{ model: "", state: null, questions: {} }`; an unavailable response omits `Trace.result`. `captureWarnings` explains the unavailable section. The trace ID, status, attempts and flow link still describe the actual SDK call.
+
+The drawer projects legacy redacted request/result JSON through the same view boundary. It preserves valid structured captures and their object identity. Parsers must distinguish the structural trace envelope from arbitrary captured JSON, including the optional `capture` fields. User strings such as `[redacted]` do not control availability. Raw retains the captured content, and fixture export reports an unavailable response as missing rather than inventing answers.
+
 ## Delivery and recovery
 
 Capture remains immediate; delivery still batches at the next event-loop turn. Only changed trace payloads are cloned, serialized and encoded. The retained ID list is at most 200 entries. Same-session viewers at the same cursor share serialization during that flush, with independent response buffers. Viewers at different cursors receive separately computed updates.

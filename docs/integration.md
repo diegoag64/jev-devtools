@@ -172,6 +172,10 @@ Names such as `tokenCount`, `sessionId`, `apiKeyName`, and `secretary` remain in
 
 Captures have depth, collection, image, and text budgets; omitted/truncated data is marked. Small PNG/JPEG byte arrays have inline previews; unsupported or large images retain references and sizes.
 
+Custom redactors can replace an entire request or response with any JSON value, or replace a numeric answer field with a string. The recorder validates the resulting inspection copy before exposing a structured view. If the request shape is unavailable, `Trace.request` contains an empty display fallback (`model: ""`, `state: null`, `questions: {}`), and `Trace.capture.request` retains the bounded redacted JSON. If the response shape is unavailable, `Trace.result` is omitted and `Trace.capture.result` retains that JSON. Presence includes `null`; it is not a signal encoded in user text.
+
+The drawer shows an unavailable placeholder and capture warning for the affected structured section. Raw retains its captured content, subject to the current display masking prop. One incompatible field makes that entire request or response section unavailable, so the UI does not present a partial response as complete. Application values remain unchanged. `flowFixture()` reports unavailable responses as missing and retains their warnings. Existing structured-view declarations remain valid; `Trace.capture` is an optional addition. Keep server and drawer builds aligned for the new placeholders.
+
 ## Diagrams and request capture
 
 The Flow tab follows the lab's `jev-choice` layout: shared context and question cards feed a result card, then branch into output cards. Select any question from the batch and explore a dot-grid canvas: drag to pan, scroll or pinch to zoom around the pointer, and use Fit to center the complete diagram in the available width and height. Arrow keys pan, +/− zoom, and 0/Home fit when the canvas is focused. The camera follows drawer resizing; pause the synchronized flow dots with the toolbar.

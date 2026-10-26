@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | No changes recorded.                                                                                       |
+| [Unreleased](#unreleased)                   | Not published                                                                      | Renderable captures after custom redaction.                                                                |
 | [0.5.4](#054--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.4) | Thirteen Flow cookbooks; routine browser verification; rewritten docs.                                     |
 | [0.5.3](#053--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) | Shared flow encoding; simpler releases and publication helpers; flow regression coverage.                  |
 | [0.5.2](#052--october-25-2026-experimental) | 2026-10-25                                                                         | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
@@ -25,7 +25,11 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No changes recorded.
+### Changes
+
+#### Fixed
+
+- **Render transformed captures safely.** Custom redactors can replace request roots or numeric answer fields without crashing the drawer. Unavailable structured sections retain their bounded redacted JSON in `Trace.capture`, show warnings, and leave application execution unchanged.
 
 ## 0.5.4 — Prepared release
 

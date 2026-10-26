@@ -1178,6 +1178,7 @@
 .jev-devtools .detail-body.detail-body-flow {
   flex-direction: column;
 }
+.jev-devtools .detail-body-flow > .muted,
 .jev-devtools .detail-body-flow > .warning,
 .jev-devtools .detail-body-flow > .error-banner {
   flex-shrink: 0;

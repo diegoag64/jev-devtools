@@ -7,30 +7,34 @@ Use the host app's typecheck/build commands. Do not run the Jev DevTools monorep
 Use this server-only fixture when live inference is not authorized or no key is configured. It exercises the real SDK and recorder with fixed sample data and no external inference call. Create it from the **same inspector** that serves the endpoints. Keep it visibly sample-only; never substitute it for the user's production inference path.
 
 ```ts
-const sampleJev = inspector.createClient({
-  apiKey: 'sample-only',
-  logLevel: 'off',
-  fetch: async () => Response.json({
-    model: 'jev-sample',
-    answers: {
-      category: {
-        type: 'choice',
-        choice: 'billing',
-        probabilities: { billing: 0.8, other: 0.2 },
-        confidence: 0.7,
-      },
-    },
-  }),
-}, { label: 'Setup verification', source: 'sample' });
+const sampleJev = inspector.createClient(
+  {
+    apiKey: "sample-only",
+    logLevel: "off",
+    fetch: async () =>
+      Response.json({
+        model: "jev-sample",
+        answers: {
+          category: {
+            type: "choice",
+            choice: "billing",
+            probabilities: { billing: 0.8, other: 0.2 },
+            confidence: 0.7,
+          },
+        },
+      }),
+  },
+  { label: "Setup verification", source: "sample" },
+);
 
 async function runSample() {
   return sampleJev.systemOne({
-    state: { message: 'I was charged twice.' },
+    state: { message: "I was charged twice." },
     questions: {
       category: {
-        type: 'choice',
-        instructions: 'Which team should handle this message?',
-        criteria: { billing: 'Payment issues', other: 'Everything else' },
+        type: "choice",
+        instructions: "Which team should handle this message?",
+        criteria: { billing: "Payment issues", other: "Everything else" },
       },
     },
   });
@@ -41,12 +45,14 @@ For a Vite/Connect dev plugin, register a temporary local handler after mounting
 
 ```ts
 server.middlewares.use(async (req, res, next) => {
-  if (req.url !== '/__jev-setup-sample' || req.method !== 'POST') return next();
+  if (req.url !== "/__jev-setup-sample" || req.method !== "POST") return next();
   try {
     await runSample();
-    res.writeHead(200, { 'content-type': 'application/json' }).end('{"ok":true}');
+    res
+      .writeHead(200, { "content-type": "application/json" })
+      .end('{"ok":true}');
   } catch {
-    res.writeHead(500).end('Sample failed');
+    res.writeHead(500).end("Sample failed");
   }
 });
 ```
@@ -66,16 +72,18 @@ Report HTTP/capture checks separately from visual browser checks, and sample ver
 
 ## Troubleshooting
 
-| Symptom | Check |
-| --- | --- |
-| No launcher | Mount once and explicitly enable in development. Styles load automatically; no CSS import is needed. It intentionally renders nothing on the server. |
-| Disconnected or HTML instead of config | Ensure base path **and** subpaths reach the adapter before the SPA fallback; check proxy and Next optional catch-all. |
-| 403 | Match scheme/hostname/port and Host exactly; preserve proxy Host, verify Origin and authorization. Don't disable guards. |
-| Connected but empty | Use the adapter's instrumented client, same adapter/key/process and session. Direct SDK clients are not intercepted. |
-| Clear fails | Browser/server endpoint agreement, same-origin DELETE, exact Origin, authorization and session. |
-| Missing key | SDK needs a server key even with recording off; use the labeled sample transport for offline verification. |
-| Next reload loses or ignores settings | Use a stable `getJevDevtools` key; restart after option changes. Don't dispose during hot reload. |
-| Server import/build errors | Keep `/server` outside client modules. In Next externalize the SDK only. Use a supported Node runtime. |
-| Production 404 | Expected when disabled; app inference remains independent. |
+| Symptom                                | Check                                                                                                                                                |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No launcher                            | Mount once and explicitly enable in development. Styles load automatically; no CSS import is needed. It intentionally renders nothing on the server. |
+| Disconnected or HTML instead of config | Ensure base path **and** subpaths reach the adapter before the SPA fallback; check proxy and Next optional catch-all.                                |
+| 403                                    | Match scheme/hostname/port and Host exactly; preserve proxy Host, verify Origin and authorization. Don't disable guards.                             |
+| Connected but empty                    | Use the adapter's instrumented client, same adapter/key/process and session. Direct SDK clients are not intercepted.                                 |
+| Clear fails                            | Browser/server endpoint agreement, same-origin DELETE, exact Origin, authorization and session.                                                      |
+| Missing key                            | SDK needs a server key even with recording off; use the labeled sample transport for offline verification.                                           |
+| Next reload loses or ignores settings  | Use a stable `getJevDevtools` key; restart after option changes. Don't dispose during hot reload.                                                    |
+| Server import/build errors             | Keep `/server` outside client modules. In Next externalize the SDK only. Use a supported Node runtime.                                               |
+| Production 404                         | Expected when disabled; app inference remains independent.                                                                                           |
 
 Capture is bounded to 50 calls in memory by default. Known credential fields are always redacted, including common API-key, client-secret and session-token aliases (case, hyphens and underscores are ignored). HTTP headers/options are not captured. The `redactAdditionalSensitiveData` component prop defaults to `true` and masks supported email, phone, postal address, SSN and card-number fields **only in DevTools views**. Set it to `false` to inspect those fields; changes apply immediately to existing captures, independently in each viewer, without server requests. These personal values remain in server/stream/browser memory even while masked. Custom server redaction always remains active, and neither credentials nor custom-redacted values can be recovered through the prop. See the [exact policy](https://github.com/diegoag64/jev-devtools/blob/main/docs/integration.md#redaction-policy). Arbitrary secrets in prose and unusual field names still need custom redaction. Verify both modes with synthetic sentinels and confirm SDK/runtime values remain unchanged. Diagrams show captured inputs/outputs, not hidden model reasoning. Routing decisions are recorded only for explicitly defined flows; see [flows.md](flows.md) for flow verification.
+
+When configuring a custom redactor, verify replacements that change a field type or the whole request root with synthetic values. The drawer must show readable unavailable placeholders and warnings, retain bounded redacted JSON in `Trace.capture.request` or `Trace.capture.result`, and leave SDK results unchanged. Presence includes `null`; strings such as `[redacted]` remain ordinary content. An unavailable request has an empty structured view, and an unavailable response omits `Trace.result`. Fixture export reports that response as missing and keeps its warnings.
