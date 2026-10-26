@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | No additional changes yet.                                                                                 |
+| [Unreleased](#unreleased)                   | Not published                                                                      | Rewritten onboarding, guides, and API explanations.                                                        |
 | [0.5.3](#053--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) | Shared flow encoding; simpler releases and publication helpers; flow regression coverage.                  |
 | [0.5.2](#052--october-25-2026-experimental) | 2026-10-25                                                                         | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
 | [0.5.1](#051--october-25-2026-experimental) | 2026-10-25                                                                         | Task input validation and expression types; setup guidance; release and website maintenance.               |
@@ -24,7 +24,35 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No additional changes yet.
+### Changes
+
+#### Added
+
+- **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
+
+- **API reference previews.** Hover or focus a supported API link for its summary, then open the full reference or read its contract and examples in a side panel. Touch controls, keyboard navigation, copy buttons, and failed-load recovery keep reference reading available without losing the current page. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
+
+#### Fixed
+
+- **Search from an API reading panel.** Opening search dismisses the reference panel and keeps focus in search, so glossary results appear without an old panel covering the destination. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
+
+#### Documentation
+
+- **Even API panel close control.** Give the close button a square touch target with a centered X in desktop and mobile layouts. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
+
+- **Current API reference links.** Mute links inside the reading panel that point to its open entry and label them “current,” updating the indication when following references or going Back. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
+
+- **Useful resource entry points.** Rewrite Examples & cookbooks with sample run instructions, expected results, and clearer cookbook descriptions. Rewrite For coding agents around the installed setup skill, version-matched contracts, Markdown access, and verification evidence. Preserve existing section links. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
+
+- **Clearer API explanations.** Revise the glossary and React, server, flow, expression, and recorder references. Separate parameter rules, execution behavior, and errors; explain replay and comparison results; add missing server parameter types. Preserve examples, signatures, and section links. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
+
+- **Concepts and practical guides.** Rename How it fits together to Concepts and explain capture, flows, and drawer controls. Rewrite the Next.js, Build a flow, Privacy & access, and Troubleshooting guides with setup steps, expected results, and diagnostic checks. Preserve existing page and section links. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
+
+- **Introduction for new users.** Explain request inspection, optional flows, the React and Node connection, and capture privacy before directing readers to setup guides. Keep the fixed-answer demo and existing section links. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
+
+- **Guided first runs.** Rewrite Quick start around a Vite and Express setup and Flows from scratch around a no-network greeting. Add expected results and keep full method contracts and examples in the API reference, preserving existing section links. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
+
+- **Readable API contracts.** Fix the server options table and replace stale unreleased labels in type descriptions, hover help, and the replay example with their 0.5.0 availability. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
 ## 0.5.3 — Prepared release
 

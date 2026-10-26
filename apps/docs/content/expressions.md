@@ -1,8 +1,12 @@
+Use expressions to pass future values between steps and to describe conditions the inspector can display. Import expression helpers from `jev-devtools/flow` on Node. The [API glossary](@/api/reference/#expressions-and-conditions) lists exact parameters and return types.
+
 ## References are values for later
 
-[`FlowExpression<T>`](@/api/reference/#flowexpression) represents a typed value that will be resolved during a run. Obtain one from [`flow.input`](@/api/reference/#flow-input), a task result, an answer field, or a joined operation. You usually do not construct the class directly.
+[`FlowExpression<T>`](@/api/reference/#flowexpression) describes how to obtain a value during execution. It is a reference during definition and resolves to a value of type `T` when the flow runs.
 
-Inside the synchronous `defineJevFlow()` callback:
+Get references from [`flow.input`](@/api/reference/#flow-input), task results, answer fields, or joined operations. The builder manages their ownership. Ordinary application code should not construct `FlowExpression` directly.
+
+This fragment belongs inside a synchronous `defineJevFlow()` callback. It assumes an input field `message` and an earlier Jev step named `classification` with a Choice question named `team`:
 
 ```ts api=expressions
 const message = flow.input.get("message");
@@ -10,9 +14,9 @@ const answer = classification.answer("team").choice;
 const isBilling = answer.eq("billing");
 ```
 
-**Example walkthrough:** `get("message")` selects the input message. `answer("team").choice` selects a previous Choice answer. `.eq("billing")` describes a Boolean comparison that will be evaluated when the flow runs.
+`message` references the input field. `answer` references the chosen team label, and `isBilling` references the result of comparing that label with `"billing"`. None contains its runtime value yet.
 
-This fragment assumes a flow input with `message` and an earlier request named `classification` with a Choice question `team`. See the [complete flow example](@/guides/flows/) for the surrounding definition and `await triage.run(...)` call. The runner resolves the answer and evaluates the comparison during that awaited execution.
+See [Build a flow](@/guides/flows/) for the surrounding definition and awaited run. The runner resolves the answer before evaluating the condition.
 
 ## Select and compare
 
@@ -24,9 +28,13 @@ This fragment assumes a flow input with `message` and an earlier request named `
 | [`.gt(value)`](@/api/reference/#expression-gt)   | Strictly greater than; finite numeric values only.                  |
 | [`.gte(value)`](@/api/reference/#expression-gte) | Greater than or equal; finite numeric values only.                  |
 
-Each comparison accepts a literal or compatible expression. Optional or nullable numeric fields must be resolved to valid numbers before comparison. Missing fields are execution errors. There is no `.lte()` method; express an inclusive upper bound with [`not(value.gt(limit))`](@/api/reference/#not) when the value is a valid number.
+Each comparison takes a literal or compatible expression and returns `FlowExpression<boolean>`. Equality compares matching scalar types, not deep object contents. Numeric comparisons require finite numbers. Resolve optional or nullable fields to valid numbers before comparing them.
 
-`.get()` does not read properties of primitive values: string `.get("length")` and `.get(0)` are unsupported. Array indexes and array `length` are supported. Use a task callback for string operations, as shown in the [complete field-selection example](@/api/reference/#expression-get). **0.5.1:** TypeScript now rejects primitive receivers, including unions that may contain primitives; version 0.5.0 accepts some of these calls but fails during execution.
+Missing fields fail during execution. There is no `.lte()` method. For a valid numeric inclusive upper bound, use [`not(value.gt(limit))`](@/api/reference/#not).
+
+`.get()` reads own properties of objects and arrays. It supports array indexes and array `length`, but not string `length` or character indexes. Perform string operations in a task callback, as shown in the [field-selection example](@/api/reference/#expression-get).
+
+Since **0.5.1**, TypeScript rejects primitive receivers and unions that may contain primitives. Version 0.5.0 accepts some of these calls during type checking but rejects primitive property access during execution.
 
 ### Return interfaces
 
@@ -37,9 +45,9 @@ Each comparison accepts a literal or compatible expression. Optional or nullable
 
 ## Combine conditions
 
-Import [`all`](@/api/reference/#all), [`any`](@/api/reference/#any), and [`not`](@/api/reference/#not) from `jev-devtools/flow`:
+Import [`all()`](@/api/reference/#all), [`any()`](@/api/reference/#any), and [`not()`](@/api/reference/#not) from `jev-devtools/flow`. Each accepts Boolean expressions and returns one Boolean expression.
 
-Inside the synchronous `defineJevFlow()` callback:
+This fragment belongs inside the definition callback after Jev steps named `eligibility` and `risk`. They contain Noul questions named `eligible` and `risky`:
 
 ```ts api=expressions
 const shouldReview = all(
@@ -48,13 +56,13 @@ const shouldReview = all(
 );
 ```
 
-**Example walkthrough:** `.gte(0.9)` checks the eligibility threshold. `.gt(0.2)` checks the risk threshold, and `not()` inverts that second condition. `all()` requires both conditions to hold. These thresholds are explicitly authored application policy.
-
-This fragment assumes earlier requests named `eligibility` and `risk`. The thresholds are example application policy, not TypeSafe defaults. [`all`](@/api/reference/#all) requires every condition, [`any`](@/api/reference/#any) requires at least one, and [`not`](@/api/reference/#not) inverts one Boolean expression.
+`shouldReview` is true when `eligible` is at least `0.9` and `risky` is at most `0.2`. `not()` supplies the inclusive upper bound by inverting `gt(0.2)`. These thresholds are example application policy. Noul values represent probabilities of true, not confidence scores.
 
 To execute conditions like these, pass the reference to a step or `output()` and await the flow’s `run()`. The [complete operations example](@/api/flow/#collections-and-loops) shows `all()` and `not()` inside a definition, followed by `await summarize.run(...)` and the resolved result.
 
-All operands are evaluated. A missing reference remains an error even when another operand would normally short-circuit JavaScript evaluation. There is no arbitrary predicate callback or `eval` in the expression API.
+All operands are evaluated. An earlier false condition in `all()` or true condition in `any()` does not suppress a missing-reference error later in the list. These helpers do not short-circuit like JavaScript `&&` and `||`.
+
+Supply at least one owned condition to `all()` and `any()`. A zero-operand expression has no flow owner and cannot be used in a definition. The expression API does not accept arbitrary predicate callbacks or `eval`.
 
 ### Return interfaces
 
@@ -66,12 +74,22 @@ All operands are evaluated. A missing reference remains an error even when anoth
 
 ## Respect scope
 
-A reference belongs to its definition and available execution scope. Do not use a reference from another flow, an untaken branch, or a sibling parallel lane. Return a value from [`if`](@/api/reference/#flow-if) or [`parallel`](@/api/reference/#flow-parallel) to make it available after the join. Pass explicit context into map and loop programs.
+A reference belongs to a definition and must be available where it is used. References from another flow, an untaken branch, or a sibling parallel lane are unavailable.
+
+Return a value through [`if()`](@/api/reference/#flow-if) or [`parallel()`](@/api/reference/#flow-parallel) to use it after the paths join. Pass outer data through the `input` context of a map or loop, then read `context` inside its program.
 
 ## Expression limits
 
-**0.5.2:** construction enforces depth 80 and 4,096 expanded nodes per expression, including ordinary composition and reused children. A leaf has depth 0 and counts as one node; each field selection, literal, reference, and operation also counts. Reusing a child counts its complete size at every occurrence. The existing per-operation limit is 256 operands.
+Since **0.5.2**, construction checks the complete expression, including composition and reused children.
+
+| Limit                  | Maximum | How it is counted                                                                                                  |
+| ---------------------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
+| Depth                  | 80      | A leaf has depth 0. Each containing operation or field selection adds depth.                                       |
+| Expanded nodes         | 4,096   | Every literal, reference, field selection, and operation counts. Reused children count in full at each occurrence. |
+| Operands per operation | 256     | Applies to each operation, including `all()` and `any()`.                                                          |
 
 For example, 80 `not()` calls around Boolean `flow.input` fit; the 81st throws. Starting from that input, eleven `e = all(e, e)` doublings contain 4,095 expanded nodes; a twelfth throws. Split larger generated logic into tasks or smaller steps. Within these limits, all operands still evaluate, and references keep their scope and missing-value checks.
 
-Legacy condition text is limited to 4,096 UTF-16 code units, including `[condition truncated]` when shortened. Structured rules keep their existing 128-node projection budget. Neither display limit changes the accepted expression's runtime result. See [flow limits](@/api/flow/#limits-and-errors) for the separate step and run budgets.
+Capture has separate limits. Legacy condition text is capped at 4,096 UTF-16 code units, including the `[condition truncated]` suffix. Structured rules have a 128-node projection budget. These limits shorten inspection data without changing an accepted expression's runtime result.
+
+See [flow limits](@/api/flow/#limits-and-errors) for the separate definition and run budgets.

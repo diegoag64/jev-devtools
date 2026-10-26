@@ -21,25 +21,30 @@ menu.addEventListener("click", () => {
   menu.setAttribute("aria-expanded", String(open));
   document.querySelector(".sidebar")!.classList.toggle("is-open", open);
 });
-for (const button of document.querySelectorAll<HTMLButtonElement>(
-  ".copy-code",
-)) {
+for (const button of document.querySelectorAll<HTMLButtonElement>(".copy-code"))
   button.hidden = false;
+// Delegate so examples loaded into the reference panel retain working Copy buttons.
+document.addEventListener("click", async (event) => {
+  const button =
+    event.target instanceof Element
+      ? event.target.closest<HTMLButtonElement>(".copy-code")
+      : null;
+  if (!button) return;
   const copyLabel = button.textContent;
-  button.addEventListener("click", async () => {
-    try {
-      const block = button.closest(".code-block")!;
-      const code = block.querySelector(".install-panel:not([hidden]) code") ?? block.querySelector("code");
-      await navigator.clipboard.writeText(code?.textContent ?? "");
-      button.textContent = "Copied!";
-    } catch {
-      button.textContent = "Select code to copy";
-    }
-    setTimeout(() => {
-      button.textContent = copyLabel;
-    }, 2200);
-  });
-}
+  try {
+    const block = button.closest(".code-block")!;
+    const code =
+      block.querySelector(".install-panel:not([hidden]) code") ??
+      block.querySelector("code");
+    await navigator.clipboard.writeText(code?.textContent ?? "");
+    button.textContent = "Copied!";
+  } catch {
+    button.textContent = "Select code to copy";
+  }
+  setTimeout(() => {
+    button.textContent = copyLabel;
+  }, 2200);
+});
 
 type SearchPage = { title: string; group: string; url: string; text: string };
 const dialog = document.querySelector<HTMLDialogElement>("#search-dialog")!;
@@ -84,7 +89,10 @@ function renderSearch() {
     : "No matching pages. Try a shorter search.";
 }
 async function openSearch() {
-  if (!dialog.open) dialog.showModal();
+  if (!dialog.open) {
+    document.dispatchEvent(new Event("docs:search-open"));
+    dialog.showModal();
+  }
   input.focus();
   if (pages) {
     renderSearch();
@@ -140,3 +148,6 @@ if (document.querySelector("[data-demo]")) void import("./demo.js");
 if (document.querySelector("[data-type-info]")) void import("./type-hovers.js");
 
 if (document.querySelector("[data-install]")) void import("./install.js");
+
+if (document.querySelector("[data-api-preview]"))
+  void import("./api-previews.js");

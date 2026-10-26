@@ -1,6 +1,8 @@
-Jev DevTools brings your TypeSafe requests into view: the context you sent, the questions you asked, the answers you received, and the application flows that connect them.
+Jev DevTools adds an inspector drawer to React applications that use TypeSafe's Jev. It records `systemOne()` calls through an instrumented SDK client on your Node server. Open the drawer while using your app to inspect each call's context, answers, timing, and errors.
 
-[Get started →](@/getting-started/)
+[Capture your first request](@/getting-started/) or follow the [Next.js setup](@/guides/nextjs/).
+
+This sample pairs a support message with the returned Choice answer. Switch between billing and delivery to compare fixed responses.
 
 <div class="demo" data-demo>
 <div class="demo-top"><span>One request, made visible</span><div class="sample-buttons"><button type="button" data-sample="billing" aria-pressed="true" hidden>Billing sample</button><button type="button" data-sample="delivery" aria-pressed="false" hidden>Delivery sample</button></div></div>
@@ -8,43 +10,62 @@ Jev DevTools brings your TypeSafe requests into view: the context you sent, the 
 <p class="demo-caption">Illustrative sample · Fixed answers, no inference calls. Connections show data structure, not model reasoning.</p>
 </div>
 
-## Easy to integrate
-
-Keep using the TypeSafe SDK. Create your client through the Node adapter, then mount one React component. The drawer connects to your server and handles request history, reconnection, and inspection.
-
-```sh install
-pnpm add jev-devtools @typesafe-ai/sdk
-```
-
-<!-- example: client.tsx -->
-
-The component includes its own styles. No provider or CSS import is required. Follow the [quick start](@/getting-started/) to wire up the server before opening it.
-
-## Next steps
-
-- **New to the package?** [Quick start](@/getting-started/) takes you from installation to a captured request.
-- **Using Next.js?** [The App Router guide](@/guides/nextjs/) covers the server and client boundaries.
-- **Connecting several calls?** [Build a flow](@/guides/flows/) explains definitions, execution, and outcomes.
-- **Looking up an option?** Start with [React props](@/api/react/), the [server adapter](@/api/server/), or the [flow builder](@/api/flow/).
-
 ## What you can inspect
 
-| View      | What it helps you understand                                         |
-| --------- | -------------------------------------------------------------------- |
-| Flow      | Request structure and application-defined connected steps            |
-| Questions | Choice, Score, Noul, and Box answers with their question definitions |
-| Context   | The captured state and assets passed to the request                  |
-| Transport | Attempts, retries, errors, and request timing                        |
-| Raw       | Captured request and response data                                   |
+Select a captured request in the drawer to explore these views:
 
-The inspector records calls through your instrumented client. It does not discover unrelated SDK instances, reveal hidden model reasoning, or decide your application's routing policy.
+| View      | What it shows                                                           |
+| --------- | ----------------------------------------------------------------------- |
+| Context   | The state and assets captured from the request.                         |
+| Questions | Question definitions and returned Choice, Score, Noul, and Box answers. |
+| Transport | Request timing, attempts, retries, and errors.                          |
+| Raw       | The captured request and response data.                                 |
+| Flow      | The request's structure, or the steps in an application-defined flow.   |
+
+Captures have size and depth limits. Redacted or truncated data may be absent from the inspection copy even when your application received the full response.
+
+## Requests and flows
+
+A request is one `systemOne()` call, including any retries. You can inspect requests without adopting a flow API.
+
+For work that spans several steps, an optional flow definition connects Jev requests, application tasks, and decisions. The inspector shows the steps that ran and their results. Your code defines the paths and conditions. The diagram describes that application logic.
+
+[Flows from scratch](@/guides/flow-basics/) starts with ordinary code and no model calls. [Build a flow](@/guides/flows/) combines a model question with an application decision.
+
+Captured answers can also become fixtures for [replay and comparison](@/api/flow/#replay-captured-answers). Replay supplies stored Jev answers, while application tasks still execute. Comparison runs the flow again with your supplied client.
+
+<a id="easy-to-integrate"></a>
+
+## How it connects to your app
+
+The Node adapter creates an instrumented TypeSafe SDK client and serves inspector endpoints. Calls through that client populate the capture history. Your application's handlers and the inspector endpoints share one adapter in the same Node process.
+
+The React component connects to those endpoints through your app's browser origin. It includes its own styles and needs no provider. API credentials stay on the server.
+
+[Concepts](@/concepts/) explains the client, recorder, and drawer in more detail.
+
+## Local capture and privacy
+
+The adapter and drawer are disabled by default. Enable both for local development. Disabling the adapter stops recording. Your application's SDK calls continue.
+
+History is bounded, stays in memory, and disappears when the server process restarts. Separate workers or serverless instances do not share capture history.
+
+Known credential fields are redacted from captures. The drawer also masks supported personal fields, but display masking leaves the underlying captured data intact. Use [server-side redaction and access controls](@/guides/privacy/) for data that must not reach the browser and for shared or tunneled environments.
 
 ## Before you begin
 
-Use **React 18 or 19**, **Node 22.12+**, and **TypeSafe SDK 0.7.x**. The server adapter and flow runner need Node; they do not run in a browser or edge runtime. History is bounded and in memory.
+The inspector uses React and React DOM **18 or 19**, Node **22.12+**, and TypeSafe SDK **0.7.x**. The server adapter and flow runner require Node. Edge runtimes are unsupported. See the [Quick start prerequisites](@/getting-started/#before-you-begin) for the complete setup requirements.
 
-> These pages describe **version 0.5.3**. [See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) The 0.5.3 notes cover shared flow encoding, release tooling, and regression coverage. Check the [changelog](@/changelog/) and your installed version. The package is experimental before 1.0.
+These pages describe **version 0.5.3**. Check your installed version and the [release notes for verified publication status](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3). The package is experimental before 1.0. The [changelog](@/changelog/) records changes and compatibility notes.
 
-## Find a method or learn flows
+## Next steps
 
-Use the [API glossary](@/api/reference/) to look up inputs, return values, and usage. [Flows from scratch](@/guides/flow-basics/) teaches each flow method with a small example.
+<a id="find-a-method-or-learn-flows"></a>
+
+Choose a starting point for your task:
+
+- [Quick start](@/getting-started/) connects a Vite React app and an Express server, then captures a request.
+- [Next.js](@/guides/nextjs/) sets up the App Router's server adapter and Client Component.
+- [Examples and cookbooks](@/examples/) includes no-key sample apps and complete application flows.
+- [API glossary](@/api/reference/) lists method inputs, return values, and examples.
+- [Troubleshooting](@/guides/troubleshooting/) helps resolve an empty drawer, rejected connections, or missing captures.

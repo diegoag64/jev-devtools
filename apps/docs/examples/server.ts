@@ -1,4 +1,4 @@
-// server/jev.ts — Node only
+// server.ts (Node only)
 import { createJevDevtools } from "jev-devtools/server";
 
 export const inspector = createJevDevtools({

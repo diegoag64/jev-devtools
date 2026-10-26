@@ -1,4 +1,4 @@
-New to flows? Start with [Flows from scratch](@/guides/flow-basics/), which introduces each method with a small example. For exact inputs and return values, use the [API glossary](@/api/reference/).
+Use the flow builder to connect SDK requests, application tasks, and decisions on Node. This page explains how the operations compose and what their examples return. The [API glossary](@/api/reference/#flow-definitions-and-steps) has the full parameter and return tables. For your first definition, start with [Flows from scratch](@/guides/flow-basics/).
 
 ## defineJevFlow(name, build)
 
@@ -8,7 +8,7 @@ Import from `jev-devtools/flow` in Node code. [`defineJevFlow<Input>()`](@/api/r
 
 <!-- example: flow.ts -->
 
-**Example walkthrough:** the `classify` Jev step asks which team should handle the message. `.answer("team").choice.eq("billing")` turns that answer into a branch condition. Each path returns a terminal team name. `routeMessage()` executes the recipe with the instrumented client and shared inspector.
+`classify` asks Jev which team should handle the message. The branch compares the returned Choice label with `"billing"` and returns one team name. `routeMessage()` supplies the message, instrumented client, and shared inspector, then awaits the outcome. The selected team depends on the SDK response.
 
 ### Definition and run interfaces
 
@@ -50,7 +50,9 @@ Import from `jev-devtools/flow` in Node code. [`defineJevFlow<Input>()`](@/api/r
 | [`if(id, { when, then, else }, display?)`](@/api/reference/#flow-if)         | Return a typed value from one path, then continue shared work.                                                   |
 | [`output(name, value?, display?)`](@/api/reference/#flow-output)             | Finish with a named outcome and optional resolved value. Does not execute a business action.                     |
 
-Path callbacks build both possible paths synchronously; only the selected path executes. Conditions use [inspectable expressions](@/api/expressions/). You cannot use a JavaScript `if` on an expression to select runtime work.
+Both path callbacks run during definition to describe the possible steps. During execution, the runner selects one path using the resolved condition.
+
+Use [flow expressions](@/api/expressions/) for that condition. A JavaScript `if` on a reference runs during definition and cannot select work based on its future value.
 
 ### Return interfaces
 
@@ -66,7 +68,7 @@ Path callbacks build both possible paths synchronously; only the selected path e
 
 <!-- example: flow-join.ts -->
 
-**Example walkthrough:** the left lane doubles `2` and the right lane triples `3`. The joined references are passed into `output()`, producing `{ left: 4, right: 9 }`. The lane computations are independent; neither reads the other's private steps. `tryJoin()` starts the run and waits for both lanes before reading the output.
+`tryJoin()` starts a run and waits for both lanes. The left lane doubles `2`, and the right lane triples `3`. `output()` resolves their joined references to `{ left: 4, right: 9 }`. Neither lane reads the other's private steps.
 
 | Returned member | Type                     | Resolved value in this example |
 | --------------- | ------------------------ | ------------------------------ |
@@ -77,15 +79,22 @@ The builder describes both lanes synchronously; the task callbacks run when `try
 
 ## Collections and loops
 
-[`map(id, { items, input, maxItems, concurrency? }, build, display?)`](@/api/reference/#flow-map) executes one bounded item program per item and returns results in input order. Its builder input is `{ item, index, context }`. The `input` option supplies explicit shared context. Items may be literals, a whole-array reference, or nested reference templates; whole-array references and scalar arrays preserve `Item`, while nested template items use `Resolved<Item>`.
+[`map()`](@/api/reference/#flow-map) executes an item program for each array item. Results stay in input order even when items finish out of order. Set `maxItems` to bound the array size and `concurrency` to limit simultaneous item programs.
 
-[`loop(id, { initial, input, while, maxIterations }, build, display?)`](@/api/reference/#flow-loop) tests the state condition before each iteration. Its builder input is `{ state, index, context }`; whole-state references and scalars preserve `State`, while initial templates use `Resolved<State>` to resolve nested references. Return the next state with that resolved shape. It returns the final state after the condition becomes false. If the condition still holds at the iteration limit, it throws [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror).
+The item builder receives `{ item, index, context }`. Pass shared context through the `input` option. Whole-array references and scalar arrays preserve `Item`; nested reference templates resolve each item to `Resolved<Item>`.
+
+[`loop()`](@/api/reference/#flow-loop) tests a state condition before each iteration. Its builder receives `{ state, index, context }` and must return the next state. Whole-state references and scalars preserve `State`; initial templates resolve nested references to `Resolved<State>`.
+
+When the condition becomes false, the loop returns the current state. If the condition remains true at `maxIterations`, it rejects with [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror). It does not return a successful partial result.
 
 Call `tryOperations()` from Node to run both definitions below. Its two `await` calls execute application-owned tasks without inference and read the resolved results:
 
 <!-- example: operations.ts -->
 
-**Example walkthrough:** `summarize` uses `map()` to double each number, a task to add them, and `if()` to choose a label before returning the summary. `all()` and `not()` make the label policy explicit. With `[2, 4]`, the output is `{ total: 12, label: "Large: 12" }`. The separate `count` flow carries `{ value, target }` as loop state and increments `value` until it reaches the target. Its initial template nests the target reference; the gate and task both see its numeric value type.
+`tryOperations()` runs two definitions:
+
+- `summarize` doubles `[2, 4]` with `map()`, adds the results in a task, and uses `if()` to choose a label. `all()` and `not()` express the label policy. The result is outcome `"summary"` with value `{ total: 12, label: "Large: 12" }`.
+- `count` carries `{ value, target }` through a loop, incrementing `value` until it reaches `target`. With target `3`, the result is outcome `"counted"` with value `{ value: 3, target: 3 }`. The initial template contains a target reference, which resolves before the condition and task use it.
 
 | Method      | Return type                                                                                                 | Resolved value                                              |
 | ----------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
@@ -96,7 +105,17 @@ A loop can contain a map. Nested maps, nested loops, and loops inside maps are u
 
 ## Limits and errors
 
-IDs must be unique across the whole definition, including untaken branches and lanes: 1–80 letters, digits, `_`, or `-`, starting with a letter or digit. Output names are node IDs too. Definitions allow 256 nodes, 16 nested blocks, and a run-wide budget of 1,024 expanded nodes.
+Node IDs must be unique across the whole definition, including untaken branches and parallel lanes. Output names are node IDs too. Use 1–80 letters, digits, `_`, or `-`, starting with a letter or digit.
+
+The limits apply at different levels:
+
+| Level        | Limit                                          |
+| ------------ | ---------------------------------------------- |
+| Definition   | 256 nodes and 16 nested blocks                 |
+| Run          | 1,024 expanded nodes                           |
+| Map          | `maxItems` 1–64; `concurrency` 1–16, default 4 |
+| Loop         | `maxIterations` 1–64                           |
+| Task timeout | Integer `timeoutMs` from 1 to 2,147,483,647    |
 
 **0.5.2:** each expression is limited to depth 80 and 4,096 expanded nodes, counting reused children at every occurrence; an operation accepts at most 256 operands. These limits apply during construction, including composition. Legacy condition text is capped at 4,096 UTF-16 code units with an explicit truncation suffix; execution retains the full accepted expression. See [expression limits](@/api/expressions/#expression-limits).
 
@@ -106,13 +125,13 @@ Structural errors fail during definition. Missing input values and invalid compa
 
 ## Replay captured answers
 
-[`replayClient(fixture)`](@/api/reference/#replayclient) returns an SDK-compatible client for a flow run. Jev steps receive stored answers without a network call or API key. Available in **0.5.0 or later** from [npm](https://www.npmjs.com/package/jev-devtools/v/0.5.0).
+Since **0.5.0**, [`replayClient(fixture)`](@/api/reference/#replayclient) supplies stored Jev answers to a flow run. It needs no API key or inference-service connection. Application tasks still execute.
 
 Call `await replayExample()` from Node. The definition is synchronous; `await flow.run(...)` executes it using the stored response.
 
 <!-- example: replay.ts -->
 
-**Example walkthrough:** the fixture stores the response for the `classify` step. `replayClient()` supplies that response to the same flow, so the Choice expression resolves to `"billing"` without inference. The run returns outcome `"routed"` and value `"billing"`.
+The fixture stores a response for `classify`. `replayClient()` supplies it when that step executes, so the Choice reference resolves to `"billing"`. `replayExample()` returns outcome `"routed"` with value `"billing"`, without inference.
 
 | API                     | Return type                  | Description                                                   |
 | ----------------------- | ---------------------------- | ------------------------------------------------------------- |
@@ -127,7 +146,7 @@ Tasks and request factories execute again. A task can still perform external cal
 
 ## Build a fixture
 
-**New in 0.5.0.**
+Available since **0.5.0**.
 
 [`flowFixture(definition, run, traces)`](@/api/reference/#flowfixture) is available from both `jev-devtools` and `jev-devtools/flow`. Pass the captured flow definition/run and a `ReadonlyMap<string, Trace>` indexed by trace ID. It returns a [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture) with `{ fixture, missing, warnings }`.
 
@@ -149,9 +168,9 @@ Check `missing` for completed steps whose response was unavailable, and `warning
 
 ## Compare a fixture with a live run
 
-**New in 0.5.0.**
+Available since **0.5.0**.
 
-[`compareWithFixture`](@/api/reference/#comparewithfixture) runs the same recipe and input twice: first with saved answers, then with your supplied client. [`formatComparison`](@/api/reference/#formatcomparison) turns the result into readable text. This comparison performs live inference; ordinary [`replayClient`](@/api/reference/#replayclient) does not.
+[`compareWithFixture()`](@/api/reference/#comparewithfixture) runs the same definition and input twice: first with saved answers, then with your supplied client. A live client makes inference calls during the second run. [`formatComparison()`](@/api/reference/#formatcomparison) returns a text summary of the differences.
 
 ```ts
 import { compareWithFixture, formatComparison } from "jev-devtools/flow";
@@ -165,7 +184,7 @@ const comparison = await compareWithFixture(program, input, fixture, {
 console.log(formatComparison(comparison));
 ```
 
-**Example walkthrough:** the comparison replays the stored answers, then runs with the supplied client using the same input. The tolerance applies to numeric answer-field differences. `formatComparison()` returns text, and the application's `console.log()` prints it.
+The comparison uses the same `program` and `input` for both executions. `tolerance: 0.01` permits small numeric answer-field differences. `formatComparison()` returns text, and `console.log()` prints it.
 
 | Value / member                 | Type                         | Description                                                                           |
 | ------------------------------ | ---------------------------- | ------------------------------------------------------------------------------------- |
@@ -175,6 +194,8 @@ console.log(formatComparison(comparison));
 | `comparison.liveFixture`       | `FlowFixture`                | Unredacted, untruncated live response bodies.                                         |
 | `formatComparison(comparison)` | `string`                     | Plain-text description of changes.                                                    |
 
-Tasks execute on both sides. Use controlled, repeatable tasks; neither replay nor comparison undoes side effects. Top-level `changed` tracks outcome, value, decisions, and executed Jev steps; answer drift alone does not set it. Inspect `answers` for individual field differences. Numeric tolerance only applies to those answer fields. The returned `liveFixture` contains unredacted live responses, so review it before saving or sharing.
+Read `changed` and `answers` separately. The top-level flag tracks differences in outcome, value, decisions, and executed Jev steps. Answer drift alone does not set it. Numeric tolerance applies only to individual answer fields.
+
+Tasks execute on both sides, so use controlled, repeatable tasks. Neither execution undoes side effects. `liveFixture` contains unredacted, untruncated responses from the supplied client. Review it before saving or sharing.
 
 See [`FixtureComparison`](@/api/reference/#type-fixturecomparison) for every output field and the [comparison contract](@/api/reference/#comparewithfixture) for errors and cancellation.

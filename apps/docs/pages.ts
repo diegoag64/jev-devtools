@@ -17,7 +17,7 @@ export const pages: Page[] = [
     slug: "",
     title: "Introduction",
     description:
-      "See what your Jev calls are doing. A local development inspector for TypeSafe applications.",
+      "Inspect TypeSafe requests and application flows during local development.",
     group: "Getting started",
     file: "introduction.md",
   },
@@ -31,9 +31,8 @@ export const pages: Page[] = [
   },
   {
     slug: "concepts",
-    title: "How it fits together",
-    description:
-      "Understand the client, recorder, and drawer before connecting them to your application.",
+    title: "Concepts",
+    description: "Understand requests, flows, and how data reaches the drawer.",
     group: "Getting started",
     file: "concepts.md",
   },
@@ -48,21 +47,13 @@ export const pages: Page[] = [
   {
     slug: "guides/flow-basics",
     title: "Flows from scratch",
-    description: "Learn each flow method with a small example, starting with ordinary application code.",
+    description: "Define and run a greeting flow, then inspect its steps.",
     group: "Guides",
     file: "flow-basics.md",
     tocLabels: {
-      "your-first-flow": "First flow",
-      "input-read-the-data-you-were-given": "input",
-      "task-run-your-own-code": "task()",
-      "jev-ask-a-question": "jev()",
-      "output-finish-with-a-result": "output()",
-      "if-choose-a-value-then-continue": "if()",
-      "branch-choose-how-to-finish": "branch()",
-      "parallel-do-independent-work-together": "parallel()",
-      "map-repeat-a-recipe-for-each-item": "map()",
-      "loop-repeat-until-a-condition-is-false": "loop()",
-      "give-steps-useful-names": "Step names",
+      "your-first-flow": "Run your first flow",
+      "add-a-greeting-task": "Add a task",
+      "inspect-the-greeting-flow": "Inspect the flow",
       "where-to-go-next": "Next steps",
     },
   },
@@ -70,7 +61,7 @@ export const pages: Page[] = [
     slug: "guides/flows",
     title: "Build a flow",
     description:
-      "Connect requests and application code in an inspectable, bounded flow.",
+      "Classify a message, select a team, and inspect the resulting flow.",
     group: "Guides",
     file: "flows.md",
   },
@@ -93,7 +84,8 @@ export const pages: Page[] = [
   {
     slug: "api/reference",
     title: "API glossary",
-    description: "Every public API in one place: imports, inputs, return values, examples, and types.",
+    description:
+      "Every public API in one place: imports, inputs, return values, examples, and types.",
     group: "API reference",
     file: "reference.md",
   },

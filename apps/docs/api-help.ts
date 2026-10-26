@@ -135,7 +135,7 @@ export const apiHelp: Record<string, Help> = {
       endpoint:
         "Same-origin inspector path. Defaults to /api/jev-devtools; must match the server adapter.",
       redactAdditionalSensitiveData:
-        "Mask supported personal fields in the display. Does not remove captured data. Unreleased; defaults to true.",
+        "Mask supported personal fields in the display. Does not remove captured data. Available since 0.5.0; defaults to true.",
     },
   ),
   adapterCreate: entry(

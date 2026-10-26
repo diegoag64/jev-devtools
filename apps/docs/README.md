@@ -62,7 +62,7 @@ Every page emits Open Graph and Twitter metadata in its static HTML, using its e
 
 ## Content direction and next steps
 
-See [the research and architecture notes](../../docs/documentation-site.md). This first pass includes onboarding, framework/privacy/troubleshooting guides, a full public API glossary with readable contracts and exact declarations, a beginner flow guide with checked examples for every operation, example links, and a separate agent page. The TypeSafe SDK itself and wire-protocol transport semantics remain separate references.
+See [the research and architecture notes](../../docs/documentation-site.md). This first pass includes onboarding, framework/privacy/troubleshooting guides, a full public API glossary with readable contracts and exact declarations, a greeting-flow tutorial and checked reference examples for every operation, example links, and a separate agent page. The TypeSafe SDK itself and wire-protocol transport semantics remain separate references.
 
 The hosted site is the primary human documentation. The original integration, flow, and Next.js documents remain detailed companion references with stable repository paths. READMEs and the landing page lead to the site; the bundled skill remains self-contained for installed-version/offline use. Update the affected companion guidance alongside API changes; the static changelog links prepared releases to GitHub release notes for verified publication status.
 
@@ -80,7 +80,7 @@ The header uses bundled GitHub Octicons and a star count fetched once per build 
 
 ## Method documentation style
 
-Use **Parameters** for positional arguments, **Options** or **Properties** for object fields, and **Props** for React component props. Method sections must show both input and return interfaces in tables with types. Distinguish a builder's expression reference from its resolved runtime value; do not imply that `FlowOutcome.value` has an inferred concrete public type. Explain each code example using its actual variables, operations, and result. Avoid vague labels such as “Part” or “What comes back.” Use short method names in on-page navigation through `tocLabels`, preserving existing heading IDs and deep links.
+Use **Parameters** for positional arguments, **Options** or **Properties** for object fields, and **Props** for React component props. API reference method sections must show both input and return interfaces in tables with types. Tutorials should build toward one concrete result, show expected output after each run, and link to those method contracts. Keep optional operations and exhaustive interface tables in the reference. Preserve old heading IDs when restructuring a tutorial. Distinguish a builder's expression reference from its resolved runtime value; do not imply that `FlowOutcome.value` has an inferred concrete public type. Explain each code example using its actual variables, operations, and result. Avoid vague labels such as “Part” or “What comes back.” Use short method names in on-page navigation through `tocLabels`, preserving existing heading IDs and deep links.
 
 Complete flow examples must pair the synchronous definition with an explicit `await program.run(...)`, concrete input, client setup (or a link to it), and use of the resolved outcome/value. Keep execution inside a callable async function so importing examples never triggers inference. Before Jev examples, explain that `flow.jev()` creates future-answer references and the runner awaits the SDK request. Label partial reference fragments with their required scope and link to a complete define-and-run example.
 
@@ -107,3 +107,17 @@ Command syntax follows the official [pnpm](https://pnpm.io/cli/add), [npm](https
 ### Brand assets
 
 `assets/logo.svg` reuses the landing page’s flow symbol (`landing/src/main.ts` on `codex/landing`). It inherits the docs text color so it stays light in dark mode and dark in light mode. The header uses the same `jevtools.` wordmark. `assets/favicon-light.svg` preserves the landing favicon geometry with a pale pink background and dark pink symbol. Both SVGs render without JavaScript; the favicon is copied at build time.
+
+## API link previews
+
+Links to individual glossary methods and public types get an adjacent preview button. Hovering or focusing the link opens a summary with **Open reference** and **Read in side panel** actions. Ordinary link activation keeps native navigation, including new-tab shortcuts. Touch users use the preview button. Escape, the close button, or the panel backdrop dismiss the panel and return focus to its source control without changing the guide URL or scroll position. Without JavaScript, links remain ordinary anchors.
+
+`api-previews.ts` derives summaries and per-entry HTML fragments from the same compiled glossary used for the reference page. Only known glossary entries are enhanced, and section links in fragments resolve to the full reference under the configured base path. The browser lazily fetches the metadata index on first use and each full entry on demand. Failed loads retain the full-page link and allow a retry. No external preview service is used.
+
+The panel namespaces IDs and accessibility references to coexist with the original glossary, preserves code help, and uses the shared delegated copy handler. Keep generated fragments free of application scripts. `verify-api-previews.mjs`, called by `verify:docs`, checks pointer/keyboard/touch access, native navigation, reader position, copy, focus restoration, ID uniqueness, and network-failure recovery. Run it with a subdirectory `DOCS_BASE` when changing link resolution.
+
+Inside the panel, links to known API entries replace the current entry. **Back** retraces that panel session and restores the previous entry’s scroll position, expanded declarations, and source link focus. Closing resets this history; the guide URL, browser history, and guide scroll stay unchanged. **Open full reference**, links outside the API entries, and modified link activation retain normal navigation. Entry links carry their build-time titles so exploration also works when the summary index cannot load.
+
+Within the reading panel, links to the open entry use `aria-current="location"`, muted styling, and a visible “current” label. Recompute this indication for every loaded entry, including Back navigation; keep other API links and the explicit full-page action available.
+
+Opening search dispatches `docs:search-open` before showing its dialog. The reference panel dismisses itself and any link preview, then lets search own focus. This also releases the guide’s scroll lock for same-page glossary results. The browser checks cover both keyboard shortcuts, cancelling search, and selecting a glossary result without leaving the document.
