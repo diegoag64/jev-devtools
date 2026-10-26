@@ -227,7 +227,7 @@ function browser(t: TestContext) {
     close() {
       this.closed = true;
     }
-    send(data: FlowUpdate) {
+    send(data: unknown) {
       this.dispatchEvent(
         new MessageEvent("flows", { data: JSON.stringify(data) }),
       );
@@ -349,3 +349,100 @@ test("native flow reconnect discards pending updates and replaces cached definit
   t.mock.timers.tick(1000);
   assert.equal(sources[1].closed, true);
 });
+
+const wireDefinition = {
+  version: 1,
+  id: "definition",
+  name: "flow",
+  nodes: [{ id: "done", kind: "output", dependencies: [], path: [] }],
+};
+const wireRun = {
+  version: 1,
+  id: "run",
+  definitionId: "definition",
+  name: "flow",
+  startedAt: 1,
+  status: "success",
+  steps: {
+    done: { id: "done", executionId: "execution", status: "completed" },
+  },
+};
+for (const [name, patch] of Object.entries({
+  "unsupported version": { version: 2 },
+  "nonstring retained ID": { order: [7] },
+  "empty definition ID": { definitions: [{ ...wireDefinition, id: "" }] },
+  "invalid run status": { upserts: [{ ...wireRun, status: "done" }] },
+  "invalid warning metadata": {
+    upserts: [{ ...wireRun, captureWarnings: [null] }],
+  },
+  "missing steps": { upserts: [{ ...wireRun, steps: undefined }] },
+  "invalid nested step": { upserts: [{ ...wireRun, steps: { done: null } }] },
+  "invalid nested node": {
+    definitions: [{ ...wireDefinition, nodes: [null] }],
+  },
+  "invalid node dependencies": {
+    definitions: [
+      {
+        ...wireDefinition,
+        nodes: [{ ...wireDefinition.nodes[0], dependencies: null }],
+      },
+    ],
+  },
+  "duplicate definition IDs": { definitions: [wireDefinition, wireDefinition] },
+  "duplicate run IDs": { upserts: [wireRun, wireRun] },
+  "unretained upsert": { order: [] },
+  "mismatched step ID": {
+    upserts: [
+      { ...wireRun, steps: { done: { ...wireRun.steps.done, id: "other" } } },
+    ],
+  },
+  "unknown step": {
+    upserts: [
+      { ...wireRun, steps: { other: { ...wireRun.steps.done, id: "other" } } },
+    ],
+  },
+  "invalid collection": {
+    upserts: [
+      {
+        ...wireRun,
+        steps: {
+          done: {
+            ...wireRun.steps.done,
+            collection: { total: 1, concurrency: 1, items: [null] },
+          },
+        },
+      },
+    ],
+  },
+})) {
+  test(`flow boundary rejects ${name} and ignores the closed source before retry`, (t) => {
+    const { sources, paint } = browser(t);
+    const histories: FlowHistory[] = [];
+    const stop = connectFlowStream("/api/jev", (h) => histories.push(h));
+    t.after(stop);
+    const valid = {
+      version: 1,
+      definitions: [wireDefinition],
+      upserts: [wireRun],
+      order: ["run"],
+    };
+    sources[0].send(valid);
+    paint();
+    sources[0].send(valid); // A pending valid publication is cancelled too.
+    sources[0].send({ ...valid, ...patch });
+    assert.equal(sources[0].closed, true);
+    sources[0].send(valid); // Even before the retry creates its replacement.
+    paint();
+    t.mock.timers.tick(100);
+    assert.equal(histories.length, 1);
+    t.mock.timers.tick(900);
+    assert.equal(sources.length, 2);
+    sources[1].send({
+      ...valid,
+      definitions: [{ ...wireDefinition, name: "fresh" }],
+    });
+    paint();
+    assert.equal(histories.length, 2);
+    assert.equal(histories[1].definitions[0].name, "fresh");
+  });
+}
