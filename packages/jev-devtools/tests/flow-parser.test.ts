@@ -265,6 +265,30 @@ test("collection maximum and JSON depth/width bounds match captured producer val
   assert.throws(() => apply(valid));
 });
 
+for (const count of [256, 257]) {
+  test(`public producer round-trips ${count} parallel lanes sharing a predecessor`, async () => {
+    const names = Array.from({ length: count }, (_, i) => `lane${i}`);
+    const flow = defineJevFlow("many empty lanes", (f) => {
+      const previous = f.task("previous", { input: 1, run: (input) => input });
+      const lanes = Object.fromEntries(
+        names.map((name) => [name, () => previous]),
+      );
+      const joined = f.parallel("join", lanes);
+      return f.output("done", joined.lane0);
+    });
+    const parsed = await captured(flow);
+    const definition = [...parsed.definitions.values()][0];
+    const join = definition.nodes.find((node) => node.id === "join")!;
+    assert.equal(definition.nodes.length, 3);
+    assert.deepEqual(join.lanes, names);
+    assert.deepEqual(
+      join.dependencies,
+      names.map(() => "previous"),
+    );
+    assert.equal([...parsed.runs.values()][0].value, 1);
+  });
+}
+
 test("parallel joins may precede dependencies and empty lanes may reuse a predecessor", async () => {
   const flow = defineJevFlow("parallel and merge", (f) => {
     const previous = f.task("previous", { input: 1, run: (input) => input });

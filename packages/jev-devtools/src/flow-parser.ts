@@ -96,7 +96,8 @@ function definitionCheck(): Check<FlowDefinition> {
             "parallel",
             "output",
           ),
-          dependencies: array(id, 256),
+          // Empty parallel lanes can repeat a predecessor without adding nodes.
+          dependencies: array(id),
           path: array(text, 256),
           title: optional(text),
           description: optional(text),
@@ -104,7 +105,7 @@ function definitionCheck(): Check<FlowDefinition> {
           merge: optional(shape({ condition: id, then: id, else: id })),
           conditionRule: optional(json),
           conditionCaptureWarnings: optional(strings),
-          lanes: optional(array(text, 256)),
+          lanes: optional(array(text)),
           itemDefinition: optional(definition(depth + 1)),
         })(value) &&
         (!value.itemDefinition ||
