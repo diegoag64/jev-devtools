@@ -1,35 +1,14 @@
-// Run from repository root after npm run build:package. Local sample checks only.
+import { browserOutput } from "../../scripts/cookbook-browser-context.mjs";
+// Run via npm run verify:cookbooks -- --only function-calling.
 import assert from "node:assert/strict";
-import { spawn, execFileSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { once } from "node:events";
-import { mkdir, writeFile, rm, readFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { chromium } from "playwright";
-const lock = "/private/tmp/jev-cookbook-verification.lock";
-const evidence = "benchmarks/results/function-calling/browser";
-try {
-  await mkdir(lock);
-} catch (error) {
-  if (error.code === "EEXIST")
-    throw new Error(
-      `Verification lock occupied: ${await readFile(`${lock}/owner.json`, "utf8")}`,
-    );
-  throw error;
-}
+const evidence = browserOutput();
 let browser, server, context;
 let log = "";
 try {
-  await writeFile(
-    `${lock}/owner.json`,
-    JSON.stringify({
-      thread: process.env.CODEX_THREAD_ID ?? "function-calling browser check",
-      branch: execFileSync("git", ["branch", "--show-current"], {
-        encoding: "utf8",
-      }).trim(),
-      worktree: process.cwd(),
-      pid: process.pid,
-      purpose: "function-calling browser verification",
-    }),
-  );
   await mkdir(evidence, { recursive: true });
   server = spawn(
     process.execPath,
@@ -222,5 +201,4 @@ try {
     await exited;
   }
   await writeFile(`${evidence}/server.log`, log).catch(() => {});
-  await rm(lock, { recursive: true });
 }

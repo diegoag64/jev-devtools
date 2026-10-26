@@ -1,3 +1,4 @@
+import { browserOutput } from "./cookbook-browser-context.mjs";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
@@ -5,10 +6,9 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
-// Run while holding /private/tmp/jev-cookbook-verification.lock, as required
-// when multiple cookbook worktrees share the playground's fixed local port.
+// Run via npm run verify:cookbooks -- --only confidence-fallback.
 const root = fileURLToPath(new URL("../", import.meta.url));
-const output = `${root}benchmarks/results/confidence-fallback`;
+const output = browserOutput();
 await mkdir(output, { recursive: true });
 const server = spawn(
   process.execPath,

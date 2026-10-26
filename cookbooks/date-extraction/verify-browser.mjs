@@ -1,4 +1,5 @@
-// Run under the shared cookbook verification lock after building the package.
+import { browserOutputURL } from "../../scripts/cookbook-browser-context.mjs";
+// Run via npm run verify:cookbooks -- --only date-extraction.
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
@@ -6,10 +7,7 @@ import { once } from "node:events";
 import { mkdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../../", import.meta.url));
-const output = new URL(
-  "../../benchmarks/results/date-extraction/browser/",
-  import.meta.url,
-);
+const output = browserOutputURL();
 await mkdir(output, { recursive: true });
 const server = spawn(
   process.execPath,

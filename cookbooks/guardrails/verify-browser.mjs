@@ -1,12 +1,13 @@
+import { browserOutput } from "../../scripts/cookbook-browser-context.mjs";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
 import { chromium } from "playwright";
 
-// Run from the repository root while holding the shared cookbook verification lock.
+// Run via npm run verify:cookbooks -- --only guardrails.
 // No live transport is enabled or used. Evidence stays ignored.
-const evidence = "benchmarks/results/guardrails/browser";
+const evidence = browserOutput();
 await mkdir(evidence, { recursive: true });
 const root = fileURLToPath(new URL("../../apps/playground/", import.meta.url));
 let server, browser, page;

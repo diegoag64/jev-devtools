@@ -1,18 +1,16 @@
-import { spawn, execFileSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import {
-  mkdir,
-  readFile,
-  writeFile,
-  readdir,
-  lstat,
-  readlink,
-} from "node:fs/promises";
+import { readFile, writeFile, readdir } from "node:fs/promises";
 import { createWriteStream } from "node:fs";
 import { once } from "node:events";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { npm, npmCommand, runtimeEnv } from "./runtime.mjs";
+import {
+  snapshotSource,
+  assertSameSource,
+  createEvidenceDirectory,
+} from "./verification-evidence.mjs";
 import { checkReceiptScope } from "./receipt-scope.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -24,41 +22,12 @@ const receipts = args.includes("--receipts");
 // Gate before any build/test. Include committed, staged, unstaged and untracked
 // changes since the merge base, so a clean index cannot hide broader work.
 const scope = receipts ? checkReceiptScope(root) : undefined;
-const git = (...args) => execFileSync("git", args, { encoding: "utf8" });
-async function sourceHash() {
-  const files = new Set(
-    git("ls-files", "-z", "--cached", "--others", "--exclude-standard")
-      .split("\0")
-      .filter(Boolean),
-  );
-  const hash = createHash("sha256");
-  for (const path of [...files].sort()) {
-    hash.update(path + "\0");
-    try {
-      const info = await lstat(path);
-      hash.update(String(info.mode) + "\0");
-      hash.update(
-        info.isSymbolicLink() ? await readlink(path) : await readFile(path),
-      );
-    } catch (error) {
-      if (error.code !== "ENOENT") throw error;
-      hash.update("<deleted>");
-    }
-    hash.update("\0");
-  }
-  return hash.digest("hex");
-}
-const output = join(
-  root,
-  "benchmarks/results/verification",
-  `${new Date().toISOString().replaceAll(":", "-")}-${process.pid}`,
-);
-await mkdir(output, { recursive: true });
+const output = await createEvidenceDirectory(root, "verification");
+const initialSource = await snapshotSource(root);
 const report = {
   mode: receipts ? "receipts" : "full",
   ...(scope ? { scope } : {}),
-  revision: git("rev-parse", "HEAD").trim(),
-  sourceHash: await sourceHash(),
+  ...initialSource,
   node: { version: process.versions.node, executable: process.execPath },
   npm: npm(["--version"], { encoding: "utf8" }).trim(),
   typescript: JSON.parse(
@@ -198,6 +167,7 @@ try {
       "verify:nextjs",
       "verify:drawer",
       "verify:flows",
+      "verify:cookbooks",
       "verify:docs",
     ]) {
       await runNpm(name.replaceAll(":", "-"), ["run", name], {
@@ -207,15 +177,10 @@ try {
     }
   }
   await run("diff-check", "git", ["diff", "--check"]);
-  report.finalSourceHash = await sourceHash();
-  if (
-    report.finalSourceHash !== report.sourceHash ||
-    git("rev-parse", "HEAD").trim() !== report.revision
-  ) {
-    throw new Error(
-      "Source revision or contents differ between the start and end of verification; rerun with the checkout unchanged.",
-    );
-  }
+  const finalSource = await snapshotSource(root);
+  report.finalSourceHash = finalSource.sourceHash;
+  report.finalRevision = finalSource.revision;
+  assertSameSource(initialSource, finalSource);
   report.status = "passed";
 } catch (error) {
   report.status = "failed";

@@ -1,11 +1,12 @@
-// Local sample integration check. Acquire the shared cookbook verification lock before running.
+import { browserOutput } from "./cookbook-browser-context.mjs";
+// Run via npm run verify:cookbooks -- --only line-search.
 import { spawn } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createWriteStream } from "node:fs";
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
 
-const output = "benchmarks/results/line-search/browser";
+const output = browserOutput();
 await mkdir(output, { recursive: true });
 const log = createWriteStream(`${output}/server.log`);
 const server = spawn(
@@ -14,7 +15,6 @@ const server = spawn(
   {
     cwd: "apps/playground",
     env: { ...process.env, TYPESAFE_API_KEY: "" },
-    detached: true,
     stdio: ["ignore", "pipe", "pipe"],
   },
 );
@@ -182,12 +182,12 @@ try {
 } finally {
   await browser?.close();
   try {
-    process.kill(-server.pid, "SIGTERM");
+    server.kill("SIGTERM");
   } catch (error) {
     if (error.code !== "ESRCH") throw error;
   }
   await new Promise((resolve) => {
-    if (server.exitCode !== null) resolve();
+    if (server.exitCode !== null || server.signalCode !== null) resolve();
     else server.once("exit", resolve);
   });
   log.end();

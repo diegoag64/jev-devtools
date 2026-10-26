@@ -1,43 +1,20 @@
-// Run after npm run build:package. All browser/server work uses the shared lock.
+import { browserOutput } from "../../scripts/cookbook-browser-context.mjs";
+// Run via npm run verify:cookbooks -- --only pre-parsed-extraction.
 import assert from "node:assert/strict";
-import { mkdir, readFile, writeFile, rm } from "node:fs/promises";
-import { execFileSync } from "node:child_process";
+import { mkdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { createServer } from "vite";
 import { chromium } from "playwright";
 const root = fileURLToPath(new URL("../../", import.meta.url));
-const lock = "/private/tmp/jev-cookbook-verification.lock";
-let reportedOwner = "";
-for (;;) {
-  try {
-    await mkdir(lock);
-    break;
-  } catch (error) {
-    if (error.code !== "EEXIST") throw error;
-    const owner = await readFile(join(lock, "owner.json"), "utf8").catch(
-      () => "owner initializing",
-    );
-    if (!process.argv.includes("--wait"))
-      throw new Error(`Verification lock occupied: ${owner}`);
-    if (owner !== reportedOwner)
-      console.log(`Waiting for verification lock: ${owner}`);
-    reportedOwner = owner;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-}
 let server, browser, context;
-const output = join(root, "benchmarks/results/pre-parsed-extraction/browser");
+const output = browserOutput();
 const cleanup = async () => {
   try {
     await context?.close();
     await browser?.close();
   } finally {
-    try {
-      await server?.close();
-    } finally {
-      await rm(lock, { recursive: true });
-    }
+    await server?.close();
   }
 };
 for (const signal of ["SIGINT", "SIGTERM"])
@@ -45,19 +22,6 @@ for (const signal of ["SIGINT", "SIGTERM"])
     void cleanup().finally(() => process.exit(1));
   });
 try {
-  await writeFile(
-    join(lock, "owner.json"),
-    JSON.stringify({
-      thread: process.env.CODEX_THREAD_ID ?? "pre-parsed-extraction",
-      branch: execFileSync("git", ["branch", "--show-current"], {
-        cwd: root,
-        encoding: "utf8",
-      }).trim(),
-      worktree: root,
-      pid: process.pid,
-      purpose: "pre-parsed extraction browser verification",
-    }),
-  );
   await mkdir(output, { recursive: true });
   await writeFile(
     join(output, "summary.json"),

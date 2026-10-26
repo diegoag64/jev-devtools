@@ -1,11 +1,12 @@
+import { browserOutput } from "../../scripts/cookbook-browser-context.mjs";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { chromium } from "playwright";
 
-// Run from the repository root while holding the shared cookbook verification lock.
-const output = "benchmarks/results/citation-checking";
+// Run via npm run verify:cookbooks -- --only citation-checking.
+const output = browserOutput();
 await mkdir(output, { recursive: true });
 const server = spawn(
   process.execPath,

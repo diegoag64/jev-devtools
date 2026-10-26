@@ -1,11 +1,12 @@
-// Run after build:package while holding /private/tmp/jev-cookbook-verification.lock.
+import { browserOutput } from "./cookbook-browser-context.mjs";
+// Run via npm run verify:cookbooks -- --only collection.
 // This checks shared registration/state/transport boundaries; recipe scripts own fidelity checks.
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
 import { chromium } from "playwright";
-const output = "benchmarks/results/cookbook-collection";
+const output = browserOutput();
 const root = fileURLToPath(new URL("../apps/playground/", import.meta.url));
 const recipes = [
   ["parallel-questions", "flow-parallel-questions", "parallelQuestionsCase"],

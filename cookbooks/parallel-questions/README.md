@@ -26,3 +26,5 @@ The original prices recorded token usage and compares the sum of 13 sequential s
 Cancellation stops queued requests and later repeats, without returning a partial success. Capture previews remain bounded by the public recorder's limits; the application result retains every answer independently of those previews. The cookbook and fixtures live in the repository, outside the published library. No public API or package CSS change is required.
 
 Implementation: `flow.ts`; fixed document and choices: `cases.ts`; authored responses and strict transport: `samples.ts`; tests: `../../apps/playground/tests/parallel-questions.test.ts`.
+
+Run `npm run verify:cookbooks -- --only parallel-questions` to reproduce the browser checks for all answer details, nested request inspection, sample guards, cancellation and mobile layout. The shared runner saves each run’s source-bound evidence under a unique ignored `benchmarks/results/cookbook-browser/` directory.

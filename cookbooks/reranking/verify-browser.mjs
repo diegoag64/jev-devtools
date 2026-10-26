@@ -1,11 +1,11 @@
-// Run from the repository root after building the package, while holding the shared
-// cookbook verification lock. All evidence stays in ignored benchmarks/results/.
+import { browserOutput } from "../../scripts/cookbook-browser-context.mjs";
+// Run via npm run verify:cookbooks -- --only reranking.
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { chromium } from "playwright";
 import { createServer } from "vite";
-const output = resolve("benchmarks/results/reranking/browser");
+const output = browserOutput();
 await mkdir(output, { recursive: true });
 let server, browser, context;
 try {

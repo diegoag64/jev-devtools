@@ -20,4 +20,6 @@ The application result provides top matches and **All 218 line options** with co
 
 Focused tests: `node --import tsx --test apps/playground/tests/line-search.test.ts` after `npm run build:package`. They execute the public flow, protect request count/order and exact prompts, exercise threshold routes and rejection, and verify complete ID/text/probability lookup against the pinned source.
 
-Browser integration: `node scripts/verify-line-search.mjs` starts and stops its own sample server on port 4182, visits every case, verifies all line options, and saves local screenshots under ignored `benchmarks/results/line-search/browser/`. Serialize browser and full-verification runs with the shared cookbook lock described in the batch workflow.
+Browser integration: `npm run verify:cookbooks -- --only line-search` starts and stops its own sample server on port 4182, visits every case, verifies all line options, and saves local screenshots under ignored `benchmarks/results/line-search/browser/`. Serialize browser and full-verification runs with the shared cookbook lock described in the batch workflow.
+
+Browser verification runs through the shared runner: `npm run verify:cookbooks -- --only line-search`. It owns the server/lock lifecycle and saves each run’s source-bound evidence under a unique ignored `benchmarks/results/cookbook-browser/` directory.

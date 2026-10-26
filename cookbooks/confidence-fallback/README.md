@@ -25,4 +25,6 @@ See [provenance.json](provenance.json) for the pinned upstream commit, URLs, has
 
 The focused tests in `apps/playground/tests/confidence-fallback.test.ts` run the real SDK through the public flow, pin source data, protect the cutoff and separate confidence/probability semantics, and reject mismatched samples. Full verification follows [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
-For browser verification, build the package and run `node scripts/verify-confidence-cookbook.mjs` while holding the shared `/private/tmp/jev-cookbook-verification.lock` (atomic `mkdir`, owner metadata, cleanup in `finally`/shell trap). It owns and stops its temporary Vite server, checks all cases and server restrictions, and writes screenshots under `benchmarks/results/confidence-fallback/`.
+For browser verification, build the package and run `npm run verify:cookbooks -- --only confidence-fallback` while holding the shared `/private/tmp/jev-cookbook-verification.lock` (atomic `mkdir`, owner metadata, cleanup in `finally`/shell trap). It owns and stops its temporary Vite server, checks all cases and server restrictions, and writes screenshots under `benchmarks/results/confidence-fallback/`.
+
+Browser verification runs through the shared runner: `npm run verify:cookbooks -- --only confidence-fallback`. It owns the server/lock lifecycle and saves each run’s source-bound evidence under a unique ignored `benchmarks/results/cookbook-browser/` directory.

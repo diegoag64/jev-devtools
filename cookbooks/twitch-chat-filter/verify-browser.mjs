@@ -1,10 +1,11 @@
-// Run from repository root after build:package, while holding the shared cookbook verification lock.
+import { browserOutput } from "../../scripts/cookbook-browser-context.mjs";
+// Run via npm run verify:cookbooks -- --only twitch-chat-filter.
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createServer } from "vite";
 import { chromium } from "playwright";
-const output = resolve("benchmarks/results/twitch-browser");
+const output = browserOutput();
 await mkdir(output, { recursive: true });
 const server = await createServer({
   root: resolve("apps/playground"),

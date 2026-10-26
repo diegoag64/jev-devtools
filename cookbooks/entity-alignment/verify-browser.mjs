@@ -1,39 +1,16 @@
-// Run after npm run build:package. Serialize with the other cookbook checks.
+import { browserOutputURL } from "../../scripts/cookbook-browser-context.mjs";
+// Run via npm run verify:cookbooks -- --only entity-alignment.
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { mkdir, readFile, writeFile, rm } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { createWriteStream } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { setTimeout as delay } from "node:timers/promises";
 const root = fileURLToPath(new URL("../../", import.meta.url));
-const lock = "/private/tmp/jev-cookbook-verification.lock";
-const output = new URL(
-  "../../benchmarks/results/entity-alignment/",
-  import.meta.url,
-);
-try {
-  await mkdir(lock);
-} catch (error) {
-  if (error.code === "EEXIST")
-    console.error(
-      await readFile(`${lock}/owner.json`, "utf8").catch(
-        () => "Verification lock occupied",
-      ),
-    );
-  throw error;
-}
+const output = browserOutputURL();
 let server, browser;
 try {
-  await writeFile(
-    `${lock}/owner.json`,
-    JSON.stringify({
-      thread: "01a17664-50db-7923-b964-051785213355",
-      branch: "codex/cookbook-entity-alignment",
-      worktree: root,
-      pid: process.pid,
-    }),
-  );
   await mkdir(output, { recursive: true });
   const log = createWriteStream(new URL("server.log", output));
   server = spawn(
@@ -46,7 +23,6 @@ try {
     ],
     {
       cwd: `${root}apps/playground`,
-      detached: true,
       stdio: ["ignore", "pipe", "pipe"],
     },
   );
@@ -207,8 +183,7 @@ try {
 } finally {
   await browser?.close();
   if (server?.pid && server.exitCode === null) {
-    process.kill(-server.pid, "SIGTERM");
+    server.kill("SIGTERM");
     await new Promise((resolve) => server.once("exit", resolve));
   }
-  await rm(lock, { recursive: true });
 }

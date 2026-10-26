@@ -1,11 +1,12 @@
-// Run after acquiring the shared cookbook verification lock; owns its server.
+import { browserOutputURL } from "../../scripts/cookbook-browser-context.mjs";
+// Run via npm run verify:cookbooks -- --only consistency-choices.
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { mkdir, writeFile } from "node:fs/promises";
 import { chromium } from "playwright";
 const root = new URL("../../", import.meta.url);
-const evidence = new URL("benchmarks/results/consistency-choices/", root);
+const evidence = browserOutputURL();
 await mkdir(evidence, { recursive: true });
 const env = { ...process.env, TYPESAFE_API_KEY: "" };
 const server = spawn(

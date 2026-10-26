@@ -59,6 +59,7 @@ jobs:
       - run: npx playwright install chromium --only-shell
       - run: npm run verify:drawer
       - run: npm run verify:flows
+      - run: npm run verify:cookbooks
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -66,6 +67,7 @@ jobs:
           path: |
             benchmarks/results/flows/**/*.png
             benchmarks/results/flows/**/server.log
+            benchmarks/results/cookbook-browser/**
           if-no-files-found: ignore
           retention-days: 7
 
