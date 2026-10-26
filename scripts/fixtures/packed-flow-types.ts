@@ -35,7 +35,9 @@ export const optionalCount: FlowExpression<number | undefined> = data
   .get("nested")
   .get("count");
 export const arrayItem: FlowExpression<number> = data.get("values").get(0);
-export const arrayLength: FlowExpression<number> = data.get("values").get("length");
+export const arrayLength: FlowExpression<number> = data
+  .get("values")
+  .get("length");
 export const tupleItem: FlowExpression<"first"> = data.get("pair").get(0);
 export const tupleLength: FlowExpression<2> = data.get("pair").get("length");
 // @ts-expect-error selecting an optional field must preserve undefined
@@ -45,16 +47,15 @@ export const numericLabel: FlowExpression<number> = nestedLabel;
 // @ts-expect-error object keys still come from the input shape
 data.get("missing");
 
-declare const objectUnion: FlowExpression<{ value: string } | { value: number }>;
+declare const objectUnion: FlowExpression<
+  { value: string } | { value: number }
+>;
 export const unionField: FlowExpression<string | number> =
   objectUnion.get("value");
 export function selectField<
   T extends object,
-  K extends keyof T & (string | number),
->(
-  value: FlowExpression<T>,
-  key: K,
-): FlowExpression<T[K]> {
+  K extends keyof T & Parameters<FlowExpression<T>["get"]>[0],
+>(value: FlowExpression<T>, key: K): FlowExpression<T[K]> {
   return value.get(key);
 }
 

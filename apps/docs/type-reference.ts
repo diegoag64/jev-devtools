@@ -33,6 +33,10 @@ const descriptions: Record<string, string> = {
 };
 
 const supportingDescriptions: Record<string, string> = {
+  Scalar:
+    "The value types accepted by flow equality: string, number, boolean, and null. Execution also requires matching types and finite numbers.",
+  ExpressionFields:
+    "The fields available to get(): object fields, or array indices and length. Common keys across union members remain selectable; missing values still fail during execution.",
   FlowNode:
     "One step in a flow’s static graph, including its kind, dependencies, and any nested item program. Optional conditionCaptureWarnings describe limitations in captured conditionRule data. The inspector uses these nodes to display the recipe.",
   FlowCondition:
