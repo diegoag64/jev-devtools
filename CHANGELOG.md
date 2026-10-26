@@ -28,7 +28,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **Function calling cookbook.** Explore a proposed tool call from a batched request, with selected-argument branches, omitted defaults, set membership and source-faithful confidence arithmetic. Synthetic samples only; no tool execution.
+- **Function calling cookbook.** Explore a proposed tool call from a batched request, with selected-argument branches, omitted defaults, set membership and source-faithful confidence arithmetic. Synthetic samples only; no tool execution. ([#115](https://github.com/diegoag64/jev-devtools/pull/115))
 
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
