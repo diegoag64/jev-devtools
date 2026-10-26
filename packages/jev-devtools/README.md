@@ -2,156 +2,162 @@
 
 [![npm version 0.5.4](https://img.shields.io/badge/npm-v0.5.4-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.5.4)
 
-A React drawer and Node adapter for inspecting TypeSafe Jev requests with animated diagrams. Includes request history, context, questions, typed answers, transport attempts, and raw snapshots.
+A React inspector for TypeSafe Jev requests captured through a Node server adapter. Inspect request inputs, returned answers and probabilities, retries, and errors. Use the optional Flow API to connect requests and application steps in a diagram.
 
-**Package version: 0.5.4.** [See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.4) Check the [release history](https://github.com/diegoag64/jev-devtools/blob/main/CHANGELOG.md) for compatibility notes. To try newer source changes, install the local archive below. **Experimental (pre-1.0).** React 18/19 and Node 22.12+ are supported. APIs may change before 1.0. Verification uses sample responses through the real TypeSafe SDK, not live inference.
-
-[Website](https://jevtools.dev/) · [Documentation](https://docs.jevtools.dev/) · [Quick start](https://docs.jevtools.dev/getting-started/) · [API reference](https://docs.jevtools.dev/api/reference/) · [Release history](https://docs.jevtools.dev/changelog/)
-
-Hosted docs update separately; use the installed declarations and bundled skill for your exact version, and the [repository changelog](https://github.com/diegoag64/jev-devtools/blob/main/CHANGELOG.md) for release-candidate status.
+[Website](https://jevtools.dev/) · [Documentation](https://docs.jevtools.dev/) · [API reference](https://docs.jevtools.dev/api/reference/) · [For AI agents](#for-ai-agents)
 
 ## Demo
 
-![Full 28-second Jev DevTools demo showing sample results, the request drawer, and animated diagrams.](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/docs/assets/jev-devtools-preview.gif)
+![Jev DevTools sample recording showing the request drawer and diagrams.](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/docs/assets/jev-devtools-preview.gif)
 
-The full sample recording loops above.
-
-## Set up with your coding agent
-
-In your application's coding-agent chat, paste:
-
-```text
-Set up jev-devtools in this React app. Read and follow:
-https://raw.githubusercontent.com/diegoag64/jev-devtools/main/packages/jev-devtools/skills/setup-jev-devtools/SKILL.md
-Choose the recipe for this app's framework, wire the server capture and root
-drawer, and verify with a labeled sample request. Preserve existing app behavior.
-```
-
-After installing, the version-matched instructions are available locally at `node_modules/jev-devtools/skills/setup-jev-devtools/SKILL.md` with all references included. In a workspace, read the package installed for the consuming app. Agents can follow these files without web access. Tools with skill support can install/copy the entire `setup-jev-devtools` folder into their supported skills location; npm does not register it automatically.
-
-The [setup skill](https://github.com/diegoag64/jev-devtools/blob/main/packages/jev-devtools/skills/setup-jev-devtools/SKILL.md) covers React/Node/Vite and Next.js App Router, with no-key sample verification and troubleshooting. A Node backend is required for live calls; browser-only apps can use a local Vite sample server. [Agent documentation index](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/llms.txt).
+The recording uses sample responses. Try the [sample apps and cookbooks](https://docs.jevtools.dev/examples/) without an API key. Cookbook application code and fixtures live in the repository and are not bundled in npm.
 
 ## Install
 
-Install from npm:
+Use matching React and React DOM **18.x or 19.x**, Node **22.12+**, TypeSafe SDK **0.7.x**, and ESM imports. TypeScript consumers need **5.4+** and compatible React and Node types. React and React DOM are required peers even in a server-only workspace. See [compatibility and public imports](https://github.com/diegoag64/jev-devtools/blob/main/docs/integration.md#compatibility-and-public-imports) for exact ranges and compiler settings.
+
+Install in each workspace that imports the package:
 
 ```sh
-pnpm add jev-devtools @typesafe-ai/sdk
+npm install jev-devtools @typesafe-ai/sdk
 ```
 
-Use ESM imports, matching React/React DOM **18.x or 19.x**, Node **22.12+**, and TypeSafe SDK **0.7.x**. TypeScript consumers need **5.4+** and compatible React/Node types. React and React DOM are required package peers even for server-only installations. See [compatibility and all public imports](https://github.com/diegoag64/jev-devtools/blob/main/docs/integration.md#compatibility-and-public-imports); `/server` and `/flow` run only on Node.
+Connect one React drawer, one shared Node adapter, and an instrumented client created with `inspector.createClient()`. Only calls through that client are captured. The drawer and adapter default to disabled. Enable both for development and keep API keys on the server.
 
-To try local changes before a future release:
+Choose the setup guide for your app:
+
+- [React with Node](https://docs.jevtools.dev/getting-started/) connects an existing Express server and a Vite React app, with proxy configuration and capture checks.
+- [Next.js App Router](https://docs.jevtools.dev/guides/nextjs/) uses `getJevDevtools` for a shared adapter, `handleNodeRoute` in an optional catch-all route, and a client component for the drawer. Externalize `@typesafe-ai/sdk` and keep `jev-devtools` bundled. The package does not require a Next.js dependency.
+
+Mount the drawer once near your app's root. It supplies its own styles inside a Shadow DOM boundary and requires no CSS import, Tailwind, or shadcn. The browser entry is safe for server rendering. Pan the Flow canvas by dragging, zoom by scrolling or pinching, or select **Fit**.
+
+### Runtime and access
+
+The inspector routes and application client must share one adapter in the same Node process. Keep `jev-devtools/server` and `jev-devtools/flow` on Node. Edge runtimes and history aggregation across distributed or serverless instances are unsupported.
+
+The drawer receives same-origin server-sent events, starting with a snapshot and then changed traces. Older client and server combinations can use full snapshots. Keep both on the same package version to inspect all supported flow steps. History is bounded to 50 calls in memory by default.
+
+Bind local development servers to `127.0.0.1`. Without `authorize`, Node middleware accepts only loopback connections. Web Request handlers cannot inspect the connection's address. Shared access and tunnels require real [authorization and access controls](https://github.com/diegoag64/jev-devtools/blob/main/docs/integration.md#history-and-access). Match the adapter's `origin` to the browser URL, and proxy the inspector endpoints when the frontend and backend use different ports.
+
+### Capture privacy
+
+Captures contain bounded, redacted copies of request context and answers. Application and SDK data remain unchanged. Diagrams show captured data and application-defined routing, not hidden model reasoning.
+
+Known credential fields and custom server redactions cannot be revealed in the drawer. Headers and client options are not captured. Arbitrary secrets in prose or unusual field names still need application-specific server redaction. See the [redaction policy and limits](https://github.com/diegoag64/jev-devtools/blob/main/docs/integration.md#redaction-policy).
+
+`redactAdditionalSensitiveData` defaults to `true` and masks supported email, phone, postal address, SSN, and card-number fields in the drawer. Set it to `false` on `JevDevtools` to disable that display masking, including in existing views. **Display masking does not remove captured data.** The underlying values remain in capture, stream, and browser memory. Use server-side redaction for data that must not reach the browser.
+
+### Versions and local builds
+
+**Package version: 0.5.4.** [See release notes for verified publication status](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.4). APIs remain experimental before 1.0. Check the [changelog](https://github.com/diegoag64/jev-devtools/blob/main/CHANGELOG.md) for compatibility and release status. Verification uses sample responses through the real TypeSafe SDK, not live inference.
+
+Hosted docs update separately. Prefer installed declarations and the bundled setup skill when the site's version differs from your package.
+
+<details>
+<summary>Try changes from a local checkout</summary>
+
+Pack the Jev DevTools repository, then install the archive in your app:
 
 ```sh
 # From the jev-devtools repository root:
 npm ci
 npm run pack:devtools
+
 # From the consuming app:
-npm install /absolute/path/to/jev-devtools-0.5.4.tgz
+npm install /absolute/path/to/jev-devtools/jev-devtools-0.5.4.tgz
 ```
 
-Mount once. The drawer loads its own styles; no CSS import is needed:
+Keep the drawer and server adapter on the same build.
 
-```tsx
-import { JevDevtools } from "jev-devtools";
+</details>
 
-<JevDevtools enabled={import.meta.env.DEV} defaultOpen={false} />;
-```
+<a id="connected-jev-flows-with-jev-devtoolsflow"></a>
 
-Create one shared Node adapter and instrumented client:
+## Connect requests with flows
+
+Define a flow on Node, then run it for each input. Typed answer references can feed later requests, conditions, and outputs. The API also supports server tasks, parallel steps, bounded collections, conditional paths that rejoin, and stateful loops.
+
+This example asks whether a message is ready for review. An application-defined threshold selects an outcome. Reuse the instrumented `jev` client and shared `inspector` from your server integration. Running this example with a live client makes an inference request:
 
 ```ts
-import { createJevDevtools } from "jev-devtools/server";
-
-const inspector = createJevDevtools({
-  enabled: process.env.NODE_ENV === "development",
-  origin: "http://localhost:3000",
-});
-const jev = inspector.createClient({ apiKey: process.env.TYPESAFE_API_KEY });
-app.use(inspector.middleware); // Mount at root, before fallback handlers.
-// Call jev.systemOne(...) in your application's handlers.
-// Call inspector.dispose() on shutdown.
-```
-
-Only calls through that client are captured. The React component subscribes via same-origin SSE, receiving an initial snapshot followed by changed traces. Older client/server combinations remain compatible through full snapshots. Both sides default to disabled. API keys remain server-side. Browser code is SSR-safe. The drawer uses a Shadow DOM boundary and its own stylesheet so host page selectors cannot alter its internal layout. No Tailwind or shadcn installation is required. Drag the Flow canvas to pan, scroll/pinch to zoom, or use Fit.
-
-History is bounded to 50 calls in memory by default. API routes and inspector endpoints must share an adapter instance; distributed processes and edge runtimes are not supported. Without `authorize`, the middleware accepts only loopback connections; Web Request handlers can't see the connection's address, so run those servers on `127.0.0.1`. Captures include bounded/redacted context and answers, not hidden model reasoning.
-
-Known credential fields are always redacted from DevTools captures; SDK and runtime data remain unchanged. The optional `<JevDevtools redactAdditionalSensitiveData={false} />` prop controls **display-only** masking of supported email, phone, postal address, SSN and card-number fields. It defaults to `true` and updates existing views immediately. These additional values still exist in capture/stream/browser memory while masked. Custom server redaction remains active, and neither credentials nor custom-redacted values can be revealed. Headers/options are not captured. See the [exact policy and limitations](https://github.com/diegoag64/jev-devtools/blob/main/docs/integration.md#redaction-policy); arbitrary secrets in prose and unusual field names still need application-specific redaction.
-
-For Next.js App Router, use `getJevDevtools(appKey, optionsFactory)` from `/server` to share an adapter across server reloads, expose `handleNodeRoute` through an optional catch-all Route Handler, and mount the root component in a client boundary. See the [Next.js guide](https://docs.jevtools.dev/guides/nextjs/) and runnable example. No Next dependency is required by this package.
-
-[Quick start](https://docs.jevtools.dev/getting-started/) · [Detailed integration and access controls](https://github.com/diegoag64/jev-devtools/blob/main/docs/integration.md) · [Repository and playground](https://github.com/diegoag64/jev-devtools)
-
-Jev DevTools is an independent, open-source community project. It is not affiliated with TypeSafe AI.
-
-MIT for project code. See bundled LICENSE and THIRD_PARTY_NOTICES.txt for original design attribution and TypeSafe branding.
-
-## Connected Jev flows with `jev-devtools/flow`
-
-Define calls, conditions, parallel checks, and named outcomes with `jev-devtools/flow`. The builder supports server function steps (`task`), runtime request factories, bounded collections (`map`), returning conditionals (`if`), stateful iteration (`loop`), and strict numeric `.gt()` comparisons. The drawer connects request diagrams, function results, selected paths, collection items, and loop iterations on one canvas. Existing single-request integrations remain supported.
-
-On the server, reuse the instrumented `jev` client and `inspector` from the setup above:
-
-```ts
+import { noul } from "@typesafe-ai/sdk";
 import { defineJevFlow } from "jev-devtools/flow";
 
 const review = defineJevFlow<{ message: string }>("review", (flow) => {
-  const decision = flow.jev(
-    "readiness",
-    {
-      state: flow.input,
-      questions: {
-        ready: { type: "noul", instructions: "Is this ready for review?" },
-      },
+  const readiness = flow.jev("readiness", {
+    state: flow.input,
+    questions: {
+      ready: noul("Does this message include enough detail to review?"),
     },
-    { title: "Assess readiness" },
-  );
+  });
 
-  return flow.branch(
-    "route",
-    {
-      when: decision.answer("ready").noul.gte(0.9), // Your application's policy.
-      then: (path) =>
-        path.output(
-          "ready",
-          { probability: decision.answer("ready").noul },
-          {
-            title: "Ready for review",
-            description: "Return readiness to the application.",
-          },
-        ),
-      else: (path) =>
-        path.output("manual-review", undefined, {
-          title: "Needs manual review",
-        }),
-    },
-    { title: "Require at least 90% readiness" },
-  );
+  return flow.branch("route", {
+    // Example application policy, not a threshold supplied by Jev.
+    when: readiness.answer("ready").noul.gte(0.9),
+    then: (path) => path.output("ready"),
+    else: (path) => path.output("needs-detail"),
+  });
 });
 
 const result = await review.run(
-  { message: "Please review my ticket." },
-  {
-    client: jev,
-    devtools: inspector,
-  },
+  { message: "Please review the attached proposal." },
+  { client: jev, devtools: inspector },
 );
-// Handle result.outcome in your app. The flow does not execute business actions.
+console.log(result.outcome); // "ready" or "needs-detail", depending on the answer.
 ```
 
-Define once in a Node module and run per request. Use `flow.parallel` for concurrent named lanes; downstream calls wait for every lane to succeed. `flow.branch` is terminal in its block; use `flow.if` when selected values feed shared downstream work. Tasks execute application code on Node with JSON-compatible inputs/results; maps and loops have explicit bounds. Runs have SDK retries and cooperative cancellation, with bounded in-memory inspector history. They do not provide durable or distributed execution. Keep the server and drawer on the same package version to inspect every supported step kind.
+Open **Jev DevTools**, select **Flows**, and open the run. Inspect the returned probability and the condition that selected the path. Untaken paths remain visible. The flow returns an outcome. Your application decides what to do with it.
 
-**Added in 0.5.0.** **Copy fixture** in the drawer saves a run as JSON, and `replayClient(fixture)` from `jev-devtools/flow` replays its Jev calls in tests with no network access or API key; tasks run again. `compareWithFixture` from `jev-devtools/flow` compares a live run's answers, routing and item steps with a saved fixture.
+Runs support SDK retries and cancellation, with bounded in-memory inspector history. They do not provide durable workflow execution. Learn the API in [Flows from scratch](https://docs.jevtools.dev/guides/flow-basics/) or look up contracts in the [flow reference](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md).
 
-[Beginner flow guide](https://docs.jevtools.dev/guides/flow-basics/) · [Flow API reference](https://docs.jevtools.dev/api/flow/) · [Detailed flow guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md) · [AI flow recipe](https://github.com/diegoag64/jev-devtools/blob/main/packages/jev-devtools/skills/setup-jev-devtools/references/flows.md)
+## Replay and compare runs
 
-To have your coding agent add a flow after installation:
+Replay and comparison require **0.5.0 or later**. Choose **Copy fixture** on a captured run to save its answers as JSON. `replayClient(fixture)` from `jev-devtools/flow` supplies those answers without Jev inference or an API key. Tasks run again and may call outside services.
+
+`compareWithFixture` compares answers, routing, and item steps with a saved fixture. It runs the flow with the supplied client and can make live calls. See the [Flow API reference](https://docs.jevtools.dev/api/flow/) for fixture requirements and complete examples.
+
+<a id="set-up-with-your-coding-agent"></a>
+
+## For AI agents
+
+Start with the `jev-devtools` version installed in the consuming app. Follow that app's project instructions and use its existing package manager. Choose guidance for the task:
+
+| Task                                                     | Instructions                                                                                                                                                                                                                                                     |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Install or troubleshoot the inspector                    | Read `node_modules/jev-devtools/skills/setup-jev-devtools/SKILL.md`. The [setup skill](https://github.com/diegoag64/jev-devtools/blob/main/packages/jev-devtools/skills/setup-jev-devtools/SKILL.md) selects the framework recipe and capture checks.            |
+| Build a flow                                             | Read `references/flows.md` inside the installed setup skill. The [flow recipe](https://github.com/diegoag64/jev-devtools/blob/main/packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) covers builders, execution, capture, replay, and limits. |
+| Convert existing Jev logic or check whether it fits Flow | Read [port-jev-to-flow](https://github.com/diegoag64/jev-devtools/blob/main/.agents/skills/port-jev-to-flow/SKILL.md) and its referenced guidance. It maps source behavior to public Flow APIs and records adaptations or unsupported behavior.                  |
+| Look up an API contract                                  | Read `lib/src/index.d.ts`, `lib/server/index.d.ts`, or `lib/flow/index.d.ts` inside the installed package. Use the [API reference](https://docs.jevtools.dev/api/reference/) for explanations and examples.                                                      |
+
+The setup skill and its references ship in npm. **The porting skill is repository-only.** Read it at `.agents/skills/port-jev-to-flow/SKILL.md` in a Jev DevTools checkout, or use its [raw Markdown](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/.agents/skills/port-jev-to-flow/SKILL.md). Resolve its `references/` links beside that file. For offline use, copy the whole `port-jev-to-flow` folder, including its references. Cookbook paths in the skill refer to the Jev DevTools repository.
+
+Check online guidance against the installed declarations before using an API. Read declaration files from disk, but import application code only through `jev-devtools`, `jev-devtools/server`, and `jev-devtools/flow`. The latter two run on Node. Internal files and `jev-devtools/package.json` are not application import paths.
+
+Use this prompt to set up an app after installing the package:
 
 ```text
-Read node_modules/jev-devtools/skills/setup-jev-devtools/SKILL.md and references/flows.md.
-Build a flow for the scenario I describe using the shared server client/inspector.
-Preserve my routing policies, add clear step titles/descriptions, and verify with
-labeled samples before using live inference. Ask for any missing decision rules.
+Read node_modules/jev-devtools/skills/setup-jev-devtools/SKILL.md
+from the package installed for this app, then follow its framework recipe.
+Preserve authentication, redaction, SDK options, and application behavior.
+Keep credentials on the server. Share one adapter between application calls
+and inspector routes in the same Node process.
+Verify a labeled sample in the drawer, run the app's typecheck and build,
+and check that capture and display are disabled in production.
+Report what passed, whether inference was sample or live, and any gaps.
 ```
+
+For a port, provide the source code or recipe and ask the agent to use `port-jev-to-flow`. Preserve question wording, request order and concurrency, thresholds, and external effects. Report unsupported behavior before changing it. Verify with labeled samples first. Live inference, publication, and deployment require separate authorization.
+
+npm does not register skills with coding tools automatically. Point the agent to the files explicitly, or install each complete skill folder using the tool's supported mechanism. Use [llms.txt](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/llms.txt) to find repository guidance and [the hosted Markdown index](https://docs.jevtools.dev/llms.txt) for docs pages. The [contributor instructions](https://github.com/diegoag64/jev-devtools/blob/main/AGENTS.md) apply when editing Jev DevTools itself.
+
+## Documentation and contributing
+
+Use the [documentation](https://docs.jevtools.dev/) for guides and API examples, and the [repository](https://github.com/diegoag64/jev-devtools/) for sample apps and cookbooks. See [Contributing](https://github.com/diegoag64/jev-devtools/blob/main/CONTRIBUTING.md) for repository setup, verification, and the pull request workflow. Merging, npm publication, and deployment each require explicit authorization.
+
+## Credits and license
+
+Inspired by the TanStack Query DevTools workflow, with a custom drawer and TanStack Virtual for the Questions list. The TanStack DevTools shell is not included. Diagram styling is based on [Cathryn Lavery's diagram-design](https://github.com/cathrynlavery/diagram-design).
+
+Jev DevTools is an independent, open-source community project. It is not affiliated with TypeSafe AI. TypeSafe branding belongs to its respective owner.
+
+Project code is MIT licensed. See the bundled `LICENSE` and `THIRD_PARTY_NOTICES.txt`, or read the repository's [license](https://github.com/diegoag64/jev-devtools/blob/main/LICENSE) and [third-party notices](https://github.com/diegoag64/jev-devtools/blob/main/THIRD_PARTY_NOTICES.txt).

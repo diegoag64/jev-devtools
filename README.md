@@ -12,7 +12,7 @@ Inspect request inputs, returned answers and probabilities, retries, and errors.
 [![MIT license](https://img.shields.io/badge/License-MIT-E551BA?labelColor=0D0A0F)](LICENSE)
 [![Status: experimental](https://img.shields.io/badge/Status-experimental-E551BA?labelColor=0D0A0F)](#add-to-your-app)
 
-[Website](https://jevtools.dev/) · [Documentation](https://docs.jevtools.dev/) · [API reference](https://docs.jevtools.dev/api/reference/)
+[Website](https://jevtools.dev/) · [Documentation](https://docs.jevtools.dev/) · [API reference](https://docs.jevtools.dev/api/reference/) · [For AI agents](#for-ai-agents)
 
 </div>
 
@@ -156,20 +156,39 @@ Use `compareWithFixture` to compare a run with saved answers, including routing 
 
 The [cookbook collection](cookbooks/README.md) contains runnable adaptations of official TypeSafe recipes, including passage classification, skill selection, structured extraction, and memory. The examples use Flow APIs available since **0.4.0** and labeled sample responses. They run from this repository without an API key. Cookbook application code and fixtures are not bundled in npm.
 
-## Set up with your coding agent
+<a id="set-up-with-your-coding-agent"></a>
 
-After installing, paste this into your coding agent while it has your app open:
+## For AI agents
+
+Start with the `jev-devtools` version installed in the consuming app. Follow that app's project instructions and use its existing package manager. Choose guidance for the task:
+
+| Task                                                     | Instructions                                                                                                                                                                                                 |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Install or troubleshoot the inspector                    | Read `node_modules/jev-devtools/skills/setup-jev-devtools/SKILL.md`. The [setup skill](packages/jev-devtools/skills/setup-jev-devtools/SKILL.md) selects the framework recipe and capture checks.            |
+| Build a flow                                             | Read `references/flows.md` inside the installed setup skill. The [flow recipe](packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) covers builders, execution, capture, replay, and limits. |
+| Convert existing Jev logic or check whether it fits Flow | Read [port-jev-to-flow](.agents/skills/port-jev-to-flow/SKILL.md) and its referenced guidance. It maps source behavior to public Flow APIs and records adaptations or unsupported behavior.                  |
+| Look up an API contract                                  | Read `lib/src/index.d.ts`, `lib/server/index.d.ts`, or `lib/flow/index.d.ts` inside the installed package. Use the [API reference](https://docs.jevtools.dev/api/reference/) for explanations and examples.  |
+
+The setup skill and its references ship in npm. **The porting skill is repository-only.** Read it at `.agents/skills/port-jev-to-flow/SKILL.md` in a Jev DevTools checkout, or use its [raw Markdown](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/.agents/skills/port-jev-to-flow/SKILL.md). Resolve its `references/` links beside that file. For offline use, copy the whole `port-jev-to-flow` folder, including its references. Cookbook paths in the skill refer to the Jev DevTools repository.
+
+Check online guidance against the installed declarations before using an API. Read declaration files from disk, but import application code only through `jev-devtools`, `jev-devtools/server`, and `jev-devtools/flow`. The latter two run on Node. Internal files and `jev-devtools/package.json` are not application import paths.
+
+Use this prompt to set up an app after installing the package:
 
 ```text
-Set up jev-devtools in this app. Read
-node_modules/jev-devtools/skills/setup-jev-devtools/SKILL.md
-and follow the recipe for React with Node or Next.js. Connect server capture
-and the root drawer, then verify with a labeled sample request.
-Preserve existing behavior. For connected flows, also read references/flows.md
-in that skill folder and preserve my routing rules.
+Read node_modules/jev-devtools/skills/setup-jev-devtools/SKILL.md
+from the package installed for this app, then follow its framework recipe.
+Preserve authentication, redaction, SDK options, and application behavior.
+Keep credentials on the server. Share one adapter between application calls
+and inspector routes in the same Node process.
+Verify a labeled sample in the drawer, run the app's typecheck and build,
+and check that capture and display are disabled in production.
+Report what passed, whether inference was sample or live, and any gaps.
 ```
 
-Use the package directory visible to your app for guidance that matches its installed version. The [bundled setup skill](packages/jev-devtools/skills/setup-jev-devtools/SKILL.md) includes framework recipes and sample verification. Tools that support installed skills can copy the whole `setup-jev-devtools` folder, including `references/`. npm does not register it automatically. [llms.txt](llms.txt) indexes the documentation.
+For a port, provide the source code or recipe and ask the agent to use `port-jev-to-flow`. Preserve question wording, request order and concurrency, thresholds, and external effects. Report unsupported behavior before changing it. Verify with labeled samples first. Live inference, publication, and deployment require separate authorization.
+
+npm does not register skills with coding tools automatically. Point the agent to the files explicitly, or install each complete skill folder using the tool's supported mechanism. Use [llms.txt](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/llms.txt) to find repository guidance and [the hosted Markdown index](https://docs.jevtools.dev/llms.txt) for docs pages. The [contributor instructions](AGENTS.md) apply when editing Jev DevTools itself.
 
 ## Documentation
 

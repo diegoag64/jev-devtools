@@ -39,6 +39,8 @@ Flow expression types now reject non-scalar equality and array method selection 
 
 #### Documentation
 
+- **Package README and AI agent guidance.** Rewrite the npm README around installation, runtime and privacy limits, and a shorter flow example. Add task-based AI agent sections to both READMEs and link the repository-only flow-porting skill from the docs agent guide, while preserving installed-version guidance and existing section links.
+
 - **README for new users.** Lead with request inspection and the no-key playground, link to complete framework setup guides, and introduce optional flows with one request and one branch. Preserve existing section links, compatibility requirements, security boundaries, and attribution.
 
 - **Shared porting skill.** Version `port-jev-to-flow` in the repository with semantic guidance, cookbook examples, and agent discovery links. The skill supports Jev-to-Flow ports and capability audits; npm contents and public APIs are unchanged. ([#124](https://github.com/diegoag64/jev-devtools/pull/124))
