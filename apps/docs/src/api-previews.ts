@@ -257,6 +257,18 @@ async function loadPanel(entry: PanelEntry, restore = false) {
       ".copy-code",
     ))
       button.hidden = false;
+    for (const link of template.content.querySelectorAll<HTMLAnchorElement>(
+      "a[data-api-entry]",
+    )) {
+      if (link.dataset.apiEntry !== id) continue;
+      link.setAttribute("aria-current", "location");
+      link.title = "Currently open in this panel";
+      const label = document.createElement("span");
+      label.className = "api-current-label";
+      label.setAttribute("aria-hidden", "true");
+      label.textContent = "current";
+      link.append(label);
+    }
     panelContent.replaceChildren(template.content);
     if (restore) {
       panelContent.querySelectorAll("details").forEach((details, index) => {

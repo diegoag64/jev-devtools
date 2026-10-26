@@ -24,6 +24,25 @@ export async function verifyApiPreviews({ browser, origin, base, evidence }) {
     .first();
   const popup = page.getByRole("dialog", { name: "API preview", exact: true });
   const panel = page.locator(".api-reference-panel");
+  async function assertCurrentEntry(id) {
+    const entries = await panel
+      .locator("a[data-api-entry]")
+      .evaluateAll((links) =>
+        links.map((link) => ({
+          id: link.dataset.apiEntry,
+          current: link.getAttribute("aria-current"),
+          labels: link.querySelectorAll(".api-current-label").length,
+        })),
+      );
+    assert.ok(
+      entries.some((entry) => entry.id === id),
+      "Entry has a self-link",
+    );
+    for (const entry of entries) {
+      assert.equal(entry.current, entry.id === id ? "location" : null);
+      assert.equal(entry.labels, entry.id === id ? 1 : 0);
+    }
+  }
   try {
     await page.goto(url);
     assert.ok(await link.count(), "API reference links offer previews");
@@ -78,6 +97,7 @@ export async function verifyApiPreviews({ browser, origin, base, evidence }) {
     await page.screenshot({
       path: resolve(evidence, "api-reference-panel.png"),
     });
+    await assertCurrentEntry("getjevdevtools");
     // Explore multiple references without adding browser history or losing place.
     const back = panel.getByRole("button", { name: /^Back to / });
     assert.equal(await back.count(), 0);
@@ -134,6 +154,7 @@ export async function verifyApiPreviews({ browser, origin, base, evidence }) {
         exact: true,
       })
       .waitFor();
+    await assertCurrentEntry("type-jevdevtoolsserveroptions");
     assert.ok(await panel.locator("details").evaluate((el) => el.open));
     assert.equal(await panel.evaluate((el) => el.scrollTop), typeScroll);
     assert.ok(
@@ -150,6 +171,7 @@ export async function verifyApiPreviews({ browser, origin, base, evidence }) {
     assert.equal(await panel.evaluate((el) => el.scrollTop), entryScroll);
     assert.ok(await createLink.evaluate((el) => el === document.activeElement));
     assert.equal(await back.count(), 0);
+    await assertCurrentEntry("getjevdevtools");
     // A self-link does not create a redundant Back entry.
     await panel.locator('a[data-api-entry="getjevdevtools"]').first().click();
     assert.equal(await back.count(), 0);

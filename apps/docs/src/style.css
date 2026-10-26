@@ -278,9 +278,8 @@ kbd {
   background: var(--surface);
 }
 .nav-group a[aria-current="page"] {
-  background: color-mix(in srgb, var(--tint), var(--accent) 16%);
-  color: var(--text);
-  box-shadow: inset 3px 0 var(--accent);
+  background: var(--tint);
+  color: var(--accent);
   font-weight: 600;
 }
 main {
@@ -1343,6 +1342,20 @@ dialog::backdrop {
 }
 .api-panel-content .heading-link {
   display: none;
+}
+.api-panel-content a[aria-current="location"] {
+  color: var(--muted);
+  text-decoration-style: dotted;
+}
+.api-current-label {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 10px;
+  line-height: 1.6;
+  vertical-align: middle;
 }
 .api-panel-content pre {
   max-width: 100%;

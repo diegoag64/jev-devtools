@@ -34,7 +34,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
-- **Clearer current page in the sidebar.** Strengthen the selected page’s background and text contrast and add an accent marker in both themes.
+- **Current API reference links.** Mute links inside the reading panel that point to its open entry and label them “current,” updating the indication when following references or going Back.
 
 - **Useful resource entry points.** Rewrite Examples & cookbooks with sample run instructions, expected results, and clearer cookbook descriptions. Rewrite For coding agents around the installed setup skill, version-matched contracts, Markdown access, and verification evidence. Preserve existing section links.
 
