@@ -28,7 +28,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **Citation checking cookbook.** Inspect exact normalized quote matches against RFC 7519, a zero-request fabricated path and Choice-confidence review routing in five no-key synthetic samples.
+- **Citation checking cookbook.** Inspect exact normalized quote matches against RFC 7519, a zero-request fabricated path and Choice-confidence review routing in five no-key synthetic samples. ([#107](https://github.com/diegoag64/jev-devtools/pull/107))
 
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 

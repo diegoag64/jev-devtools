@@ -51,6 +51,7 @@ export function normalize(text: string): string {
     "‘": "'",
     "’": "'",
   };
+  // Match Python Unicode whitespace: JS \s differs for NEL and BOM.
   return text
     .replace(/[“”‘’]/g, (char) => quotes[char])
     .replace(

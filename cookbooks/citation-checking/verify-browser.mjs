@@ -132,11 +132,36 @@ try {
     .click();
   await page.getByRole("button", { name: "Flows", exact: true }).click();
   await page
+    .getByRole("button", { name: "Expand Jev drawer", exact: true })
+    .click();
+  await page
     .getByLabel("Flow step", { exact: true })
     .selectOption("check-citations");
   await page.getByRole("button", { name: "View Flow", exact: true }).click();
   await page.getByRole("button", { name: "Fit flow", exact: true }).click();
+  await page
+    .getByRole("button", {
+      name: "Step assess-support, jev, completed",
+      exact: true,
+    })
+    .waitFor();
   await page.screenshot({ path: `${output}/flow.png`, fullPage: true });
+  await page
+    .getByLabel("Collection item for Check citations in order", { exact: true })
+    .selectOption("2");
+  await page
+    .getByRole("button", {
+      name: "Step assess-support, jev, untaken",
+      exact: true,
+    })
+    .waitFor();
+  await page
+    .getByRole("button", {
+      name: "Step fabricated, task, completed",
+      exact: true,
+    })
+    .waitFor();
+  await page.screenshot({ path: `${output}/flow-missing.png`, fullPage: true });
   await page
     .getByRole("button", { name: "Close Jev DevTools", exact: true })
     .click();
