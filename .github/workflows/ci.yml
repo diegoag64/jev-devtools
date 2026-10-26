@@ -43,16 +43,21 @@ jobs:
           const assert = require('node:assert/strict');
           const { execFileSync } = require('node:child_process');
           const { readFileSync } = require('node:fs');
+          const { createRequire } = require('node:module');
+          const { resolve } = require('node:path');
+          const roots = [require, createRequire(resolve('apps/playground/package.json'))];
           const packages = ['react', 'react-dom'];
-          const version = name => JSON.parse(readFileSync(require.resolve(`${name}/package.json`))).version;
+          const version = (from, name) => JSON.parse(readFileSync(from.resolve(`${name}/package.json`))).version;
           const expected = process.env.REACT_VERSION;
-          if (!packages.every(name => version(name) === expected)) {
+          if (!roots.every(from => packages.every(name => version(from, name) === expected))) {
             // --no-save preserves the manifests while still reading the lockfile.
-            execFileSync('npm', ['install', '--no-save', ...packages.map(name => `${name}@${expected}`)], { stdio: 'inherit' });
+            execFileSync('npm', ['install', '--no-save', '--workspace', '@jev-devtools/playground', '--include-workspace-root', ...packages.map(name => `${name}@${expected}`)], { stdio: 'inherit' });
           }
-          for (const name of packages) {
-            assert.equal(version(name), expected);
-            console.log(`${name}: ${expected}`);
+          for (const [index, from] of roots.entries()) {
+            for (const name of packages) {
+              assert.equal(version(from, name), expected);
+              console.log(`${index === 0 ? 'root' : 'playground'} ${name}: ${expected}`);
+            }
           }
           NODE
       # Use the runner image's system libraries; keep Playwright's pinned browser.

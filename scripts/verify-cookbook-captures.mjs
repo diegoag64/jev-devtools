@@ -22,6 +22,7 @@ try {
   const page = await browser.newPage({
     viewport: { width: 1440, height: 1000 },
   });
+  page.on("pageerror", (error) => console.error("Browser page error:", error));
   for (const [slug, count] of [
     ["parallel-questions", 70],
     ["consistency-choices", 15],

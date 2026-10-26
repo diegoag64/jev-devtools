@@ -46,13 +46,18 @@ try {
   for (let attempt = 0; ; attempt++) {
     if (server.exitCode !== null || attempt === 120)
       throw new Error(`Server failed: ${log}`);
-    if (log.includes("http://127.0.0.1:4182/")) break;
+    try {
+      if ((await fetch("http://127.0.0.1:4182/")).ok) break;
+    } catch {
+      // Vite has not started listening yet. Readiness does not depend on ANSI logs.
+    }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
   browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({
     viewport: { width: 1440, height: 1000 },
   });
+  page.on("pageerror", (error) => console.error("Browser page error:", error));
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
   await page.goto("http://127.0.0.1:4182/?cookbook=confidence-fallback");
