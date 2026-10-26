@@ -45,7 +45,7 @@ export const flows: Flow[] = [
     label: "RAG passages",
 
     description:
-      "Assess passages independently, route each result in code, and bring the evidence back together.",
+      "Assess each passage with System One. Application code decides which passages to include, flag as conflicting, or exclude.",
 
     group: {
       x: 276,
@@ -92,7 +92,6 @@ export const flows: Flow[] = [
         "Assemble evidence",
         "Accepted + conflicting",
         4.5,
-        [["Ready for the next step", "✓"]],
       ),
     ],
     edges: [
@@ -110,7 +109,7 @@ export const flows: Flow[] = [
     label: "Skill suggestion",
 
     description:
-      "Rank a skill roster, apply a gate in code, then assess a shortlist or abstain. The application owns the decision.",
+      "Rank candidate skills with System One. Application code decides whether to assess a shortlist or skip skill selection.",
 
     nodes: [
       node("input", 30, 207, "input", "User request", "A task needs a tool", 0),
@@ -168,7 +167,7 @@ export const flows: Flow[] = [
     label: "Verification cascade",
 
     description:
-      "Verify a candidate record, escalate when a field is flagged, and merge the selected result into one continuation.",
+      "Check a candidate record for field issues. Application code selects a replacement when a field is flagged, or keeps the original record.",
 
     nodes: [
       node(
@@ -216,7 +215,7 @@ export const flows: Flow[] = [
         207,
         "output",
         "Merge the result",
-        "One shared continuation",
+        "Continue with selected record",
         4.5,
       ),
     ],
@@ -233,7 +232,7 @@ export const flows: Flow[] = [
     label: "Hierarchical search",
 
     description:
-      "Expand a taxonomy frontier, evaluate candidates, and retain the strongest paths in a bounded loop.",
+      "Evaluate candidate paths through a category hierarchy. Application code keeps and expands selected paths until a stopping rule ends the loop.",
 
     group: {
       x: 272,
@@ -257,7 +256,7 @@ export const flows: Flow[] = [
         295,
         207,
         "jev",
-        "Assess the frontier",
+        "Assess candidate paths",
         "Choice · candidate paths",
         1.3,
         [["Software / hardware", "76 / 24"]],
@@ -268,7 +267,7 @@ export const flows: Flow[] = [
         207,
         "code",
         "Retain & expand",
-        "Beam policy in code",
+        "Path selection in code",
         2.8,
         [["Continue until stop rule", "↻"]],
       ),
@@ -294,7 +293,7 @@ export const flows: Flow[] = [
     label: "Simple memory",
 
     description:
-      "Combine a ticket with saved context, inspect the route, and let a memory gate decide what the next ticket can use.",
+      "Classify a ticket using saved context. System One estimates whether new information is useful to remember, and application code decides whether to save it.",
 
     nodes: [
       node(
@@ -359,7 +358,7 @@ export const flows: Flow[] = [
     label: "Structure recovery",
 
     description:
-      "Assess adjacent lines, merge them in code, then classify the resulting blocks before rendering a document.",
+      "Use System One to assess whether adjacent lines belong together. Application code joins the lines, then uses block classifications to format Markdown.",
 
     nodes: [
       node(
