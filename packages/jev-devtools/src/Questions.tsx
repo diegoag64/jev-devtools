@@ -1,3 +1,4 @@
+import { traceCaptureView } from "./capture-view.js";
 import {
   memo,
   useCallback,
@@ -52,6 +53,7 @@ const QuestionContent = memo(function QuestionContent({
 
 /** Variable-height rows retain full answers; only offscreen DOM is omitted. */
 export function Questions({ trace }: { trace: Trace }) {
+  trace = traceCaptureView(trace);
   const helpId = useId();
   const entries = useMemo(
     () =>
@@ -210,6 +212,16 @@ export function Questions({ trace }: { trace: Trace }) {
     ),
     [entries, destination, goTo, helpId],
   );
+  if (
+    trace.capture?.request !== undefined ||
+    trace.capture?.result !== undefined
+  )
+    return (
+      <p className="muted">
+        Questions and answers unavailable in this capture. See Raw for captured
+        content.
+      </p>
+    );
   if (!entries.length)
     return <p className="muted">No questions available in this capture.</p>;
   return (

@@ -1,3 +1,4 @@
+import { traceCaptureView } from "./capture-view.js";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useDiagramViewport } from "./useDiagramViewport.js";
 import type { AnswerView, Trace } from "./protocol.js";
@@ -139,6 +140,7 @@ export function TraceDiagram({
   embedded?: boolean;
   onHeightChange?: (height: number) => void;
 }) {
+  trace = traceCaptureView(trace);
   const root = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     if (!embedded || !root.current || !onHeightChange) return;
@@ -227,6 +229,18 @@ export function TraceDiagram({
     mid = ry + resultHeight / 2;
   const { viewport, canvas, zoom, zoomBy, fit, preserveCamera } =
     useDiagramViewport(1120, height, key);
+  if (trace.capture?.request !== undefined)
+    return (
+      <p className="muted">
+        Request unavailable in this capture. See Raw for captured content.
+      </p>
+    );
+  if (trace.capture?.result !== undefined)
+    return (
+      <p className="muted">
+        Response unavailable in this capture. See Raw for captured content.
+      </p>
+    );
   if (!question)
     return <p className="muted">No questions available in this capture.</p>;
   const sourcePath = (y: number) => `M260 ${y} C325 ${y},325 ${mid},390 ${mid}`;
