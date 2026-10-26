@@ -28,7 +28,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **LLM guardrails cookbook.** Screen input or output samples with the official hazard batteries, compare strict/permissive policies on one synthetic assessment, and inspect severity upgrades and action precedence. No live inference or LLM generation.
+- **LLM guardrails cookbook.** Screen input or output samples with the official hazard batteries, compare strict/permissive policies on one synthetic assessment, and inspect severity upgrades and action precedence. No live inference or LLM generation. ([#117](https://github.com/diegoag64/jev-devtools/pull/117))
 
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
