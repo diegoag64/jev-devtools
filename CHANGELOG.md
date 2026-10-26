@@ -28,7 +28,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **Noul self-consistency cookbook.** Explore fifteen sequential fourteen-question requests, exact uncertainty-band decisions and computed statistics from authored synthetic fixtures. Preserve every answer and requested/returned model labels; no measured consistency or provider comparison is claimed.
+- **Noul self-consistency cookbook.** Explore fifteen sequential fourteen-question requests, exact uncertainty-band decisions and computed statistics from authored synthetic fixtures. Preserve every answer and requested/returned model labels; no measured consistency or provider comparison is claimed. ([#116](https://github.com/diegoag64/jev-devtools/pull/116))
 
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
