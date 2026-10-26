@@ -91,6 +91,12 @@ await cp(
   join(root, "scripts/fixtures/packed-resolved-templates.test.mjs"),
   join(types, "packed-resolved-templates.test.mjs"),
 );
+for (const file of [
+  "packed-expression-contracts.ts",
+  "packed-expression-contracts.test.mjs",
+]) {
+  await cp(join(root, "scripts/fixtures", file), join(types, file));
+}
 // No skipLibCheck: it would also skip the archive's own declarations.
 await writeFile(
   join(types, "tsconfig.json"),
@@ -104,7 +110,11 @@ await writeFile(
       noEmitOnError: true,
       types: [],
     },
-    files: ["flow.ts", "packed-resolved-templates.ts"],
+    files: [
+      "flow.ts",
+      "packed-resolved-templates.ts",
+      "packed-expression-contracts.ts",
+    ],
   }),
 );
 execFileSync(
@@ -115,7 +125,11 @@ execFileSync(
 console.log("Packed flow types: passed");
 execFileSync(
   process.execPath,
-  ["--test", join(types, "packed-resolved-templates.test.mjs")],
+  [
+    "--test",
+    join(types, "packed-resolved-templates.test.mjs"),
+    join(types, "packed-expression-contracts.test.mjs"),
+  ],
   { cwd: consumer, stdio: "inherit" },
 );
 npm(["run", "build"], { cwd: consumer, stdio: "inherit" });

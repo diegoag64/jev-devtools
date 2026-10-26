@@ -43,16 +43,26 @@ for (const kind of ["text", "array", "rule"] as const) {
         kind === "array"
           ? Array.from({ length: size }, (_, i) => i)
           : "x".repeat(size);
-      const flow = defineJevFlow<string | number[]>(`capture-${kind}`, (f) =>
-        kind === "rule"
-          ? f.branch("match", {
-              when: f.input.eq(input as string),
-              then: (p) => p.output("yes"),
-              else: (p) => p.output("no"),
-            })
-          : f.output("done", f.input),
-      );
-      const result = await flow.run(input, { client, devtools: inspector });
+      // Narrow the fixture before defining scalar equality; array captures use output only.
+      const options = { client, devtools: inspector };
+      const { flow, result } = await (async () => {
+        if (typeof input === "string") {
+          const flow = defineJevFlow<string>(`capture-${kind}`, (f) =>
+            kind === "rule"
+              ? f.branch("match", {
+                  when: f.input.eq(input),
+                  then: (p) => p.output("yes"),
+                  else: (p) => p.output("no"),
+                })
+              : f.output("done", f.input),
+          );
+          return { flow, result: await flow.run(input, options) };
+        }
+        const flow = defineJevFlow<number[]>(`capture-${kind}`, (f) =>
+          f.output("done", f.input),
+        );
+        return { flow, result: await flow.run(input, options) };
+      })();
       const update = await history(inspector);
       const run = update.upserts[0];
       const node = update.definitions[0].nodes.find((n) => n.id === "match");
