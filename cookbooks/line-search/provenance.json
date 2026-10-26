@@ -1,0 +1,17 @@
+{
+  "source": "https://docs.typesafe.ai/cookbooks/semantic_find.md",
+  "reviewedOn": "2026-10-26",
+  "sourceSha256": "db5484c31340a940b7faeb3acdb0129fb82f5a297409131b0f6db1e34013e806",
+  "document": {
+    "source": "https://raw.githubusercontent.com/typesafe-ai/typesafe-public-examples/25e9d373f4853b3e7e300e55a194f50e54838f68/cookbooks/semantic_find/github-tos.txt",
+    "recipeGist": "https://gist.githubusercontent.com/eugene-shvarts/900632789a24983d5678ffd508dd01f6/raw/cf9c2ab422d568deade949ef0a06bed6896964b9/github-tos.txt",
+    "sha256": "8bd60793d355b8fc280c3197d48e8222db600d60360f0d0b49a7c948ee0fea0d",
+    "lines": 218,
+    "transformation": "None: byte-identical copies of the pinned upstream file and recipe Gist. Tag zero-based IDs at runtime.",
+    "license": "GitHub site-policy CC0-1.0; LICENSE.github retained",
+    "licenseSource": "https://github.com/github/site-policy/blob/main/LICENSE.md",
+    "licenseSha256": "36ffd9dc085d529a7e60e1276d73ae5a030b020313e6c5408593a6ae2af39673"
+  },
+  "transformation": "TypeScript adaptation of tagging, one runtime Choice + Noul request, document-order relevance, stable descending ranking, line lookup and exact existence branches. Authored complete synthetic distributions inspired by the printed examples, plus boundary fixtures; not replayed upstream API cache or measured evaluation. Browser result replaces terminal bars and exposes every line.",
+  "recipeLicense": "MIT; LICENSE.typesafe retained from the pinned typesafe-public-examples repository"
+}

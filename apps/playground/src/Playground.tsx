@@ -1,4 +1,70 @@
 import {
+  parallelQuestionsCases,
+  type ParallelQuestionsCase,
+} from "../../../cookbooks/parallel-questions/cases.js";
+import { ParallelQuestionsCookbookResult } from "./ParallelQuestionsCookbookResult.js";
+import {
+  twitchCases,
+  type TwitchCase,
+} from "../../../cookbooks/twitch-chat-filter/cases.js";
+import { TwitchCookbookResult } from "./TwitchCookbookResult.js";
+import {
+  entityCases,
+  type EntityCase,
+} from "../../../cookbooks/entity-alignment/cases.js";
+import { EntityCookbookResult } from "./EntityCookbookResult.js";
+import {
+  citationCases,
+  type CitationCase,
+} from "../../../cookbooks/citation-checking/cases.js";
+import { CitationCookbookResult } from "./CitationCookbookResult.js";
+import {
+  confidenceCases,
+  type ConfidenceCase,
+} from "../../../cookbooks/confidence-fallback/cases.js";
+import { ConfidenceCookbookResult } from "./ConfidenceCookbookResult.js";
+import {
+  lineSearchCases,
+  type LineSearchCase,
+} from "../../../cookbooks/line-search/cases.js";
+import { LineSearchCookbookResult } from "./LineSearchCookbookResult.js";
+import {
+  rerankingCases,
+  type RerankingCase,
+} from "../../../cookbooks/reranking/cases.js";
+import { RerankingCookbookResult } from "./RerankingCookbookResult.js";
+import {
+  dateCases,
+  type DateCase,
+} from "../../../cookbooks/date-extraction/cases.js";
+import { DateCookbookResult } from "./DateCookbookResult.js";
+import "./date-extraction.css";
+import {
+  extractionCases,
+  type ExtractionCase,
+} from "../../../cookbooks/pre-parsed-extraction/cases.js";
+import { ExtractionCookbookResult } from "./ExtractionCookbookResult.js";
+import {
+  functionCases,
+  type FunctionCase,
+} from "../../../cookbooks/function-calling/cases.js";
+import { FunctionCookbookResult } from "./FunctionCookbookResult.js";
+import {
+  guardrailsCases,
+  type GuardrailsCase,
+} from "../../../cookbooks/guardrails/cases.js";
+import { GuardrailsCookbookResult } from "./GuardrailsCookbookResult.js";
+import {
+  consistencyCases,
+  type ConsistencyCase,
+} from "../../../cookbooks/consistency-choices/cases.js";
+import { ConsistencyCookbookResult } from "./ConsistencyCookbookResult.js";
+import {
+  noulCases,
+  type NoulCase,
+} from "../../../cookbooks/consistency-nouls/cases.js";
+import { NoulCookbookResult } from "./NoulCookbookResult.js";
+import {
   memoryCases,
   type MemoryCase,
 } from "../../../cookbooks/simple-memory/cases.js";
@@ -60,6 +126,35 @@ const structureRequested =
 const hierarchyRequested =
   new URLSearchParams(location.search).get("cookbook") ===
   "hierarchical-classification";
+const parallelQuestionsRequested =
+  new URLSearchParams(location.search).get("cookbook") === "parallel-questions";
+const twitchRequested =
+  new URLSearchParams(location.search).get("cookbook") === "twitch-chat-filter";
+const entityRequested =
+  new URLSearchParams(location.search).get("cookbook") === "entity-alignment";
+const citationRequested =
+  new URLSearchParams(location.search).get("cookbook") === "citation-checking";
+const confidenceRequested =
+  new URLSearchParams(location.search).get("cookbook") ===
+  "confidence-fallback";
+const lineSearchRequested =
+  new URLSearchParams(location.search).get("cookbook") === "line-search";
+const rerankingRequested =
+  new URLSearchParams(location.search).get("cookbook") === "reranking";
+const dateRequested =
+  new URLSearchParams(location.search).get("cookbook") === "date-extraction";
+const extractionRequested =
+  new URLSearchParams(location.search).get("cookbook") ===
+  "pre-parsed-extraction";
+const functionRequested =
+  new URLSearchParams(location.search).get("cookbook") === "function-calling";
+const guardrailsRequested =
+  new URLSearchParams(location.search).get("cookbook") === "guardrails";
+const consistencyRequested =
+  new URLSearchParams(location.search).get("cookbook") ===
+  "consistency-choices";
+const noulRequested =
+  new URLSearchParams(location.search).get("cookbook") === "consistency-nouls";
 const savedSession = sessionStorage.getItem("jev-inspector-session");
 const session = savedSession || crypto.randomUUID();
 sessionStorage.setItem("jev-inspector-session", session);
@@ -72,6 +167,24 @@ const post = (
 function App() {
   const activeRequest = useRef<AbortController | null>(null);
   useEffect(() => () => activeRequest.current?.abort(), []);
+  const [parallelQuestionsCase, setParallelQuestionsCase] =
+    useState<ParallelQuestionsCase>("stable");
+  const [twitchCase, setTwitchCase] = useState<TwitchCase>("original");
+  const [entityCase, setEntityCase] = useState<EntityCase>("same");
+  const [citationCase, setCitationCase] = useState<CitationCase>("original");
+  const [confidenceCase, setConfidenceCase] = useState<ConfidenceCase>("below");
+  const [lineSearchCase, setLineSearchCase] =
+    useState<LineSearchCase>("ownership");
+  const [rerankingCase, setRerankingCase] =
+    useState<RerankingCase>("reordered");
+  const [dateCase, setDateCase] = useState<DateCase>("official");
+  const [extractionCase, setExtractionCase] = useState<ExtractionCase>("email");
+  const [functionCase, setFunctionCase] = useState<FunctionCase>("roles");
+  const [guardrailsCase, setGuardrailsCase] =
+    useState<GuardrailsCase>("policy");
+  const [consistencyCase, setConsistencyCase] =
+    useState<ConsistencyCase>("varying");
+  const [noulCase, setNoulCase] = useState<NoulCase>("variation");
   const [memoryCase, setMemoryCase] = useState<MemoryCase>("timeline");
   const [structureCase, setStructureCase] = useState<StructureCase>("memo");
   const [hierarchyCase, setHierarchyCase] = useState<HierarchyCase>("recovery");
@@ -97,38 +210,90 @@ function App() {
     setFeedback("Ready to capture a request.");
   };
   const [scenario, setScenario] = useState(
-      memoryRequested
-        ? "flow-memory"
-        : structureRequested
-          ? "flow-structure"
-          : hierarchyRequested
-            ? "flow-hierarchy"
-            : sdeRequested
-              ? "flow-sde"
-              : ragRequested
-                ? "flow-rag"
-                : cookbookRequested
-                  ? "flow-skills"
-                  : sandbox
-                    ? "stress"
-                    : "triage",
+      parallelQuestionsRequested
+        ? "flow-parallel-questions"
+        : twitchRequested
+          ? "flow-twitch"
+          : entityRequested
+            ? "flow-entity"
+            : citationRequested
+              ? "flow-citation"
+              : confidenceRequested
+                ? "flow-confidence"
+                : lineSearchRequested
+                  ? "flow-line-search"
+                  : rerankingRequested
+                    ? "flow-reranking"
+                    : dateRequested
+                      ? "flow-date"
+                      : extractionRequested
+                        ? "flow-extraction"
+                        : functionRequested
+                          ? "flow-function-calling"
+                          : guardrailsRequested
+                            ? "flow-guardrails"
+                            : consistencyRequested
+                              ? "flow-consistency-choices"
+                              : noulRequested
+                                ? "flow-nouls"
+                                : memoryRequested
+                                  ? "flow-memory"
+                                  : structureRequested
+                                    ? "flow-structure"
+                                    : hierarchyRequested
+                                      ? "flow-hierarchy"
+                                      : sdeRequested
+                                        ? "flow-sde"
+                                        : ragRequested
+                                          ? "flow-rag"
+                                          : cookbookRequested
+                                            ? "flow-skills"
+                                            : sandbox
+                                              ? "stress"
+                                              : "triage",
     ),
     [mode, setMode] = useState("sample"),
     [live, setLive] = useState(false);
   const [message, setMessage] = useState(
-    memoryRequested
-      ? memoryCases.timeline.message
-      : structureRequested
-        ? structureCases.memo.message
-        : hierarchyRequested
-          ? hierarchyCases.recovery.message
-          : sdeRequested
-            ? sdeCases.fabricated.message
-            : ragRequested
-              ? ragCases.premise.message
-              : cookbookRequested
-                ? skillCases.deck.message
-                : "I was charged twice and checkout is blocked. I need a human to help me today.",
+    parallelQuestionsRequested
+      ? parallelQuestionsCases.stable.message
+      : twitchRequested
+        ? twitchCases.original.message
+        : entityRequested
+          ? entityCases.same.message
+          : citationRequested
+            ? citationCases.original.message
+            : confidenceRequested
+              ? confidenceCases.below.message
+              : lineSearchRequested
+                ? lineSearchCases.ownership.message
+                : rerankingRequested
+                  ? rerankingCases.reordered.message
+                  : dateRequested
+                    ? dateCases.official.message
+                    : extractionRequested
+                      ? extractionCases.email.message
+                      : functionRequested
+                        ? functionCases.roles.message
+                        : guardrailsRequested
+                          ? guardrailsCases.policy.message
+                          : consistencyRequested
+                            ? consistencyCases.varying.message
+                            : noulRequested
+                              ? noulCases.variation.message
+                              : memoryRequested
+                                ? memoryCases.timeline.message
+                                : structureRequested
+                                  ? structureCases.memo.message
+                                  : hierarchyRequested
+                                    ? hierarchyCases.recovery.message
+                                    : sdeRequested
+                                      ? sdeCases.fabricated.message
+                                      : ragRequested
+                                        ? ragCases.premise.message
+                                        : cookbookRequested
+                                          ? skillCases.deck.message
+                                          : "I was charged twice and checkout is blocked. I need a human to help me today.",
   );
   const [runId, setRunId] = useState<string>(),
     [feedback, setFeedback] = useState("Ready to capture a request.");
@@ -164,6 +329,19 @@ function App() {
           hierarchyCase,
           structureCase,
           memoryCase,
+          parallelQuestionsCase,
+          twitchCase,
+          entityCase,
+          citationCase,
+          confidenceCase,
+          lineSearchCase,
+          rerankingCase,
+          dateCase,
+          extractionCase,
+          functionCase,
+          guardrailsCase,
+          consistencyCase,
+          noulCase,
         },
         {
           signal: controller.signal,
@@ -203,6 +381,326 @@ function App() {
   return (
     <>
       <main className="playground dark">
+        {scenario === "flow-parallel-questions" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · Parallel questions
+            </span>
+            <h1>Ask 13 questions. Compare two strategies.</h1>
+            <p>
+              Five batched requests, then five repeats of 13 sequential
+              single-question requests. Inspect every answer and compare metrics
+              computed in tasks.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/parallel_questions"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official Parallel Questions cookbook ↗
+            </a>
+            <p className="sample-note">
+              Authored short document · synthetic answers · no API key. This
+              sample does not reproduce the original Wikipedia evaluation or its
+              measured savings.
+            </p>
+          </div>
+        )}
+        {scenario === "flow-twitch" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · Twitch chat filter
+            </span>
+            <h2>One feed, five visible actions</h2>
+            <p>
+              Replay the original 29 messages with synthetic answers. Eight
+              concurrent requests each ask category, toxic and spoiler together.
+              Compare normal and quiet policies using the same answers.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/twitch_chat_filter"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official Twitch chat filter cookbook ↗
+            </a>
+            <p className="sample-note">
+              Finite sample only. No Twitch connection, live inference, or
+              measured moderation quality.
+            </p>
+          </div>
+        )}
+        {scenario === "flow-entity" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · entity alignment
+            </span>
+            <h1>Compare records. Inspect the match.</h1>
+            <p>
+              One Score chooses between different, related and identical
+              products. Three companion Nouls explain name, brewery and style
+              agreement.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/entity_alignment"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official Entity Alignment cookbook ↗
+            </a>
+            <p className="sample-note">
+              Attributed beer pairs · synthetic judgments · no API key or
+              database changes.
+            </p>
+          </div>
+        )}
+        {scenario === "flow-citation" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · Citation checking
+            </span>
+            <h1>Does the source support the claim?</h1>
+            <p>
+              Normalize quotes, find their actual source section, then assess
+              support with Choice. Missing quotes bypass Jev; confidence below
+              0.80 requests human review.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/citation_check"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official citation-checking cookbook ↗
+            </a>
+            <p className="sample-note">
+              Official RFC and citations. Authored synthetic responses, no API
+              key, no live inference.
+            </p>
+          </div>
+        )}
+        {scenario === "flow-confidence" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · confidence fallback
+            </span>
+            <h1>Choose how specific to be.</h1>
+            <p>
+              Classify into one of 75 original SIC industry groups. Keep the
+              group at API confidence ≥0.90; otherwise look up its parent
+              division in code.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/classification_using_confidence"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official confidence cookbook ↗
+            </a>
+            <p className="sample-note">
+              Authored descriptions · synthetic answers · one request · no API
+              key.
+            </p>
+          </div>
+        )}
+        {scenario === "flow-line-search" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · one request, two questions
+            </span>
+            <h1>Line-by-line search</h1>
+            <p>
+              Rank every line, then distinguish an answer from a near match
+              using the independent existence check.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/semantic_find"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Official recipe ↗
+            </a>
+            <p>
+              Complete pinned 218-line GitHub Terms of Service document.
+              Authored synthetic responses; no API key or live inference.
+              Includes exact threshold cases.
+            </p>
+          </div>
+        )}
+        {scenario === "flow-reranking" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · Re-ranking
+            </span>
+            <h1>One query. A new candidate order.</h1>
+            <p>
+              Score 30 candidates independently, at most 12 at a time, then sort
+              by Noul probability. Ties keep the original retrieval order.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/rerank_typesafe"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Official recipe ↗
+            </a>
+            <p className="sample-note">
+              Official prompt and sorting semantics, authored legal-style
+              passages and synthetic scores. The retrieval fixture does not run
+              BM25 or use CLERC. No live inference, accuracy claims or full
+              40-query benchmark.
+            </p>
+          </div>
+        )}
+        {scenario === "flow-date" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · Date extraction
+            </span>
+            <h1>Read the parts. Resolve the date.</h1>
+            <p>
+              Seven Choice questions per role, then calendar math in code.
+              Follow the confidence gate into acceptance or review.
+            </p>
+            <p>
+              Fixed reference: <b>Thursday, 2026-07-30</b>. Bare weekdays mean
+              on or after today; “this” means this calendar week; “next” means
+              the following calendar week.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/date_extraction_cookbook"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official Date extraction cookbook ↗
+            </a>
+            <p className="sample-note">
+              Official and authored documents · synthetic answers and
+              confidences · no API key or live inference.
+            </p>
+          </div>
+        )}
+        {scenario === "flow-extraction" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · Pre-parsed value extraction
+            </span>
+            <h1>Find the spans. Select the value.</h1>
+            <p>
+              Use regex candidates, separate Choice calls and deterministic code
+              to extract email addresses, phone numbers and invoice amounts.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/pre_parsed_value_extraction_cookbook"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official recipe ↗
+            </a>
+            <p className="sample-note">
+              Fixed documents and synthetic answers. No API key or live
+              inference. Original helper order and strict credit threshold are
+              preserved.
+            </p>
+          </div>
+        )}
+        {scenario === "flow-function-calling" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · Function calling
+            </span>
+            <h1>One command. A proposed call.</h1>
+            <p>
+              Choose a tool and assemble closed-set arguments from one batch of
+              54 questions. Inspect defaults, set membership and the least
+              certain relevant decision.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/function_calling"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official Function Calling cookbook ↗
+            </a>
+            <p className="sample-note">
+              Synthetic fixtures. No tool execution, market data, trading, or
+              live inference.
+            </p>
+          </div>
+        )}
+        {scenario === "flow-guardrails" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · one assessment, two policies
+            </span>
+            <h1>LLM guardrails</h1>
+            <p>
+              Screen a user message or model reply with four hazard Nouls and
+              one severity Score. Compare strict and permissive routing on the
+              same assessment.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/llm_guardrails"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Official guardrails recipe ↗
+            </a>
+            <p className="sample-note">
+              Authored messages and synthetic answers · no API key, inference,
+              or LLM generation. Each run screens one selected side.
+            </p>
+          </div>
+        )}
+        {scenario === "flow-consistency-choices" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · Choice self-consistency
+            </span>
+            <h1>Repeat the rubric. Inspect every decision.</h1>
+            <p>
+              Follow 15 sequential requests over the original eight moderation
+              questions. Compare raw argmax labels with a probability gate that
+              abstains below 0.60.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/consistency_choice_cookbook"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official Choice self-consistency cookbook ↗
+            </a>
+            <p className="sample-note">
+              Original post and rubric · authored synthetic responses · no API
+              key. Each request changes a uid; these are not identical inputs or
+              measured consistency results.
+            </p>
+          </div>
+        )}
+        {scenario === "flow-nouls" && (
+          <div className="cookbook-intro">
+            <span className="cookbook-eyebrow">
+              TypeSafe cookbook · Noul self-consistency
+            </span>
+            <h1>Keep uncertainty visible.</h1>
+            <p>
+              One auto-insurance claim. Fifteen sequential requests. Fourteen
+              Noul questions each. Explore exact review-band boundaries with
+              authored synthetic responses and computed descriptive statistics.
+            </p>
+            <a
+              href="https://docs.typesafe.ai/cookbooks/consistency_noul_cookbook"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the official Noul self-consistency cookbook ↗
+            </a>
+            <p className="sample-note">
+              Sample only. No independent model draws, measured quality,
+              provider comparison or paid inference. No human review or
+              insurance action is performed.
+            </p>
+          </div>
+        )}
         {scenario === "flow-memory" && (
           <div className="cookbook-intro">
             <span className="cookbook-eyebrow">
@@ -357,6 +855,19 @@ function App() {
             "flow-hierarchy",
             "flow-structure",
             "flow-memory",
+            "flow-parallel-questions",
+            "flow-twitch",
+            "flow-entity",
+            "flow-citation",
+            "flow-confidence",
+            "flow-line-search",
+            "flow-reranking",
+            "flow-date",
+            "flow-extraction",
+            "flow-function-calling",
+            "flow-guardrails",
+            "flow-consistency-choices",
+            "flow-nouls",
           ].includes(scenario) && (
             <p>
               Sample-only flow. Run a sample, open Jev DevTools, and choose
@@ -371,6 +882,19 @@ function App() {
             "flow-hierarchy",
             "flow-structure",
             "flow-memory",
+            "flow-parallel-questions",
+            "flow-twitch",
+            "flow-entity",
+            "flow-citation",
+            "flow-confidence",
+            "flow-line-search",
+            "flow-reranking",
+            "flow-date",
+            "flow-extraction",
+            "flow-function-calling",
+            "flow-guardrails",
+            "flow-consistency-choices",
+            "flow-nouls",
           ].includes(scenario) && (
             <div role="status">
               <strong>Outcome: {flowResult.outcome}</strong>
@@ -389,6 +913,34 @@ function App() {
                 onChange={(e) => {
                   setScenario(e.target.value);
                   resetOutcome();
+                  if (e.target.value === "flow-parallel-questions")
+                    setMessage(
+                      parallelQuestionsCases[parallelQuestionsCase].message,
+                    );
+                  if (e.target.value === "flow-twitch")
+                    setMessage(twitchCases[twitchCase].message);
+                  if (e.target.value === "flow-entity")
+                    setMessage(entityCases[entityCase].message);
+                  if (e.target.value === "flow-citation")
+                    setMessage(citationCases[citationCase].message);
+                  if (e.target.value === "flow-confidence")
+                    setMessage(confidenceCases[confidenceCase].message);
+                  if (e.target.value === "flow-line-search")
+                    setMessage(lineSearchCases[lineSearchCase].message);
+                  if (e.target.value === "flow-reranking")
+                    setMessage(rerankingCases[rerankingCase].message);
+                  if (e.target.value === "flow-date")
+                    setMessage(dateCases[dateCase].message);
+                  if (e.target.value === "flow-extraction")
+                    setMessage(extractionCases[extractionCase].message);
+                  if (e.target.value === "flow-function-calling")
+                    setMessage(functionCases[functionCase].message);
+                  if (e.target.value === "flow-guardrails")
+                    setMessage(guardrailsCases[guardrailsCase].message);
+                  if (e.target.value === "flow-consistency-choices")
+                    setMessage(consistencyCases[consistencyCase].message);
+                  if (e.target.value === "flow-nouls")
+                    setMessage(noulCases[noulCase].message);
                   if (e.target.value === "flow-memory")
                     setMessage(memoryCases[memoryCase].message);
                   if (e.target.value === "flow-structure")
@@ -409,6 +961,20 @@ function App() {
                 }}
               >
                 {Object.entries({
+                  "flow-parallel-questions": "Cookbook · Parallel questions",
+                  "flow-twitch": "Cookbook · Twitch chat filter",
+                  "flow-entity": "Cookbook · Entity alignment",
+                  "flow-citation": "Cookbook · Citation checking",
+                  "flow-confidence": "Cookbook · Confidence fallback",
+                  "flow-line-search": "Cookbook · Line-by-line search",
+                  "flow-reranking": "Cookbook · Re-ranking",
+                  "flow-date": "Cookbook · Date extraction",
+                  "flow-extraction": "Cookbook · Pre-parsed value extraction",
+                  "flow-function-calling": "Cookbook · Function calling",
+                  "flow-guardrails": "Cookbook · LLM guardrails",
+                  "flow-consistency-choices":
+                    "Cookbook · Choice self-consistency",
+                  "flow-nouls": "Cookbook · Noul self-consistency",
                   "flow-approve": "Flow · Approve",
                   "flow-functions":
                     "Flow · Functions + dynamic questions (synthetic)",
@@ -472,6 +1038,298 @@ function App() {
                 </NativeSelectOption>
               </NativeSelect>
             </div>
+            {scenario === "flow-parallel-questions" && (
+              <div className="form-field">
+                <Label htmlFor="parallel-questions-case">
+                  Parallel questions sample
+                </Label>
+                <NativeSelect
+                  id="parallel-questions-case"
+                  value={parallelQuestionsCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as ParallelQuestionsCase;
+                    setParallelQuestionsCase(next);
+                    setMessage(parallelQuestionsCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(parallelQuestionsCases).map(
+                    ([key, value]) => (
+                      <NativeSelectOption key={key} value={key}>
+                        {value.label}
+                      </NativeSelectOption>
+                    ),
+                  )}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-twitch" && (
+              <div className="form-field">
+                <Label htmlFor="twitch-case">Twitch sample</Label>
+                <NativeSelect
+                  id="twitch-case"
+                  value={twitchCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as TwitchCase;
+                    setTwitchCase(next);
+                    setMessage(twitchCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(twitchCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-entity" && (
+              <div className="form-field">
+                <Label htmlFor="entity-case">Entity sample</Label>
+                <NativeSelect
+                  id="entity-case"
+                  value={entityCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as EntityCase;
+                    setEntityCase(next);
+                    setMessage(entityCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(entityCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-citation" && (
+              <div className="form-field">
+                <Label htmlFor="citation-case">Citation sample</Label>
+                <NativeSelect
+                  id="citation-case"
+                  value={citationCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as CitationCase;
+                    setCitationCase(next);
+                    setMessage(citationCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(citationCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-confidence" && (
+              <div className="form-field">
+                <Label htmlFor="confidence-case">Confidence sample</Label>
+                <NativeSelect
+                  id="confidence-case"
+                  value={confidenceCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as ConfidenceCase;
+                    setConfidenceCase(next);
+                    setMessage(confidenceCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(confidenceCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-line-search" && (
+              <div className="form-field">
+                <Label htmlFor="line-search-case">Line search sample</Label>
+                <NativeSelect
+                  id="line-search-case"
+                  value={lineSearchCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as LineSearchCase;
+                    setLineSearchCase(next);
+                    setMessage(lineSearchCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(lineSearchCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-reranking" && (
+              <div className="form-field">
+                <Label htmlFor="reranking-case">Re-ranking sample</Label>
+                <NativeSelect
+                  id="reranking-case"
+                  value={rerankingCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as RerankingCase;
+                    setRerankingCase(next);
+                    setMessage(rerankingCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(rerankingCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-date" && (
+              <div className="form-field">
+                <Label htmlFor="date-case">Date sample</Label>
+                <NativeSelect
+                  id="date-case"
+                  value={dateCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as DateCase;
+                    setDateCase(next);
+                    setMessage(dateCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(dateCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-extraction" && (
+              <div className="form-field">
+                <Label htmlFor="extraction-case">Extraction sample</Label>
+                <NativeSelect
+                  id="extraction-case"
+                  value={extractionCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as ExtractionCase;
+                    setExtractionCase(next);
+                    setMessage(extractionCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(extractionCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-function-calling" && (
+              <div className="form-field">
+                <Label htmlFor="function-case">Function calling sample</Label>
+                <NativeSelect
+                  id="function-case"
+                  value={functionCase}
+                  disabled={!!runId}
+                  onChange={(e) => {
+                    const next = e.target.value as FunctionCase;
+                    setFunctionCase(next);
+                    setMessage(functionCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(functionCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-guardrails" && (
+              <div className="form-field">
+                <Label htmlFor="guardrails-case">Guardrails sample</Label>
+                <NativeSelect
+                  id="guardrails-case"
+                  value={guardrailsCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as GuardrailsCase;
+                    setGuardrailsCase(next);
+                    setMessage(guardrailsCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(guardrailsCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-consistency-choices" && (
+              <div className="form-field">
+                <Label htmlFor="consistency-case">
+                  Choice consistency sample
+                </Label>
+                <NativeSelect
+                  id="consistency-case"
+                  value={consistencyCase}
+                  disabled={!!runId}
+                  onChange={(e) => {
+                    const next = e.target.value as ConsistencyCase;
+                    setConsistencyCase(next);
+                    setMessage(consistencyCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(consistencyCases).map(([key, value]) => (
+                    <NativeSelectOption key={key} value={key}>
+                      {value.label}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
+            {scenario === "flow-nouls" && (
+              <div className="form-field">
+                <Label htmlFor="noul-case">Noul sample</Label>
+                <NativeSelect
+                  id="noul-case"
+                  value={noulCase}
+                  disabled={!!runId}
+                  onChange={(event) => {
+                    const next = event.target.value as NoulCase;
+                    setNoulCase(next);
+                    setMessage(noulCases[next].message);
+                    resetOutcome();
+                  }}
+                >
+                  {Object.entries(noulCases).map(([key, value]) => (
+                    <option value={key} key={key}>
+                      {value.label}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </div>
+            )}
             {scenario === "flow-memory" && (
               <div className="form-field">
                 <Label htmlFor="memory-case">Memory sample</Label>
@@ -735,6 +1593,19 @@ function App() {
                     "flow-hierarchy",
                     "flow-structure",
                     "flow-memory",
+                    "flow-parallel-questions",
+                    "flow-twitch",
+                    "flow-entity",
+                    "flow-citation",
+                    "flow-confidence",
+                    "flow-line-search",
+                    "flow-reranking",
+                    "flow-date",
+                    "flow-extraction",
+                    "flow-function-calling",
+                    "flow-guardrails",
+                    "flow-consistency-choices",
+                    "flow-nouls",
                   ].includes(scenario) && mode === "sample"
                 }
                 id="context"
@@ -784,23 +1655,89 @@ function App() {
             <span role="status">{feedback}</span>
           </div>
           <p id="sample-note" className="sample-note">
-            {scenario === "flow-memory"
-              ? "Run a sample, then open Jev DevTools → Flows. Choose a ticket iteration and View Flow to inspect routing, the memory gate and the selected save path."
-              : scenario === "flow-structure"
-                ? "Run a sample, then open Jev DevTools → Flows. Inspect both batched requests, the line-merge decisions and the deterministic Markdown renderer."
-                : scenario === "flow-hierarchy"
-                  ? "Run a sample, then open Flows. Choose an iteration in either Loop card and View Flow; expand a frontier item to inspect its request. The limit case returns FlowLoopLimitError on purpose."
-                  : scenario === "flow-sde"
-                    ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
-                    : scenario === "flow-rag"
-                      ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
-                      : scenario === "flow-skills" && mode === "sample"
-                        ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
-                        : mode === "sample"
-                          ? "Fixed sample answers, including when you edit context. No external API calls."
-                          : "Live inference uses your server key and may incur API charges."}
+            {scenario === "flow-parallel-questions"
+              ? "Run either fixed sample, then inspect the two loops in Flows. Each has five iterations; single-question collections run with concurrency 1."
+              : scenario === "flow-twitch"
+                ? "Open Jev DevTools → Flows, choose a message in the collection and View Flow to inspect the three-question request and ordered policy conditions."
+                : scenario === "flow-entity"
+                  ? "Fixed attributed pairs and synthetic judgments. Run a sample, then inspect the Score boundaries in Jev DevTools → Flows."
+                  : scenario === "flow-citation"
+                    ? "Fixed citations and synthetic responses. Inspect each match and confidence route in Jev DevTools → Flows."
+                    : scenario === "flow-confidence"
+                      ? "Run a sample, then open Jev DevTools → Flows. Inspect API confidence ≥0.90 and the actual parent-division task; largest class probability does not control routing."
+                      : scenario === "flow-line-search"
+                        ? "Choose a fixed query or threshold fixture. Run it and inspect the single request and existence branches in Flows."
+                        : scenario === "flow-reranking"
+                          ? "Fixed authored shortlist and synthetic probabilities. Run the sample to inspect each candidate request and the stable sorting task. Cancel stops active and queued work."
+                          : scenario === "flow-date"
+                            ? "Fixed samples only. Inspect each role’s seven-question request and the assembly task; missing used confidence sends the date to review."
+                            : scenario === "flow-extraction"
+                              ? "Fixed synthetic sample. Open Flows to inspect sequential helper calls, missing-value bypasses and deterministic normalization."
+                              : scenario === "flow-function-calling"
+                                ? "Fixed synthetic responses. Run a sample and inspect the dispatch request and selected argument paths in Jev DevTools → Flows. No tool executes."
+                                : scenario === "flow-guardrails"
+                                  ? "Fixed message and battery, enforced on the server. Open Jev DevTools → Flows to inspect assessment reuse and strict routing."
+                                  : scenario === "flow-consistency-choices"
+                                    ? "Fixed synthetic responses. The full original post is visible in every captured request. Run, then explore repeat collections and question gates in Flows."
+                                    : scenario === "flow-nouls"
+                                      ? "Fixed claim and rubric; samples reject edits. Open Flows and select a repeat to inspect its request, all decisions and review path."
+                                      : scenario === "flow-memory"
+                                        ? "Run a sample, then open Jev DevTools → Flows. Choose a ticket iteration and View Flow to inspect routing, the memory gate and the selected save path."
+                                        : scenario === "flow-structure"
+                                          ? "Run a sample, then open Jev DevTools → Flows. Inspect both batched requests, the line-merge decisions and the deterministic Markdown renderer."
+                                          : scenario === "flow-hierarchy"
+                                            ? "Run a sample, then open Flows. Choose an iteration in either Loop card and View Flow; expand a frontier item to inspect its request. The limit case returns FlowLoopLimitError on purpose."
+                                            : scenario === "flow-sde"
+                                              ? "Choose a fixed sample, run it, then open Jev DevTools → Flows to inspect the selected path and shared continuation."
+                                              : scenario === "flow-rag"
+                                                ? "Fixed sample retrieval and scores. Choose a case, run it, then inspect the collection in Flows. Cancel stops queued passages."
+                                                : scenario === "flow-skills" &&
+                                                    mode === "sample"
+                                                  ? "Fixed synthetic case. Switch to Live to try your own request; unmatched sample inputs are rejected."
+                                                  : mode === "sample"
+                                                    ? "Fixed sample answers, including when you edit context. No external API calls."
+                                                    : "Live inference uses your server key and may incur API charges."}
           </p>
         </section>
+        {scenario === "flow-parallel-questions" && flowResult && (
+          <ParallelQuestionsCookbookResult result={flowResult} />
+        )}
+        {scenario === "flow-twitch" && flowResult && (
+          <TwitchCookbookResult key={outcome.id} result={flowResult} />
+        )}
+        {scenario === "flow-entity" && flowResult && (
+          <EntityCookbookResult result={flowResult} />
+        )}
+        {scenario === "flow-citation" && flowResult && (
+          <CitationCookbookResult result={flowResult} />
+        )}
+        {scenario === "flow-confidence" && flowResult && (
+          <ConfidenceCookbookResult result={flowResult} />
+        )}
+        {scenario === "flow-line-search" && flowResult && (
+          <LineSearchCookbookResult result={flowResult} />
+        )}
+        {scenario === "flow-reranking" && flowResult && (
+          <RerankingCookbookResult result={flowResult} />
+        )}
+        {scenario === "flow-date" && flowResult && (
+          <DateCookbookResult result={flowResult} />
+        )}
+        {scenario === "flow-extraction" && flowResult && (
+          <ExtractionCookbookResult result={flowResult} />
+        )}
+        {scenario === "flow-function-calling" && flowResult && (
+          <FunctionCookbookResult result={flowResult} />
+        )}
+        {scenario === "flow-guardrails" && flowResult && (
+          <GuardrailsCookbookResult key={outcome.id} result={flowResult} />
+        )}
+        {scenario === "flow-consistency-choices" && flowResult && (
+          <ConsistencyCookbookResult result={flowResult} />
+        )}
+        {scenario === "flow-nouls" && flowResult && (
+          <NoulCookbookResult result={flowResult} />
+        )}
         {scenario === "flow-memory" && flowResult && (
           <MemoryCookbookResult result={flowResult} />
         )}

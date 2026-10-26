@@ -1,0 +1,308 @@
+{
+  "question": "What is the user asking the trading assistant to do?",
+  "functions": {
+    "list_symbols": {
+      "description": "The user wants to know which symbols or how much history is loaded, not to see any particular chart or number",
+      "arguments": {}
+    },
+    "market_summary": {
+      "description": "The user wants one line per symbol showing how the whole board moved, with no single symbol singled out",
+      "arguments": {
+        "window": {
+          "question": "How far back is the user asking about - today, the past week, the past month, or the past three months?",
+          "stated": "Does the user say how far back to look, such as today, this week, this month, or this quarter?",
+          "options": {
+            "1d": "today, the latest trading session only",
+            "1w": "the past week",
+            "1mo": "the past month",
+            "3mo": "the past three months, a quarter"
+          }
+        }
+      }
+    },
+    "plot_price": {
+      "description": "The user wants to look at one symbol's price over time as a chart",
+      "arguments": {
+        "symbol": {
+          "question": "Which company's stock is the user asking about?",
+          "options": {
+            "SPY": "SPY, the S&P 500 index ETF, the market as a whole",
+            "NVDA": "Nvidia, often written NVDA",
+            "AMD": "AMD, Advanced Micro Devices",
+            "AAPL": "Apple, often written AAPL",
+            "MSFT": "Microsoft, often written MSFT",
+            "TSLA": "Tesla, often written TSLA"
+          }
+        },
+        "style": {
+          "question": "Does the user want a plain line or candles?",
+          "stated": "Does the user say how the chart should be drawn, such as a line, candles, or OHLC bars?",
+          "options": {
+            "line": "a simple line through the closing prices",
+            "candles": "a candlestick or OHLC chart, showing each bar's open, high, low and close"
+          }
+        },
+        "resolution": {
+          "question": "How coarse should each bar be - one minute, five minutes, fifteen minutes, one hour, or one day?",
+          "stated": "Does the user say what bar size or interval they want, such as 1m, 15m, hourly, or daily?",
+          "options": {
+            "1m": "one-minute bars",
+            "5m": "five-minute bars",
+            "15m": "fifteen-minute bars",
+            "1h": "hourly bars",
+            "1d": "daily bars"
+          }
+        },
+        "window": {
+          "question": "How far back is the user asking about - today, the past week, the past month, or the past three months?",
+          "stated": "Does the user say how far back to look, such as today, this week, this month, or this quarter?",
+          "options": {
+            "1d": "today, the latest trading session only",
+            "1w": "the past week",
+            "1mo": "the past month",
+            "3mo": "the past three months, a quarter"
+          }
+        },
+        "include_volume": {
+          "question": "Does the user ask to see traded volume as well as the price?",
+          "stated": "Does the user say anything about volume?"
+        },
+        "moving_average": {
+          "question": "How many bars should the moving average cover - nine, twenty, or fifty?",
+          "stated": "Does the user ask for a moving average or a smoothed line over the candles?",
+          "options": {
+            "9": "a nine-bar moving average, a fast one",
+            "20": "a twenty-bar moving average",
+            "50": "a fifty-bar moving average, a slow one"
+          }
+        },
+        "log_scale": {
+          "question": "Does the user ask for a logarithmic price axis?",
+          "stated": "Does the user say anything about the scale of the price axis, such as log or linear?"
+        }
+      }
+    },
+    "intraday_pattern": {
+      "description": "The user asks how a typical trading day goes for one symbol - what happens at the open, at midday, into the close",
+      "arguments": {
+        "symbol": {
+          "question": "Which company's stock is the user asking about?",
+          "options": {
+            "SPY": "SPY, the S&P 500 index ETF, the market as a whole",
+            "NVDA": "Nvidia, often written NVDA",
+            "AMD": "AMD, Advanced Micro Devices",
+            "AAPL": "Apple, often written AAPL",
+            "MSFT": "Microsoft, often written MSFT",
+            "TSLA": "Tesla, often written TSLA"
+          }
+        },
+        "window": {
+          "question": "How far back is the user asking about - today, the past week, the past month, or the past three months?",
+          "stated": "Does the user say how far back to look, such as today, this week, this month, or this quarter?",
+          "options": {
+            "1d": "today, the latest trading session only",
+            "1w": "the past week",
+            "1mo": "the past month",
+            "3mo": "the past three months, a quarter"
+          }
+        },
+        "metric": {
+          "question": "Is the user asking about how much gets traded, how choppy it is, or which way it tends to move?",
+          "stated": "Does the user say which of trading activity, choppiness, or direction they are asking about?",
+          "options": {
+            "volume": "how many shares change hands",
+            "volatility": "how much the price jumps around, how choppy it is",
+            "return": "which way it tends to move, up or down"
+          }
+        }
+      }
+    },
+    "compare_returns": {
+      "description": "The user wants two or more symbols on the same chart to see which did better",
+      "arguments": {
+        "symbols": {
+          "question": "Does the user want {} in the comparison?",
+          "options": {
+            "SPY": "SPY, the S&P 500 index ETF, the market as a whole",
+            "NVDA": "Nvidia, often written NVDA",
+            "AMD": "AMD, Advanced Micro Devices",
+            "AAPL": "Apple, often written AAPL",
+            "MSFT": "Microsoft, often written MSFT",
+            "TSLA": "Tesla, often written TSLA"
+          }
+        },
+        "window": {
+          "question": "How far back is the user asking about - today, the past week, the past month, or the past three months?",
+          "stated": "Does the user say how far back to look, such as today, this week, this month, or this quarter?",
+          "options": {
+            "1d": "today, the latest trading session only",
+            "1w": "the past week",
+            "1mo": "the past month",
+            "3mo": "the past three months, a quarter"
+          }
+        },
+        "normalize": {
+          "question": "Does the user want the lines as percentage moves from the start rather than as raw prices?",
+          "stated": "Does the user say whether to show percentage returns or raw share prices?"
+        }
+      }
+    },
+    "rolling_correlation": {
+      "description": "The user wants to see how closely two symbols have been moving together, and how that has changed",
+      "arguments": {
+        "symbol": {
+          "question": "Which stock is the user asking about - the one being measured, named first?",
+          "options": {
+            "SPY": "SPY, the S&P 500 index ETF, the market as a whole",
+            "NVDA": "Nvidia, often written NVDA",
+            "AMD": "AMD, Advanced Micro Devices",
+            "AAPL": "Apple, often written AAPL",
+            "MSFT": "Microsoft, often written MSFT",
+            "TSLA": "Tesla, often written TSLA"
+          }
+        },
+        "benchmark": {
+          "question": "Which stock is it being compared against - the second one named, the yardstick?",
+          "stated": "Does the user name a second symbol to compare against?",
+          "options": {
+            "SPY": "SPY, the S&P 500 index ETF, the market as a whole",
+            "NVDA": "Nvidia, often written NVDA",
+            "AMD": "AMD, Advanced Micro Devices",
+            "AAPL": "Apple, often written AAPL",
+            "MSFT": "Microsoft, often written MSFT",
+            "TSLA": "Tesla, often written TSLA"
+          }
+        },
+        "window": {
+          "question": "How far back is the user asking about - today, the past week, the past month, or the past three months?",
+          "stated": "Does the user say how far back to look, such as today, this week, this month, or this quarter?",
+          "options": {
+            "1d": "today, the latest trading session only",
+            "1w": "the past week",
+            "1mo": "the past month",
+            "3mo": "the past three months, a quarter"
+          }
+        },
+        "resolution": {
+          "question": "What bar size should the returns be measured on - one minute, five minutes, fifteen minutes, one hour, or one day?",
+          "stated": "Does the user say what bar size or interval to measure returns on?",
+          "options": {
+            "1m": "one-minute returns",
+            "5m": "five-minute returns",
+            "15m": "fifteen-minute returns",
+            "1h": "hourly returns",
+            "1d": "daily returns"
+          }
+        }
+      }
+    },
+    "summary_stats": {
+      "description": "The user wants a table of numbers for one symbol - highs, lows, average move, total return",
+      "arguments": {
+        "symbol": {
+          "question": "Which company's stock is the user asking about?",
+          "options": {
+            "SPY": "SPY, the S&P 500 index ETF, the market as a whole",
+            "NVDA": "Nvidia, often written NVDA",
+            "AMD": "AMD, Advanced Micro Devices",
+            "AAPL": "Apple, often written AAPL",
+            "MSFT": "Microsoft, often written MSFT",
+            "TSLA": "Tesla, often written TSLA"
+          }
+        },
+        "window": {
+          "question": "How far back is the user asking about - today, the past week, the past month, or the past three months?",
+          "stated": "Does the user say how far back to look, such as today, this week, this month, or this quarter?",
+          "options": {
+            "1d": "today, the latest trading session only",
+            "1w": "the past week",
+            "1mo": "the past month",
+            "3mo": "the past three months, a quarter"
+          }
+        }
+      }
+    },
+    "volatility": {
+      "description": "The user asks how volatile, choppy, or risky one symbol has been",
+      "arguments": {
+        "symbol": {
+          "question": "Which company's stock is the user asking about?",
+          "options": {
+            "SPY": "SPY, the S&P 500 index ETF, the market as a whole",
+            "NVDA": "Nvidia, often written NVDA",
+            "AMD": "AMD, Advanced Micro Devices",
+            "AAPL": "Apple, often written AAPL",
+            "MSFT": "Microsoft, often written MSFT",
+            "TSLA": "Tesla, often written TSLA"
+          }
+        },
+        "window": {
+          "question": "How far back is the user asking about - today, the past week, the past month, or the past three months?",
+          "stated": "Does the user say how far back to look, such as today, this week, this month, or this quarter?",
+          "options": {
+            "1d": "today, the latest trading session only",
+            "1w": "the past week",
+            "1mo": "the past month",
+            "3mo": "the past three months, a quarter"
+          }
+        },
+        "annualized": {
+          "question": "Does the user want the figure as a yearly rate rather than per bar?",
+          "stated": "Does the user say whether they want volatility annualized or per bar?"
+        }
+      }
+    },
+    "top_movers": {
+      "description": "The user wants a ranked list of which symbols rose or fell the most",
+      "arguments": {
+        "window": {
+          "question": "How far back is the user asking about - today, the past week, the past month, or the past three months?",
+          "stated": "Does the user say how far back to look, such as today, this week, this month, or this quarter?",
+          "options": {
+            "1d": "today, the latest trading session only",
+            "1w": "the past week",
+            "1mo": "the past month",
+            "3mo": "the past three months, a quarter"
+          }
+        },
+        "direction": {
+          "question": "Is the user asking about the ones that went up or the ones that went down?",
+          "options": {
+            "gainers": "the ones that rose the most, winners, best performers",
+            "losers": "the ones that fell the most, worst performers"
+          }
+        }
+      }
+    },
+    "drawdown": {
+      "description": "The user asks how far one symbol fell from a peak, its worst decline",
+      "arguments": {
+        "symbol": {
+          "question": "Which company's stock is the user asking about?",
+          "options": {
+            "SPY": "SPY, the S&P 500 index ETF, the market as a whole",
+            "NVDA": "Nvidia, often written NVDA",
+            "AMD": "AMD, Advanced Micro Devices",
+            "AAPL": "Apple, often written AAPL",
+            "MSFT": "Microsoft, often written MSFT",
+            "TSLA": "Tesla, often written TSLA"
+          }
+        },
+        "window": {
+          "question": "How far back is the user asking about - today, the past week, the past month, or the past three months?",
+          "stated": "Does the user say how far back to look, such as today, this week, this month, or this quarter?",
+          "options": {
+            "1d": "today, the latest trading session only",
+            "1w": "the past week",
+            "1mo": "the past month",
+            "3mo": "the past three months, a quarter"
+          }
+        },
+        "plot": {
+          "question": "Does the user ask to see the drawdown drawn as a chart rather than just told the number?",
+          "stated": "Does the user say whether they want a chart or just the figure?"
+        }
+      }
+    }
+  }
+}

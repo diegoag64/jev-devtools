@@ -1,0 +1,23 @@
+{
+  "recipe": "https://docs.typesafe.ai/cookbooks/citation_check",
+  "reviewed": "2026-10-26",
+  "upstreamCommit": "25e9d373f4853b3e7e300e55a194f50e54838f68",
+  "assets": [
+    {
+      "path": "citations.json",
+      "source": "https://raw.githubusercontent.com/typesafe-ai/typesafe-public-examples/25e9d373f4853b3e7e300e55a194f50e54838f68/cookbooks/citation_check/citations.json",
+      "sha256": "5f87f8f5475bcf9cf9e869952df3a264edc2a9c0dac573652a54b5707ff15fd7"
+    },
+    {
+      "path": "rfc7519.txt",
+      "source": "https://raw.githubusercontent.com/typesafe-ai/typesafe-public-examples/25e9d373f4853b3e7e300e55a194f50e54838f68/cookbooks/citation_check/rfc7519.txt",
+      "sha256": "fecd930e9ccf2276b95c0017c6c4ff5d09352e4bc3c7629946447894e0f97248"
+    },
+    {
+      "path": "LICENSE.typesafe",
+      "source": "https://raw.githubusercontent.com/typesafe-ai/typesafe-public-examples/25e9d373f4853b3e7e300e55a194f50e54838f68/LICENSE",
+      "sha256": "f7c12f055628204172796b98c08c910b521ab8278e6217fa8af622140e618d94"
+    }
+  ],
+  "transformation": "RFC and all eight citations copied unchanged. Algorithm adapted from official recipe. Additional cases and all response fixtures authored locally; no published cache, usage or timings replayed."
+}

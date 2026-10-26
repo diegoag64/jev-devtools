@@ -1,0 +1,16 @@
+{
+  "source": "https://docs.typesafe.ai/cookbooks/date_extraction_cookbook.md",
+  "reviewedOn": "2026-10-26",
+  "sourceSha256": "7be9d428531d3fab5c35c3c95de521f40184afbcbdb6354c88ecd092b44e7fce",
+  "questionSource": "date_questions(role), all seven Choice instructions and criteria; role replaced by {role} in questions.json",
+  "questionsSha256": "573d159dd1179a3ba429a51cc78e2997b4b7ca1100da8b238059e6502cd6aa88",
+  "examplesRepository": "https://github.com/typesafe-ai/typesafe-public-examples/tree/25e9d373f4853b3e7e300e55a194f50e54838f68",
+  "licenseNotice": "TypeSafe examples MIT notice retained in LICENSE.typesafe; no date-specific file/cache is present in the inspected repository tree. Algorithm source is the published cookbook Python cells.",
+  "adaptations": [
+    "Fixed source reference date 2026-07-30; UTC calendar calculations; task outputs ISO strings/null.",
+    "Missing confidence on any used part requires review, while the source ignores missing values unless all are missing.",
+    "Invalid inferred leap-day rollover returns null/review rather than raising.",
+    "Original document/role examples retained; all readings, confidence and probability values are authored synthetic fixtures, including an absent kickoff mode none instead of the published incomplete absolute reading.",
+    "Additional authored calendar, invalid-date and threshold cases; sequential one-request-per-role map replaces cache-backed repeated display calls."
+  ]
+}

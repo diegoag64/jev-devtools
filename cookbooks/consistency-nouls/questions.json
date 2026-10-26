@@ -1,0 +1,16 @@
+{
+  "covered": "Is the loss covered under the policy's collision coverage?",
+  "exclusion": "Does a policy exclusion apply to this loss?",
+  "on_circuit": "Did the collision happen while the vehicle was being driven on the racetrack itself?",
+  "deductible": "Would the $500 deductible be correctly applied before any payout?",
+  "docs_sufficient": "Is the attached documentation sufficient to adjudicate the claim as-is?",
+  "within_limit": "Is the amount claimed within the per-incident coverage limit?",
+  "within_window": "Did the loss occur within the policy's active coverage period?",
+  "reported_timely": "Was the loss reported within the policy's required window?",
+  "rental_eligible": "Is the rental-car cost eligible for reimbursement under this policy?",
+  "fraud_flag": "Are there indicators that warrant a fraud review?",
+  "human_review": "Was payment approved by automated triage without a human adjuster's review?",
+  "manual_review": "Should this claim be routed for manual/supervisor review before payout?",
+  "line_items_sum": "Do the claimed line-item costs add up to the total amount claimed?",
+  "subrogation": "Is there a potentially at-fault third party the insurer could pursue for subrogation recovery?"
+}
