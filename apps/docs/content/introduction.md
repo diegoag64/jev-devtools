@@ -47,4 +47,4 @@ Use **React 18 or 19**, **Node 22.12+**, and **TypeSafe SDK 0.7.x**. The server 
 
 ## Find a method or learn flows
 
-Use the [API glossary](@/api/reference/) to look up inputs, return values, and usage. [Flows from scratch](@/guides/flow-basics/) teaches each flow method with a small example.
+Use the [API glossary](@/api/reference/) to look up inputs, return values, and usage. [Flows from scratch](@/guides/flow-basics/) walks you through defining and running a greeting flow.

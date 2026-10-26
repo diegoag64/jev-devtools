@@ -1,4 +1,4 @@
-New to flows? Start with [Flows from scratch](@/guides/flow-basics/), which introduces each method with a small example. For exact inputs and return values, use the [API glossary](@/api/reference/).
+New to flows? Start with [Flows from scratch](@/guides/flow-basics/), which builds and runs a greeting flow. For exact inputs and return values, use the [API glossary](@/api/reference/).
 
 Flows are optional. Start here once a single request appears in the drawer. Keep all `jev-devtools/flow` imports on Node.
 
@@ -16,26 +16,26 @@ The `triage` definition is built synchronously once; its `jev()` call creates an
 
 [`run()`](@/api/reference/#flow-run) resolves to `{ runId, outcome, value? }`. In this example, `outcome` is `billing-team` or `support-team`. Your application decides what to do with it. The return value is not inferred as a discriminated union; narrow `value` in application code when needed.
 
-| Returned property | Type | Value in this example |
-| --- | --- | --- |
-| `runId` | `string` | Unique execution ID. |
-| `outcome` | `string` | `"billing-team"` or `"support-team"`. |
-| `value?` | `unknown` | Omitted; the terminal paths only name an outcome. |
+| Returned property | Type      | Value in this example                             |
+| ----------------- | --------- | ------------------------------------------------- |
+| `runId`           | `string`  | Unique execution ID.                              |
+| `outcome`         | `string`  | `"billing-team"` or `"support-team"`.             |
+| `value?`          | `unknown` | Omitted; the terminal paths only name an outcome. |
 
 **Example walkthrough:** `state: flow.input` supplies the message to the Choice question. `answer("team").choice.eq("billing")` creates the routing condition from the chosen label. `branch()` selects one terminal `output()`; the application can then act on that outcome. Passing `devtools: inspector` records the execution with the same adapter as the SDK client.
 
 ## Choose the right operation
 
-| If you need to…                         | Use               |
-| --------------------------------------- | ----------------- |
-| Ask Jev one or more questions           | [`flow.jev()`](@/api/reference/#flow-jev)      |
-| Run application code or await a service | [`flow.task()`](@/api/reference/#flow-task)     |
-| Select a path and finish the flow       | [`flow.branch()`](@/api/reference/#flow-branch)   |
-| Select a value and continue             | [`flow.if()`](@/api/reference/#flow-if)       |
+| If you need to…                         | Use                                                 |
+| --------------------------------------- | --------------------------------------------------- |
+| Ask Jev one or more questions           | [`flow.jev()`](@/api/reference/#flow-jev)           |
+| Run application code or await a service | [`flow.task()`](@/api/reference/#flow-task)         |
+| Select a path and finish the flow       | [`flow.branch()`](@/api/reference/#flow-branch)     |
+| Select a value and continue             | [`flow.if()`](@/api/reference/#flow-if)             |
 | Run independent lanes and join          | [`flow.parallel()`](@/api/reference/#flow-parallel) |
-| Process a bounded collection            | [`flow.map()`](@/api/reference/#flow-map)      |
-| Repeat while a state condition holds    | [`flow.loop()`](@/api/reference/#flow-loop)     |
-| Return a named result                   | [`flow.output()`](@/api/reference/#flow-output)   |
+| Process a bounded collection            | [`flow.map()`](@/api/reference/#flow-map)           |
+| Repeat while a state condition holds    | [`flow.loop()`](@/api/reference/#flow-loop)         |
+| Return a named result                   | [`flow.output()`](@/api/reference/#flow-output)     |
 
 See the [flow builder reference](@/api/flow/) for options and boundaries, and [expressions](@/api/expressions/) for conditions.
 

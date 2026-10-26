@@ -1,4 +1,4 @@
-New to flows? Start with [Flows from scratch](@/guides/flow-basics/), which introduces each method with a small example. For exact inputs and return values, use the [API glossary](@/api/reference/).
+New to flows? Start with [Flows from scratch](@/guides/flow-basics/), which builds and runs a greeting flow. For exact inputs and return values, use the [API glossary](@/api/reference/).
 
 ## defineJevFlow(name, build)
 

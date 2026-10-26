@@ -1,4 +1,4 @@
-// An application handler on your Node server.
+// request.ts (Node only)
 import { choice } from "@typesafe-ai/sdk";
 import { jev } from "./server.js";
 

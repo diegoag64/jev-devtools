@@ -581,7 +581,7 @@ flow.jev(id, { input, request: (resolvedInput) => sdkRequest }, display?): Answe
 
 **Inputs:** unique ID and either a normal SDK request whose `state` may contain nested expressions, or a factory configuration. The factory's `input` is resolved first, then its synchronous `request` callback returns an SDK request. Use tasks for async preparation. The request's `questions` define named SDK question types; other SDK request options are passed through.
 
-**Returns:** `.answer(name)` field references and `.answers` for all answers, typed from the questions. Runtime factories may generate question names; use `.answers` for dynamic keys. SDK failures reject the run. A request factory returning a promise is invalid. [Both forms with complete examples](@/guides/flow-basics/#jev-ask-a-question).
+**Returns:** `.answer(name)` field references and `.answers` for all answers, typed from the questions. Runtime factories may generate question names; use `.answers` for dynamic keys. SDK failures reject the run. A request factory returning a promise is invalid. Both request forms have complete examples below.
 
 #### Returns
 
@@ -600,6 +600,14 @@ flow.jev(id, { input, request: (resolvedInput) => sdkRequest }, display?): Answe
 #### How it works
 
 `state: flow.input` sends the message as context. The SDK's `choice()` helper defines the allowed teams and their descriptions. `answer("team").choice` selects the model's chosen label, and `output()` returns it. `tryClassify()` supplies a concrete message to `await classify.run(...)`. After the request finishes, `result.outcome` is `"classified"` and `result.value` contains the chosen team. The selected team is not predetermined.
+
+#### Request factory example
+
+Use the factory form when a question needs a resolved input value. Call `tryCustomQuestion(jev)` with the same [server client](@/api/server/). This example makes a live request and requires a server-side API key.
+
+<!-- example: flow-factory.ts -->
+
+The factory receives the resolved message and includes it in the question. `result.answers` keeps the complete answer object, which `flow.output()` returns as the run's value. The factory returns synchronously; use a preceding task for asynchronous preparation. `await customQuestion.run(...)` executes the request before `tryCustomQuestion()` reads the result.
 
 ### request.answer
 
@@ -625,7 +633,7 @@ result.answer<Name extends keyof Questions>(name: Name): AnswerFieldReferences
 | -------------- | --------------------------------- | ------------------------------------------------------------------- |
 | Return         | `Object of FlowExpression fields` | Each result field is an expression with its SDK-defined value type. |
 
-Inside a synchronous `defineJevFlow()` callback; these references resolve when you await the flow’s `run()`. See the [complete definition and execution](@/guides/flow-basics/#jev-ask-a-question).
+Inside a synchronous `defineJevFlow()` callback; these references resolve when you await the flow’s `run()`. See the [complete definition and execution](#flow-jev).
 
 #### Example
 
@@ -659,7 +667,7 @@ The full resolved SDK answer object, useful when a factory generates question na
 | -------------- | ----------------------------------------------------- | ---------------------------------------- |
 | Property value | `FlowExpression<{ [K in keyof Q]: ResultFor<Q[K]> }>` | Reference to the complete answer object. |
 
-Inside a synchronous `defineJevFlow()` callback; these references resolve when you await the flow’s `run()`. See the [complete definition and execution](@/guides/flow-basics/#jev-ask-a-question).
+Inside a synchronous `defineJevFlow()` callback; these references resolve when you await the flow’s `run()`. See the [complete definition and execution](#flow-jev).
 
 #### Example
 
@@ -691,7 +699,7 @@ flow.if<A, B>(id, { when, then, else }, display?): Expression<A | B>
 | `paths.else`       | `(path: FlowBuilder<Input>) => FlowExpression<B>` |
 | `display?`         | `FlowDisplay`                                     |
 
-**Inputs:** a Boolean expression `when`; `then(path)` and `else(path)` callbacks each returning a value reference. **Returns:** the chosen value reference so later shared steps can continue. Both callbacks build synchronously, only the selected path executes. Use the provided path builder; do not return terminal outputs here. [Beginner example](@/guides/flow-basics/#if-choose-a-value-then-continue).
+**Inputs:** a Boolean expression `when`; `then(path)` and `else(path)` callbacks each returning a value reference. **Returns:** the chosen value reference so later shared steps can continue. Both callbacks build synchronously, only the selected path executes. Use the provided path builder; do not return terminal outputs here.
 
 #### Returns
 
@@ -727,7 +735,7 @@ flow.branch(id, { when, then, else }, display?): Expression<FlowOutcome>
 | `paths.then, paths.else` | `(path: FlowBuilder<Input>) => FlowExpression<FlowOutcome>` |
 | `display?`               | `FlowDisplay`                                               |
 
-**Inputs:** Boolean `when`; two callbacks returning `output` or another terminal `branch`. **Returns:** the terminal result reference. Return it from the containing flow/path. No steps may follow this terminal decision. Use `if` to rejoin instead. [Beginner example](@/guides/flow-basics/#branch-choose-how-to-finish).
+**Inputs:** Boolean `when`; two callbacks returning `output` or another terminal `branch`. **Returns:** the terminal result reference. Return it from the containing flow/path. No steps may follow this terminal decision. Use `if` to rejoin instead.
 
 #### Returns
 
@@ -763,7 +771,7 @@ flow.parallel(id, lanes: { [name: string]: (lane) => Expression<unknown> }, disp
 | `lanes`            | `Named builder callbacks, each returning a FlowExpression` |
 | `display?`         | `FlowDisplay`                                              |
 
-**Inputs:** a nonempty object of named lane callbacks, each returning a value expression. Lane names follow step ID naming rules. **Returns:** an object preserving lane names and their expression types. Lanes run concurrently; steps within a lane are sequential. Sibling intermediate results are private. A failure cancels sibling work cooperatively. [Beginner example](@/guides/flow-basics/#parallel-do-independent-work-together).
+**Inputs:** a nonempty object of named lane callbacks, each returning a value expression. Lane names follow step ID naming rules. **Returns:** an object preserving lane names and their expression types. Lanes run concurrently; steps within a lane are sequential. Sibling intermediate results are private. A failure cancels sibling work cooperatively.
 
 #### Returns
 
@@ -805,7 +813,7 @@ flow.map<Item, Context, Output>(id, { items, input, maxItems, concurrency? }, bu
 
 **Inputs:** literal array, whole-array reference, or nested reference template `items`; shared context `input`; required integer `maxItems` from 1–64; `concurrency` from 1–16 (default 4). For whole-array references and scalar arrays, `build(item)` preserves the existing `Item` payload, including generic types. Nested templates resolve each item to `Resolved<Item>`. Branded primitives remain scalar values. The builder returns a value reference. For `items: [flow.input.get("count")]`, the item reference is `FlowExpression<number>` and a task receiving it gets a number.
 
-**Returns:** results in original item order; empty input returns an empty array. Exceeding `maxItems` rejects instead of truncating. Use explicit context rather than outer references inside the item program. No nested maps or loops inside maps. [Complete beginner example](@/guides/flow-basics/#map-repeat-a-recipe-for-each-item).
+**Returns:** results in original item order; empty input returns an empty array. Exceeding `maxItems` rejects instead of truncating. Use explicit context rather than outer references inside the item program. No nested maps or loops inside maps.
 
 #### Returns
 
@@ -851,7 +859,7 @@ flow.loop<State, Context>(id, { initial, input, while, maxIterations }, build, d
 
 **Inputs:** JSON state/reference `initial`; explicit shared context `input`; `while(state)` returning a Boolean expression of that state; required `maxIterations` integer 1–64. `build(iteration)` gets `{ state, index, context }` through its builder input and returns the next state reference with the same resolved shape. Literal state, whole-state references, and nested object/array templates are supported. Whole-state references and scalar initial values preserve their payload without remapping it; literal/template state resolves nested references while preserving branded primitives. The initial state determines the body return type. For `initial: { count: flow.input.get("count") }`, both the gate and iteration select `count` as `FlowExpression<number>`; a task receiving that state uses ordinary numeric operations on `state.count`.
 
-**Returns:** final state when the pre-iteration condition becomes false (possibly the initial state). If still true at the limit, rejects with `FlowLoopLimitError`. Nested loops are unsupported; a loop can contain a map. [Beginner example](@/guides/flow-basics/#loop-repeat-until-a-condition-is-false).
+**Returns:** final state when the pre-iteration condition becomes false (possibly the initial state). If still true at the limit, rejects with `FlowLoopLimitError`. Nested loops are unsupported; a loop can contain a map.
 
 #### Returns
 
