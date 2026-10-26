@@ -53,3 +53,5 @@ Before public hosting: choose the canonical URL, add sitemap/social metadata, ke
 `/concepts/` explains the client, adapter, drawer, inspection copies, and flow lifecycle. Guides focus on concrete setup and debugging tasks: Next.js wiring, message routing, privacy controls, and symptom-based troubleshooting. Keep explanations consistent with the detailed repository references and installed setup skill, and preserve existing section links when reorganizing a page.
 
 API explanations separate parameter rules, execution behavior, and failures. Keep signatures and checked examples intact during prose edits, and distinguish builder references from resolved values, capture limits from execution limits, and replayed answers from application tasks that run again.
+
+Resource pages direct readers to runnable sample apps, cookbook workflows, and checked method examples. Coding-agent guidance points to the installed setup skill and adjacent references, distinguishes online snapshots from installed contracts, and asks for observable integration evidence.

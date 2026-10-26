@@ -28,6 +28,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **Useful resource entry points.** Rewrite Examples & cookbooks with sample run instructions, expected results, and clearer cookbook descriptions. Rewrite For coding agents around the installed setup skill, version-matched contracts, Markdown access, and verification evidence. Preserve existing section links.
+
 - **Clearer API explanations.** Revise the glossary and React, server, flow, expression, and recorder references. Separate parameter rules, execution behavior, and errors; explain replay and comparison results; add missing server parameter types. Preserve examples, signatures, and section links.
 
 - **Concepts and practical guides.** Rename How it fits together to Concepts and explain capture, flows, and drawer controls. Rewrite the Next.js, Build a flow, Privacy & access, and Troubleshooting guides with setup steps, expected results, and diagnostic checks. Preserve existing page and section links.
