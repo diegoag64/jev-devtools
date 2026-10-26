@@ -28,7 +28,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **Twitch chat filter cookbook.** Replay the original 29-message feed with eight concurrent sample requests, inspect exact moderation precedence, and compare normal/quiet policies without additional inference. Includes a separate threshold-boundary feed; ongoing Twitch ingestion is outside this sample.
+- **Twitch chat filter cookbook.** Replay the original 29-message feed with eight concurrent sample requests, inspect exact moderation precedence, and compare normal/quiet policies without additional inference. Includes a separate threshold-boundary feed; ongoing Twitch ingestion is outside this sample. ([#108](https://github.com/diegoag64/jev-devtools/pull/108))
 
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
