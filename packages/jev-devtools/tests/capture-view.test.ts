@@ -34,17 +34,32 @@ const result = {
 
 // Existing redaction checks preserved JSON state fields but never rendered a
 // supported transformation that changes the request root or a typed answer.
-for (const mode of ["normal", "root-null", "score-string"] as const) {
+for (const mode of [
+  "normal",
+  "root-null",
+  "request-only",
+  "score-string",
+  "legend-json",
+] as const) {
   test(`recorder/SSE/view preserves execution and handles ${mode} capture`, async (t) => {
     const adapter = createJevDevtools({
       enabled: true,
       origin,
       redact: (path, value) =>
-        mode === "root-null" && path.length === 0
+        (mode === "root-null" && path.length === 0) ||
+        (mode === "request-only" &&
+          path.length === 0 &&
+          value !== null &&
+          typeof value === "object" &&
+          "questions" in value)
           ? null
-          : mode === "score-string" && path.at(-1) === "score"
-            ? "[redacted]"
-            : value,
+          : mode === "legend-json" &&
+              path.at(-2) === "legend" &&
+              path.at(-1) === "0"
+            ? { toString: null }
+            : mode === "score-string" && path.at(-1) === "score"
+              ? "[redacted]"
+              : value,
     });
     t.after(() => adapter.dispose());
     const client = adapter.createClient({
@@ -77,7 +92,14 @@ for (const mode of ["normal", "root-null", "score-string"] as const) {
           renderToString(createElement(component, { trace })),
         );
       const diagram = renderToString(createElement(TraceDiagram, { trace }));
-      if (mode === "normal") {
+      if (mode === "legend-json") {
+        assert.match(diagram, /toString/);
+        assert.match(diagram.replaceAll("<!-- -->", ""), /Score 1.00/);
+        assert.deepEqual(trace.result?.answers.q.legend?.["0"], {
+          toString: null,
+        });
+        assert.equal(trace.capture, undefined);
+      } else if (mode === "normal") {
         assert.match(diagram.replaceAll("<!-- -->", ""), /Score 1.00/);
         assert.deepEqual(trace.request.state, input.state);
         assert.deepEqual(trace.result, result);
@@ -90,14 +112,20 @@ for (const mode of ["normal", "root-null", "score-string"] as const) {
           /structured view unavailable/,
         );
         const raw = payload.traces[0];
-        if (mode === "root-null") {
+        if (mode === "root-null" || mode === "request-only") {
           assert.equal(raw.capture.request, null);
-          assert.equal(raw.capture.result, null);
+          assert.equal(
+            raw.capture.result,
+            mode === "root-null" ? null : undefined,
+          );
         } else {
           assert.equal(raw.capture.result.answers.q.score, "[redacted]");
           assert.deepEqual(raw.request.state, input.state);
         }
-        assert.equal(trace.result, undefined);
+        assert.deepEqual(
+          trace.result,
+          mode === "request-only" ? result : undefined,
+        );
         assert.doesNotMatch(
           JSON.stringify(createDisplayRedactor().trace(trace)),
           /personal@example/,
