@@ -15,7 +15,7 @@ Open http://127.0.0.1:4182/. Sample mode needs no API key. Run a scenario to see
 
 ## Cookbook examples
 
-The [cookbook guide](../../cookbooks/README.md) lists six runnable examples, their local URLs, and the flow patterns they demonstrate. They use the 0.4.0 flow API. The playground, cookbook code, and fixtures live in this repository and are not bundled in the npm package.
+The [cookbook guide](../../cookbooks/README.md) lists runnable examples, their local URLs, and the flow patterns they demonstrate. They use the 0.4.0 flow API. The playground, cookbook code, and fixtures live in this repository and are not bundled in the npm package.
 
 ## Manual edge-case sandbox
 
@@ -30,3 +30,5 @@ For optional live mode, copy `apps/playground/.env.example` to `apps/playground/
 ## Development
 
 The playground consumes built public package exports. Restart `npm run dev` after library edits, or run `npm run build:package` separately. The full verification commands and package checks are in [Contributing](../../CONTRIBUTING.md).
+
+The [Noul self-consistency cookbook](../../cookbooks/consistency-nouls/README.md) runs at `/?cookbook=consistency-nouls`. It preserves fifteen sequential fourteen-question requests and the inclusive 0.30–0.70 uncertainty band. Its authored variation and statistics are fixture demonstrations, not measured model consistency or a provider comparison; live mode is rejected.

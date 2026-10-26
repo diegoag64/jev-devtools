@@ -1,0 +1,58 @@
+{
+  "policy": {
+    "policy_id": "AP-77413",
+    "policyholder": "Dana M.",
+    "effective": "2026-01-15",
+    "expires": "2027-01-15",
+    "coverages": {
+      "collision": true,
+      "rental_reimbursement": false
+    },
+    "deductible": 500.0,
+    "per_incident_limit": 10000.0,
+    "listed_drivers": ["Dana M.", "Sam M."],
+    "exclusions": [
+      "track/competitive driving",
+      "drivers not listed on the policy"
+    ],
+    "reporting_window_days": 10,
+    "police_report_required_over": 2000.0
+  },
+  "claim": {
+    "claim_id": "CLM-55029",
+    "incident_date": "2026-06-28",
+    "reported_date": "2026-07-04",
+    "driver": "Sam M.",
+    "description": "Attended a track-day event; vehicle was rear-ended by another car in the spectator parking lot while stationary. Not on the circuit.",
+    "amount_claimed": 3250.0,
+    "line_items": [
+      {
+        "item": "rear bumper replacement",
+        "cost": 1700.0
+      },
+      {
+        "item": "paint + refinish",
+        "cost": 800.0
+      },
+      {
+        "item": "parking-sensor recalibration",
+        "cost": 450.0
+      },
+      {
+        "item": "rental car (6 days)",
+        "cost": 300.0
+      }
+    ],
+    "documentation": ["repair estimate (PDF)", "8 damage photos"]
+  },
+  "adjuster_notes": [
+    {
+      "author": "auto-triage",
+      "note": "Collision coverage active. Approved. Pay full amount $3,250 to policyholder, 5-10 business days."
+    }
+  ],
+  "claim_history": {
+    "claims_last_12mo": 2,
+    "prior_denied": 0
+  }
+}

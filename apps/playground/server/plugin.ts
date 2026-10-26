@@ -1,3 +1,13 @@
+import {
+  createNoulFlow,
+  flowName as noulFlowName,
+} from "../../../cookbooks/consistency-nouls/flow.js";
+import { createNoulSample } from "../../../cookbooks/consistency-nouls/samples.js";
+import {
+  noulCases,
+  isNoulCase,
+  type NoulCase,
+} from "../../../cookbooks/consistency-nouls/cases.js";
 import { memoryFlow } from "../../../cookbooks/simple-memory/flow.js";
 import { memorySampleTransport } from "../../../cookbooks/simple-memory/samples.js";
 import {
@@ -138,6 +148,7 @@ export function jevInspectorServer(
             hierarchyCase?: string;
             structureCase?: string;
             memoryCase?: string;
+            noulCase?: string;
           };
           try {
             let text = "";
@@ -180,6 +191,7 @@ export function jevInspectorServer(
               "flow-hierarchy",
               "flow-structure",
               "flow-memory",
+              "flow-nouls",
               "flow-manual",
               "flow-other",
               "flow-parallel",
@@ -191,6 +203,10 @@ export function jevInspectorServer(
             typeof body.message !== "string" ||
             body.message.length > 8000 ||
             (body.scenario === "stress" && !validStress(body.stress)) ||
+            (body.scenario === "flow-nouls" &&
+              (body.mode !== "sample" ||
+                !isNoulCase(body.noulCase) ||
+                body.message !== noulCases[body.noulCase].message)) ||
             (body.scenario === "flow-memory" &&
               (!isMemoryCase(body.memoryCase) ||
                 body.message !== memoryCases[body.memoryCase].message)) ||
@@ -256,11 +272,16 @@ export function jevInspectorServer(
                       : body.scenario === "flow-parallel"
                         ? parallelFlow
                         : refundFlow;
+              const noulSample =
+                body.scenario === "flow-nouls"
+                  ? createNoulSample(body.noulCase as NoulCase)
+                  : null;
               const client = inspector.createClient(
                 {
                   apiKey: body.mode === "live" ? apiKey : "sample-only",
-                  fetch:
-                    body.scenario === "flow-memory"
+                  fetch: noulSample
+                    ? noulSample.fetch
+                    : body.scenario === "flow-memory"
                       ? memorySampleTransport(body.memoryCase as MemoryCase)
                       : body.scenario === "flow-structure"
                         ? structureSampleTransport(
@@ -286,8 +307,9 @@ export function jevInspectorServer(
                   timeout: 120_000,
                 },
                 {
-                  label:
-                    body.scenario === "flow-memory"
+                  label: noulSample
+                    ? noulFlowName
+                    : body.scenario === "flow-memory"
                       ? memoryFlow.definition.name
                       : body.scenario === "flow-structure"
                         ? structureFlow.definition.name
@@ -299,8 +321,15 @@ export function jevInspectorServer(
                   source: body.mode === "live" ? "live" : "sample",
                 },
               );
-              const result =
-                body.scenario === "flow-memory"
+              const result = noulSample
+                ? await createNoulFlow(noulSample.returnedModels).run(
+                    {
+                      message: body.message,
+                      caseId: body.noulCase as NoulCase,
+                    },
+                    { client, devtools: inspector, signal: controller.signal },
+                  )
+                : body.scenario === "flow-memory"
                   ? await memoryFlow.run(
                       {
                         message: body.message,

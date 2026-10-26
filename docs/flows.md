@@ -420,6 +420,8 @@ In the drawer, a **Loop** card shows completed iterations, the continuation rule
 
 Try the [hierarchical classification cookbook](../cookbooks/hierarchical-classification/README.md), including beam recovery, deterministic paths, a zero-iteration leaf, and an intentional iteration-limit failure.
 
+The [Noul self-consistency cookbook](../cookbooks/consistency-nouls/README.md) uses a collection with concurrency 1 for fifteen sequential fourteen-question requests. Tasks retain every probability, apply the inclusive 0.30–0.70 review band, and compute descriptive fixture statistics; a returning conditional exposes each repeat's review path. Its deterministic UIDs and authored variation are not independent model draws or measured consistency. Other-provider experiments are excluded.
+
 ## Replay a run in tests
 
 **New in 0.5.0.**
