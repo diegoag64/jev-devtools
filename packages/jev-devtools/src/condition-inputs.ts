@@ -29,8 +29,13 @@ export function conditionInputs(
         typeof node.stepId === "string"
           ? traces.get(run.steps[node.stepId]?.traceId ?? "")
           : undefined;
-      let value: unknown = trace?.result;
-      let available = !!trace?.result;
+      // Incoming labels display captured JSON; they never evaluate a rule or
+      // require the numeric answer shape used by the request diagrams.
+      let value: unknown =
+        trace?.capture?.result !== undefined
+          ? trace.capture.result
+          : trace?.result;
+      let available = value !== undefined;
       if (node.source === "task" && typeof node.stepId === "string") {
         const data = run.steps[node.stepId]?.data;
         available =
@@ -125,7 +130,7 @@ export function conditionRequirement(
         ...node,
         label:
           typeof node.label === "string"
-            ? names.get(node.label) ?? "Input"
+            ? (names.get(node.label) ?? "Input")
             : "Input",
       };
     if (Array.isArray(node.args))
