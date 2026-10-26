@@ -62,6 +62,31 @@ try {
       .isVisible(),
     false,
   );
+  const contrast = await result
+    .locator(".twitch-highlight")
+    .first()
+    .evaluate((element) => {
+      const luminance = (color) => {
+        const rgb = color
+          .match(/[\d.]+/g)
+          .slice(0, 3)
+          .map(Number)
+          .map((v) => {
+            v /= 255;
+            return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+          });
+        return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+      };
+      const foreground = luminance(
+        getComputedStyle(element.querySelector("p")).color,
+      );
+      const background = luminance(getComputedStyle(element).backgroundColor);
+      return (
+        (Math.max(foreground, background) + 0.05) /
+        (Math.min(foreground, background) + 0.05)
+      );
+    });
+  assert.ok(contrast >= 4.5, `Highlighted preview contrast: ${contrast}`);
   await result.scrollIntoViewIfNeeded();
   await page.screenshot({
     path: resolve(output, "normal-chat.png"),
@@ -101,6 +126,10 @@ try {
   await page
     .getByRole("article", { name: "Request classify-message", exact: true })
     .waitFor();
+  await page
+    .getByLabel("Flow step", { exact: true })
+    .last()
+    .selectOption("classify-message");
   await page.screenshot({ path: resolve(output, "message-flow.png") });
   await page
     .getByRole("button", { name: "Close Jev DevTools", exact: true })
@@ -172,6 +201,7 @@ try {
         quiet: { dim: 8, hide: 13, highlight: 6, blur: 2 },
         boundaries: 9,
         quietAdditionalRuns: 0,
+        highlightContrast: contrast,
         invalidStatus: invalid.status(),
         liveStatus: live.status(),
         errors,
