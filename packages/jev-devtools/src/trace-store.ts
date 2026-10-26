@@ -1,23 +1,19 @@
 import type { Trace } from "./protocol.js";
 
-const revision = (value: unknown): value is number =>
-  typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+import { projectTraceCapture } from "./capture-view.js";
+import { parseTraceRecord } from "./trace-parser.js";
+import { ids, integer, parse, record } from "./transport-validation.js";
+
 function traces(value: unknown): Trace[] {
   if (!Array.isArray(value) || value.length > 200)
     throw new Error("Invalid traces");
   const ids = new Set<string>();
-  for (const trace of value) {
-    if (
-      !trace ||
-      trace.version !== 1 ||
-      typeof trace.id !== "string" ||
-      !trace.id ||
-      ids.has(trace.id)
-    )
-      throw new Error("Invalid trace ID");
+  return value.map((input: unknown) => {
+    const trace = projectTraceCapture(parseTraceRecord(input));
+    if (ids.has(trace.id)) throw new Error("Duplicate trace ID");
     ids.add(trace.id);
-  }
-  return value;
+    return trace;
+  });
 }
 
 // Owned by one EventSource connection. Unchanged trace objects keep their
@@ -26,35 +22,28 @@ export class TraceStore {
   private current: Trace[] = [];
   private revision: number | undefined;
   apply(event: "snapshot" | "delta", input: unknown): Trace[] {
-    if (!input || typeof input !== "object") throw new Error("Invalid update");
-    const data = input as Record<string, unknown>;
+    const data = parse(record, input, "update");
     if (event === "snapshot") {
       if (data.version !== 1 && data.version !== 2)
         throw new Error("Unsupported stream");
-      if (data.version === 2 && !revision(data.revision))
-        throw new Error("Invalid revision");
+      const nextRevision =
+        data.version === 2
+          ? parse(integer, data.revision, "revision")
+          : undefined;
       const next = traces(data.traces);
       this.current = next;
-      this.revision =
-        data.version === 2 ? (data.revision as number) : undefined;
+      this.revision = nextRevision;
       return next;
     }
     if (
       data.version !== 2 ||
       this.revision === undefined ||
       data.base !== this.revision ||
-      !revision(data.revision) ||
+      !integer(data.revision) ||
       data.revision <= this.revision
     )
       throw new Error("Inspector stream needs a fresh snapshot");
-    if (
-      !Array.isArray(data.order) ||
-      data.order.length > 200 ||
-      data.order.some((id) => typeof id !== "string") ||
-      new Set(data.order).size !== data.order.length
-    )
-      throw new Error("Invalid retained order");
-    const order = data.order as string[];
+    const order = parse(ids, data.order, "retained order");
     const retained = new Set(order);
     const upserts = traces(data.upserts);
     if (upserts.some((t) => !retained.has(t.id)))
