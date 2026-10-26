@@ -248,6 +248,8 @@ Use `task()` for application-owned server work and the request-factory overload 
 
 Choose an item in the collection card, then **View Flow** to expand its full request/function diagram directly underneath on the same canvas. Changing the selector replaces the inline item flow; **Hide Flow** collapses it. Item values use bounded/redacted capture; don't put runtime data in structural titles. For an executable sample, see `cookbooks/rag-passages/README.md` in the repository checkout. Do not promise embedding search or LLM generation in that sample: it uses fixed retrieved passages, synthetic Jev scores and a deterministic excerpt preview.
 
+For sequential repeated assessments, the repository’s `cookbooks/consistency-choices/README.md` uses `map` with concurrency one and 15 requests. Keep its original eight-question rubric, fresh uid per repeat, ordered argmax and maximum-probability gate: below 0.60 abstains; exactly 0.60 accepts. Choice confidence is separate. Fixtures are authored demonstrations, not measured consistency; provider comparisons and live inference are excluded.
+
 ## Returning conditionals: `flow.if()` (0.4.0)
 
 Version 0.4.0 includes `flow.if()` and strict numeric `.gt()` comparisons. Use `flow.if(id, { when, then, else }, display?)` for a conditional whose value feeds shared downstream steps. Each arm returns a `FlowExpression`; only the selected arm executes. The result type is the union of both values. An arm may return an earlier expression without adding a task. `output()` and terminal `branch()` arms are rejected. Scope-local refs must not leak; consume the returned conditional reference. Conditionals may nest and run inside parallel lanes or map items.

@@ -33,12 +33,13 @@ For Next.js, follow the [example's run instructions](https://github.com/diegoag6
 
 ## Explore complete flows
 
-The six cookbooks below run inside the playground. Each README explains the sample cases, application policies, source recipe, and limitations.
+The cookbooks below run inside the playground. Each README explains the sample cases, application policies, source recipe, and limitations.
 
 | Cookbook                                                                                                                 | What to inspect                                                                                                |
 | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
 | [SDE cascade](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/sde-cascade)                                 | Field verification, conditional escalation, and a shared continuation that returns the final record.           |
 | [Hierarchical classification](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/hierarchical-classification) | Beam and greedy search through bounded loops, frontier collections, and retained or pruned paths.              |
+| [Choice self-consistency](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/consistency-choices)             | Sequential repeats, per-question probability gates and a synthetic agreement heatmap.                          |
 | [Structure recovery](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/structure-recovery)                   | Tasks that join text, requests built from those results, and formatting based on returned labels.              |
 | [Simple memory](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/simple-memory)                             | Ticket routing with customer-scoped memory that starts fresh for each run.                                     |
 | [RAG passages](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/rag-passages)                               | Passage assessment with bounded concurrency and explicit rules for including, excluding, or flagging evidence. |
@@ -53,7 +54,7 @@ npm run dev
 
 Open [http://127.0.0.1:4182](http://127.0.0.1:4182/), choose a cookbook and sample, then click **Run sample**. Open **Jev DevTools → Flows** and select the latest run. Compare the application's result with the executed steps, linked requests, and routing decisions. The [cookbook index](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/README.md#choose-an-example) has direct local links to each example.
 
-All six have samples that need no API key. Their synthetic responses demonstrate execution and inspection, not model accuracy. Editing an input does not turn a fixed response into live inference. Some examples reject inputs that do not match their fixtures. Live support varies by example, so read its README before configuring a key.
+These examples have samples that need no API key. Their synthetic responses demonstrate execution and inspection, not model accuracy. Editing an input does not turn a fixed response into live inference. Some examples reject inputs that do not match their fixtures. Live support varies by example, so read its README before configuring a key.
 
 ## Learn one method at a time
 

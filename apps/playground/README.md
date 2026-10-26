@@ -15,7 +15,7 @@ Open http://127.0.0.1:4182/. Sample mode needs no API key. Run a scenario to see
 
 ## Cookbook examples
 
-The [cookbook guide](../../cookbooks/README.md) lists six runnable examples, their local URLs, and the flow patterns they demonstrate. They use the 0.4.0 flow API. The playground, cookbook code, and fixtures live in this repository and are not bundled in the npm package.
+The [cookbook guide](../../cookbooks/README.md) lists runnable examples, their local URLs, and the flow patterns they demonstrate. They use the public flow API. The playground, cookbook code, and fixtures live in this repository and are not bundled in the npm package.
 
 ## Manual edge-case sandbox
 
@@ -30,3 +30,7 @@ For optional live mode, copy `apps/playground/.env.example` to `apps/playground/
 ## Development
 
 The playground consumes built public package exports. Restart `npm run dev` after library edits, or run `npm run build:package` separately. The full verification commands and package checks are in [Contributing](../../CONTRIBUTING.md).
+
+### Choice self-consistency
+
+Open `http://127.0.0.1:4182/?cookbook=consistency-choices` for the [Choice self-consistency adaptation](../../cookbooks/consistency-choices/README.md). It keeps the original post, eight Choice questions and 15 sequential requests, with authored varying distributions. Inspect each repeat and its question gates in Flows, or select heatmap cells for raw probabilities and separate confidence. Below 0.60 abstains; exactly 0.60 accepts. Samples do not measure consistency, accuracy, latency or cost; live mode and other-provider comparisons are excluded.

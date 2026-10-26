@@ -535,3 +535,7 @@ for (const { name, input, fixture } of savedCases) {
 Recording observer failures or mutations to run snapshots do not change comparison results. The comparison copies each resolved client response on capture, so an observer that retains a response cannot rewrite the captured answers or live fixture during later run updates.
 
 Save `comparison.liveFixture` to update the case. It is the fixture `flowFixture` builds from the live run, item steps included, with unredacted, untruncated responses, so review it before committing it.
+
+## Choice self-consistency cookbook
+
+The repository’s [Choice self-consistency example](../cookbooks/consistency-choices/README.md) uses a map with concurrency one for 15 requests over the original eight-question rubric. Tasks compute ordered probability vectors, argmax and aggregate statistics; returning conditionals expose each question’s maximum-probability gate (≥0.60 selects a label; below it abstains). The rubric stays fixed while each state gets a fresh uid. Authored fixtures demonstrate calculations, not measured consistency or identical-input sampling; Choice confidence is retained separately and never used as this threshold. No public API extension or paid inference is required.
