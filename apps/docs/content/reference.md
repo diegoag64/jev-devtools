@@ -1,6 +1,6 @@
 Use this page when you know an API name and want its contract. Each method has a permanent heading link, a readable signature, inputs, return value, and usage. Start with [Flows from scratch](@/guides/flow-basics/) if flows are new to you.
 
-These docs describe **published version 0.5.2**, also the default npm install. Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
+These docs describe **version 0.5.3**. [See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
 
 <details class="reference-notes">
 <summary>How to read the signatures</summary>

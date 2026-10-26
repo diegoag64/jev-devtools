@@ -6,22 +6,34 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## At a glance
 
-| Version                                     | Published (UTC) | Highlights                                                                                                 |
-| ------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published   | Shared flow encoding; release tooling and receipts; lifecycle and nested browser regression coverage.      |
-| [0.5.2](#052--october-25-2026-experimental) | 2026-10-25      | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
-| [0.5.1](#051--october-25-2026-experimental) | 2026-10-25      | Task input validation and expression types; setup guidance; release and website maintenance.               |
-| [0.5.0](#050--october-25-2026-experimental) | 2026-10-25      | Replay and comparison; capture reliability/privacy; website and docs.                                      |
-| [0.4.1](#041--october-24-2026-experimental) | 2026-10-24      | CSS isolation; stricter published flow types; approved release workflow.                                   |
-| [0.4.0](#040--october-24-2026-experimental) | 2026-10-24      | Tasks, maps and loops; six cookbooks; SDK and inspector access changes.                                    |
-| [0.3.0](#030--october-24-2026-experimental) | 2026-10-24      | Connected flow API; readable diagrams; bundled flow guidance.                                              |
-| [0.2.0](#020--october-23-2026-experimental) | 2026-10-23      | Faster streaming and rendering; virtualized questions; compact Choice views.                               |
-| [0.1.3](#013--october-23-2026-experimental) | 2026-10-23      | Isolated drawer styles; diagram pan and zoom; versioned package links.                                     |
-| [0.1.2](#012--october-23-2026-experimental) | 2026-10-23      | Bundled setup skill; agent prompts; framework recipes.                                                     |
-| [0.1.1](#011--october-23-2026-experimental) | 2026-10-23      | Installation guidance; complete inline demo; smaller video download.                                       |
-| [0.1.0](#010--october-23-2026-experimental) | 2026-10-23      | React inspector; Node capture; Next.js integration.                                                        |
+| Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
+| ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| [Unreleased](#unreleased)                   | Not published                                                                      | No additional changes yet.                                                                                 |
+| [0.5.3](#053--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) | Shared flow encoding; simpler releases and publication helpers; flow regression coverage.                  |
+| [0.5.2](#052--october-25-2026-experimental) | 2026-10-25                                                                         | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
+| [0.5.1](#051--october-25-2026-experimental) | 2026-10-25                                                                         | Task input validation and expression types; setup guidance; release and website maintenance.               |
+| [0.5.0](#050--october-25-2026-experimental) | 2026-10-25                                                                         | Replay and comparison; capture reliability/privacy; website and docs.                                      |
+| [0.4.1](#041--october-24-2026-experimental) | 2026-10-24                                                                         | CSS isolation; stricter published flow types; approved release workflow.                                   |
+| [0.4.0](#040--october-24-2026-experimental) | 2026-10-24                                                                         | Tasks, maps and loops; six cookbooks; SDK and inspector access changes.                                    |
+| [0.3.0](#030--october-24-2026-experimental) | 2026-10-24                                                                         | Connected flow API; readable diagrams; bundled flow guidance.                                              |
+| [0.2.0](#020--october-23-2026-experimental) | 2026-10-23                                                                         | Faster streaming and rendering; virtualized questions; compact Choice views.                               |
+| [0.1.3](#013--october-23-2026-experimental) | 2026-10-23                                                                         | Isolated drawer styles; diagram pan and zoom; versioned package links.                                     |
+| [0.1.2](#012--october-23-2026-experimental) | 2026-10-23                                                                         | Bundled setup skill; agent prompts; framework recipes.                                                     |
+| [0.1.1](#011--october-23-2026-experimental) | 2026-10-23                                                                         | Installation guidance; complete inline demo; smaller video download.                                       |
+| [0.1.0](#010--october-23-2026-experimental) | 2026-10-23                                                                         | React inspector; Node capture; Next.js integration.                                                        |
 
 ## Unreleased
+
+No additional changes yet.
+
+## 0.5.3 — Prepared release
+
+[See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3)
+
+### Compatibility and upgrade
+
+- **Supported environments are unchanged.** Node 22.12+, React/React DOM 18 or 19, ESM, TypeScript 5.4+, and TypeSafe SDK 0.7.x remain supported. No migration is required from 0.5.2; public APIs, package exports, and the version-1 capture format are unchanged.
+- **Shared encoding preserves isolation.** Matching flow viewers reuse encoding work while retaining independent response buffers and session filtering. Aggregate capture budgets and finer-grained deltas remain follow-up work.
 
 ### Changes
 

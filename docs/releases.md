@@ -241,8 +241,8 @@ npm run verify:drawer
 git diff --check
 npm pack --dry-run --json -w jev-devtools
 npm run pack:devtools
-tar -tzf jev-devtools-0.5.2.tgz
-shasum -a 256 jev-devtools-0.5.2.tgz
+tar -tzf jev-devtools-0.5.3.tgz
+shasum -a 256 jev-devtools-0.5.3.tgz
 ```
 
 The archive must contain only `package.json`, the package README, MIT license, third-party notices, the setup skill and its four Markdown references under `skills/setup-jev-devtools`, and compiled JavaScript, declaration files, and scoped CSS under `lib/src`, `lib/server`, and `lib/flow`. It must not contain playground code, tests, fixtures, source TypeScript, demo media, environment files, or credentials. `verify:package` checks the actual pack file list before installing into an independent React app. `verify:nextjs` checks a separate packed installation with real development and production Next.js servers. Both use sample responses; neither makes live inference calls.
@@ -250,7 +250,7 @@ The archive must contain only `package.json`, the package README, MIT license, t
 Inspect the packed manifest too:
 
 ```sh
-tar -xOf jev-devtools-0.5.2.tgz package/package.json
+tar -xOf jev-devtools-0.5.3.tgz package/package.json
 ```
 
 Confirm the name/version, public access, Node engine, React peers, public exports (including the `/flow` entry point), and absence of `private: true`. Save the release commit SHA and archive checksum with the release evidence. Keep the archive unchanged between final inspection and publication. Do not publish from a dirty checkout or use a wildcard that could select an old archive.

@@ -43,7 +43,7 @@ The inspector records calls through your instrumented client. It does not discov
 
 Use **React 18 or 19**, **Node 22.12+**, and **TypeSafe SDK 0.7.x**. The server adapter and flow runner need Node; they do not run in a browser or edge runtime. History is bounded and in memory.
 
-> These pages describe **published version 0.5.2**, also the default npm install. The 0.5.2 notes cover resolved template types, composed-expression limits, and capture warnings. Check the [changelog](@/changelog/) and your installed version. The package is experimental before 1.0.
+> These pages describe **version 0.5.3**. [See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) The 0.5.3 notes cover shared flow encoding, release tooling, and regression coverage. Check the [changelog](@/changelog/) and your installed version. The package is experimental before 1.0.
 
 ## Find a method or learn flows
 
