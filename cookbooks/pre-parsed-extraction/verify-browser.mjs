@@ -59,6 +59,10 @@ try {
     }),
   );
   await mkdir(output, { recursive: true });
+  await writeFile(
+    join(output, "summary.json"),
+    JSON.stringify({ status: "running" }) + "\n",
+  );
   server = await createServer({
     root: join(root, "apps/playground"),
     configFile: join(root, "apps/playground/vite.config.ts"),
@@ -167,6 +171,7 @@ try {
     path: join(output, "selection-flow.png"),
     fullPage: true,
   });
+  await centerRequest(helpers);
   await helpers.getByRole("button", { name: "Hide Flow", exact: true }).click();
   await whole
     .getByLabel("Flow step", { exact: true })
@@ -294,6 +299,12 @@ try {
     ) + "\n",
   );
   console.log(`Pre-parsed extraction browser checks passed: ${output}`);
+} catch (error) {
+  await writeFile(
+    join(output, "summary.json"),
+    JSON.stringify({ status: "failed", error: String(error) }, null, 2) + "\n",
+  );
+  throw error;
 } finally {
   await cleanup();
 }
