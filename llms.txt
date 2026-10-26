@@ -22,6 +22,8 @@ The skill and references ship in npm at `node_modules/jev-devtools/skills/setup-
 
 ## Build connected flows
 
+- [Port Jev logic to Flow](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/.agents/skills/port-jev-to-flow/SKILL.md): Shared repository skill for faithful ports and capability audits, with semantic hazards and cookbook examples. This skill is not shipped in npm.
+
 - [Bundled flow recipe](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/packages/jev-devtools/skills/setup-jev-devtools/references/flows.md): Agent workflow for requests, tasks, runtime factories, parallel lanes, branches, returning conditionals, maps and loops; scope rules, sample checks and troubleshooting. Available offline beside the installed setup skill.
 - [Flow API guide](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/docs/flows.md): Definition versus execution, typed references, conditions, joins, errors/cancellation, recording and viewer limits.
 
