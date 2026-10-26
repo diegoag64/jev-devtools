@@ -418,6 +418,8 @@ An iteration can contain tasks, Jev requests, `if()`, parallel lanes and **one l
 
 In the drawer, a **Loop** card shows completed iterations, the continuation rule and its stop reason. Choose **Iteration → View Flow** to reveal that iteration’s complete connected diagram underneath. Previous/next iteration arrows preserve the parent graph and camera. A collection within the selected iteration can expose its own item flow. Initial/latest states and the condition’s captured incoming values are available in Details; each iteration’s returned state is its captured outcome. Captures remain bounded/redacted, so a large state may be truncated in the inspector even though runtime execution uses the full value. Request links include both iteration and item paths and retain distinct execution IDs. New loop metadata extends version-1 records; use the matching updated drawer and server.
 
+Try the [Parallel Questions cookbook](../cookbooks/parallel-questions/README.md) for two five-repeat loops: batched requests followed by sequential 13-item maps with `concurrency: 1`. Tasks compute answer metrics and sample standard deviations. Every response is synthetic; no live cost or speed savings are claimed.
+
 Try the [hierarchical classification cookbook](../cookbooks/hierarchical-classification/README.md), including beam recovery, deterministic paths, a zero-iteration leaf, and an intentional iteration-limit failure.
 
 ## Replay a run in tests

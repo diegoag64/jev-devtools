@@ -33,16 +33,17 @@ For Next.js, follow the [example's run instructions](https://github.com/diegoag6
 
 ## Explore complete flows
 
-The six cookbooks below run inside the playground. Each README explains the sample cases, application policies, source recipe, and limitations.
+The seven cookbooks below run inside the playground. Each README explains the sample cases, application policies, source recipe, and limitations.
 
-| Cookbook                                                                                                                 | What to inspect                                                                                                |
-| ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| [SDE cascade](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/sde-cascade)                                 | Field verification, conditional escalation, and a shared continuation that returns the final record.           |
-| [Hierarchical classification](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/hierarchical-classification) | Beam and greedy search through bounded loops, frontier collections, and retained or pruned paths.              |
-| [Structure recovery](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/structure-recovery)                   | Tasks that join text, requests built from those results, and formatting based on returned labels.              |
-| [Simple memory](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/simple-memory)                             | Ticket routing with customer-scoped memory that starts fresh for each run.                                     |
-| [RAG passages](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/rag-passages)                               | Passage assessment with bounded concurrency and explicit rules for including, excluding, or flagging evidence. |
-| [Skill suggestion](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/skill-suggestion)                       | Dynamic questions, shortlist ranking, and a final suggestion or abstention. No skill is executed.              |
+| Cookbook                                                                                                                 | What to inspect                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| [Parallel questions](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/parallel-questions)                   | Five batched repeats versus 65 sequential single requests, with all 13 synthetic answer metrics and computed statistics. |
+| [SDE cascade](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/sde-cascade)                                 | Field verification, conditional escalation, and a shared continuation that returns the final record.                     |
+| [Hierarchical classification](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/hierarchical-classification) | Beam and greedy search through bounded loops, frontier collections, and retained or pruned paths.                        |
+| [Structure recovery](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/structure-recovery)                   | Tasks that join text, requests built from those results, and formatting based on returned labels.                        |
+| [Simple memory](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/simple-memory)                             | Ticket routing with customer-scoped memory that starts fresh for each run.                                               |
+| [RAG passages](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/rag-passages)                               | Passage assessment with bounded concurrency and explicit rules for including, excluding, or flagging evidence.           |
+| [Skill suggestion](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/skill-suggestion)                       | Dynamic questions, shortlist ranking, and a final suggestion or abstention. No skill is executed.                        |
 
 From the **repository root**, start the playground:
 

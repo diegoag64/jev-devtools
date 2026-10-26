@@ -28,6 +28,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
+- **Parallel Questions cookbook.** Compare five batched requests with 65 sequential single-question requests over a fixed synthetic sample, with all 13 original questions, inspectable loops and computed answer statistics. No live timing or cost savings are claimed.
+
 - **Explore API references in place.** Follow API links within the docs side panel and use Back to return to earlier entries with their reading positions preserved, without leaving the guide. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))
 
 - **API reference previews.** Hover or focus a supported API link for its summary, then open the full reference or read its contract and examples in a side panel. Touch controls, keyboard navigation, copy buttons, and failed-load recovery keep reference reading available without losing the current page. ([#104](https://github.com/diegoag64/jev-devtools/pull/104))

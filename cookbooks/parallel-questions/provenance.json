@@ -1,0 +1,17 @@
+{
+  "source": "https://docs.typesafe.ai/cookbooks/parallel_questions.md",
+  "reviewedOn": "2026-10-26",
+  "sourceSha256": "99430b2845ba1bece5c3d8c54c9c20598b24fe2ba4d10fa61a1c17fd9972114a",
+  "upstreamRepository": "https://github.com/typesafe-ai/typesafe-public-examples",
+  "upstreamCommit": "25e9d373f4853b3e7e300e55a194f50e54838f68",
+  "upstreamAssetReview": "The recursive upstream tree contains no parallel_questions directory or cached article/answers for this recipe. The executable code on the official page is the implementation source. Upstream MIT license retained.",
+  "originalDocument": "https://en.wikipedia.org/?oldid=1363040264",
+  "adaptations": [
+    "All 13 question instructions and criteria preserved exactly, including upstream o f spelling.",
+    "Short authored sample document replaces the 53,777-character pinned Wikipedia article; no Wikipedia text is redistributed.",
+    "Authored synthetic answers replace live/cached inference. Two cases exercise identical and varying repeat values.",
+    "Five batched requests precede five sequential maps of 13 single requests. No concurrent speed comparison.",
+    "Tasks compute metrics, sample standard deviation (n-1), means and request counts. Usage, price, latency and savings are unavailable; no synthetic usage or cost is invented."
+  ],
+  "license": "MIT; LICENSE.typesafe"
+}

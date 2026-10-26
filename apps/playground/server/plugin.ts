@@ -1,3 +1,10 @@
+import { parallelQuestionsFlow } from "../../../cookbooks/parallel-questions/flow.js";
+import { parallelQuestionsSampleTransport } from "../../../cookbooks/parallel-questions/samples.js";
+import {
+  parallelQuestionsCases,
+  isParallelQuestionsCase,
+  type ParallelQuestionsCase,
+} from "../../../cookbooks/parallel-questions/cases.js";
 import { memoryFlow } from "../../../cookbooks/simple-memory/flow.js";
 import { memorySampleTransport } from "../../../cookbooks/simple-memory/samples.js";
 import {
@@ -138,6 +145,7 @@ export function jevInspectorServer(
             hierarchyCase?: string;
             structureCase?: string;
             memoryCase?: string;
+            parallelQuestionsCase?: string;
           };
           try {
             let text = "";
@@ -180,6 +188,7 @@ export function jevInspectorServer(
               "flow-hierarchy",
               "flow-structure",
               "flow-memory",
+              "flow-parallel-questions",
               "flow-manual",
               "flow-other",
               "flow-parallel",
@@ -191,6 +200,11 @@ export function jevInspectorServer(
             typeof body.message !== "string" ||
             body.message.length > 8000 ||
             (body.scenario === "stress" && !validStress(body.stress)) ||
+            (body.scenario === "flow-parallel-questions" &&
+              (!isParallelQuestionsCase(body.parallelQuestionsCase) ||
+                body.message !==
+                  parallelQuestionsCases[body.parallelQuestionsCase]
+                    .message)) ||
             (body.scenario === "flow-memory" &&
               (!isMemoryCase(body.memoryCase) ||
                 body.message !== memoryCases[body.memoryCase].message)) ||
@@ -260,51 +274,58 @@ export function jevInspectorServer(
                 {
                   apiKey: body.mode === "live" ? apiKey : "sample-only",
                   fetch:
-                    body.scenario === "flow-memory"
-                      ? memorySampleTransport(body.memoryCase as MemoryCase)
-                      : body.scenario === "flow-structure"
-                        ? structureSampleTransport(
-                            body.structureCase as StructureCase,
-                          )
-                        : body.scenario === "flow-hierarchy"
-                          ? hierarchySampleTransport(
-                              body.hierarchyCase as HierarchyCase,
+                    body.scenario === "flow-parallel-questions"
+                      ? parallelQuestionsSampleTransport(
+                          body.parallelQuestionsCase as ParallelQuestionsCase,
+                        )
+                      : body.scenario === "flow-memory"
+                        ? memorySampleTransport(body.memoryCase as MemoryCase)
+                        : body.scenario === "flow-structure"
+                          ? structureSampleTransport(
+                              body.structureCase as StructureCase,
                             )
-                          : body.scenario === "flow-sde"
-                            ? sdeSampleTransport(body.sdeCase as SdeCase)
-                            : body.scenario === "flow-rag"
-                              ? ragSampleTransport(body.ragCase as RagCase)
-                              : body.scenario === "flow-skills"
-                                ? body.mode === "live"
-                                  ? globalThis.fetch
-                                  : skillSampleTransport(
-                                      body.cookbookCase as keyof typeof skillCases,
-                                    )
-                                : flowTransport(body.scenario!),
+                          : body.scenario === "flow-hierarchy"
+                            ? hierarchySampleTransport(
+                                body.hierarchyCase as HierarchyCase,
+                              )
+                            : body.scenario === "flow-sde"
+                              ? sdeSampleTransport(body.sdeCase as SdeCase)
+                              : body.scenario === "flow-rag"
+                                ? ragSampleTransport(body.ragCase as RagCase)
+                                : body.scenario === "flow-skills"
+                                  ? body.mode === "live"
+                                    ? globalThis.fetch
+                                    : skillSampleTransport(
+                                        body.cookbookCase as keyof typeof skillCases,
+                                      )
+                                  : flowTransport(body.scenario!),
                   logLevel: "off",
                   retry: { maxRetries: 0 },
                   timeout: 120_000,
                 },
                 {
                   label:
-                    body.scenario === "flow-memory"
-                      ? memoryFlow.definition.name
-                      : body.scenario === "flow-structure"
-                        ? structureFlow.definition.name
-                        : body.scenario === "flow-hierarchy"
-                          ? hierarchyFlow.definition.name
-                          : body.scenario === "flow-sde"
-                            ? sdeFlow.definition.name
-                            : flow.definition.name,
+                    body.scenario === "flow-parallel-questions"
+                      ? parallelQuestionsFlow.definition.name
+                      : body.scenario === "flow-memory"
+                        ? memoryFlow.definition.name
+                        : body.scenario === "flow-structure"
+                          ? structureFlow.definition.name
+                          : body.scenario === "flow-hierarchy"
+                            ? hierarchyFlow.definition.name
+                            : body.scenario === "flow-sde"
+                              ? sdeFlow.definition.name
+                              : flow.definition.name,
                   source: body.mode === "live" ? "live" : "sample",
                 },
               );
               const result =
-                body.scenario === "flow-memory"
-                  ? await memoryFlow.run(
+                body.scenario === "flow-parallel-questions"
+                  ? await parallelQuestionsFlow.run(
                       {
                         message: body.message,
-                        caseId: body.memoryCase as MemoryCase,
+                        caseId:
+                          body.parallelQuestionsCase as ParallelQuestionsCase,
                       },
                       {
                         client,
@@ -312,11 +333,11 @@ export function jevInspectorServer(
                         signal: controller.signal,
                       },
                     )
-                  : body.scenario === "flow-structure"
-                    ? await structureFlow.run(
+                  : body.scenario === "flow-memory"
+                    ? await memoryFlow.run(
                         {
                           message: body.message,
-                          caseId: body.structureCase as StructureCase,
+                          caseId: body.memoryCase as MemoryCase,
                         },
                         {
                           client,
@@ -324,15 +345,11 @@ export function jevInspectorServer(
                           signal: controller.signal,
                         },
                       )
-                    : body.scenario === "flow-hierarchy"
-                      ? await (
-                          body.hierarchyCase === "limit"
-                            ? hierarchyLimitFlow
-                            : hierarchyFlow
-                        ).run(
+                    : body.scenario === "flow-structure"
+                      ? await structureFlow.run(
                           {
                             message: body.message,
-                            caseId: body.hierarchyCase as HierarchyCase,
+                            caseId: body.structureCase as StructureCase,
                           },
                           {
                             client,
@@ -340,11 +357,15 @@ export function jevInspectorServer(
                             signal: controller.signal,
                           },
                         )
-                      : body.scenario === "flow-sde"
-                        ? await sdeFlow.run(
+                      : body.scenario === "flow-hierarchy"
+                        ? await (
+                            body.hierarchyCase === "limit"
+                              ? hierarchyLimitFlow
+                              : hierarchyFlow
+                          ).run(
                             {
                               message: body.message,
-                              caseId: body.sdeCase as SdeCase,
+                              caseId: body.hierarchyCase as HierarchyCase,
                             },
                             {
                               client,
@@ -352,17 +373,29 @@ export function jevInspectorServer(
                               signal: controller.signal,
                             },
                           )
-                        : await flow.run(
-                            {
-                              message: body.message,
-                              caseId: body.ragCase as RagCase,
-                            },
-                            {
-                              client,
-                              devtools: inspector,
-                              signal: controller.signal,
-                            },
-                          );
+                        : body.scenario === "flow-sde"
+                          ? await sdeFlow.run(
+                              {
+                                message: body.message,
+                                caseId: body.sdeCase as SdeCase,
+                              },
+                              {
+                                client,
+                                devtools: inspector,
+                                signal: controller.signal,
+                              },
+                            )
+                          : await flow.run(
+                              {
+                                message: body.message,
+                                caseId: body.ragCase as RagCase,
+                              },
+                              {
+                                client,
+                                devtools: inspector,
+                                signal: controller.signal,
+                              },
+                            );
               send(res, 200, { ok: true, flow: result });
               return;
             }
