@@ -61,6 +61,10 @@ export async function checkCapture({ browser, url }) {
       await page.screenshot({ path: `${directory}/${mode}-flow.png` });
       assert.deepEqual(errors, [], `${mode}: browser exceptions`);
       const body = page.locator(".detail-body");
+      if (mode === "root-null") {
+        await expect(page.locator(".detail-meta .muted")).toHaveCount(0);
+        await expect(body).not.toContainText("No questions available");
+      }
       if (mode === "normal") await expect(body).toContainText("Score 1.00");
       else {
         await expect(body).toContainText("unavailable in this capture");

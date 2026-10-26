@@ -256,11 +256,17 @@ export function TraceDiagram({
   const { viewport, canvas, zoom, zoomBy, fit, preserveCamera } =
     useDiagramViewport(1120, height, key);
   if (!question)
-    return (
-      <>
-        <CaptureFields trace={trace} path={["request"]} />
-        <p className="muted">No questions available in this capture.</p>
-      </>
+    return captureFieldUnavailable(trace, ["request", "questions"]) ? (
+      <CaptureFields
+        trace={trace}
+        path={
+          captureFieldUnavailable(trace, ["request"])
+            ? ["request"]
+            : ["request", "questions"]
+        }
+      />
+    ) : (
+      <p className="muted">No questions available in this capture.</p>
     );
   const sourcePath = (y: number) => `M260 ${y} C325 ${y},325 ${mid},390 ${mid}`;
   const enteringDelay = (index: number) =>

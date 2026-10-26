@@ -119,8 +119,15 @@ export const RequestDetail = memo(function RequestDetail({
                   ? "Request ID pending"
                   : "No request ID")}
             </code>
-            <CaptureFields trace={trace} path={["request", "model"]} />
-            <CaptureFields trace={trace} path={["result", "model"]} />
+            {(["request", "result"] as const).map((section) =>
+              !captureFieldUnavailable(trace, [section]) &&
+              captureFieldUnavailable(trace, [section, "model"]) ? (
+                <p className="muted" key={section}>
+                  {section === "request" ? "Request" : "Response"} model
+                  unavailable in this capture.
+                </p>
+              ) : null,
+            )}
           </div>
           <nav className="detail-tabs" aria-label="Request views">
             {["Flow", "Questions", "Context", "Transport", "Raw"].map(

@@ -220,11 +220,17 @@ export function Questions({ trace }: { trace: Trace }) {
     [entries, destination, goTo, helpId],
   );
   if (!entries.length)
-    return (
-      <>
-        <CaptureFields trace={trace} path={["request", "questions"]} />
-        <p className="muted">No questions available in this capture.</p>
-      </>
+    return captureFieldUnavailable(trace, ["request", "questions"]) ? (
+      <CaptureFields
+        trace={trace}
+        path={
+          captureFieldUnavailable(trace, ["request"])
+            ? ["request"]
+            : ["request", "questions"]
+        }
+      />
+    ) : (
+      <p className="muted">No questions available in this capture.</p>
     );
   return (
     <div className="questions-list">
