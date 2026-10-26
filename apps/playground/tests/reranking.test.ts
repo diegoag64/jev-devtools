@@ -152,52 +152,61 @@ test("stable sorting keeps input order for exact ties, does not mutate input, an
     );
 });
 
-test("cancellation aborts active work, never dispatches queued candidates, and blocks sorting", async () => {
-  const controller = new AbortController();
-  let calls = 0,
-    settled = 0,
-    capture: FlowRun | undefined;
-  let ready!: () => void;
-  const started = new Promise<void>((resolve) => {
-    ready = resolve;
-  });
-  const sample = rerankingSampleTransport("reordered", 10_000);
-  const run = rerankingFlow.run(
-    { caseId: "reordered", message: rerankingCases.reordered.message },
-    {
-      signal: controller.signal,
-      client: client(async (url, init) => {
-        if (++calls === 12) ready();
-        try {
-          return await sample(url, init);
-        } finally {
-          settled++;
-        }
-      }),
-      devtools: {
-        startFlow: () => ({
-          update: (value) => {
-            capture = value;
-          },
-          request: (_l, _t, cb) => cb(),
+test(
+  "cancellation aborts active work, never dispatches queued candidates, and blocks sorting",
+  { timeout: 5_000 },
+  async () => {
+    const controller = new AbortController();
+    const transports: Promise<Response>[] = [];
+    let capture: FlowRun | undefined;
+    let ready!: () => void;
+    const started = new Promise<void>((resolve) => {
+      ready = resolve;
+    });
+    const sample = rerankingSampleTransport("reordered", 10_000);
+    const run = rerankingFlow.run(
+      { caseId: "reordered", message: rerankingCases.reordered.message },
+      {
+        signal: controller.signal,
+        client: client((url, init) => {
+          const pending = sample(url, init);
+          transports.push(pending);
+          if (transports.length === 12) ready();
+          return pending;
         }),
+        devtools: {
+          startFlow: () => ({
+            update: (value) => {
+              capture = value;
+            },
+            request: (_l, _t, cb) => cb(),
+          }),
+        },
       },
-    },
-  );
-  const rejected = assert.rejects(run);
-  await started;
-  controller.abort();
-  await rejected;
-  assert.equal(calls, 12);
-  assert.equal(settled, 12);
-  assert.equal(capture!.status, "cancelled");
-  assert.notEqual(capture!.steps["sort-candidates"].status, "completed");
-  assert.ok(
-    capture!.steps["score-candidates"]
-      .collection!.items.slice(12)
-      .every((item) => item.status === "cancelled"),
-  );
-});
+    );
+    const rejected = assert.rejects(run, { name: "AbortError" });
+    await started;
+    controller.abort();
+    await rejected;
+    // The flow stops awaiting on abort; it need not wait for cooperative transport
+    // cleanup. Observe that separate boundary explicitly, including on Node 22.
+    const settlements = await Promise.allSettled(transports);
+    assert.equal(transports.length, 12);
+    assert.equal(settlements.length, 12);
+    for (const settlement of settlements) {
+      assert.equal(settlement.status, "rejected");
+      if (settlement.status === "rejected")
+        assert.equal(settlement.reason.name, "AbortError");
+    }
+    assert.equal(capture!.status, "cancelled");
+    assert.equal(capture!.steps["sort-candidates"].status, "cancelled");
+    assert.equal(capture!.steps["sort-candidates"].startedAt, undefined);
+    const items = capture!.steps["score-candidates"].collection!.items;
+    assert.equal(items.length, 30);
+    assert.ok(items.every((item) => item.status === "cancelled"));
+    assert.ok(items.slice(12).every((item) => item.run === undefined));
+  },
+);
 
 test("sample input and request drift fail instead of silently returning fixture scores", async () => {
   assert.deepEqual(sourceQuestion, expectedQuestion);
