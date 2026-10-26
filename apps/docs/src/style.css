@@ -278,8 +278,9 @@ kbd {
   background: var(--surface);
 }
 .nav-group a[aria-current="page"] {
-  background: var(--tint);
-  color: var(--accent);
+  background: color-mix(in srgb, var(--tint), var(--accent) 16%);
+  color: var(--text);
+  box-shadow: inset 3px 0 var(--accent);
   font-weight: 600;
 }
 main {

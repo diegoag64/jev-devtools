@@ -34,6 +34,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **Clearer current page in the sidebar.** Strengthen the selected page’s background and text contrast and add an accent marker in both themes.
+
 - **Useful resource entry points.** Rewrite Examples & cookbooks with sample run instructions, expected results, and clearer cookbook descriptions. Rewrite For coding agents around the installed setup skill, version-matched contracts, Markdown access, and verification evidence. Preserve existing section links.
 
 - **Clearer API explanations.** Revise the glossary and React, server, flow, expression, and recorder references. Separate parameter rules, execution behavior, and errors; explain replay and comparison results; add missing server parameter types. Preserve examples, signatures, and section links.
