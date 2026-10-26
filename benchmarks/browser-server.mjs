@@ -238,7 +238,7 @@ const server = createServer(async (req, res) => {
                           probabilities: { 0: 0, 1: 1 },
                           legend: { 0: "Low", 1: "High" },
                         },
-                  other: {
+                  email: {
                     type: "score",
                     score: 0,
                     probabilities: { 0: 1, 1: 0 },
@@ -264,7 +264,7 @@ const server = createServer(async (req, res) => {
               mode === "probability-string"
                 ? choice("Rating?", { Low: "Low rating", High: "High rating" })
                 : score("Rating?", ["Low", "High"]),
-            other: score("Other rating?", ["Low", "High"]),
+            email: score("Other rating?", ["Low", "High"]),
           },
         });
         await new Promise((resolve) => setTimeout(resolve, 10));

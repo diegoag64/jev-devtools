@@ -76,7 +76,7 @@ export async function checkCapture({ browser, url }) {
         await expect(body).not.toContainText("RETURNED SCORE");
         await page
           .getByLabel("Diagram question", { exact: true })
-          .selectOption("other");
+          .selectOption("email");
         await expect(body).toContainText("Score 0.00");
         await expect(body).not.toContainText(
           "Score unavailable in this capture",

@@ -399,3 +399,85 @@ test("partial capture fields preserve siblings without inventing numeric values"
   );
   assert.doesNotMatch(JSON.stringify(maskedView), /personal@example/);
 });
+
+// Generic masking of fallback JSON used to erase SDK map entries whose names
+// resemble personal fields, hiding usable siblings after partial projection.
+test("partial captures preserve structural names while masking personal content", () => {
+  const request = {
+    model: null,
+    state: { email: "private@example.test" },
+    questions: {
+      email: {
+        type: "choice",
+        instructions: { phone: "private-phone" },
+        criteria: { email: "Email category", phone: "Phone category" },
+      },
+      phone: { type: "score", instructions: "Other answer" },
+    },
+    assets: { email: { description: "Asset kept", phone: "private-phone" } },
+  };
+  const result = {
+    model: "fixture",
+    answers: {
+      email: {
+        type: "choice",
+        choice: "email",
+        probabilities: { email: 0.7, phone: 0.3 },
+        confidence: "hidden",
+        legend: {
+          phone: { email: "private@example.test", text: "Legend kept" },
+        },
+      },
+      phone: { type: "score", score: 2 },
+    },
+    metadata: { email: "private@example.test" },
+  };
+  const [trace] = new TraceStore().apply("snapshot", {
+    version: 1,
+    traces: [
+      {
+        version: 1,
+        id: "structural-names",
+        session: "local",
+        label: "Structural names",
+        source: "sample",
+        startedAt: 0,
+        status: "success",
+        attempts: [],
+        captureWarnings: [],
+        request,
+        result,
+      },
+    ],
+  });
+  const unmasked = traceCaptureView(trace);
+  const redactor = createDisplayRedactor();
+  const masked = redactor.trace(unmasked);
+  const view = traceCaptureView(masked);
+  assert.equal(view.request.questions.email.type, "choice");
+  assert.deepEqual(view.request.questions.email.criteria, {
+    email: "Email category",
+    phone: "Phone category",
+  });
+  assert.deepEqual(view.request.assets, {
+    email: { description: "Asset kept", phone: "[redacted]" },
+  });
+  assert.equal(view.result?.answers.email.choice, "email");
+  assert.deepEqual(view.result?.answers.email.probabilities, {
+    email: 0.7,
+    phone: 0.3,
+  });
+  assert.deepEqual(view.result?.answers.email.legend, {
+    phone: { email: "[redacted]", text: "Legend kept" },
+  });
+  assert.equal(view.result?.answers.phone.score, 2);
+  assert.equal(
+    captureFieldUnavailable(view, ["result", "answers", "email", "confidence"]),
+    true,
+  );
+  assert.doesNotMatch(JSON.stringify(view), /private@example|private-phone/);
+  assert.equal(redactor.trace(unmasked), masked);
+  assert.deepEqual(unmasked.capture?.request, request);
+  assert.deepEqual(unmasked.capture?.result, result);
+  assert.match(JSON.stringify(unmasked), /private@example/);
+});
