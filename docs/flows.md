@@ -337,6 +337,8 @@ Item input/output and result snapshots follow the same capture limits and redact
 
 Try the [RAG passage cookbook](../cookbooks/rag-passages/README.md) for a twelve-item sample with four concurrent requests and every passage inspectable.
 
+The [Citation checking cookbook](../cookbooks/citation-checking/README.md) combines a sequential map with deterministic quote matching and nested returning conditionals. Missing quotes bypass Jev with null confidence; claim-only citations use their named source section. Each surviving citation makes one Choice request and routes on API confidence `>= 0.80`, independently of option probabilities. All five cases use synthetic responses.
+
 ## Returning conditionals: `flow.if()`
 
 Use `flow.if(id, { when, then, else }, display?)` when one path should produce a value and **both paths continue into shared work**. `flow.branch()` still ends its block with a named outcome. Returning conditionals and strict `.gt()` comparisons are included in **0.4.0**.

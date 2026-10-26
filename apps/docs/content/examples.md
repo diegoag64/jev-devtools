@@ -33,10 +33,11 @@ For Next.js, follow the [example's run instructions](https://github.com/diegoag6
 
 ## Explore complete flows
 
-The six cookbooks below run inside the playground. Each README explains the sample cases, application policies, source recipe, and limitations.
+The cookbooks below run inside the playground. Each README explains the sample cases, application policies, source recipe, and limitations.
 
 | Cookbook                                                                                                                 | What to inspect                                                                                                |
 | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| [Citation checking](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/citation-checking)                     | Exact normalized quote matching, inference bypass and API-confidence review routing over RFC 7519.             |
 | [SDE cascade](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/sde-cascade)                                 | Field verification, conditional escalation, and a shared continuation that returns the final record.           |
 | [Hierarchical classification](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/hierarchical-classification) | Beam and greedy search through bounded loops, frontier collections, and retained or pruned paths.              |
 | [Structure recovery](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/structure-recovery)                   | Tasks that join text, requests built from those results, and formatting based on returned labels.              |
@@ -53,7 +54,7 @@ npm run dev
 
 Open [http://127.0.0.1:4182](http://127.0.0.1:4182/), choose a cookbook and sample, then click **Run sample**. Open **Jev DevTools → Flows** and select the latest run. Compare the application's result with the executed steps, linked requests, and routing decisions. The [cookbook index](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/README.md#choose-an-example) has direct local links to each example.
 
-All six have samples that need no API key. Their synthetic responses demonstrate execution and inspection, not model accuracy. Editing an input does not turn a fixed response into live inference. Some examples reject inputs that do not match their fixtures. Live support varies by example, so read its README before configuring a key.
+All listed cookbooks have samples that need no API key. Their synthetic responses demonstrate execution and inspection, not model accuracy. Editing an input does not turn a fixed response into live inference. Some examples reject inputs that do not match their fixtures. Live support varies by example, so read its README before configuring a key.
 
 ## Learn one method at a time
 
