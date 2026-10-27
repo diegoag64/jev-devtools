@@ -1,6 +1,6 @@
 Look up an API by name to find its signature, parameters, return type, example, and failure behavior. Each entry has a permanent link. For a first integration, start with [Quick start](@/getting-started/). For a first flow, use [Flows from scratch](@/guides/flow-basics/).
 
-These docs describe **version 0.5.4**. [See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.4) Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
+These docs describe **version 0.5.5**. [See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.5) Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
 
 <details class="reference-notes">
 <summary>How to read the signatures</summary>
