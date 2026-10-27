@@ -33,6 +33,8 @@ const descriptions: Record<string, string> = {
 };
 
 const supportingDescriptions: Record<string, string> = {
+  FlowHistory:
+    "Retained flow runs and their definitions inside an InspectionSnapshot. The validated stream updates both collections together, including removal and reconnection snapshots.",
   Scalar:
     "The value types accepted by flow equality: string, number, boolean, and null. Execution also requires matching types and finite numbers.",
   ExpressionFields:
