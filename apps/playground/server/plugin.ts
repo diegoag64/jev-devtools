@@ -170,11 +170,6 @@ export function jevInspectorServer(
   captureLimit?: number,
 ): Plugin {
   const cookbook = createSkillSuggestionFlow(cookbookModel);
-  const inspector = createJevDevtools({
-    enabled: true,
-    origin: "http://127.0.0.1:4182",
-    limit: captureLimit,
-  });
   const running = new Map<
     string,
     { session: string; controller: AbortController }
@@ -184,6 +179,15 @@ export function jevInspectorServer(
     name: "jev-inspector-server",
     apply: "serve",
     configureServer(server) {
+      // Use Vite's resolved port, including CLI overrides, for both route guards.
+      // Keep the trusted loopback host independent of request headers.
+      const host = `127.0.0.1:${server.config.server.port ?? 4182}`;
+      const origin = `http://${host}`;
+      const inspector = createJevDevtools({
+        enabled: true,
+        origin,
+        limit: captureLimit,
+      });
       server.httpServer?.once("close", () => {
         for (const r of running.values()) r.controller.abort();
         inspector.dispose();
@@ -192,9 +196,8 @@ export function jevInspectorServer(
       server.middlewares.use(
         async (req: IncomingMessage, res: ServerResponse, next) => {
           if (!req.url?.startsWith("/__jev/")) return next();
-          const origin = "http://127.0.0.1:4182";
           if (
-            req.headers.host !== "127.0.0.1:4182" ||
+            req.headers.host !== host ||
             (req.headers.origin && req.headers.origin !== origin) ||
             req.headers["sec-fetch-site"] === "cross-site"
           ) {

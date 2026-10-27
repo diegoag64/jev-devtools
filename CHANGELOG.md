@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | No changes yet.                                                                                            |
+| [Unreleased](#unreleased)                   | Not published                                                                      | Playground requests support custom development ports.                                                      |
 | [0.5.5](#055--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.5) | TypeScript fixes; capture and stream validation; clearer setup guidance.                                   |
 | [0.5.4](#054--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.4) | Thirteen Flow cookbooks; routine browser verification; rewritten docs.                                     |
 | [0.5.3](#053--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) | Shared flow encoding; simpler releases and publication helpers; flow regression coverage.                  |
@@ -26,7 +26,11 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No changes yet.
+### Changes
+
+#### Fixed
+
+- **Playground ports.** Sample runs and DevTools requests now use Vite's configured port for same-origin checks, so a playground started with `--port 4184` accepts requests from its own page.
 
 ## 0.5.5 — Prepared release
 
