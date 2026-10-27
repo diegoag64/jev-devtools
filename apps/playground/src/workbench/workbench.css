@@ -278,7 +278,10 @@ pre:focus-visible {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: #20252e;
+  background:
+    linear-gradient(var(--step-color), var(--step-color)) top / 100% 2px
+      no-repeat,
+    color-mix(in srgb, var(--step-color) 12%, #20252e);
   clip-path: polygon(
     0 0,
     calc(100% - 14px) 0,
@@ -287,7 +290,7 @@ pre:focus-visible {
     0 100%,
     14px 50%
   );
-  transition: background 180ms;
+  transition: background-color 180ms;
 }
 .wb-timeline button:first-child {
   padding-left: 14px;
@@ -305,7 +308,7 @@ pre:focus-visible {
   color: #8e98aa;
 }
 .wb-timeline button:hover::before {
-  background: #303846;
+  background-color: color-mix(in srgb, var(--step-color) 24%, #20252e);
 }
 .wb-timeline button[aria-current] {
   color: #151920;
