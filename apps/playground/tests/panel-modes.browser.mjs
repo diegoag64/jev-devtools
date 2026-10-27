@@ -42,7 +42,20 @@ async function assertModal(page, pane) {
     "The popup fits within the viewport",
   );
   // Native modality keeps focus inside the popup, including the shadow viewer.
-  await dialog.getByRole("button").first().press("Shift+Tab");
+  await page
+    .getByRole("button", { name: `Close expanded ${pane}` })
+    .press("Tab");
+  assert.equal(
+    await page
+      .locator(".wb-guide-controls button")
+      .first()
+      .evaluate((node) => {
+        node.focus();
+        return node === document.activeElement;
+      }),
+    false,
+    "Background controls cannot take focus while the popup is open",
+  );
   assert.equal(
     await dialog.evaluate((node) => node.contains(document.activeElement)),
     true,
@@ -211,7 +224,12 @@ try {
     await restore(page, share);
   }
   for (const stacked of [false, true]) {
-    if (stacked) await page.setViewportSize({ width: 390, height: 844 });
+    if (stacked) {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page
+        .locator('.wb-divider[aria-orientation="horizontal"]')
+        .waitFor();
+    }
     for (const edge of ["start", "end"]) {
       const before = await divider.getAttribute("aria-valuenow");
       const box = await page.locator(".wb-panels").boundingBox();
@@ -261,6 +279,33 @@ try {
   assert.equal(
     await page.locator('.wb-timeline [aria-current="step"]').innerText(),
     stage,
+  );
+  await page
+    .getByRole("button", { name: "Show diagram only", exact: true })
+    .click();
+  await page
+    .getByRole("navigation", { name: "Cookbook steps" })
+    .getByRole("button")
+    .nth(3)
+    .click();
+  await page
+    .getByRole("button", { name: "Show both panels", exact: true })
+    .click();
+  await page.screenshot({
+    path: new URL("restored-step.png", output).pathname,
+  });
+  await page.waitForFunction(
+    () => {
+      const source = document
+        .querySelector(".wb-source")
+        .getBoundingClientRect();
+      const selected = document
+        .querySelector(".wb-source .is-selected")
+        .getBoundingClientRect();
+      return selected.top >= source.top && selected.top < source.bottom;
+    },
+    undefined,
+    { timeout: 5000 },
   );
   assert.deepEqual(errors, []);
   await writeFile(

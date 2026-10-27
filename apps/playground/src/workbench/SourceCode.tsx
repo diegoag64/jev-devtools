@@ -132,20 +132,38 @@ export function SourceCode({
     : detail.sourceRanges[selected[0]];
   useEffect(() => {
     if (!activeRange) return;
-    const node = ref.current?.querySelector<HTMLElement>(
-      `[data-note-line="${activeRange.start}"], [data-line="${activeRange.start}"]`,
-    );
-    if (node && ref.current)
-      ref.current.scrollTo({
-        top:
-          node.getBoundingClientRect().top -
-          ref.current.getBoundingClientRect().top +
-          ref.current.scrollTop -
-          28,
-        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "instant"
-          : "smooth",
-      });
+    const source = ref.current;
+    if (!source) return;
+    const reveal = () => {
+      const node = source.querySelector<HTMLElement>(
+        `[data-note-line="${activeRange.start}"], [data-line="${activeRange.start}"]`,
+      );
+      if (node)
+        source.scrollTo({
+          top:
+            node.getBoundingClientRect().top -
+            source.getBoundingClientRect().top +
+            source.scrollTop -
+            28,
+          behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? "instant"
+            : "smooth",
+        });
+    };
+    if (source.clientHeight) {
+      reveal();
+      return;
+    }
+    // A step can change while this pane is hidden. Reveal that step only once
+    // the restored pane has measurable rows; later selections replace this one.
+    const observer = new ResizeObserver(() => {
+      if (source.clientHeight) {
+        reveal();
+        observer.disconnect();
+      }
+    });
+    observer.observe(source);
+    return () => observer.disconnect();
   }, [activeRange?.start, walkthrough]);
   const lineNodes = (line: number) => {
     const matches = Object.entries(detail.sourceRanges).filter(([, range]) =>
