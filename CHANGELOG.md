@@ -8,7 +8,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | Redacted captures and stream validation; expression type checks; shared porting skill.                     |
+| [Unreleased](#unreleased)                   | Not published                                                                      | No changes yet.                                                                                            |
+| [0.5.5](#055--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.5) | TypeScript fixes; capture and stream validation; clearer setup guidance.                                   |
 | [0.5.4](#054--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.4) | Thirteen Flow cookbooks; routine browser verification; rewritten docs.                                     |
 | [0.5.3](#053--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) | Shared flow encoding; simpler releases and publication helpers; flow regression coverage.                  |
 | [0.5.2](#052--october-25-2026-experimental) | 2026-10-25                                                                         | Responsive drawer navigation; flow template types, limits, and capture warnings; contributor verification. |
@@ -25,9 +26,16 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
+No changes yet.
+
+## 0.5.5 — Prepared release
+
+[See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.5)
+
 ### Compatibility and upgrade
 
-Flow expression types now reject non-scalar equality and array method selection that already fail during execution. Generic field-selection helpers must derive supported keys from `Parameters<FlowExpression<T>["get"]>[0]` instead of accepting every `keyof T`. Runtime behavior is unchanged.
+- **Supported environments are unchanged.** Node 22.12+, React/React DOM 18 or 19, ESM, TypeScript 5.4+, and TypeSafe SDK 0.7.x remain supported. Upgrade the server adapter and drawer together to receive the capture fixes.
+- **Flow type corrections.** Flow expression types now reject non-scalar equality and array method selection that already fail during execution. Generic field-selection helpers must derive supported keys from `Parameters<FlowExpression<T>["get"]>[0]` instead of accepting every `keyof T`. Runtime behavior is unchanged.
 
 ### Changes
 
