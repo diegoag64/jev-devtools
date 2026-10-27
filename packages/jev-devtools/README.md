@@ -1,6 +1,6 @@
 # Jev DevTools
 
-[![npm version 0.5.5](https://img.shields.io/badge/npm-v0.5.5-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.5.5)
+[![npm version 0.5.6](https://img.shields.io/badge/npm-v0.5.6-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.5.6)
 
 A React inspector for TypeSafe Jev requests captured through a Node server adapter. Inspect request inputs, returned answers and probabilities, retries, and errors. Use the optional Flow API to connect requests and application steps in a diagram.
 
@@ -49,7 +49,7 @@ Known credential fields and custom server redactions cannot be revealed in the d
 
 ### Versions and local builds
 
-**Package version: 0.5.5.** [See release notes for verified publication status](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.5). APIs remain experimental before 1.0. Check the [changelog](https://github.com/diegoag64/jev-devtools/blob/main/CHANGELOG.md) for compatibility and release status. Verification uses sample responses through the real TypeSafe SDK, not live inference.
+**Package version: 0.5.6.** [See release notes for verified publication status](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.6). APIs remain experimental before 1.0. Check the [changelog](https://github.com/diegoag64/jev-devtools/blob/main/CHANGELOG.md) for compatibility and release status. Verification uses sample responses through the real TypeSafe SDK, not live inference.
 
 Hosted docs update separately. Prefer installed declarations and the bundled setup skill when the site's version differs from your package.
 
@@ -64,7 +64,7 @@ npm ci
 npm run pack:devtools
 
 # From the consuming app:
-npm install /absolute/path/to/jev-devtools/jev-devtools-0.5.5.tgz
+npm install /absolute/path/to/jev-devtools/jev-devtools-0.5.6.tgz
 ```
 
 Keep the drawer and server adapter on the same build.

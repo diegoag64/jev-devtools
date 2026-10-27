@@ -1,6 +1,6 @@
 {
   "name": "@jev-devtools/playground",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,6 +22,6 @@
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "@typesafe-ai/sdk": "0.7.0",
-    "jev-devtools": "0.5.5"
+    "jev-devtools": "0.5.6"
   }
 }
