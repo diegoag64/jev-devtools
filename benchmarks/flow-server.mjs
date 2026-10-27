@@ -36,6 +36,30 @@ const warningFlow = defineJevFlow("capture-warning", (flow) =>
     else: (branch) => branch.output("different"),
   }),
 );
+const redactedConditions = new Map([
+  [
+    "flow-redacted-branch",
+    defineJevFlow("redacted-branch", (f) =>
+      f.branch("redacted-op", {
+        when: f.input.get("message").eq("Sample refund"),
+        then: (p) => p.output("done", 0),
+        else: (p) => p.output("wrong", 1),
+      }),
+    ),
+  ],
+  [
+    "flow-redacted-loop",
+    defineJevFlow("redacted-loop", (f) => {
+      const state = f.loop(
+        "redacted-op",
+        { initial: 1, input: null, maxIterations: 2, while: (s) => s.gt(0) },
+        (p) =>
+          p.task("next", { input: p.input.get("state"), run: (n) => n - 1 }),
+      );
+      return f.output("done", state);
+    }),
+  ],
+]);
 const categories = Object.fromEntries(
   Array.from({ length: 150 }, (_, i) => [`category-${i + 1}`, null]),
 );
@@ -128,6 +152,7 @@ const server = createServer((req, res) => {
               const scenario = url.searchParams.get("scenario");
               const flow =
                 nestedFlowSamples.get(scenario) ??
+                redactedConditions.get(scenario) ??
                 (scenario === "flow-tasks"
                   ? taskSelectionFlow
                   : scenario === "flow-warning"
@@ -245,7 +270,13 @@ await new Promise((resolve, reject) => {
   server.listen(port, "127.0.0.1", resolve);
 });
 origin = `http://127.0.0.1:${server.address().port}`;
-inspector = createJevDevtools({ enabled: true, origin, limit: 200 });
+inspector = createJevDevtools({
+  enabled: true,
+  origin,
+  limit: 200,
+  redact: (path, value) =>
+    path.join(".") === "conditions.redacted-op.op" ? { toString: null } : value,
+});
 console.log(origin);
 process.send?.({ origin });
 const stop = () => {
