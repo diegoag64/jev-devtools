@@ -49,7 +49,7 @@ Document-level transforms, clipping, and page JavaScript can still affect the ho
 
 When `defaultOpen` is false, the panel first mounts when opened. After that, closing it preserves selection, filters, and view state while incoming traces continue to update history.
 
-Disabling or unmounting the component closes its subscription. Server capture continues independently until the server adapter is disabled or disposed.
+Disabling or unmounting the component closes its subscriptions. The drawer and `useJevInspection` also close their streams while the browser page is hidden or starts navigation, which frees connections for a refresh. Returning to the page reconnects and retrieves the retained history; cancelling navigation resumes the streams after one second. Server capture continues independently until the server adapter is disabled or disposed; recorder limits still apply while a page is hidden.
 
 ## Browser-safe types
 
