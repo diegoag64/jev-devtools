@@ -537,6 +537,7 @@ button.wb-primary {
   flex-shrink: 0;
 }
 .wb-source-actions .wb-comments-toggle,
+.wb-source-actions .wb-copy-source,
 .wb-source-actions .wb-pane-button {
   display: inline-flex;
   align-items: center;
@@ -545,6 +546,7 @@ button.wb-primary {
 }
 .wb-source-actions .wb-comments-toggle[aria-pressed="true"],
 .wb-source-actions .wb-comments-toggle:hover,
+.wb-source-actions .wb-copy-source:hover,
 .wb-source-actions .wb-pane-button:hover {
   color: #c7d5ff;
 }

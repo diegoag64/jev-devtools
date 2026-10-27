@@ -41,6 +41,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Changed
 
+- **Compact source copying.** Use a copy icon in the workbench header, with a checkmark after copying and an accessible label and tooltip. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+
 - **Cookbook color cues and focus.** Keep each ribbon's step color visible when inactive. Highlight embedded diagram cards with a subtle, card-toned backdrop glow while retaining their colored top accents and keyboard focus indicators. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 - **More room for cookbook flows.** Remove the playground's top header and use a compact horizontal ribbon for cookbook steps. Library access stays in the view toolbar, leaving more height for the code and diagram. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 
