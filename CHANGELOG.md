@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | Focused cookbook CI coverage.                                                                              |
+| [Unreleased](#unreleased)                   | Not published                                                                      | Less duplicated CI work; focused cookbook checks.                                                          |
 | [0.5.5](#055--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.5) | TypeScript fixes; capture and stream validation; clearer setup guidance.                                   |
 | [0.5.4](#054--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.4) | Thirteen Flow cookbooks; routine browser verification; rewritten docs.                                     |
 | [0.5.3](#053--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) | Shared flow encoding; simpler releases and publication helpers; flow regression coverage.                  |
@@ -29,6 +29,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 ### Changes
 
 #### Maintenance
+
+- **Deduplicated CI builds and checks.** Run shared verification once per Node version while retaining all four Node/React consumer combinations. Build the docs site only in its Node 24 job and keep the complete docs browser suite; docs example type checks and execution tests still run on both Node versions. ([#131](https://github.com/diegoag64/jev-devtools/pull/131))
 
 - **Focused cookbook CI coverage.** Run one cookbook capture-to-result probe on React 19 instead of the full browser suite on both React versions. Keep direct Flow contract tests and shared viewer checks in CI; the full cookbook suite remains in local `verify:all`. ([#131](https://github.com/diegoag64/jev-devtools/pull/131))
 

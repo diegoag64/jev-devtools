@@ -92,7 +92,6 @@ jobs:
       fail-fast: false
       matrix:
         node: ["22.12.0", "24"]
-        react: ["18.3.1", "19.3.1"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -102,11 +101,20 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm test
-      - run: npm run build
+      # check and test build the package; the docs job owns the site build.
+      - run: npm run build -w @jev-devtools/playground
       - run: npm run check:playground
-      - run: npm run verify:package
+      - name: Verify React 18 consumer
+        id: react18
+        run: npm run verify:package
         env:
-          JEV_VERIFY_REACT: ${{ matrix.react }}
+          JEV_VERIFY_REACT: "18.3.1"
+      - name: Verify React 19 consumer
+        # Keep both consumer results when React 18 fails, as the old matrix did.
+        if: ${{ !cancelled() && (success() || steps.react18.conclusion == 'failure') }}
+        run: npm run verify:package
+        env:
+          JEV_VERIFY_REACT: "19.3.1"
       - run: git diff --check
 
   nextjs:
