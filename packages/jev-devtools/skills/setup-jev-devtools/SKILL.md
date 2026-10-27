@@ -19,7 +19,7 @@ Inspect the app's package manager/lockfile, React and Node versions, root compon
 
 Install `jev-devtools` using the app's existing package manager (npm: `npm install jev-devtools @typesafe-ai/sdk`; pnpm: `pnpm add jev-devtools @typesafe-ai/sdk`; Yarn: `yarn add jev-devtools @typesafe-ai/sdk`; Bun: `bun add jev-devtools @typesafe-ai/sdk`). `@typesafe-ai/sdk` is a peer dependency: keep the app's existing SDK version when it satisfies the peer range. Install in the workspace(s) that actually import it. It is a regular dependency when application modules import it, even though capture/display are development-only. Do not replace the app's framework or upgrade unrelated dependencies to force compatibility.
 
-### Consumer compatibility (0.5.5)
+### Consumer compatibility (0.5.6)
 
 | Requirement       | Contract                                                                                                                              |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -35,7 +35,7 @@ Import application APIs from `jev-devtools` (React and browser-safe capture help
 
 ## Optional connected flow API
 
-When asked to build or inspect connected calls, read [references/flows.md](references/flows.md) after the framework recipe. For 0.5.5 it covers requests, server function tasks, runtime request factories, parallel checks, terminal branches, returning conditionals, bounded collections, stateful loops, captured-answer replay, and fixture comparison. It includes sample verification, scope/execution rules, diagnostic handling, and privacy limits. For an older installation, use its bundled recipe and declarations rather than assuming these operations exist. Preserve existing application policies; do not convert unrelated calls just to install the drawer. Flow execution is server-only and continues even with the inspector disabled.
+When asked to build or inspect connected calls, read [references/flows.md](references/flows.md) after the framework recipe. For 0.5.6 it covers requests, server function tasks, runtime request factories, parallel checks, terminal branches, returning conditionals, bounded collections, stateful loops, captured-answer replay, and fixture comparison. It includes sample verification, scope/execution rules, diagnostic handling, and privacy limits. For an older installation, use its bundled recipe and declarations rather than assuming these operations exist. Preserve existing application policies; do not convert unrelated calls just to install the drawer. Flow execution is server-only and continues even with the inspector disabled.
 
 ## Integration invariants
 
