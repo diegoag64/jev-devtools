@@ -42,6 +42,7 @@ test("an explicit empty verification key disables live mode even with a dotenv c
       const handlers: Connect.NextHandleFunction[] = [];
       const httpServer = new EventEmitter();
       const server = {
+        config: { server: { port: 4182 } },
         httpServer,
         middlewares: {
           use(handler: Connect.NextHandleFunction) {
