@@ -1,6 +1,6 @@
 # Documentation publishing
 
-GitHub is the editable source. GPT Sites serves a reviewed static snapshot. Merging a PR, running CI, completing an agent task, or publishing npm does **not** deploy the docs. A maintainer explicitly requests each GPT Sites publication; do not add unattended deployment or hosting credentials to CI.
+GitHub is the editable source. GPT Sites serves a reviewed static snapshot. A request to release a version includes its matching docs deployment unless the maintainer excludes docs. Continue under that [initial release authorization](releases.md#release-authorization) without a separate approval prompt. Standalone docs publications require an explicit request. Merging a PR, running CI, completing a task, or publishing npm alone does not authorize deployment. The operator uses the supported Sites workflow; do not add unattended deployment or hosting credentials to CI.
 
 ## When to publish
 
@@ -8,7 +8,7 @@ GitHub is the editable source. GPT Sites serves a reviewed static snapshot. Merg
 | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Corrections, examples, navigation, accessibility, or styling | Publish the reviewed changes after merge and green CI; related small edits can be batched.                                                                                                                                                            |
 | New or changed public APIs                                   | Update docs in the API PR, then publish release guidance after npm, tag, and GitHub release verification. Explicitly marked Unreleased reference material may appear earlier, but default installation examples must work with the published package. |
-| Installation blockers or security guidance                   | Prioritize review, merge, and an explicit manual publication.                                                                                                                                                                                         |
+| Installation blockers or security guidance                   | Prioritize review, merge, and publication under a release or standalone docs request.                                                                                                                                                                 |
 | Internal refactors or tests                                  | No publication unless reader-visible output changes.                                                                                                                                                                                                  |
 | Star count or other optional build-time statistics           | Refresh during the next normal publication. Do not deploy solely for these.                                                                                                                                                                           |
 
@@ -48,7 +48,7 @@ GPT Sites assigns a saved version and deployment timestamp **after** the build. 
 
 ## Manual publication checklist
 
-1. Obtain the explicit docs-publication request. Reuse project `appgprj_6add5705dbec8191b56b1c9555078a2d`, public audience, and `https://docs.jevtools.dev`; do not create another Site or change DNS/access.
+1. Use the initial versioned release request unless it excludes docs, or obtain a standalone docs-publication request. Honor limits such as "package only", "no docs", and "save without deploying". Do not ask again when the release already authorizes this step. Reuse project `appgprj_6add5705dbec8191b56b1c9555078a2d`, public audience, and `https://docs.jevtools.dev`; do not create another Site or change DNS/access.
 2. Select the reviewed full SHA after merge. Fetch `origin/main`, use a clean checkout of that SHA, verify `git merge-base --is-ancestor HEAD origin/main`, and confirm successful Verify CI for it, including the `docs` job. This reachability/CI check is a maintainer gate; the build's automatic guard checks cleanliness, not approval or branch membership.
 3. For a release, verify npm availability/dist-tag, the exact release tag, and the GitHub release before advertising released APIs. Select reviewed release-prepared content with a static link to its GitHub release for verified publication status; no release-record PR is required first. Keep later Unreleased work labeled. A later main commit does not replace the selected artifact automatically.
 4. Install the locked dependencies with `npm ci`, install Playwright Chromium if needed, and run the repository's required checks. Then build and verify the **publication artifact**:

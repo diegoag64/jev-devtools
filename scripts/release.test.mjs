@@ -259,7 +259,11 @@ test("GitHub publication records observations in release notes without changing 
       recorded.includes(meta.sha256) &&
       recorded.includes(meta.integrity),
   );
-  assert.match(recorded, /Hosted docs require a separate explicit request/);
+  assert.match(
+    recorded,
+    /Continue the matching docs deployment under the initial release request unless it excludes docs/,
+  );
+  assert.match(result.stdout, /Do not ask for another approval/);
   assert.match(result.stdout, /No receipt-only source PR is required/);
   assert.doesNotMatch(
     result.stdout,
@@ -328,4 +332,159 @@ test("publication facts must belong to the approved candidate", (t) => {
     result.stderr,
     /Publication commit differs from approved artifact/,
   );
+});
+
+function environmentFixture(
+  t,
+  overrides = {},
+  policies = [{ name: "main", type: "branch" }],
+  customRules = [],
+) {
+  const cwd = mkdtempSync(join(tmpdir(), "jev-release-environment-"));
+  t.after(() => rmSync(cwd, { recursive: true, force: true }));
+  const environment = {
+    name: "npm-release",
+    can_admins_bypass: false,
+    deployment_branch_policy: {
+      protected_branches: false,
+      custom_branch_policies: true,
+    },
+    protection_rules: [{ type: "branch_policy" }],
+    ...overrides,
+  };
+  const preload = join(cwd, "environment-fixture.mjs");
+  const calls = join(cwd, "calls.jsonl");
+  writeFileSync(
+    preload,
+    `
+import childProcess from 'node:child_process';
+import {syncBuiltinESMExports} from 'node:module';
+import {appendFileSync} from 'node:fs';
+childProcess.execFileSync=(bin,args)=>{
+ if(bin!=='gh'||args[0]!=='api'||args.length!==2) throw new Error('Only read-only GitHub API calls are allowed');
+ appendFileSync(${JSON.stringify(calls)},JSON.stringify(args)+'\\n');
+ if(args[1]==='repos/diegoag64/jev-devtools/environments/npm-release') return JSON.stringify(${JSON.stringify(environment)});
+ if(args[1]==='repos/diegoag64/jev-devtools/environments/npm-release/deployment-branch-policies?per_page=100') return JSON.stringify(${JSON.stringify({ total_count: policies.length, branch_policies: policies })});
+ if(args[1]==='repos/diegoag64/jev-devtools/environments/npm-release/deployment_protection_rules') return JSON.stringify(${JSON.stringify({ total_count: customRules.length, custom_deployment_protection_rules: customRules })});
+ throw new Error('Unexpected GitHub endpoint: '+args[1]);
+};
+syncBuiltinESMExports();
+`,
+  );
+  return {
+    calls,
+    run: () =>
+      spawnSync(
+        process.execPath,
+        ["--import", preload, script, "check-environment"],
+        { cwd, encoding: "utf8" },
+      ),
+  };
+}
+
+test("release environment accepts unattended main-only publishing using read-only API calls", (t) => {
+  const { run, calls } = environmentFixture(t);
+  const result = run();
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(
+    result.stdout,
+    /no reviewers or delay, main branch only, administrator bypass disabled/,
+  );
+  assert.deepEqual(
+    readFileSync(calls, "utf8").trim().split("\n").map(JSON.parse),
+    [
+      ["api", "repos/diegoag64/jev-devtools/environments/npm-release"],
+      [
+        "api",
+        "repos/diegoag64/jev-devtools/environments/npm-release/deployment-branch-policies?per_page=100",
+      ],
+      [
+        "api",
+        "repos/diegoag64/jev-devtools/environments/npm-release/deployment_protection_rules",
+      ],
+    ],
+  );
+});
+
+test("release environment rejects human gates and broader publishing authority", async (t) => {
+  for (const [name, overrides, policies, error, customRules] of [
+    [
+      "reviewer gate",
+      {
+        protection_rules: [
+          {
+            type: "required_reviewers",
+            reviewers: [{ type: "User", reviewer: { login: "owner" } }],
+          },
+        ],
+      },
+      undefined,
+      /requires reviewers/,
+    ],
+    [
+      "wait timer",
+      { protection_rules: [{ type: "wait_timer", wait_timer: 5 }] },
+      undefined,
+      /wait timer/,
+    ],
+    [
+      "custom rule",
+      { protection_rules: [{ type: "custom" }] },
+      undefined,
+      /Unexpected release protection rule/,
+    ],
+    [
+      "administrator bypass",
+      { can_admins_bypass: true },
+      undefined,
+      /disable administrator bypass/,
+    ],
+    [
+      "unrestricted branches",
+      { deployment_branch_policy: null },
+      undefined,
+      /selected main branch policy/,
+    ],
+    [
+      "all protected branches",
+      {
+        deployment_branch_policy: {
+          protected_branches: true,
+          custom_branch_policies: false,
+        },
+      },
+      undefined,
+      /selected main branch policy/,
+    ],
+    [
+      "extra branch",
+      {},
+      [
+        { name: "main", type: "branch" },
+        { name: "release/*", type: "branch" },
+      ],
+      /allow only main/,
+    ],
+    [
+      "wildcard branch",
+      {},
+      [{ name: "*", type: "branch" }],
+      /main branch only/,
+    ],
+    ["main tag", {}, [{ name: "main", type: "tag" }], /main branch only/],
+    [
+      "custom deployment app",
+      {},
+      undefined,
+      /custom deployment protection rules/,
+      [{ id: 3, enabled: true, app: { slug: "approval-app" } }],
+    ],
+  ])
+    await t.test(name, (t) => {
+      const { run } = environmentFixture(t, overrides, policies, customRules);
+      const result = run();
+      assert.notEqual(result.status, 0);
+      assert.match(result.stderr, error);
+      assert.doesNotMatch(result.stdout, /npm-release verified/);
+    });
 });
