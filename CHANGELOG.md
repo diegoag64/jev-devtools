@@ -30,7 +30,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Fixed
 
-- **Playground ports.** Sample runs and DevTools requests now use Vite's configured port for same-origin checks, so a playground started with `--port 4184` accepts requests from its own page.
+- **Playground ports.** Sample runs and DevTools requests now use Vite's configured port for same-origin checks, so a playground started with `--port 4184` accepts requests from its own page. ([#129](https://github.com/diegoag64/jev-devtools/pull/129))
 
 ## 0.5.5 — Prepared release
 
