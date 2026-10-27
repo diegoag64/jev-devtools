@@ -33,6 +33,14 @@ The skill selects the framework recipe and links to these files inside its `refe
 
 Flow adoption is optional. Adding the drawer to an app does not require converting existing calls into flows.
 
+## Port existing Jev logic
+
+To convert an existing application or cookbook, or to check whether it fits the Flow API, use [port-jev-to-flow](https://github.com/diegoag64/jev-devtools/blob/main/.agents/skills/port-jev-to-flow/SKILL.md). The skill maps source requests, decisions, and deterministic work to public Flow operations. It requires explicit records of adaptations and unsupported behavior.
+
+This skill lives in the repository at `.agents/skills/port-jev-to-flow/` and is not shipped in npm. Read its [raw Markdown](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/.agents/skills/port-jev-to-flow/SKILL.md) and resolve `references/` links beside that file. For offline use, copy the whole folder, including its references. Cookbook paths refer to a Jev DevTools checkout.
+
+Give the agent the source code or recipe. Preserve question wording, request order and concurrency, threshold boundaries, and external effects. Use the installed setup skill's `references/flows.md` and declarations to check supported APIs. Repository guidance may describe a newer version. Verify with labeled samples and report adaptations before treating the port as equivalent to its source.
+
 ## Read plain Markdown
 
 Use **Read as Markdown** at the bottom of any page to get its text with embedded code examples expanded. The site's [llms.txt](@/llms.txt) links to those downloads. The [repository agent index](https://github.com/diegoag64/jev-devtools/blob/main/llms.txt) also links to the setup skill and detailed integration references.
