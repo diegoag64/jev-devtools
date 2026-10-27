@@ -199,7 +199,6 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
   const [result, setResult] = useState<unknown>();
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
-  const [copied, setCopied] = useState(false);
   const request = useRef<
     { controller: AbortController; id: string } | undefined
   >(undefined);
@@ -448,31 +447,17 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
             className="wb-code-panel"
             aria-label="Code panel"
           >
-            <div className="wb-panel-heading">
-              <h2>
-                Flow API <span> / flow.ts</span>
-              </h2>
-              <button
-                onClick={() => {
-                  void navigator.clipboard
-                    .writeText(detail.source)
-                    .then(() => setCopied(true))
-                    .catch(() =>
-                      setStatus(
-                        "Could not copy. Select the source text to copy it manually.",
-                      ),
-                    );
-                }}
-              >
-                {copied ? "Copied" : "Copy source"}
-              </button>
-            </div>
             <SourceCode
               detail={detail}
               active={active}
               walkthrough={walkthrough}
               selected={selected}
               onSelect={selectNodes}
+              onCopyError={() =>
+                setStatus(
+                  "Could not copy. Select the source text to copy it manually.",
+                )
+              }
             />
             <p className="wb-panel-foot">
               {walkthrough

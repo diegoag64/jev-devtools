@@ -30,6 +30,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
+- **Optional cookbook code comments.** Read concise step explanations beside the Flow API source in all 19 cookbooks. A small comment toggle beside Copy source remembers your preference; copying includes the notes only when shown, while original line numbers and diagram links stay intact. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 - **Cookbook Flow Workbench.** Explore all 19 cookbooks with actual Flow API source beside the drawer's diagram renderer, compact narrated tutorials, animated graph construction, and linked timeline/code highlights. The workspace fills the viewport with resizable code and diagram panels; synthetic runs expose requests and results inline, and the original request lab remains at `?legacy=1`. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 - **Embedded flow viewer.** The new browser-safe `jev-devtools/viewer` export provides `JevFlowViewer` and the opt-in `useJevInspection` hook. Definitions can be displayed before execution, with optional presentation filters, selection, and color cues; the Node runner remains separate. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 

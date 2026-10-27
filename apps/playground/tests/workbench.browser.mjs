@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createServer } from "vite";
 import { chromium } from "playwright";
+import { sourceWithComments } from "../src/workbench/source-comments.ts";
 import { browserOutputURL } from "../../../scripts/cookbook-browser-context.mjs";
 
 // New workbench coverage complements the retained request-lab recipe checks.
@@ -177,6 +178,109 @@ async function assertGuideOwnsSelection(page) {
     "Line-number clicks cannot navigate the guide",
   );
 }
+async function assertCommentCopies(page) {
+  const detail = await (
+    await page.request.get(
+      "http://127.0.0.1:4182/__jev/cookbooks/confidence-fallback?session=00000000-0000-4000-8000-000000000000",
+    )
+  ).json();
+  const toggle = page.getByRole("button", {
+    name: "Step comments",
+    exact: true,
+  });
+  assert.equal(await toggle.getAttribute("aria-pressed"), "true");
+  assert.equal(
+    await page.locator(".wb-source-note").count(),
+    detail.steps.length,
+  );
+  const lines = await page
+    .locator(".wb-code-line")
+    .evaluateAll((nodes) => nodes.map((node) => node.dataset.line));
+  await page.getByRole("button", { name: "Copy source", exact: true }).click();
+  await page.getByRole("button", { name: "Copied", exact: true }).waitFor();
+  assert.equal(
+    await page.evaluate(() => navigator.clipboard.readText()),
+    sourceWithComments(detail),
+  );
+  await toggle.press("Space");
+  assert.equal(await page.locator(".wb-source-note").count(), 0);
+  assert.deepEqual(
+    await page
+      .locator(".wb-code-line")
+      .evaluateAll((nodes) => nodes.map((node) => node.dataset.line)),
+    lines,
+  );
+  await page.getByRole("button", { name: "Copy source", exact: true }).click();
+  await page.getByRole("button", { name: "Copied", exact: true }).waitFor();
+  assert.equal(
+    await page.evaluate(() => navigator.clipboard.readText()),
+    detail.source,
+  );
+  await page.reload();
+  await toggle.waitFor();
+  assert.equal(
+    await toggle.getAttribute("aria-pressed"),
+    "false",
+    "Comment preference survives a reload",
+  );
+  await toggle.click();
+}
+
+async function assertGuideComments(page) {
+  const line = page.locator('[data-line="61"]');
+  await line.evaluate((node) =>
+    node.scrollIntoView({ block: "center", behavior: "instant" }),
+  );
+  const state = () =>
+    page.evaluate(() => ({
+      step: document.querySelector(".wb-timeline [aria-current]").textContent,
+      selected: [...document.querySelectorAll(".wb-code-line.is-selected")].map(
+        (node) => node.dataset.line,
+      ),
+      diagram: [
+        ...document
+          .querySelector(".jev-flow-viewer")
+          .shadowRoot.querySelectorAll(".flow-step[data-highlighted]"),
+      ].map((node) => node.dataset.nodeId),
+    }));
+  const expected = await state();
+  const anchorNumber = await page.locator(".wb-source").evaluate((source) => {
+    const top = source.getBoundingClientRect().top;
+    return [...source.querySelectorAll(".wb-code-line")].find(
+      (row) => row.getBoundingClientRect().bottom > top,
+    ).dataset.line;
+  });
+  const anchor = page.locator(`[data-line="${anchorNumber}"]`);
+  const anchorOffset = async () =>
+    (await anchor.boundingBox()).y -
+    (await page.locator(".wb-source").boundingBox()).y;
+  const top = await anchorOffset();
+  const toggle = page.getByRole("button", {
+    name: "Step comments",
+    exact: true,
+  });
+  await toggle.click();
+  assert.deepEqual(
+    await state(),
+    expected,
+    "Hiding comments cannot change guide selection",
+  );
+  assert.ok(
+    Math.abs((await anchorOffset()) - top) <= 2,
+    "Hiding notes preserves the source reading position",
+  );
+  await toggle.click();
+  assert.deepEqual(
+    await state(),
+    expected,
+    "Showing comments cannot change guide selection",
+  );
+  assert.ok(
+    Math.abs((await anchorOffset()) - top) <= 2,
+    "Showing notes preserves the source reading position",
+  );
+}
+
 try {
   await server.listen();
   browser = await chromium.launch({ headless: true });
@@ -187,6 +291,7 @@ try {
       size: { width: 1600, height: 1100 },
     },
   });
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   const page = await context.newPage();
   page.on("pageerror", (error) => errors.push(String(error)));
   // Observe painted positions, not effect timing: page-load camera fitting and
@@ -223,6 +328,7 @@ try {
     .waitFor();
   await page.locator(".wb-diagram-panel .flow-step").first().waitFor();
   await assertOpeningView(page, "opening");
+  await assertCommentCopies(page);
   await page.screenshot({ path: new URL("opening.png", output).pathname });
   await page
     .getByRole("button", { name: "Step-by-step guide", exact: true })
@@ -340,6 +446,11 @@ try {
       );
       previous = visible;
       await assertWorkspaceFits(page);
+      assert.equal(
+        await page.locator(".wb-source-note").count(),
+        index + 1,
+        `${title}: only revealed steps have comments`,
+      );
       assert.equal(await page.locator(".wb-narrative a").count(), 1);
       assert.ok(
         (await page.locator(".flow-step[data-highlighted]").count()) > 0,
@@ -397,6 +508,7 @@ try {
     .getByRole("button", { name: "Step-by-step guide", exact: true })
     .click();
   await assertGuideOwnsSelection(page);
+  await assertGuideComments(page);
   await page.setViewportSize({ width: 1280, height: 800 });
   await assertWorkspaceFits(page);
   await assertSelectionInView(page);

@@ -1,5 +1,15 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import {
+  Fragment,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useMemo,
+  useRef,
+  type CSSProperties,
+} from "react";
 import type { CookbookDetail, SourceRange } from "./types.js";
+
+import { sourceComments, sourceWithComments } from "./source-comments.js";
 
 export const colors = [
   "#58bfa9",
@@ -46,21 +56,81 @@ export function SourceCode({
   walkthrough,
   selected,
   onSelect,
+  onCopyError,
 }: {
   detail: CookbookDetail;
   active: number;
   walkthrough: boolean;
   selected: string[];
   onSelect: (ids: string[]) => void;
+  onCopyError: () => void;
 }) {
   const ref = useRef<HTMLPreElement>(null);
+  const [copied, setCopied] = useState(false);
+  const [showComments, setShowComments] = useState(() => {
+    try {
+      return localStorage.getItem("jev-workbench-step-comments") !== "hidden";
+    } catch {
+      return true;
+    }
+  });
+  const readingPosition = useRef<
+    | {
+        row: HTMLElement | undefined;
+        offset: number;
+        left: number;
+        atTop: boolean;
+      }
+    | undefined
+  >(undefined);
+  function toggleComments() {
+    const source = ref.current;
+    if (source) {
+      const top = source.getBoundingClientRect().top;
+      const row = [
+        ...source.querySelectorAll<HTMLElement>(".wb-code-line"),
+      ].find((line) => line.getBoundingClientRect().bottom > top);
+      readingPosition.current = {
+        row,
+        offset: (row?.getBoundingClientRect().top ?? top) - top,
+        left: source.scrollLeft,
+        atTop: source.scrollTop === 0,
+      };
+    }
+    const next = !showComments;
+    setShowComments(next);
+    setCopied(false);
+    try {
+      localStorage.setItem(
+        "jev-workbench-step-comments",
+        next ? "shown" : "hidden",
+      );
+    } catch {
+      // The toggle still works when browser storage is unavailable.
+    }
+  }
+  useLayoutEffect(() => {
+    const saved = readingPosition.current;
+    const source = ref.current;
+    if (!saved || !source) return;
+    // Keep the same original code line in view before the toggle paints.
+    if (saved.atTop) source.scrollTop = 0;
+    else if (saved.row)
+      source.scrollTop +=
+        saved.row.getBoundingClientRect().top -
+        source.getBoundingClientRect().top -
+        saved.offset;
+    source.scrollLeft = saved.left;
+    readingPosition.current = undefined;
+  }, [showComments]);
+  const comments = useMemo(() => sourceComments(detail), [detail]);
   const activeRange = walkthrough
     ? detail.steps[active].ranges[0]
     : detail.sourceRanges[selected[0]];
   useEffect(() => {
     if (!activeRange) return;
     const node = ref.current?.querySelector<HTMLElement>(
-      `[data-line="${activeRange.start}"]`,
+      `[data-note-line="${activeRange.start}"], [data-line="${activeRange.start}"]`,
     );
     if (node && ref.current)
       ref.current.scrollTo({
@@ -95,13 +165,12 @@ export function SourceCode({
       !ref.current.contains(selection.focusNode)
     )
       return;
-    const line = (node: Node | null) =>
-      Number(
-        (node instanceof Element
-          ? node
-          : node?.parentElement
-        )?.closest<HTMLElement>("[data-line]")?.dataset.line,
-      );
+    const line = (node: Node | null) => {
+      const row = (
+        node instanceof Element ? node : node?.parentElement
+      )?.closest<HTMLElement>("[data-line], [data-note-line]");
+      return Number(row?.dataset.line ?? row?.dataset.noteLine);
+    };
     const start = Math.min(
       line(selection.anchorNode),
       line(selection.focusNode),
@@ -113,76 +182,134 @@ export function SourceCode({
     onSelect(ids);
   }
   return (
-    <pre
-      ref={ref}
-      className="wb-source"
-      tabIndex={0}
-      aria-label="Flow API source"
-      onMouseUp={walkthrough ? undefined : selectText}
-      onKeyUp={walkthrough ? undefined : selectText}
-    >
-      <code>
-        {detail.source.split("\n").map((line, index) => {
-          const number = index + 1;
-          const stage = detail.steps.findIndex((step) =>
-            step.ranges.some((range) => contains(range, number)),
-          );
-          const hidden = walkthrough && stage > active;
-          if (hidden) {
-            if (
-              !detail.steps[stage].ranges.some(
-                (range) => range.start === number,
-              )
-            )
-              return null;
-            return (
-              <span className="wb-code-gap" key={number}>
-                ··· added in step {stage + 1}
-              </span>
-            );
-          }
-          const ids = lineNodes(number);
-          const highlighted = selected.some(
-            (id) =>
-              detail.sourceRanges[id] &&
-              contains(detail.sourceRanges[id], number),
-          );
-          return (
-            <span
-              key={number}
-              data-line={number}
-              className={`wb-code-line ${highlighted ? "is-selected" : ""} ${walkthrough && stage === active ? "is-new" : ""}`}
-              style={
-                {
-                  "--step-color": colors[Math.max(0, stage) % colors.length],
-                } as CSSProperties
-              }
+    <>
+      <div className="wb-panel-heading">
+        <h2>
+          Flow API <span> / flow.ts</span>
+        </h2>
+        <div className="wb-source-actions">
+          <button
+            className="wb-comments-toggle"
+            aria-label="Step comments"
+            aria-pressed={showComments}
+            aria-controls="workbench-source"
+            title={showComments ? "Hide step comments" : "Show step comments"}
+            onClick={toggleComments}
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
             >
-              {walkthrough ? (
-                <span className="wb-line-number" aria-hidden="true">
-                  {number}
+              <path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8l-5 3V6a2 2 0 0 1 2-2Z" />
+              <path d="M7 9h10M7 13h6" />
+            </svg>
+          </button>
+          <button
+            onClick={() => {
+              void navigator.clipboard
+                .writeText(
+                  showComments ? sourceWithComments(detail) : detail.source,
+                )
+                .then(() => setCopied(true))
+                .catch(onCopyError);
+            }}
+          >
+            {copied ? "Copied" : "Copy source"}
+          </button>
+        </div>
+      </div>
+      <pre
+        ref={ref}
+        id="workbench-source"
+        className="wb-source"
+        tabIndex={0}
+        aria-label="Flow API source"
+        onMouseUp={walkthrough ? undefined : selectText}
+        onKeyUp={walkthrough ? undefined : selectText}
+      >
+        <code>
+          {detail.source.split("\n").map((line, index) => {
+            const number = index + 1;
+            const stage = detail.steps.findIndex((step) =>
+              step.ranges.some((range) => contains(range, number)),
+            );
+            const hidden = walkthrough && stage > active;
+            if (hidden) {
+              if (
+                !detail.steps[stage].ranges.some(
+                  (range) => range.start === number,
+                )
+              )
+                return null;
+              return (
+                <span className="wb-code-gap" key={number}>
+                  ··· added in step {stage + 1}
                 </span>
-              ) : (
-                <button
-                  className="wb-line-number"
-                  tabIndex={
-                    ids.some((id) => detail.sourceRanges[id].start === number)
-                      ? 0
-                      : -1
+              );
+            }
+            const ids = lineNodes(number);
+            const highlighted = selected.some(
+              (id) =>
+                detail.sourceRanges[id] &&
+                contains(detail.sourceRanges[id], number),
+            );
+            return (
+              <Fragment key={number}>
+                {showComments && comments.has(number) && (
+                  <span className="wb-source-note" data-note-line={number}>
+                    <span className="wb-line-number" aria-hidden="true" />
+                    <span className="wb-comment">
+                      {comments.get(number)!.join("\n")}
+                      {"\n"}
+                    </span>
+                  </span>
+                )}
+                <span
+                  data-line={number}
+                  className={`wb-code-line ${highlighted ? "is-selected" : ""} ${walkthrough && stage === active ? "is-new" : ""}`}
+                  style={
+                    {
+                      "--step-color":
+                        colors[Math.max(0, stage) % colors.length],
+                    } as CSSProperties
                   }
-                  disabled={!ids.length}
-                  aria-label={`Inspect code at line ${number}`}
-                  onClick={() => onSelect(ids)}
                 >
-                  {number}
-                </button>
-              )}
-              <span>{tokens(line)}</span>
-              {"\n"}
-            </span>
-          );
-        })}
-      </code>
-    </pre>
+                  {walkthrough ? (
+                    <span className="wb-line-number" aria-hidden="true">
+                      {number}
+                    </span>
+                  ) : (
+                    <button
+                      className="wb-line-number"
+                      tabIndex={
+                        ids.some(
+                          (id) => detail.sourceRanges[id].start === number,
+                        )
+                          ? 0
+                          : -1
+                      }
+                      disabled={!ids.length}
+                      aria-label={`Inspect code at line ${number}`}
+                      onClick={() => onSelect(ids)}
+                    >
+                      {number}
+                    </button>
+                  )}
+                  <span>{tokens(line)}</span>
+                  {"\n"}
+                </span>
+              </Fragment>
+            );
+          })}
+        </code>
+      </pre>
+    </>
   );
 }

@@ -4,6 +4,7 @@ export type TutorialStep = {
   id: string;
   title: string;
   explanation: string;
+  comment: string;
   api: string;
   nodeIds: string[];
   ranges: SourceRange[];

@@ -50,6 +50,7 @@ export async function readCookbook(
       ...step,
       originalChapter: chapters[step.id][0],
       explanation: chapters[step.id][1],
+      comment: chapters[step.id][2],
     })),
     originalSource: catalog.source,
     sourceRevision:

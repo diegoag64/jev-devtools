@@ -508,6 +508,22 @@ button.wb-primary {
   font-size: 10px;
   padding: 6px;
 }
+.wb-source-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.wb-source-actions .wb-comments-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #738097;
+}
+.wb-source-actions .wb-comments-toggle[aria-pressed="true"],
+.wb-source-actions .wb-comments-toggle:hover {
+  color: #c7d5ff;
+}
 .wb-panel-foot {
   height: 22px;
   flex-shrink: 0;
@@ -520,6 +536,7 @@ button.wb-primary {
   font-size: 10px;
 }
 .wb-source {
+  container-type: inline-size;
   position: relative;
   flex: 1;
   min-height: 0;
@@ -541,14 +558,25 @@ button.wb-primary {
   width: max-content;
   min-width: 100%;
 }
-.wb-code-line {
+.wb-code-line,
+.wb-source-note {
   display: flex;
   border-left: 2px solid transparent;
   white-space: pre;
   min-height: 21px;
   padding-right: 20px;
 }
-.wb-code-line > .wb-line-number {
+/* Notes wrap to the pane even when long source lines make the code scroll. */
+.wb-source-note {
+  width: 100cqw;
+}
+.wb-source-note .wb-comment {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.wb-code-line > .wb-line-number,
+.wb-source-note > .wb-line-number {
   user-select: none;
   width: 47px;
   flex-shrink: 0;

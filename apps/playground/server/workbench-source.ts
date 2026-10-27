@@ -137,7 +137,7 @@ export function mapCookbookSource(source: string, definition: FlowDefinition) {
     group.nodes.push(node);
     grouped.set(key, group);
   }
-  const steps: Omit<TutorialStep, "explanation">[] = [];
+  const steps: Omit<TutorialStep, "explanation" | "comment">[] = [];
   // Definitions are already ordered by construction. Grouping preserves that
   // order even when a helper's source is above the main definition callback.
   for (const { call, nodes } of grouped.values()) {

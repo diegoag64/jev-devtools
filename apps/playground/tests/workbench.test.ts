@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import ts from "typescript-source";
+import { sourceWithComments } from "../src/workbench/source-comments.js";
 import { cookbookCatalog } from "../src/workbench/catalog.js";
 import { readCookbook } from "../server/workbench.js";
 import { mapCookbookSource } from "../server/workbench-source.js";
@@ -32,6 +34,10 @@ test("every cookbook operation has an exact source range and one tutorial stage"
     }
     for (const step of detail.steps) {
       assert.ok(step.explanation.length > 80 && step.originalChapter);
+      assert.ok(
+        step.comment.trim(),
+        `${recipe.slug}/${step.id}: missing source comment`,
+      );
       assert.ok(
         step.ranges.every(
           (range) => range.start > 0 && range.end <= lines.length,
@@ -91,4 +97,29 @@ test("cookbook lookup never treats a URL slug as a filesystem path", async () =>
     "missing",
   ])
     assert.equal(await readCookbook(slug), undefined);
+});
+
+// Notes are copied as real TypeScript comments. Inserting them at an unsafe
+// boundary could change a return expression or turn source text into a comment.
+test("annotated cookbook copies compile to exactly the original program", async () => {
+  for (const recipe of cookbookCatalog) {
+    const detail = (await readCookbook(recipe.slug))!;
+    const annotated = sourceWithComments(detail);
+    assert.notEqual(annotated, detail.source);
+    const compile = (source: string) =>
+      ts.transpileModule(source, {
+        compilerOptions: {
+          target: ts.ScriptTarget.ESNext,
+          removeComments: true,
+        },
+        reportDiagnostics: true,
+      });
+    const result = compile(annotated);
+    assert.deepEqual(result.diagnostics, [], recipe.slug);
+    assert.equal(
+      result.outputText,
+      compile(detail.source).outputText,
+      recipe.slug,
+    );
+  }
 });
