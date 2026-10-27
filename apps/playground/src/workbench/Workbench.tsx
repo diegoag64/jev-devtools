@@ -378,6 +378,20 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
       }
     }
   }
+  const guideControls = (
+    <div className="wb-guide-controls">
+      <button disabled={active === 0} onClick={() => chooseStep(active - 1)}>
+        ← Previous
+      </button>
+      <button
+        className="wb-primary"
+        disabled={active === detail.steps.length - 1}
+        onClick={() => chooseStep(active + 1)}
+      >
+        Next step →
+      </button>
+    </div>
+  );
   return (
     <div className="wb-recipe">
       <div className="wb-toolbar">
@@ -447,21 +461,7 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
               <Explanation text={step.explanation} />
             </p>
           </div>
-          <div className="wb-guide-controls">
-            <button
-              disabled={active === 0}
-              onClick={() => chooseStep(active - 1)}
-            >
-              ← Previous
-            </button>
-            <button
-              className="wb-primary"
-              disabled={active === detail.steps.length - 1}
-              onClick={() => chooseStep(active + 1)}
-            >
-              Next step →
-            </button>
-          </div>
+          {guideControls}
         </section>
       )}
       <div className="wb-runbar">
@@ -518,6 +518,23 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
         </p>
       </div>
       <SplitPanels
+        expandedGuide={
+          walkthrough && (
+            <div
+              className="wb-expanded-guide"
+              role="group"
+              aria-label="Walkthrough controls"
+            >
+              <p aria-live="polite" aria-atomic="true">
+                <span>
+                  Step {active + 1} of {detail.steps.length}
+                </span>
+                <strong title={step.title}>{step.title}</strong>
+              </p>
+              {guideControls}
+            </div>
+          )
+        }
         code={(panelActions) => (
           <section
             id="workbench-code"

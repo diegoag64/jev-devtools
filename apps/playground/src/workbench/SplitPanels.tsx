@@ -14,9 +14,11 @@ type Pane = "code" | "diagram";
 export function SplitPanels({
   code,
   diagram,
+  expandedGuide,
 }: {
   code: (actions: ReactNode) => ReactNode;
   diagram: (actions: ReactNode) => ReactNode;
+  expandedGuide?: ReactNode;
 }) {
   const panels = useRef<HTMLDialogElement>(null);
   const [only, setOnly] = useState<Pane>();
@@ -281,9 +283,11 @@ export function SplitPanels({
             ? "minmax(0, 1fr)"
             : `minmax(0, ${share}fr) 8px minmax(0, ${100 - share}fr)`,
         gridTemplateRows:
-          !visiblePane && stacked
-            ? `minmax(0, ${share}fr) 8px minmax(0, ${100 - share}fr)`
-            : "minmax(0, 1fr)",
+          expanded && expandedGuide
+            ? "minmax(0, 1fr) auto"
+            : !visiblePane && stacked
+              ? `minmax(0, ${share}fr) 8px minmax(0, ${100 - share}fr)`
+              : "minmax(0, 1fr)",
       }}
     >
       {code(actions("code"))}
@@ -377,6 +381,7 @@ export function SplitPanels({
         <span className="wb-divider-grip" />
       </div>
       {diagram(actions("diagram"))}
+      {expanded && expandedGuide}
     </dialog>
   );
 }

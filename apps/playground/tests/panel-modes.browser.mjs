@@ -61,6 +61,154 @@ async function assertModal(page, pane) {
     true,
   );
 }
+async function walkthroughInPopup(page, size) {
+  await page.goto("http://127.0.0.1:4182/?cookbook=confidence-fallback");
+  await page
+    .getByRole("button", { name: "Step-by-step guide", exact: true })
+    .click();
+  const steps = page.locator(".wb-timeline button");
+  const total = await steps.count();
+  for (const pane of ["code", "diagram"]) {
+    await steps.first().click();
+    await page
+      .getByRole("button", { name: `Expand ${pane}`, exact: true })
+      .click();
+    const dialog = page.getByRole("dialog", { name: `Expanded ${pane}` });
+    const previous = dialog.getByRole("button", {
+      name: "← Previous",
+      exact: true,
+    });
+    const next = dialog.getByRole("button", {
+      name: "Next step →",
+      exact: true,
+    });
+    await page.screenshot({
+      path: new URL(`walkthrough-${pane}-${size}.png`, output).pathname,
+    });
+    assert.equal(
+      await previous.count(),
+      1,
+      "Expanded walkthroughs retain Previous",
+    );
+    assert.equal(await next.count(), 1, "Expanded walkthroughs retain Next");
+    assert.equal(await previous.isEnabled(), false);
+    let beforeLines = "",
+      beforeNodes = -1;
+    async function assertStep(index) {
+      assert.equal(
+        await dialog.isVisible(),
+        true,
+        "Step navigation keeps the popup open",
+      );
+      assert.equal(await steps.nth(index).getAttribute("aria-current"), "step");
+      const title = await steps.nth(index).innerText();
+      await dialog
+        .locator(".wb-expanded-guide")
+        .getByText(title, { exact: true })
+        .waitFor();
+      const lines = await page
+        .locator(".wb-source .is-selected")
+        .evaluateAll((nodes) => nodes.map((n) => n.dataset.line).join(","));
+      assert.notEqual(
+        lines,
+        beforeLines,
+        "Step navigation updates the focused code",
+      );
+      beforeLines = lines;
+      await page.waitForFunction((count) => {
+        const root = document.querySelector(
+          ".wb-diagram-panel .jev-flow-viewer",
+        ).shadowRoot;
+        return (
+          root.querySelectorAll(".flow-step[data-node-id]").length !== count
+        );
+      }, beforeNodes);
+      beforeNodes = await page
+        .locator(".wb-diagram-panel .flow-step[data-node-id]")
+        .count();
+      if (pane === "code") {
+        // Let the deliberate source scroll finish before taking another step
+        // or restoring the narrower pane. Reduced motion settles immediately.
+        await page.locator(".wb-source").evaluate(async (source) => {
+          let previous = source.scrollTop,
+            stable = 0;
+          const deadline = performance.now() + 5000;
+          while (stable < 4) {
+            if (performance.now() > deadline)
+              throw new Error("Source scrolling did not settle");
+            await new Promise(requestAnimationFrame);
+            const current = source.scrollTop;
+            stable = current === previous ? stable + 1 : 0;
+            previous = current;
+          }
+          const bounds = source.getBoundingClientRect();
+          const selected = source
+            .querySelector(".is-selected")
+            .getBoundingClientRect();
+          if (selected.top < bounds.top || selected.top >= bounds.bottom)
+            throw new Error(
+              "The active step is outside the expanded code viewport",
+            );
+        });
+      }
+      const bounds = await dialog.locator(".wb-expanded-guide").boundingBox();
+      const viewport = page.viewportSize();
+      assert.ok(
+        bounds.x >= 0 &&
+          bounds.y >= 0 &&
+          bounds.x + bounds.width <= viewport.width &&
+          bounds.y + bounds.height <= viewport.height,
+        "Walkthrough controls remain in view without scrolling",
+      );
+    }
+    await assertStep(0);
+    for (let index = 1; index < total; index++) {
+      await next.press("Enter");
+      await assertStep(index);
+    }
+    assert.equal(
+      await next.isEnabled(),
+      false,
+      "The last step keeps a disabled Next button",
+    );
+    for (let index = total - 2; index >= 2; index--) {
+      await previous.press("Enter");
+      await assertStep(index);
+    }
+    await page.screenshot({
+      path: new URL(`walkthrough-${pane}-${size}-step3.png`, output).pathname,
+    });
+    await page.keyboard.press("Escape");
+    assert.equal(
+      await steps.nth(2).getAttribute("aria-current"),
+      "step",
+      "Closing the popup preserves the reached step",
+    );
+    await page.waitForFunction(() => {
+      const source = document
+        .querySelector(".wb-source")
+        .getBoundingClientRect();
+      const selected = document
+        .querySelector(".wb-source .is-selected")
+        .getBoundingClientRect();
+      return selected.top >= source.top && selected.top < source.bottom;
+    });
+  }
+  await page
+    .getByRole("button", { name: "Complete flow", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Expand code", exact: true }).click();
+  assert.equal(
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Next step →", exact: true })
+      .count(),
+    0,
+    "Complete-flow popups do not show walkthrough controls",
+  );
+  await page.keyboard.press("Escape");
+}
+
 async function restore(page, share) {
   const button = page.getByRole("button", {
     name: "Show both panels",
@@ -307,6 +455,10 @@ try {
     undefined,
     { timeout: 5000 },
   );
+  await walkthroughInPopup(page, "mobile");
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await walkthroughInPopup(page, "desktop");
   assert.deepEqual(errors, []);
   await writeFile(
     new URL("summary.json", output),

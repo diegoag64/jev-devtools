@@ -449,6 +449,37 @@ button.wb-primary {
   height: auto;
   box-shadow: 0 24px 80px #0009;
 }
+/* Keep walkthrough navigation in the modal, outside either scrolling pane. */
+.wb-expanded-guide {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-top: 1px solid #303641;
+  background: #191d25;
+}
+.wb-expanded-guide p {
+  min-width: 0;
+  margin: 0;
+  line-height: 1.5;
+}
+.wb-expanded-guide p span {
+  display: block;
+  font-size: 10px;
+  color: #929eb2;
+}
+.wb-expanded-guide strong {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  font-weight: 500;
+}
+.wb-expanded-guide .wb-guide-controls {
+  flex-direction: row;
+}
 .wb-panels::backdrop {
   background: #07090dcc;
 }

@@ -31,6 +31,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
+- **Walkthrough navigation in expanded panes.** Keep Previous and Next controls and the current step title in expanded code and diagram views. Advance the guide without closing the popup, and retain the reached step when returning to the split view. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+
 - **Expanded and single-pane workbench views.** Open code or diagrams in a large popup using compact header controls. Show either pane alone, snap the divider to an edge, and restore the previous split without resetting source or diagram state. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 
 - **Self-contained cookbook guides.** Each cookbook has an overview popup and step explanations that teach the recipe and its Flow API method choices. A single Original Cookbook link replaces the repeated chapter links; library controls now use a separate panel icon. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
