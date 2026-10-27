@@ -35,6 +35,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Fixed
 
+- **Stable final-step controls.** Keep a disabled Next button on the last walkthrough step instead of replacing it with a wider complete-flow button. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 - **Walkthrough focus follows its step.** Keep the narrated step and its highlights fixed while hovering, selecting text, or clicking line numbers in earlier code. Guide navigation stays with Previous, Next, and the timeline; complete-flow code inspection remains interactive. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 - **Stable playground opening view.** Keep cookbook source at its first line and fit the diagram before its first visible frame. Automatic fitting no longer animates on load; selecting code or advancing the walkthrough still scrolls and focuses the corresponding nodes. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 - **Refresh with multiple playground tabs.** Pages release their live inspector streams when hidden or starting navigation, so occupied HTTP/1 connections cannot block a refresh. The workbench and drawer reconnect with fresh retained captures when a tab becomes visible again or navigation is cancelled. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))

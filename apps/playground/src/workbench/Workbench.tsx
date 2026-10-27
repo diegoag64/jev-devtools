@@ -372,21 +372,13 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
             >
               ← Previous
             </button>
-            {active < detail.steps.length - 1 ? (
-              <button
-                className="wb-primary"
-                onClick={() => chooseStep(active + 1)}
-              >
-                Next step →
-              </button>
-            ) : (
-              <button
-                className="wb-primary"
-                onClick={() => setWalkthrough(false)}
-              >
-                Explore complete flow →
-              </button>
-            )}
+            <button
+              className="wb-primary"
+              disabled={active === detail.steps.length - 1}
+              onClick={() => chooseStep(active + 1)}
+            >
+              Next step →
+            </button>
           </div>
         </section>
       ) : (
