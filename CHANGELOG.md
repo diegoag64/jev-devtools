@@ -8,7 +8,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | Cookbook workbench and narrated guides; embedded flow viewer; custom playground ports.                     |
+| [Unreleased](#unreleased)                   | Not published                                                                      | Cookbook workbench and narrated guides; embedded flow viewer.                                              |
+| [0.5.6](#056--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.6) | Clearer Flow diagnostics; custom playground ports; focused CI checks.                                      |
 | [0.5.5](#055--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.5) | TypeScript fixes; capture and stream validation; clearer setup guidance.                                   |
 | [0.5.4](#054--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.4) | Thirteen Flow cookbooks; routine browser verification; rewritten docs.                                     |
 | [0.5.3](#053--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) | Shared flow encoding; simpler releases and publication helpers; flow regression coverage.                  |
@@ -49,7 +50,29 @@ Dates below use UTC and were checked against npm's publication history. The hist
 - **Walkthrough focus follows its step.** Keep the narrated step and its highlights fixed while hovering, selecting text, or clicking line numbers in earlier code. Guide navigation stays with Previous, Next, and the timeline; complete-flow code inspection remains interactive. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 - **Stable playground opening view.** Keep cookbook source at its first line and fit the diagram before its first visible frame. Automatic fitting no longer animates on load; selecting code or advancing the walkthrough still scrolls and focuses the corresponding nodes. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 - **Refresh with multiple playground tabs.** Pages release their live inspector streams when hidden or starting navigation, so occupied HTTP/1 connections cannot block a refresh. The workbench and drawer reconnect with fresh retained captures when a tab becomes visible again or navigation is cancelled. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+
+## 0.5.6 — Prepared release
+
+[See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.6)
+
+### Compatibility and upgrade
+
+- **Supported environments are unchanged.** Node 22.12+, React/React DOM 18 or 19, ESM, TypeScript 5.4+, and TypeSafe SDK 0.7.x remain supported. No migration is required from 0.5.5; package exports and the version-1 capture format are unchanged.
+- **Flow error diagnostics.** Runtime loop-limit errors now include the loop's `stepId` and identify it in the message. Zero-argument `FlowLoopLimitError` construction remains supported. Code that compares exact error messages must account for the loop identifier; captured error fields continue to contain only error names.
+
+### Changes
+
+#### Fixed
+
+- **Flow diagnostics.** Loop limit errors identify the failing loop through `stepId` and the message while preserving zero-argument construction. Unsupported terminal calls in map, loop, and `if` bodies report their definition context; parallel-lane terminals remain supported. Captured error fields keep only error names. ([#132](https://github.com/diegoag64/jev-devtools/pull/132))
+
 - **Playground ports.** Sample runs and DevTools requests now use Vite's configured port for same-origin checks, so a playground started with `--port 4184` accepts requests from its own page. ([#129](https://github.com/diegoag64/jev-devtools/pull/129))
+
+#### Maintenance
+
+- **Deduplicated CI builds and checks.** Run shared verification once per Node version while retaining all four Node/React consumer combinations. Build the docs site only in its Node 24 job and keep the complete docs browser suite; docs example type checks and execution tests still run on both Node versions. ([#131](https://github.com/diegoag64/jev-devtools/pull/131))
+
+- **Focused cookbook CI coverage.** Run one cookbook capture-to-result probe on React 19 instead of the full browser suite on both React versions. Keep direct Flow contract tests and shared viewer checks in CI; the full cookbook suite remains in local `verify:all`. ([#131](https://github.com/diegoag64/jev-devtools/pull/131))
 
 ## 0.5.5 — Prepared release
 

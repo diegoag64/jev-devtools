@@ -45,6 +45,8 @@ type Ast =
   | { op: "eq" | "lt" | "gt" | "gte" | "all" | "any" | "not"; args: Ast[] };
 const owners = new WeakMap<object, object>();
 const builderIds = new WeakMap<object, Set<string>>();
+// Only the value-returning builder is restricted; its parallel lanes may terminate.
+const builderValueContexts = new WeakMap<object, string>();
 type AstBudget = { depth: number; nodes: number };
 const astBudgets = new WeakMap<Ast, AstBudget>();
 function freezeAst(ast: Ast, depth = 0): AstBudget {
@@ -276,8 +278,12 @@ function definitionSize(definition: FlowDefinition): number {
 }
 export class FlowLoopLimitError extends Error {
   readonly name = "FlowLoopLimitError";
-  constructor() {
-    super("Loop condition is still true at maxIterations");
+  constructor(readonly stepId?: string) {
+    super(
+      stepId === undefined
+        ? "Loop condition is still true at maxIterations"
+        : `Loop "${stepId}" condition is still true at maxIterations`,
+    );
   }
 }
 const plain = (v: unknown): v is Record<string, unknown> =>
@@ -638,7 +644,7 @@ export function defineJevFlow<T>(
     previous: string[] = [],
     depth = 0,
     requireOutcome = false,
-    requireValue = false,
+    valueContext?: string,
   ): Block {
     if (depth > 16) throw new Error("Flow nesting exceeds 16");
     const token = {};
@@ -663,6 +669,11 @@ export function defineJevFlow<T>(
       if (!building) throw new Error("Flow definition is closed");
       if (activeBlock !== token)
         throw new Error("Use the current branch or lane builder for steps");
+      const context = builderValueContexts.get(builder);
+      if (context && (kind === "output" || kind === "branch"))
+        throw new Error(
+          `${context} does not support terminal ${kind}(); return a value expression instead`,
+        );
       if (terminal)
         throw new Error("No steps allowed after a terminal output or branch");
       if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/.test(id) || ids.has(id))
@@ -831,7 +842,9 @@ export function defineJevFlow<T>(
             index: number;
             context: unknown;
           }>(`Item · ${display?.title ?? id}`.slice(0, 100), (item) => {
+            builderValueContexts.set(item, `map "${id}" body`);
             const result = buildItem(item as never);
+            builderValueContexts.delete(item);
             let outputId = "item-result";
             for (let suffix = 1; builderIds.get(item)!.has(outputId); suffix++)
               outputId = `item-result-${suffix}`;
@@ -889,7 +902,9 @@ export function defineJevFlow<T>(
           program = defineJevFlow<unknown>(
             `Iteration · ${display?.title ?? id}`.slice(0, 100),
             (iteration) => {
+              builderValueContexts.set(iteration, `loop "${id}" body`);
               const result = buildIteration(iteration as never);
+              builderValueContexts.delete(iteration);
               let outputId = "iteration-result";
               for (
                 let suffix = 1;
@@ -967,7 +982,7 @@ export function defineJevFlow<T>(
           [id],
           depth + 1,
           false,
-          true,
+          `if "${id}" then path`,
         );
         step.else = block(
           paths.else,
@@ -976,7 +991,7 @@ export function defineJevFlow<T>(
           [id],
           depth + 1,
           false,
-          true,
+          `if "${id}" else path`,
         );
         // A separate merge keeps the diagram acyclic and gives downstream refs a
         // scope-safe identity, including when an arm returns an existing value.
@@ -1083,6 +1098,7 @@ export function defineJevFlow<T>(
       },
     };
     builderIds.set(builder, ids);
+    if (valueContext) builderValueContexts.set(builder, valueContext);
     const parentBlock = activeBlock;
     activeBlock = token;
     let returned: FlowExpression<unknown>;
@@ -1094,10 +1110,6 @@ export function defineJevFlow<T>(
     if (!(returned instanceof FlowExpression))
       throw new Error(
         "Flow callbacks must return an expression, output, or branch",
-      );
-    if (requireValue && terminal)
-      throw new Error(
-        "if paths must return a value, not a terminal output or branch",
       );
     if (requireOutcome && !terminal)
       throw new Error("Branch paths must end with output or branch");
@@ -1436,7 +1448,7 @@ export function defineJevFlow<T>(
                 }
                 if (index === config.maxIterations) {
                   state.loop = { ...state.loop, stopReason: "limit" };
-                  throw new FlowLoopLimitError();
+                  throw new FlowLoopLimitError(step.id);
                 }
                 reserve(config.program.definition.nodes.length);
                 state.collection = {

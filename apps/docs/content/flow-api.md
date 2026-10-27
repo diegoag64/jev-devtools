@@ -85,7 +85,7 @@ The item builder receives `{ item, index, context }`. Pass shared context throug
 
 [`loop()`](@/api/reference/#flow-loop) tests a state condition before each iteration. Its builder receives `{ state, index, context }` and must return the next state. Whole-state references and scalars preserve `State`; initial templates resolve nested references to `Resolved<State>`.
 
-When the condition becomes false, the loop returns the current state. If the condition remains true at `maxIterations`, it rejects with [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror). It does not return a successful partial result.
+When the condition becomes false, the loop returns the current state. If the condition remains true at `maxIterations`, it rejects with [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror). The error identifies the failing loop in `stepId` and its message. It does not return a successful partial result.
 
 Call `tryOperations()` from Node to run both definitions below. Its two `await` calls execute application-owned tasks without inference and read the resolved results:
 
@@ -119,7 +119,7 @@ The limits apply at different levels:
 
 **0.5.2:** each expression is limited to depth 80 and 4,096 expanded nodes, counting reused children at every occurrence; an operation accepts at most 256 operands. These limits apply during construction, including composition. Legacy condition text is capped at 4,096 UTF-16 code units with an explicit truncation suffix; execution retains the full accepted expression. See [expression limits](@/api/expressions/#expression-limits).
 
-Structural errors fail during definition. Missing input values and invalid comparisons fail when execution reaches them. [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror) is exported for bounded-loop handling. For exact collection/concurrency/timeout limits, execution errors, and cancellation behavior, consult the [detailed guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md) and installed declarations.
+Structural errors fail during definition. Direct `output()` and terminal `branch()` calls in map bodies, loop bodies, and `if()` paths report the containing step, body or path, and operation. Return a value expression instead. Parallel lanes still accept terminal outputs and branches as lane values, including lanes inside these bodies. The shared builder type still permits some unsupported calls; definition construction checks them. Missing input values and invalid comparisons fail when execution reaches them. [`FlowLoopLimitError`](@/api/reference/#flowlooplimiterror) is exported for bounded-loop handling. For exact collection/concurrency/timeout limits, execution errors, and cancellation behavior, consult the [detailed guide](https://github.com/diegoag64/jev-devtools/blob/main/docs/flows.md) and installed declarations.
 
 <a id="replay-captured-answers-unreleased"></a>
 

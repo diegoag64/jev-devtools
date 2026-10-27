@@ -271,7 +271,7 @@ export const apiHelp: Record<string, Help> = {
       "concurrency?":
         "Maximum number of item programs allowed to run concurrently.",
       build:
-        "Receives a builder with input { item, index, context }. Return an expression for the item result.",
+        "Receives a builder with input { item, index, context }. Return an expression for the item result. Direct output() and branch() calls are rejected with map context.",
     },
   ),
   if: entry(
@@ -280,8 +280,8 @@ export const apiHelp: Record<string, Help> = {
     "Choose one value-returning path, then continue with its result. Unlike branch(), this does not finish the flow.",
     {
       when: "A flow condition evaluated during the run.",
-      then: "Build the path selected when the condition is true. Return an expression for its value.",
-      else: "Build the path selected when the condition is false. Return an expression for its value.",
+      then: "Build the path selected when the condition is true. Return an expression for its value; direct output() and branch() calls are rejected with if path context.",
+      else: "Build the path selected when the condition is false. Return an expression for its value; direct output() and branch() calls are rejected with if path context.",
     },
   ),
   loop: entry(
@@ -295,9 +295,9 @@ export const apiHelp: Record<string, Help> = {
       while:
         "Build a Boolean flow condition from the current state. Tested before each iteration.",
       maxIterations:
-        "Required bound. Exceeding it while the condition is still true rejects with FlowLoopLimitError.",
+        "Required bound. Exceeding it while the condition is still true rejects with FlowLoopLimitError identifying the loop in stepId and its message.",
       build:
-        "Receives a builder with input { state, index, context }. Return an expression for the next state.",
+        "Receives a builder with input { state, index, context }. Return an expression for the next state. Direct output() and branch() calls are rejected with loop context.",
     },
   ),
   parallel: entry(
