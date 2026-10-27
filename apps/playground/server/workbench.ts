@@ -3,6 +3,7 @@ import { cookbookCatalog } from "../src/workbench/catalog.js";
 import type { CookbookDetail } from "../src/workbench/types.js";
 import { workbenchRegistry } from "./workbench-registry.js";
 import { mapCookbookSource } from "./workbench-source.js";
+import { overviews } from "./workbench-overviews.js";
 import { lessons } from "./workbench-lessons.js";
 import { hierarchyLimitFlow } from "../../../cookbooks/hierarchical-classification/flow.js";
 
@@ -52,6 +53,7 @@ export async function readCookbook(
       explanation: chapters[step.id][1],
       comment: chapters[step.id][2],
     })),
+    overview: overviews[catalog.slug],
     originalSource: catalog.source,
     sourceRevision:
       provenance.upstreamCommit ??

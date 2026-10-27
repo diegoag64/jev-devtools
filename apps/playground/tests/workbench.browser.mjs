@@ -418,6 +418,40 @@ try {
         `http://127.0.0.1:4182/__jev/cookbooks/${slug}?session=00000000-0000-4000-8000-000000000000`,
       )
     ).json();
+    const original = page.getByRole("link", {
+      name: "Original Cookbook",
+      exact: true,
+    });
+    assert.equal(await original.getAttribute("href"), recipe.originalSource);
+    assert.equal(
+      await page.locator(`a[href="${recipe.originalSource}"]`).count(),
+      1,
+      "One original-cookbook link serves the whole recipe",
+    );
+    const overview = page.getByRole("button", {
+      name: "Cookbook overview",
+      exact: true,
+    });
+    await overview.press("Enter");
+    const popup = page.getByRole("dialog", { name: title, exact: true });
+    await popup.waitFor();
+    assert.ok(
+      (await popup.innerText()).includes(
+        recipe.overview.purpose.replaceAll("`", ""),
+      ),
+    );
+    assert.ok(
+      (await popup.innerText()).includes(
+        recipe.overview.flow.replaceAll("`", ""),
+      ),
+    );
+    await page.keyboard.press("Escape");
+    await popup.waitFor({ state: "hidden" });
+    assert.equal(
+      await overview.evaluate((node) => node === document.activeElement),
+      true,
+      "Escape returns focus to the overview trigger",
+    );
     const full = await page.locator(".wb-diagram-panel .flow-step").count();
     assert.ok(full > 0, title);
     const count = await steps.count();
@@ -451,7 +485,11 @@ try {
         index + 1,
         `${title}: only revealed steps have comments`,
       );
-      assert.equal(await page.locator(".wb-narrative a").count(), 1);
+      assert.equal(await page.locator(".wb-narrative a").count(), 0);
+      assert.equal(
+        await page.locator(".wb-narrative-content > p").innerText(),
+        recipe.steps[index].explanation.replaceAll("`", ""),
+      );
       assert.ok(
         (await page.locator(".flow-step[data-highlighted]").count()) > 0,
       );
@@ -690,6 +728,47 @@ try {
     path: new URL("mobile.png", output).pathname,
     fullPage: true,
   });
+  await page
+    .getByRole("button", { name: "Cookbook overview", exact: true })
+    .click();
+  const mobileOverview = page.getByRole("dialog");
+  await mobileOverview.waitFor();
+  const overviewBounds = await mobileOverview.boundingBox();
+  const viewport = page.viewportSize();
+  assert.ok(
+    overviewBounds.x >= 0 &&
+      overviewBounds.x + overviewBounds.width <= viewport.width,
+  );
+  assert.ok(
+    overviewBounds.y >= 0 &&
+      overviewBounds.y + overviewBounds.height <= viewport.height,
+  );
+  await page.screenshot({
+    path: new URL("overview-mobile.png", output).pathname,
+  });
+  await page
+    .getByRole("button", { name: "Close cookbook overview", exact: true })
+    .click();
+  await mobileOverview.waitFor({ state: "hidden" });
+  await page
+    .getByRole("button", { name: "Cookbook overview", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Complete flow", exact: true })
+    .click();
+  await mobileOverview.waitFor({ state: "hidden" });
+  await page.getByRole("button", { name: "Toggle cookbook library" }).click();
+  await page
+    .getByRole("button", { name: "Close cookbook library", exact: true })
+    .click();
+  assert.equal(await page.getByLabel("Find a cookbook").isVisible(), false);
+  assert.equal(
+    await page
+      .getByRole("button", { name: "Toggle cookbook library" })
+      .evaluate((node) => node === document.activeElement),
+    true,
+    "Closing the mobile library restores focus to its toolbar control",
+  );
   await page.getByRole("button", { name: "Toggle cookbook library" }).click();
   await page.getByLabel("Find a cookbook").fill("not-a-cookbook");
   await page.getByText("No matching cookbooks.", { exact: true }).waitFor();

@@ -10,6 +10,7 @@ import { JevFlowViewer, useJevInspection } from "jev-devtools/viewer";
 import { cookbookCatalog } from "./catalog.js";
 import type { CookbookDetail } from "./types.js";
 import { colors, SourceCode } from "./SourceCode.js";
+import { CookbookOverview, Explanation } from "./CookbookOverview.js";
 import { SplitPanels } from "./SplitPanels.js";
 import { postPlayground, RunError } from "../playground-request.js";
 import "./workbench.css";
@@ -28,6 +29,7 @@ function App() {
   const [detail, setDetail] = useState<CookbookDetail>();
   const [loadError, setLoadError] = useState("");
   const [reload, setReload] = useState(0);
+  const libraryToggle = useRef<HTMLButtonElement>(null);
   const [libraryOpen, setLibraryOpen] = useState(
     () => !matchMedia("(max-width: 1000px)").matches,
   );
@@ -78,7 +80,16 @@ function App() {
         </a>
         <div className="wb-library-title">
           <h2>Cookbooks</h2>
-          <span>{cookbookCatalog.length}</span>
+          <button
+            aria-label="Close cookbook library"
+            title="Close cookbook library"
+            onClick={() => {
+              setLibraryOpen(false);
+              libraryToggle.current?.focus();
+            }}
+          >
+            ×
+          </button>
         </div>
         <input
           aria-label="Find a cookbook"
@@ -143,13 +154,28 @@ function App() {
       <main id="workbench" className="wb-main">
         <h1 className="wb-sr-only">{recipe?.title ?? "Cookbook not found"}</h1>
         <button
+          ref={libraryToggle}
           className="wb-library-toggle"
           aria-label="Toggle cookbook library"
+          title={
+            libraryOpen ? "Hide cookbook library" : "Show cookbook library"
+          }
           aria-expanded={libraryOpen}
           aria-controls="cookbook-library"
           onClick={() => setLibraryOpen((value) => !value)}
         >
-          Cookbooks
+          <svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            aria-hidden="true"
+          >
+            <rect x="3" y="4" width="18" height="16" rx="2" />
+            <path d="M9 4v16" />
+          </svg>
         </button>
         {loadError ? (
           <div role="alert" className="wb-empty">
@@ -333,7 +359,19 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
             Step-by-step guide
           </button>
         </div>
-        <span className="wb-transport">Synthetic samples · no API key</span>
+        <div className="wb-toolbar-links">
+          <span className="wb-transport">Synthetic samples · no API key</span>
+          <CookbookOverview
+            detail={detail}
+            title={
+              cookbookCatalog.find((recipe) => recipe.slug === detail.slug)!
+                .title
+            }
+          />
+          <a href={detail.originalSource} target="_blank" rel="noreferrer">
+            Original Cookbook <span aria-hidden="true">↗</span>
+          </a>
+        </div>
       </div>
       <nav ref={timeline} className="wb-timeline" aria-label="Cookbook steps">
         {detail.steps.map((item, index) => (
@@ -359,19 +397,15 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
             { "--step-color": colors[active % colors.length] } as CSSProperties
           }
         >
-          <div key={step.id} className="wb-narrative-content">
+          <div key={step.id} className="wb-narrative-content wb-prose">
             <div className="wb-narrative-title">
               <span className="wb-kicker">
                 STEP {active + 1} OF {detail.steps.length} · {step.api}
               </span>
               <h2>{step.title}</h2>
             </div>
-            <p>{step.explanation}</p>
-            <p className="wb-muted">
-              Original recipe:{" "}
-              <a href={detail.originalSource} target="_blank" rel="noreferrer">
-                {step.originalChapter} ↗
-              </a>
+            <p>
+              <Explanation text={step.explanation} />
             </p>
           </div>
           <div className="wb-guide-controls">
@@ -562,14 +596,6 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
               }
             </p>
             <p>{detail.adaptation}</p>
-            <p>
-              This guide follows the TypeSafe cookbook and explains the
-              operations added by this Flow adaptation. Source:{" "}
-              <a href={detail.originalSource} target="_blank" rel="noreferrer">
-                original recipe ↗
-              </a>
-              .
-            </p>
             <p className="wb-muted">
               Upstream revision: {detail.sourceRevision}. Local source:{" "}
               {detail.sourceFile}.

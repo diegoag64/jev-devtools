@@ -13,6 +13,8 @@ npm run dev
 
 Open http://127.0.0.1:4182/ for the **Flow Workbench**. Choose one of 19 cookbooks and inspect its actual `flow.ts` beside the package's diagram. **Complete flow** shows the authored graph before execution; **Step-by-step guide** narrates the TypeSafe recipe and reveals one Flow operation at a time. Timeline colors connect source ranges and diagram nodes. Select code or a line number to highlight the corresponding nodes, or select a node to find its source. Maps and loops also expose their authored item programs.
 
+**Cookbook overview** introduces each recipe and explains how its Flow methods fit together. The walkthrough explains what each step does and why it uses that method, without requiring an external tutorial. **Original Cookbook** in the top-right corner links to the selected TypeSafe recipe. The panel icon at the left of the toolbar shows or hides the cookbook library.
+
 Short step comments explain the purpose of each operation in the source view. Use the comment icon beside **Copy source** to show or hide them; the preference is remembered across cookbooks. Copy includes the notes when they are shown and returns the original source when they are hidden. Line numbers always refer to the original `flow.ts`.
 
 The workspace fills the viewport. Drag the divider to resize the code and diagram, or focus it and use the arrow keys. Press Enter or double-click to restore the default split. Wide and narrow layouts remember their proportions separately. The cookbook library can be hidden, and the compact guide keeps its controls above the panels. Input, results, and adaptation notes open from the bottom bar without moving the diagram.

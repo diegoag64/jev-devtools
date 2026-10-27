@@ -11,6 +11,7 @@ test("every cookbook operation has an exact source range and one tutorial stage"
   for (const recipe of cookbookCatalog) {
     const detail = await readCookbook(recipe.slug);
     assert.ok(detail);
+    assert.ok(detail.overview.purpose && detail.overview.flow);
     const ids = detail.steps.flatMap((step) => step.nodeIds);
     assert.deepEqual(
       [...ids].sort(),
@@ -34,6 +35,10 @@ test("every cookbook operation has an exact source range and one tutorial stage"
     }
     for (const step of detail.steps) {
       assert.ok(step.explanation.length > 80 && step.originalChapter);
+      assert.ok(
+        step.explanation.includes("`" + step.api.replace("flow.", "") + "`"),
+        `${recipe.slug}/${step.id}: explain the method this step actually adds`,
+      );
       assert.ok(
         step.comment.trim(),
         `${recipe.slug}/${step.id}: missing source comment`,

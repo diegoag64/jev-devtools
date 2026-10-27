@@ -21,6 +21,7 @@ export type CookbookDetail = {
   scenario: string;
   caseField: string;
   samples: Record<string, { label: string; message: string }>;
+  overview: { purpose: string; flow: string };
   originalSource: string;
   sourceRevision: string;
   adaptation: string;
