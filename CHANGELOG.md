@@ -31,7 +31,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Maintenance
 
-- **Releases without repeated approvals.** A versioned release request covers its release PR merge, npm and GitHub publication, and matching docs deployment while preserving verification and request limits. Add a read-only environment preflight and document the one-time GitHub setup to remove required reviewers while retaining the main-only environment and OIDC trust.
+- **Releases without repeated approvals.** A versioned release request covers its release PR merge, npm and GitHub publication, and matching docs deployment while preserving verification and request limits. Add a read-only environment preflight and document the one-time GitHub setup to remove required reviewers while retaining the main-only environment and OIDC trust. ([#135](https://github.com/diegoag64/jev-devtools/pull/135))
 
 ## 0.5.6 — Prepared release
 
