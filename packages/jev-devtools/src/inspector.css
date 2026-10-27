@@ -2125,7 +2125,7 @@
     top 420ms ease;
   animation: jev-tutorial-enter 360ms ease both;
 }
-/* Camera fitting is immediate; source/timeline focus retains its animation. */
+/* Automatic fitting is immediate; user fit, focus, and zoom actions animate. */
 .jev-devtools.jev-embedded
   .flow-overview-canvas:where([data-camera-motion="true"]) {
   transition: transform 420ms ease;

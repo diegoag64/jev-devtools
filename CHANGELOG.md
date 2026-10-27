@@ -43,6 +43,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Fixed
 
+- **Smooth Fit flow controls.** Animate user-triggered fitting in the embedded flow viewer, including its keyboard shortcut. Initial and automatic fits remain immediate, and reduced-motion preferences suppress the transition. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 - **Full cookbook request diagrams.** Show the drawer's request internals and collection item previews in both workbench views using isolated synthetic captures. Run samples from the walkthrough without losing the current step, and inspect streaming requests, probabilities, and animated diagrams inline. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 - **Stable final-step controls.** Keep a disabled Next button on the last walkthrough step instead of replacing it with a wider complete-flow button. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 - **Walkthrough focus follows its step.** Keep the narrated step and its highlights fixed while hovering, selecting text, or clicking line numbers in earlier code. Guide navigation stays with Previous, Next, and the timeline; complete-flow code inspection remains interactive. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))

@@ -107,6 +107,92 @@ async function assertOpeningView(page, name) {
     "The initial camera does not animate or jump",
   );
 }
+async function assertUserFit(page, { keyboard = false, reduced = false } = {}) {
+  const canvas = page.locator(".wb-diagram-panel .flow-overview-canvas");
+  const initial = await canvas.evaluate(
+    (node) => getComputedStyle(node).transform,
+  );
+  await page.getByRole("button", { name: "Zoom flow in", exact: true }).click();
+  // Camera painting is scheduled for the next frame; wait for the zoom to
+  // actually begin before awaiting its transition and testing the return fit.
+  await page.waitForFunction((initial) => {
+    const node = document
+      .querySelector(".wb-diagram-panel .jev-flow-viewer")
+      .shadowRoot.querySelector(".flow-overview-canvas");
+    return getComputedStyle(node).transform !== initial;
+  }, initial);
+  await canvas.evaluate((node) =>
+    Promise.all(
+      node
+        .getAnimations()
+        .map((animation) => animation.finished.catch(() => {})),
+    ),
+  );
+  const before = await canvas.evaluate(
+    (node) => getComputedStyle(node).transform,
+  );
+  await canvas.evaluate((node, keyboard) => {
+    window.fitFrames = [];
+    const viewport = node.closest(".flow-overview-viewport");
+    const target = keyboard
+      ? viewport
+      : [...viewport.querySelectorAll("button")].find(
+          (button) => button.textContent === "Fit flow",
+        );
+    target.addEventListener(
+      keyboard ? "keydown" : "click",
+      () => {
+        const record = () => {
+          window.fitFrames.push(getComputedStyle(node).transform);
+          if (window.fitFrames.length < 45) requestAnimationFrame(record);
+        };
+        requestAnimationFrame(record);
+      },
+      { once: true },
+    );
+  }, keyboard);
+  if (keyboard) {
+    await page.locator(".wb-diagram-panel .flow-overview-viewport").focus();
+    await page.keyboard.press("0");
+  } else {
+    await page.getByRole("button", { name: "Fit flow", exact: true }).click();
+  }
+  await page.waitForFunction(() => window.fitFrames.length === 45);
+  const frames = await page.evaluate(() => window.fitFrames);
+  const intermediate = [...new Set(frames)].filter(
+    (value) => value !== before && value !== frames.at(-1),
+  );
+  await writeFile(
+    new URL(
+      `fit-${keyboard ? "keyboard" : "button"}-${reduced ? "reduced" : "motion"}.json`,
+      output,
+    ),
+    JSON.stringify({ before, frames }, null, 2),
+  );
+  await page.screenshot({
+    path: new URL(
+      `fit-${keyboard ? "keyboard" : "button"}-${reduced ? "reduced" : "motion"}.png`,
+      output,
+    ).pathname,
+  });
+  assert.notEqual(
+    frames.at(-1),
+    before,
+    "Fit returns the zoomed diagram to its overview",
+  );
+  if (reduced)
+    assert.equal(
+      intermediate.length,
+      0,
+      "Reduced motion fits without intermediate camera positions",
+    );
+  else
+    assert.ok(
+      intermediate.length > 2,
+      "User-triggered fit must travel through intermediate camera positions instead of jumping",
+    );
+}
+
 async function assertGuideOwnsSelection(page) {
   await page
     .locator(".wb-diagram-panel .flow-overview-canvas")
@@ -343,6 +429,8 @@ try {
     .waitFor();
   await page.locator(".wb-diagram-panel .flow-step").first().waitFor();
   await assertOpeningView(page, "opening");
+  await assertUserFit(page);
+  await assertUserFit(page, { keyboard: true });
   assert.equal(
     await page
       .locator(
@@ -633,6 +721,7 @@ try {
   await page.getByRole("button", { name: "Next step →", exact: true }).click();
   await page.getByRole("button", { name: "Previous", exact: false }).click();
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await assertUserFit(page, { reduced: true });
   assert.equal(
     await page
       .locator(".wb-diagram-panel .flow-overview-canvas")

@@ -62,19 +62,23 @@ export function useDiagramViewport(
     },
     [renderCamera],
   );
-  const fit = useCallback(() => {
-    fitted.current = true;
-    if (size.current.width <= 0 || size.current.height <= 0) return;
-    const fittedCamera = fitCamera(size.current, bounds.current);
-    camera.current = {
-      ...fittedCamera,
-      x: fittedCamera.x - bounds.current.x * fittedCamera.scale,
-      y: fittedCamera.y - bounds.current.y * fittedCamera.scale,
-    };
-    // Initial and automatic fits must be visible before paint, without the
-    // transition used for deliberate focus/zoom actions in embedded viewers.
-    paint(true);
-  }, [paint]);
+  const fit = useCallback(
+    (animate = false) => {
+      fitted.current = true;
+      if (size.current.width <= 0 || size.current.height <= 0) return;
+      const fittedCamera = fitCamera(size.current, bounds.current);
+      camera.current = {
+        ...fittedCamera,
+        x: fittedCamera.x - bounds.current.x * fittedCamera.scale,
+        y: fittedCamera.y - bounds.current.y * fittedCamera.scale,
+      };
+      // Initial and automatic fits settle before paint. Explicit fit controls
+      // use the same transition as deliberate focus and zoom actions.
+      paint(!animate);
+    },
+    [paint],
+  );
+  const fitFromControl = useCallback(() => fit(true), [fit]);
   const preserveCamera = useCallback(() => {
     fitted.current = false;
   }, []);
@@ -199,7 +203,7 @@ export function useDiagramViewport(
       const step = event.shiftKey ? 100 : 40;
       if (event.key === "+" || event.key === "=") zoomBy(1.2);
       else if (event.key === "-") zoomBy(1 / 1.2);
-      else if (event.key === "0" || event.key === "Home") fit();
+      else if (event.key === "0" || event.key === "Home") fit(true);
       else if (
         ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
       ) {
@@ -240,5 +244,13 @@ export function useDiagramViewport(
       frame.current = null;
     };
   }, [fit, zoomBy, paint, scene]);
-  return { viewport, canvas, zoom, zoomBy, fit, preserveCamera, focusArea };
+  return {
+    viewport,
+    canvas,
+    zoom,
+    zoomBy,
+    fit: fitFromControl,
+    preserveCamera,
+    focusArea,
+  };
 }
