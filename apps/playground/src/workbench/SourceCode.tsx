@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   type CSSProperties,
+  type ReactNode,
 } from "react";
 import type { CookbookDetail, SourceRange } from "./types.js";
 
@@ -57,6 +58,7 @@ export function SourceCode({
   selected,
   onSelect,
   onCopyError,
+  panelActions,
 }: {
   detail: CookbookDetail;
   active: number;
@@ -64,6 +66,7 @@ export function SourceCode({
   selected: string[];
   onSelect: (ids: string[]) => void;
   onCopyError: () => void;
+  panelActions: ReactNode;
 }) {
   const ref = useRef<HTMLPreElement>(null);
   const [copied, setCopied] = useState(false);
@@ -223,6 +226,7 @@ export function SourceCode({
           >
             {copied ? "Copied" : "Copy source"}
           </button>
+          {panelActions}
         </div>
       </div>
       <pre

@@ -427,6 +427,14 @@ button.wb-primary {
   max-width: 330px;
 }
 .wb-panels {
+  /* An inline nonmodal dialog becomes a modal without remounting either pane. */
+  position: static;
+  width: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  color: inherit;
   display: grid;
   flex: 1;
   min-height: 0;
@@ -434,6 +442,20 @@ button.wb-primary {
   border-radius: 5px;
   overflow: hidden;
   background: #151920;
+}
+.wb-panels[data-expanded] {
+  position: fixed;
+  inset: 16px;
+  height: auto;
+  box-shadow: 0 24px 80px #0009;
+}
+.wb-panels::backdrop {
+  background: #07090dcc;
+}
+.wb-panels[data-pane="code"] > .wb-diagram-panel,
+.wb-panels[data-pane="diagram"] > .wb-code-panel,
+.wb-panels[data-pane] > .wb-divider {
+  display: none;
 }
 .wb-code-panel,
 .wb-diagram-panel {
@@ -461,7 +483,7 @@ button.wb-primary {
   inset: -4px;
   z-index: 1;
 }
-.wb-divider span {
+.wb-divider-grip {
   width: 2px;
   height: 32px;
   border-radius: 1px;
@@ -497,7 +519,7 @@ button.wb-primary {
   color: #8992a6;
   font-weight: 400;
 }
-.wb-panel-heading > span {
+.wb-diagram-status {
   font-size: 10px;
   color: #929eb2;
 }
@@ -514,14 +536,16 @@ button.wb-primary {
   gap: 2px;
   flex-shrink: 0;
 }
-.wb-source-actions .wb-comments-toggle {
+.wb-source-actions .wb-comments-toggle,
+.wb-source-actions .wb-pane-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: #738097;
 }
 .wb-source-actions .wb-comments-toggle[aria-pressed="true"],
-.wb-source-actions .wb-comments-toggle:hover {
+.wb-source-actions .wb-comments-toggle:hover,
+.wb-source-actions .wb-pane-button:hover {
   color: #c7d5ff;
 }
 .wb-panel-foot {
@@ -814,6 +838,12 @@ button.wb-primary {
   }
 }
 @media (max-width: 760px) {
+  .wb-panels[data-expanded] {
+    inset: 6px;
+  }
+  .wb-diagram-status {
+    display: none;
+  }
   .wb-main {
     padding-inline: 6px;
   }
@@ -883,7 +913,7 @@ button.wb-primary {
   .wb-divider {
     cursor: row-resize;
   }
-  .wb-divider span {
+  .wb-divider-grip {
     width: 32px;
     height: 2px;
   }

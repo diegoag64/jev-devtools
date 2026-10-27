@@ -31,6 +31,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
+- **Expanded and single-pane workbench views.** Open code or diagrams in a large popup using compact header controls. Show either pane alone, snap the divider to an edge, and restore the previous split without resetting source or diagram state. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+
 - **Self-contained cookbook guides.** Each cookbook has an overview popup and step explanations that teach the recipe and its Flow API method choices. A single Original Cookbook link replaces the repeated chapter links; library controls now use a separate panel icon. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 
 - **Optional cookbook code comments.** Read concise step explanations beside the Flow API source in all 19 cookbooks. A small comment toggle beside Copy source remembers your preference; copying includes the notes only when shown, while original line numbers and diagram links stay intact. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))

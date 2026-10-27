@@ -518,13 +518,14 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
         </p>
       </div>
       <SplitPanels
-        code={
+        code={(panelActions) => (
           <section
             id="workbench-code"
             className="wb-code-panel"
             aria-label="Code panel"
           >
             <SourceCode
+              panelActions={panelActions}
               detail={detail}
               active={active}
               walkthrough={walkthrough}
@@ -542,18 +543,21 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
                 : "Select code or a line number to highlight its diagram nodes."}
             </p>
           </section>
-        }
-        diagram={
+        )}
+        diagram={(panelActions) => (
           <section className="wb-diagram-panel" aria-label="Flow diagram">
             <div className="wb-panel-heading">
               <h2>{walkthrough ? "Building the flow" : "Flow diagram"}</h2>
-              <span>
-                {walkthrough &&
-                  `${active + 1} / ${detail.steps.length} steps · `}
-                {showingPreview
-                  ? "Sample preview"
-                  : `Sample · ${run?.status ?? (busy ? "running" : "unavailable")}`}
-              </span>
+              <div className="wb-source-actions">
+                <span className="wb-diagram-status">
+                  {walkthrough &&
+                    `${active + 1} / ${detail.steps.length} steps · `}
+                  {showingPreview
+                    ? "Sample preview"
+                    : `Sample · ${run?.status ?? (busy ? "running" : "unavailable")}`}
+                </span>
+                {panelActions}
+              </div>
             </div>
             <div className="wb-viewer">
               {showingPreview && !currentPreview && !previewError ? (
@@ -580,7 +584,7 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
               · Diagram generated from the Flow API
             </p>
           </section>
-        }
+        )}
       />
       <div
         className="wb-bottom"
