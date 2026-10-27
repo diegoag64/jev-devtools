@@ -29,6 +29,8 @@ function App() {
           "flow-map",
           "flow-loop",
           "flow-warning",
+          "flow-redacted-branch",
+          "flow-redacted-loop",
           "flow-error",
           "flow-cancel",
           "scale-10",

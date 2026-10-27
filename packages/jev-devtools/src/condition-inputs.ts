@@ -117,7 +117,8 @@ export function conditionRequirement(
       !Array.isArray(right) &&
       left.op === "reference" &&
       right.op === "literal" &&
-      ["gte", "lt", "gt", "eq"].includes(String(rule.op))
+      typeof rule.op === "string" &&
+      ["gte", "lt", "gt", "eq"].includes(rule.op)
     ) {
       return `${rule.op === "gte" ? "At least" : rule.op === "lt" ? "Less than" : rule.op === "gt" ? "Greater than" : "Equal to"} ${formatConditionLiteral(right.value, left.probability === true)}`;
     }

@@ -33,6 +33,8 @@ Flow expression types now reject non-scalar equality and array method selection 
 
 #### Fixed
 
+- **Redacted condition operators.** Branch and loop views show an unavailable rule when a custom redactor replaces its operator with non-string JSON, instead of crashing or displaying a different comparison. Execution and captured values stay unchanged. ([#126](https://github.com/diegoag64/jev-devtools/pull/126))
+
 - **Malformed stream recovery.** Validate trace and nested flow records before publishing updates, and reconnect without partially changing cached history. Preserve version-1 optional metadata, compatible unknown fields, redacted content, and parallel flows with more than 256 lanes sharing existing nodes. ([#122](https://github.com/diegoag64/jev-devtools/pull/122))
 
 - **Render transformed captures safely.** Custom redactors can replace request roots or numeric answer fields without crashing the drawer. The drawer keeps usable questions, answer fields, and context visible beside unavailable-field placeholders; display masking preserves SDK map names in partial captures. `Trace.capture` retains bounded redacted JSON with warnings; application execution and complete-response fixture requirements stay unchanged. ([#123](https://github.com/diegoag64/jev-devtools/pull/123))

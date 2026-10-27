@@ -33,7 +33,8 @@ export function formatFlowCondition(value: Json, depth = 0): string {
     return `(${args.map(format).join(value.op === "all" ? " AND " : " OR ")})`;
   }
   if (
-    !["eq", "lt", "gt", "gte"].includes(String(value.op)) ||
+    typeof value.op !== "string" ||
+    !["eq", "lt", "gt", "gte"].includes(value.op) ||
     args.length !== 2
   )
     return "[rule unavailable]";
