@@ -141,20 +141,16 @@ function App() {
         </footer>
       </aside>
       <main id="workbench" className="wb-main">
-        <header className="wb-header">
-          <button
-            aria-label="Toggle cookbook library"
-            aria-expanded={libraryOpen}
-            aria-controls="cookbook-library"
-            onClick={() => setLibraryOpen((value) => !value)}
-          >
-            ☰ <span>Cookbooks</span>
-          </button>
-          <h1 title={recipe?.title}>{recipe?.title ?? "Cookbook not found"}</h1>
-          <a href="https://docs.jevtools.dev/" target="_blank" rel="noreferrer">
-            Flow API docs ↗
-          </a>
-        </header>
+        <h1 className="wb-sr-only">{recipe?.title ?? "Cookbook not found"}</h1>
+        <button
+          className="wb-library-toggle"
+          aria-label="Toggle cookbook library"
+          aria-expanded={libraryOpen}
+          aria-controls="cookbook-library"
+          onClick={() => setLibraryOpen((value) => !value)}
+        >
+          Cookbooks
+        </button>
         {loadError ? (
           <div role="alert" className="wb-empty">
             <p>{loadError}</p>
@@ -178,6 +174,22 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
   const [walkthrough, setWalkthrough] = useState(false);
   const [active, setActive] = useState(0);
   const [selection, setSelection] = useState<string[]>([]);
+  const timeline = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const nav = timeline.current;
+    const current = nav?.querySelector<HTMLElement>('[aria-current="step"]');
+    if (!nav || !current) return;
+    const viewport = nav.getBoundingClientRect();
+    const button = current.getBoundingClientRect();
+    // Reveal the active ribbon segment without moving the page or code panels.
+    const delta =
+      button.left < viewport.left
+        ? button.left - viewport.left
+        : button.right > viewport.right
+          ? button.right - viewport.right
+          : 0;
+    if (delta) nav.scrollLeft += delta;
+  }, [active]);
   // The guide owns its focus; free inspection belongs to the complete view.
   const selected = walkthrough ? detail.steps[active].nodeIds : selection;
   const [sample, setSample] = useState(Object.keys(detail.samples)[0]);
@@ -324,7 +336,7 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
         </div>
         <span className="wb-transport">Synthetic samples · no API key</span>
       </div>
-      <nav className="wb-timeline" aria-label="Cookbook steps">
+      <nav ref={timeline} className="wb-timeline" aria-label="Cookbook steps">
         {detail.steps.map((item, index) => (
           <button
             key={item.id}
@@ -336,9 +348,7 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
             data-future={(walkthrough && index > active) || undefined}
             onClick={() => chooseStep(index)}
           >
-            <span>{String(index + 1).padStart(2, "0")}</span>
             <strong>{item.title}</strong>
-            <small>{item.api}</small>
           </button>
         ))}
       </nav>

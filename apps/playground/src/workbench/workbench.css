@@ -184,40 +184,39 @@ pre:focus-visible {
   margin: 7px 0 0;
 }
 .wb-main {
+  position: relative;
   min-width: 0;
   min-height: 0;
   padding: 0 12px 6px;
   display: flex;
   flex-direction: column;
 }
-.wb-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  min-height: 44px;
-  flex-shrink: 0;
-  border-bottom: 1px solid #282c34;
-}
-.wb-header h1 {
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-  font-size: 18px;
-  font-weight: 550;
-  letter-spacing: -0.4px;
+.wb-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
   overflow: hidden;
-  text-overflow: ellipsis;
+  clip-path: inset(50%);
   white-space: nowrap;
+  border: 0;
 }
-.wb-header button,
-.wb-header a {
+/* Keep library access in the existing toolbar without reserving a header row.
+   The control remains reachable during loading and cookbook errors. */
+.wb-library-toggle {
+  position: absolute;
+  top: 7px;
+  right: 12px;
   background: none;
   border: 0;
-  padding: 6px 0;
+  padding: 4px 0;
   font-size: 11px;
   color: #a6afc3;
-  text-decoration: none;
-  white-space: nowrap;
+}
+.wb-library-toggle:hover,
+.wb-library-toggle[aria-expanded="true"] {
+  color: #ecf0fc;
 }
 .wb-recipe {
   display: flex;
@@ -226,6 +225,7 @@ pre:focus-visible {
   min-height: 0;
 }
 .wb-toolbar {
+  padding-right: 80px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -255,58 +255,75 @@ pre:focus-visible {
 .wb-timeline {
   display: flex;
   overflow: auto;
-  gap: 10px;
+  gap: 3px;
   padding: 8px 0;
   flex-shrink: 0;
   scrollbar-width: thin;
 }
 .wb-timeline button {
+  position: relative;
+  isolation: isolate;
   background: none;
   border: 0;
-  border-top: 2px solid var(--step-color);
-  text-align: left;
-  padding: 5px 6px 0 0;
-  display: grid;
-  grid-template-columns: 20px minmax(0, 1fr);
-  align-items: baseline;
-  flex: 1;
-  min-width: 135px;
-  max-width: 250px;
-  opacity: 0.65;
-  transition: opacity 180ms;
+  text-align: center;
+  padding: 10px 22px 10px 28px;
+  flex: 1 0 170px;
+  min-width: 0;
+  color: #bac1cd;
+  transition: color 180ms;
 }
-.wb-timeline button[aria-current] {
-  opacity: 1;
+/* Clip only the ribbon surface so keyboard focus is not clipped with it. */
+.wb-timeline button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #20252e;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 50%,
+    calc(100% - 14px) 100%,
+    0 100%,
+    14px 50%
+  );
+  transition: background 180ms;
 }
-.wb-timeline button:hover {
-  opacity: 1;
+.wb-timeline button:first-child {
+  padding-left: 14px;
+}
+.wb-timeline button:first-child::before {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 50%,
+    calc(100% - 14px) 100%,
+    0 100%
+  );
 }
 .wb-timeline button[data-future] {
-  border-top-style: dashed;
-  opacity: 0.35;
+  color: #8e98aa;
 }
-.wb-timeline button > span {
-  font:
-    10px ui-monospace,
-    monospace;
-  color: var(--step-color);
+.wb-timeline button:hover::before {
+  background: #303846;
+}
+.wb-timeline button[aria-current] {
+  color: #151920;
+}
+.wb-timeline button[aria-current]::before {
+  background: var(--step-color);
+}
+.wb-timeline button:focus-visible {
+  outline-offset: -2px;
 }
 .wb-timeline strong {
   display: block;
   font-size: 11px;
   font-weight: 500;
   line-height: 1.5;
-  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.wb-timeline small {
-  grid-column: 2;
-  font:
-    10px ui-monospace,
-    monospace;
-  color: #9ba4b6;
 }
 .wb-narrative {
   display: flex;
@@ -660,7 +677,7 @@ button.wb-primary {
   .wb-library {
     position: absolute;
     z-index: 10;
-    top: 44px;
+    top: 0;
     bottom: 0;
     height: auto;
     width: 220px;
@@ -677,20 +694,8 @@ button.wb-primary {
   .wb-main {
     padding-inline: 6px;
   }
-  .wb-header {
-    gap: 10px;
-  }
-  .wb-header h1 {
-    font-size: 16px;
-  }
-  .wb-header button span {
-    display: none;
-  }
-  .wb-header button {
-    padding: 6px 8px;
-  }
   .wb-transport {
-    font-size: 9px;
+    display: none;
   }
   .wb-tabs {
     gap: 16px;
@@ -699,11 +704,7 @@ button.wb-primary {
     font-size: 11px;
   }
   .wb-timeline {
-    gap: 8px;
     padding: 6px 0;
-  }
-  .wb-timeline button {
-    min-width: 130px;
   }
   .wb-narrative {
     padding: 6px 8px;
@@ -767,7 +768,8 @@ button.wb-primary {
   .wb-code-line.is-new {
     animation: none;
   }
-  .wb-timeline button {
+  .wb-timeline button,
+  .wb-timeline button::before {
     transition: none;
   }
 }

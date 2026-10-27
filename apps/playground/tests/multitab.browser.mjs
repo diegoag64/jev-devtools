@@ -80,8 +80,9 @@ try {
     await ready(page);
   }
   const active = pages[0];
+  // A visible control supplies the user activation needed for beforeunload.
   await active
-    .getByRole("heading", { name: "Confidence fallback", exact: true })
+    .getByRole("button", { name: "Complete flow", exact: true })
     .click();
   await active.evaluate(() => {
     window.blockLeaving = (event) => event.preventDefault();
