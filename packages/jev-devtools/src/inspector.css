@@ -2101,15 +2101,13 @@
 .jev-devtools.jev-embedded .flow-step[data-accent] {
   border-top: 3px solid var(--flow-node-accent);
 }
-/* Authored highlights and direct selection share a neutral halo. Keep tutorial
+/* Authored highlights and direct selection share a card-toned backdrop. Keep tutorial
    color on the top accent, and keyboard focus on the card's inner controls.
    An outer shadow also works on request cards with content-visibility: auto. */
 .jev-devtools.jev-embedded .flow-step[data-highlighted],
 .jev-devtools.jev-embedded .flow-step.selected {
   outline: none;
-  box-shadow:
-    0 0 24px 6px rgb(255 255 255 / 20%),
-    0 0 72px 18px rgb(255 255 255 / 12%);
+  box-shadow: 0 0 48px 12px rgb(79 61 85 / 30%);
 }
 @media (forced-colors: active) {
   /* System high-contrast themes suppress shadows, so retain a selection cue. */
