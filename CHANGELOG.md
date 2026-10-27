@@ -30,7 +30,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Maintenance
 
-- **Focused cookbook CI coverage.** Run one cookbook capture-to-result probe on React 19 instead of the full browser suite on both React versions. Keep direct Flow contract tests and shared viewer checks in CI; the full cookbook suite remains in local `verify:all`.
+- **Focused cookbook CI coverage.** Run one cookbook capture-to-result probe on React 19 instead of the full browser suite on both React versions. Keep direct Flow contract tests and shared viewer checks in CI; the full cookbook suite remains in local `verify:all`. ([#131](https://github.com/diegoag64/jev-devtools/pull/131))
 
 ## 0.5.5 — Prepared release
 
