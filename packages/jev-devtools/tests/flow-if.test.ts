@@ -126,7 +126,7 @@ test("if scopes prevent leaked values and terminal arms, while direct prior valu
         });
         return f.output("done");
       }),
-    /if paths must return a value/,
+    /if "gate" then path does not support terminal output/,
   );
   const flow = defineJevFlow("nested", (f) => {
     const lanes = f.parallel("lanes", {

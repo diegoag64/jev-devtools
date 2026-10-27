@@ -86,6 +86,8 @@ test("loop tests before execution, carries state sequentially, and succeeds when
 test("loop limits, failures and cancellation stop continuation and retain the last completed iteration", async () => {
   for (const mode of ["limit", "error", "cancel"] as const) {
     const controller = new AbortController();
+    const cause = new Error("private cause");
+    const failure = new Error("failed iteration", { cause });
     let continued = false;
     const seen: number[] = [];
     const flow = defineJevFlow("stops", (f) => {
@@ -102,8 +104,7 @@ test("loop limits, failures and cancellation stop continuation and retain the la
             input: r.input.get("state"),
             run: (state) => {
               seen.push(state.count);
-              if (state.count === 1 && mode === "error")
-                throw new Error("failed iteration");
+              if (state.count === 1 && mode === "error") throw failure;
               if (state.count === 1 && mode === "cancel") controller.abort();
               return { count: state.count + 1 };
             },
@@ -129,7 +130,11 @@ test("loop limits, failures and cancellation stop continuation and retain the la
         ? FlowLoopLimitError
         : mode === "cancel"
           ? { name: "AbortError" }
-          : /failed iteration/,
+          : (error: unknown) => {
+              assert.equal(error, failure);
+              assert.equal((error as Error).cause, cause);
+              return true;
+            },
     );
     assert.equal(continued, false);
     assert.deepEqual(seen, [0, 1]);

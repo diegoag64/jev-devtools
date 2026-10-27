@@ -35,7 +35,7 @@ Import application APIs from `jev-devtools` (React and browser-safe capture help
 
 ## Optional connected flow API
 
-When asked to build or inspect connected calls, read [references/flows.md](references/flows.md) after the framework recipe. For 0.5.5 it covers requests, server function tasks, runtime request factories, parallel checks, terminal branches, returning conditionals, bounded collections, stateful loops, captured-answer replay, and fixture comparison. It includes sample verification, scope/execution rules, and privacy limits. For an older installation, use its bundled recipe and declarations rather than assuming these operations exist. Preserve existing application policies; do not convert unrelated calls just to install the drawer. Flow execution is server-only and continues even with the inspector disabled.
+When asked to build or inspect connected calls, read [references/flows.md](references/flows.md) after the framework recipe. For 0.5.5 it covers requests, server function tasks, runtime request factories, parallel checks, terminal branches, returning conditionals, bounded collections, stateful loops, captured-answer replay, and fixture comparison. It includes sample verification, scope/execution rules, diagnostic handling, and privacy limits. For an older installation, use its bundled recipe and declarations rather than assuming these operations exist. Preserve existing application policies; do not convert unrelated calls just to install the drawer. Flow execution is server-only and continues even with the inspector disabled.
 
 ## Integration invariants
 
