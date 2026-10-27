@@ -910,3 +910,9 @@ button.wb-primary {
     transition: none;
   }
 }
+
+.wb-preview-loading {
+  padding: 24px;
+  font-size: 12px;
+  color: #949dad;
+}

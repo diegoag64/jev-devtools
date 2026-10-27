@@ -128,3 +128,61 @@ test("annotated cookbook copies compile to exactly the original program", async 
     );
   }
 });
+
+// A diagram needs the recorder's real request links, including nested collection
+// runs. The authored definition alone cannot supply state, questions, or answers.
+test("sample previews retain the drawer capture for every executed request", async () => {
+  for (const recipe of cookbookCatalog) {
+    const { preview } = (await readCookbook(recipe.slug))!;
+    assert.equal(preview.run.status, "success", recipe.slug);
+    const traces = new Map(preview.traces.map((trace) => [trace.id, trace]));
+    let requests = 0;
+    function inspect(run: typeof preview.run) {
+      for (const step of Object.values(run.steps)) {
+        if (step.traceId) {
+          const trace = traces.get(step.traceId);
+          assert.ok(trace, `${recipe.slug}: missing request ${step.traceId}`);
+          assert.equal(trace.status, "success");
+          assert.ok(trace.request && trace.result);
+          requests++;
+        }
+        for (const item of step.collection?.items ?? [])
+          if (item.run) inspect(item.run);
+      }
+    }
+    inspect(preview.run);
+    assert.equal(requests, preview.traces.length, recipe.slug);
+    assert.ok(requests > 0);
+    if (recipe.slug === "parallel-questions")
+      assert.equal(
+        requests,
+        70,
+        "Preview capture retains the first items even beyond normal drawer history retention",
+      );
+    if (recipe.slug === "confidence-fallback") {
+      const trace = preview.traces[0];
+      assert.equal(
+        Object.keys(trace.result!.answers.group.probabilities!).length,
+        75,
+      );
+      assert.equal(trace.result!.answers.group.confidence, 0.899);
+    }
+  }
+});
+
+test("preview selection preserves sample boundaries and expected failure captures", async () => {
+  assert.equal(await readCookbook("confidence-fallback", "missing"), undefined);
+  assert.equal(
+    await readCookbook("confidence-fallback", "__proto__"),
+    undefined,
+  );
+  const below = (await readCookbook("confidence-fallback", "below"))!.preview;
+  const equal = (await readCookbook("confidence-fallback", "equal"))!.preview;
+  assert.equal(below.run.steps["confident-group"].decision, false);
+  assert.equal(equal.run.steps["confident-group"].decision, true);
+  assert.notEqual(below.run.id, equal.run.id);
+  const limit = (await readCookbook("hierarchical-classification", "limit"))!
+    .preview;
+  assert.equal(limit.run.status, "error");
+  assert.match(limit.run.error ?? "", /FlowLoopLimitError/);
+});

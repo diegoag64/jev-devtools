@@ -1,3 +1,4 @@
+import { readSamplePreview } from "./workbench-previews.js";
 import { readFile } from "node:fs/promises";
 import { cookbookCatalog } from "../src/workbench/catalog.js";
 import type { CookbookDetail } from "../src/workbench/types.js";
@@ -9,10 +10,16 @@ import { hierarchyLimitFlow } from "../../../cookbooks/hierarchical-classificati
 
 export async function readCookbook(
   slug: string,
+  sampleId?: string,
 ): Promise<CookbookDetail | undefined> {
   const catalog = cookbookCatalog.find((recipe) => recipe.slug === slug);
   const recipe = workbenchRegistry[slug];
   if (!catalog || !recipe) return undefined;
+  const preview = readSamplePreview(
+    slug,
+    sampleId ?? Object.keys(recipe.samples)[0],
+  );
+  if (!preview) return undefined;
   // Only a catalogued slug can reach the filesystem. Never accept a caller path.
   const directory = new URL(
     `../../../cookbooks/${catalog.slug}/`,
@@ -33,6 +40,7 @@ export async function readCookbook(
     );
   return {
     slug,
+    preview: await preview,
     ...recipe,
     variants:
       slug === "hierarchical-classification"

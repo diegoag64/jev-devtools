@@ -322,12 +322,50 @@ try {
     };
     requestAnimationFrame(record);
   });
+  await page.addInitScript(() => {
+    window.previewHistory = {};
+    const Native = window.EventSource;
+    window.EventSource = class extends Native {
+      constructor(url, options) {
+        super(url, options);
+        this.addEventListener("snapshot", (event) => {
+          window.previewHistory.requests = JSON.parse(event.data);
+        });
+        this.addEventListener("flows", (event) => {
+          window.previewHistory.flows = JSON.parse(event.data);
+        });
+      }
+    };
+  });
   await page.goto("http://127.0.0.1:4182/");
   await page
     .getByRole("heading", { name: "Confidence fallback", exact: true })
     .waitFor();
   await page.locator(".wb-diagram-panel .flow-step").first().waitFor();
   await assertOpeningView(page, "opening");
+  assert.equal(
+    await page
+      .locator(
+        '.wb-diagram-panel .flow-request[data-node-id="classify-industry"]',
+      )
+      .count(),
+    1,
+    "Opening a cookbook shows the full captured request, not a placeholder block",
+  );
+  await page.waitForFunction(
+    () => window.previewHistory.requests && window.previewHistory.flows,
+  );
+  const history = await page.evaluate(() => window.previewHistory);
+  assert.equal(
+    history.requests.traces.length,
+    0,
+    "Preview requests stay out of drawer history",
+  );
+  assert.equal(
+    history.flows.upserts.length,
+    0,
+    "Preview runs stay out of drawer history",
+  );
   await assertCommentCopies(page);
   await page.screenshot({ path: new URL("opening.png", output).pathname });
   await page
@@ -485,6 +523,17 @@ try {
         index + 1,
         `${title}: only revealed steps have comments`,
       );
+      const visibleIds = recipe.steps
+        .slice(0, index + 1)
+        .flatMap((step) => step.nodeIds);
+      const requestCount = visibleIds.filter(
+        (id) => recipe.preview.run.steps[id]?.traceId,
+      ).length;
+      assert.equal(
+        await page.locator(".wb-diagram-panel .flow-request").count(),
+        requestCount,
+        `${title}: guide retains the same request diagrams as the drawer`,
+      );
       assert.equal(await page.locator(".wb-narrative a").count(), 0);
       assert.equal(
         await page.locator(".wb-narrative-content > p").innerText(),
@@ -537,7 +586,7 @@ try {
   );
   await page
     .getByRole("button", {
-      name: "Step confident-group, if, not run",
+      name: "Step confident-group, if, completed",
       exact: true,
     })
     .click();
@@ -620,6 +669,77 @@ try {
     fullPage: true,
   });
   await page
+    .getByRole("button", { name: "Step-by-step guide", exact: true })
+    .click();
+  await page
+    .getByRole("navigation", { name: "Cookbook steps" })
+    .getByRole("button")
+    .nth(1)
+    .click();
+  const requestDiagram = page.locator(
+    '.wb-diagram-panel .flow-request[data-node-id="classify-industry"]',
+  );
+  await requestDiagram
+    .getByRole("heading", { name: "Shared context", exact: true })
+    .waitFor();
+  assert.equal(
+    await requestDiagram.getByLabel("Diagram question").inputValue(),
+    "group",
+  );
+  assert.ok((await requestDiagram.locator(".lab-flow-dot").count()) > 0);
+  await requestDiagram
+    .getByRole("button", { name: "Pause flow", exact: true })
+    .click();
+  assert.equal(await requestDiagram.locator(".lab-flow-dot").count(), 0);
+  await requestDiagram
+    .getByRole("button", { name: "Play flow", exact: true })
+    .click();
+  assert.ok((await requestDiagram.locator(".lab-flow-dot").count()) > 0);
+  await requestDiagram
+    .getByRole("button", { name: "All probabilities (75)", exact: true })
+    .click();
+  await requestDiagram
+    .getByRole("button", { name: "Back to overview", exact: true })
+    .click();
+  await requestDiagram
+    .getByRole("button", { name: "Show More", exact: true })
+    .click();
+  assert.match(await requestDiagram.innerText(), /Showing\s+6\s+of\s+75/);
+  await requestDiagram
+    .getByRole("button", { name: "Show fewer", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Run sample ↗", exact: true }).click();
+  await page.waitForFunction(() =>
+    document
+      .querySelector(".wb-diagram-panel .jev-flow-viewer")
+      .shadowRoot.querySelector(
+        '[data-node-id="classify-industry"][data-status="running"]',
+      ),
+  );
+  await page
+    .getByRole("status")
+    .filter({ hasText: "Sample complete" })
+    .waitFor();
+  assert.equal(
+    await page
+      .getByRole("button", { name: "Step-by-step guide", exact: true })
+      .getAttribute("aria-pressed"),
+    "true",
+  );
+  assert.match(
+    await page.locator('.wb-timeline [aria-current="step"]').innerText(),
+    /75 industry groups/,
+  );
+  await requestDiagram
+    .getByRole("heading", { name: "Shared context", exact: true })
+    .waitFor();
+  await page.screenshot({
+    path: new URL("guide-request-parity.png", output).pathname,
+  });
+  await page
+    .getByRole("button", { name: "Complete flow", exact: true })
+    .click();
+  await page
     .getByLabel("Cookbook sample")
     .selectOption({ label: "At cutoff · 0.900 → industry group" });
   assert.equal(
@@ -642,6 +762,26 @@ try {
     .getByRole("navigation", { name: "Cookbook steps" })
     .getByRole("button")
     .nth(1)
+    .click();
+  const collection = page.locator(
+    '.wb-diagram-panel [data-node-id="classify-passages"]',
+  );
+  await collection
+    .getByRole("button", { name: "View Flow", exact: true })
+    .click();
+  const itemFlow = page.locator(".wb-diagram-panel .flow-collection-expansion");
+  await itemFlow.locator(".flow-request").first().waitFor();
+  await itemFlow
+    .getByRole("button", { name: "Next collection item", exact: true })
+    .click();
+  await itemFlow.getByRole("heading", { name: /Item 2 of/ }).waitFor();
+  await itemFlow.locator(".flow-request").first().waitFor();
+  await page.getByRole("button", { name: "Fit flow", exact: true }).click();
+  await page.screenshot({
+    path: new URL("collection-preview-parity.png", output).pathname,
+  });
+  await collection
+    .getByRole("button", { name: "Hide Flow", exact: true })
     .click();
   await page.locator(".wb-nested summary").click();
   await page.locator(".wb-nested .flow-step").first().waitFor();
@@ -909,6 +1049,20 @@ try {
         ),
       );
   }
+  await clip
+    .getByRole("navigation", { name: "Cookbook steps" })
+    .getByRole("button")
+    .nth(1)
+    .click();
+  await clip.getByRole("button", { name: "Run sample ↗", exact: true }).click();
+  await clip
+    .getByRole("status")
+    .filter({ hasText: "Sample complete" })
+    .waitFor();
+  await clip
+    .locator(".flow-request")
+    .getByRole("heading", { name: "Shared context", exact: true })
+    .waitFor();
   const video = clip.video();
   await motion.close();
   await video.saveAs(new URL("walkthrough.webm", output).pathname);

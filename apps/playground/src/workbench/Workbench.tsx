@@ -8,7 +8,7 @@ import {
 import { createRoot } from "react-dom/client";
 import { JevFlowViewer, useJevInspection } from "jev-devtools/viewer";
 import { cookbookCatalog } from "./catalog.js";
-import type { CookbookDetail } from "./types.js";
+import type { CookbookDetail, CookbookPreview } from "./types.js";
 import { colors, SourceCode } from "./SourceCode.js";
 import { CookbookOverview, Explanation } from "./CookbookOverview.js";
 import { SplitPanels } from "./SplitPanels.js";
@@ -219,6 +219,37 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
   // The guide owns its focus; free inspection belongs to the complete view.
   const selected = walkthrough ? detail.steps[active].nodeIds : selection;
   const [sample, setSample] = useState(Object.keys(detail.samples)[0]);
+  const [preview, setPreview] = useState<CookbookPreview | undefined>(
+    detail.preview,
+  );
+  const [previewError, setPreviewError] = useState("");
+  useEffect(() => {
+    if (sample === detail.preview.sampleId) {
+      setPreview(detail.preview);
+      setPreviewError("");
+      return;
+    }
+    const abort = new AbortController();
+    setPreview(undefined);
+    setPreviewError("");
+    void fetch(
+      endpoint(`cookbooks/${detail.slug}`) +
+        `&sample=${encodeURIComponent(sample)}`,
+      { signal: abort.signal },
+    )
+      .then(async (response) => {
+        if (!response.ok)
+          throw new Error(
+            "Could not prepare the sample preview. Run the sample to capture it.",
+          );
+        const next: CookbookDetail = await response.json();
+        if (!abort.signal.aborted) setPreview(next.preview);
+      })
+      .catch((error) => {
+        if (!abort.signal.aborted) setPreviewError(error.message);
+      });
+    return () => abort.abort();
+  }, [detail, sample]);
   const [runId, setRunId] = useState<string>();
   const [startedAt, setStartedAt] = useState<number>();
   const [finishedAt, setFinishedAt] = useState<number>();
@@ -258,6 +289,15 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
   useEffect(() => {
     if (busy && run && !runId) setRunId(run.id);
   }, [busy, run, runId]);
+  const currentPreview = preview?.sampleId === sample ? preview : undefined;
+  const showingPreview = startedAt === undefined;
+  const displayedRun = showingPreview ? currentPreview?.run : run;
+  const displayedDefinition = showingPreview
+    ? currentPreview?.definition
+    : capturedDefinition;
+  const displayedTraces = showingPreview
+    ? (currentPreview?.traces ?? [])
+    : inspection.traces;
   const nestedNode = detail.definition.nodes.find(
     (node) => selected.includes(node.id) && node.itemDefinition,
   );
@@ -303,7 +343,6 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
     setRunId(undefined);
     setStartedAt(Date.now());
     setFinishedAt(undefined);
-    setWalkthrough(false);
     try {
       const data = await postPlayground(
         endpoint("run"),
@@ -389,7 +428,7 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
           </button>
         ))}
       </nav>
-      {walkthrough ? (
+      {walkthrough && (
         <section
           className="wb-narrative"
           aria-label="Step explanation"
@@ -424,56 +463,60 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
             </button>
           </div>
         </section>
-      ) : (
-        <div className="wb-runbar">
-          <label>
-            Sample
-            <select
-              aria-label="Cookbook sample"
-              disabled={busy}
-              value={sample}
-              onChange={(event) => {
-                setSample(event.target.value);
-                setRunId(undefined);
-                setResult(undefined);
-                setStartedAt(undefined);
-                setFinishedAt(undefined);
-                setStatus("");
-              }}
-            >
-              {Object.entries(detail.samples).map(([id, item]) => (
-                <option key={id} value={id}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            className="wb-primary"
-            disabled={busy}
-            onClick={() => void start()}
-          >
-            {busy ? "Running…" : "Run sample ↗"}
-          </button>
-          {busy && (
-            <button
-              onClick={() => {
-                stop();
-                setFinishedAt(Date.now());
-                setBusy(false);
-                setRunId(run?.id);
-                setStatus("Sample cancelled.");
-              }}
-            >
-              Cancel
-            </button>
-          )}
-          <p role="status">
-            {status ||
-              "Explore the structure, then run a sample to see its path and answers."}
-          </p>
-        </div>
       )}
+      <div className="wb-runbar">
+        <label>
+          Sample
+          <select
+            aria-label="Cookbook sample"
+            disabled={busy}
+            value={sample}
+            onChange={(event) => {
+              setSample(event.target.value);
+              setRunId(undefined);
+              setResult(undefined);
+              setStartedAt(undefined);
+              setFinishedAt(undefined);
+              setStatus("");
+            }}
+          >
+            {Object.entries(detail.samples).map(([id, item]) => (
+              <option key={id} value={id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          className="wb-primary"
+          disabled={busy}
+          onClick={() => void start()}
+        >
+          {busy ? "Running…" : "Run sample ↗"}
+        </button>
+        {busy && (
+          <button
+            onClick={() => {
+              stop();
+              setFinishedAt(Date.now());
+              setBusy(false);
+              setRunId(run?.id);
+              setStatus("Sample cancelled.");
+            }}
+          >
+            Cancel
+          </button>
+        )}
+        <p role="status">
+          {status ||
+            previewError ||
+            (showingPreview
+              ? currentPreview
+                ? "Synthetic sample preview. Run the full sample to watch it execute."
+                : "Preparing the sample preview…"
+              : "Run the full sample to inspect its requests and results.")}
+        </p>
+      </div>
       <SplitPanels
         code={
           <section
@@ -505,30 +548,30 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
             <div className="wb-panel-heading">
               <h2>{walkthrough ? "Building the flow" : "Flow diagram"}</h2>
               <span>
-                {walkthrough
-                  ? `${active + 1} / ${detail.steps.length} steps`
-                  : run
-                    ? `Sample · ${run.status}`
-                    : "Definition · not run"}
+                {walkthrough &&
+                  `${active + 1} / ${detail.steps.length} steps · `}
+                {showingPreview
+                  ? "Sample preview"
+                  : `Sample · ${run?.status ?? (busy ? "running" : "unavailable")}`}
               </span>
             </div>
             <div className="wb-viewer">
-              <JevFlowViewer
-                definition={
-                  !walkthrough && capturedDefinition
-                    ? capturedDefinition
-                    : walkthrough
-                      ? detail.definition
-                      : authoredDefinition
-                }
-                run={walkthrough ? undefined : run}
-                traces={walkthrough ? [] : inspection.traces}
-                selectedNodeId={selected[0] ?? ""}
-                onNodeSelect={(id) => selectNodes([id])}
-                visibleNodeIds={visible}
-                highlightedNodeIds={selected}
-                nodeAccents={accents}
-              />
+              {showingPreview && !currentPreview && !previewError ? (
+                <p className="wb-preview-loading" role="status">
+                  Preparing the sample diagram…
+                </p>
+              ) : (
+                <JevFlowViewer
+                  definition={displayedDefinition ?? authoredDefinition}
+                  run={displayedRun}
+                  traces={displayedTraces}
+                  selectedNodeId={selected[0] ?? ""}
+                  onNodeSelect={(id) => selectNodes([id])}
+                  visibleNodeIds={visible}
+                  highlightedNodeIds={selected}
+                  nodeAccents={accents}
+                />
+              )}
             </div>
             <p className="wb-panel-foot">
               {inspection.connection === "connected"

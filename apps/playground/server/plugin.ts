@@ -222,6 +222,7 @@ export function jevInspectorServer(
             try {
               const cookbook = await readCookbook(
                 url.pathname.slice("/__jev/cookbooks/".length),
+                url.searchParams.get("sample") ?? undefined,
               );
               send(
                 res,
