@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 const storageKey = "jev-workbench-panel-sizes";
 const defaults = { horizontal: 40, vertical: 32 };
@@ -41,7 +47,8 @@ export function SplitPanels({
     query.addEventListener("change", change);
     return () => query.removeEventListener("change", change);
   }, []);
-  useEffect(() => {
+  // Clamp restored proportions before the diagram paints its initial fit.
+  useLayoutEffect(() => {
     const panel = panels.current;
     if (!panel) return;
     const measure = () => {

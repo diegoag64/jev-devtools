@@ -85,6 +85,27 @@ async function assertSelectionInView(page) {
     { timeout: 5000 },
   );
 }
+async function assertOpeningView(page, name) {
+  await page.waitForFunction(() => window.openingFrames.length === 45);
+  const opening = await page.evaluate(() => window.openingFrames);
+  await writeFile(
+    new URL(`${name}-frames.json`, output),
+    JSON.stringify(opening, null, 2),
+  );
+  assert.ok(
+    opening.every((frame) => frame.scroll === 0),
+    "Loading keeps the source at its first line",
+  );
+  assert.ok(
+    opening.every((frame) => frame.fits),
+    "The diagram fits from its first visible frame",
+  );
+  assert.equal(
+    new Set(opening.map((frame) => frame.transform)).size,
+    1,
+    "The initial camera does not animate or jump",
+  );
+}
 try {
   await server.listen();
   browser = await chromium.launch({ headless: true });
@@ -97,14 +118,59 @@ try {
   });
   const page = await context.newPage();
   page.on("pageerror", (error) => errors.push(String(error)));
+  // Observe painted positions, not effect timing: page-load camera fitting and
+  // source scrolling must settle before the first visible frame.
+  await page.addInitScript(() => {
+    window.openingFrames = [];
+    const record = () => {
+      const source = document.querySelector(".wb-source");
+      const root = document.querySelector(
+        ".wb-diagram-panel .jev-flow-viewer",
+      )?.shadowRoot;
+      const viewport = root?.querySelector(".flow-overview-viewport");
+      const canvas = root?.querySelector(".flow-overview-canvas");
+      if (source && viewport && canvas && viewport.clientHeight > 0) {
+        const frame = canvas.getBoundingClientRect();
+        const bounds = viewport.getBoundingClientRect();
+        window.openingFrames.push({
+          scroll: source.scrollTop,
+          transform: getComputedStyle(canvas).transform,
+          fits:
+            frame.left >= bounds.left - 1 &&
+            frame.right <= bounds.right + 1 &&
+            frame.top >= bounds.top - 1 &&
+            frame.bottom <= bounds.bottom + 1,
+        });
+      }
+      if (window.openingFrames.length < 45) requestAnimationFrame(record);
+    };
+    requestAnimationFrame(record);
+  });
   await page.goto("http://127.0.0.1:4182/");
   await page
     .getByRole("heading", { name: "Confidence fallback", exact: true })
     .waitFor();
   await page.locator(".wb-diagram-panel .flow-step").first().waitFor();
+  await assertOpeningView(page, "opening");
+  await page.screenshot({ path: new URL("opening.png", output).pathname });
   await page
     .getByRole("button", { name: "Step-by-step guide", exact: true })
     .click();
+  await page.waitForFunction(() => {
+    const canvas = document
+      .querySelector(".wb-diagram-panel .jev-flow-viewer")
+      .shadowRoot.querySelector(".flow-overview-canvas");
+    return canvas
+      .getAnimations()
+      .some(
+        (animation) =>
+          animation instanceof CSSTransition &&
+          animation.transitionProperty === "transform",
+      );
+  });
+  await page.waitForFunction(
+    () => document.querySelector(".wb-source").scrollTop > 0,
+  );
   await assertWorkspaceFits(page);
   const divider = page.getByRole("separator", {
     name: "Resize code and diagram",
@@ -130,6 +196,7 @@ try {
   const savedShare = await divider.getAttribute("aria-valuenow");
   await page.reload();
   await divider.waitFor();
+  await assertOpeningView(page, "reload");
   assert.equal(
     await divider.getAttribute("aria-valuenow"),
     savedShare,
@@ -295,6 +362,13 @@ try {
   await page.getByRole("button", { name: "Next step →", exact: true }).click();
   await page.getByRole("button", { name: "Previous", exact: false }).click();
   await page.emulateMedia({ reducedMotion: "reduce" });
+  assert.equal(
+    await page
+      .locator(".wb-diagram-panel .flow-overview-canvas")
+      .evaluate((canvas) => getComputedStyle(canvas).transitionDuration),
+    "0s",
+    "Reduced motion also disables camera focus transitions",
+  );
   assert.equal(
     await page
       .locator(".wb-diagram-panel .flow-step")

@@ -2,6 +2,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -41,7 +42,8 @@ function useNodeHeight<T extends HTMLElement>(
   onResize: (id: string, height: number) => void,
 ) {
   const ref = useRef<T>(null);
-  useEffect(() => {
+  // The first camera fit must use measured card heights before anything paints.
+  useLayoutEffect(() => {
     const element = ref.current;
     if (!element) return;
     let previous = 0;

@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
   fitCamera,
   zoomCamera,
@@ -30,31 +24,44 @@ export function useDiagramViewport(
   }, [width, height, origin.x, origin.y]);
   const frame = useRef<number | null>(null);
   const [zoom, setZoom] = useState(100);
-  const paint = useCallback(() => {
-    if (frame.current !== null) return;
-    frame.current = requestAnimationFrame(() => {
-      frame.current = null;
-      const { x, y, scale } = camera.current;
-      if (canvas.current)
-        canvas.current.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-      if (viewport.current) {
-        viewport.current.style.backgroundPosition = `${x}px ${y}px`;
-        // Thin out the decorative grid at overview zooms instead of packing
-        // more dots behind an increasingly small diagram.
-        const grid = 24 * Math.max(scale, 1 / Math.sqrt(scale));
-        viewport.current.style.backgroundSize = `${grid}px ${grid}px`;
-        viewport.current.style.setProperty(
-          "--diagram-grid-opacity",
-          String(0.45 * Math.min(1, Math.sqrt(scale))),
-        );
-        viewport.current.style.setProperty(
-          "--diagram-grid-weight",
-          String(Math.max(0.5, Math.min(0.75, Math.sqrt(scale)))),
-        );
-      }
-      setZoom(Math.round(scale * 100));
-    });
+  const renderCamera = useCallback((animate: boolean) => {
+    const { x, y, scale } = camera.current;
+    if (canvas.current) {
+      canvas.current.dataset.cameraMotion = String(animate);
+      canvas.current.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+    }
+    if (viewport.current) {
+      viewport.current.style.backgroundPosition = `${x}px ${y}px`;
+      // Thin out the decorative grid at overview zooms instead of packing
+      // more dots behind an increasingly small diagram.
+      const grid = 24 * Math.max(scale, 1 / Math.sqrt(scale));
+      viewport.current.style.backgroundSize = `${grid}px ${grid}px`;
+      viewport.current.style.setProperty(
+        "--diagram-grid-opacity",
+        String(0.45 * Math.min(1, Math.sqrt(scale))),
+      );
+      viewport.current.style.setProperty(
+        "--diagram-grid-weight",
+        String(Math.max(0.5, Math.min(0.75, Math.sqrt(scale)))),
+      );
+    }
+    setZoom(Math.round(scale * 100));
   }, []);
+  const paint = useCallback(
+    (immediate = false) => {
+      if (immediate) {
+        if (frame.current !== null) cancelAnimationFrame(frame.current);
+        frame.current = null;
+        renderCamera(false);
+      } else if (frame.current === null) {
+        frame.current = requestAnimationFrame(() => {
+          frame.current = null;
+          renderCamera(true);
+        });
+      }
+    },
+    [renderCamera],
+  );
   const fit = useCallback(() => {
     fitted.current = true;
     if (size.current.width <= 0 || size.current.height <= 0) return;
@@ -64,7 +71,9 @@ export function useDiagramViewport(
       x: fittedCamera.x - bounds.current.x * fittedCamera.scale,
       y: fittedCamera.y - bounds.current.y * fittedCamera.scale,
     };
-    paint();
+    // Initial and automatic fits must be visible before paint, without the
+    // transition used for deliberate focus/zoom actions in embedded viewers.
+    paint(true);
   }, [paint]);
   const preserveCamera = useCallback(() => {
     fitted.current = false;
@@ -82,7 +91,7 @@ export function useDiagramViewport(
     },
     [paint],
   );
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (fitted.current) fit();
   }, [width, height, origin.x, origin.y, fit]);
   const zoomBy = useCallback(
@@ -98,7 +107,7 @@ export function useDiagramViewport(
     [paint],
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = viewport.current;
     if (!el) return;
     const pointers = new Map<number, Point>();

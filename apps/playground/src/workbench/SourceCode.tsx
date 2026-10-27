@@ -55,8 +55,10 @@ export function SourceCode({
 }) {
   const ref = useRef<HTMLPreElement>(null);
   const activeRange =
-    detail.sourceRanges[selected[0]] ?? detail.steps[active].ranges[0];
+    detail.sourceRanges[selected[0]] ??
+    (walkthrough ? detail.steps[active].ranges[0] : undefined);
   useEffect(() => {
+    if (!activeRange) return;
     const node = ref.current?.querySelector<HTMLElement>(
       `[data-line="${activeRange.start}"]`,
     );
@@ -71,7 +73,7 @@ export function SourceCode({
           ? "instant"
           : "smooth",
       });
-  }, [activeRange.start, walkthrough]);
+  }, [activeRange?.start, walkthrough]);
   const lineNodes = (line: number) => {
     const matches = Object.entries(detail.sourceRanges).filter(([, range]) =>
       contains(range, line),
