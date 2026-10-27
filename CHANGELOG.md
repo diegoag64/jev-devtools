@@ -33,7 +33,7 @@ Flow expression types now reject non-scalar equality and array method selection 
 
 #### Fixed
 
-- **Redacted condition operators.** Branch and loop views show an unavailable rule when a custom redactor replaces its operator with non-string JSON, instead of crashing or displaying a different comparison. Execution and captured values stay unchanged.
+- **Redacted condition operators.** Branch and loop views show an unavailable rule when a custom redactor replaces its operator with non-string JSON, instead of crashing or displaying a different comparison. Execution and captured values stay unchanged. ([#126](https://github.com/diegoag64/jev-devtools/pull/126))
 
 - **Malformed stream recovery.** Validate trace and nested flow records before publishing updates, and reconnect without partially changing cached history. Preserve version-1 optional metadata, compatible unknown fields, redacted content, and parallel flows with more than 256 lanes sharing existing nodes. ([#122](https://github.com/diegoag64/jev-devtools/pull/122))
 
