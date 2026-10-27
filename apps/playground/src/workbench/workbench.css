@@ -528,7 +528,7 @@ button.wb-primary {
   min-height: 21px;
   padding-right: 20px;
 }
-.wb-code-line > button {
+.wb-code-line > .wb-line-number {
   user-select: none;
   width: 47px;
   flex-shrink: 0;
@@ -542,7 +542,7 @@ button.wb-primary {
   text-align: right;
   opacity: 1;
 }
-.wb-code-line > button:disabled {
+.wb-code-line > .wb-line-number:disabled {
   color: #465063;
 }
 .wb-code-line.is-selected {

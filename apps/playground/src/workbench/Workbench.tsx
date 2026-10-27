@@ -177,7 +177,9 @@ function App() {
 function Recipe({ detail }: { detail: CookbookDetail }) {
   const [walkthrough, setWalkthrough] = useState(false);
   const [active, setActive] = useState(0);
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selection, setSelection] = useState<string[]>([]);
+  // The guide owns its focus; free inspection belongs to the complete view.
+  const selected = walkthrough ? detail.steps[active].nodeIds : selection;
   const [sample, setSample] = useState(Object.keys(detail.samples)[0]);
   const [runId, setRunId] = useState<string>();
   const [startedAt, setStartedAt] = useState<number>();
@@ -241,10 +243,11 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
   );
   function chooseStep(index: number) {
     setActive(index);
-    setSelected(detail.steps[index].nodeIds);
+    setSelection(detail.steps[index].nodeIds);
   }
   function selectNodes(ids: string[]) {
-    setSelected(ids);
+    if (walkthrough) return;
+    setSelection(ids);
     const index = detail.steps.findIndex((item) =>
       item.nodeIds.includes(ids[0]),
     );
@@ -470,7 +473,9 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
               onSelect={selectNodes}
             />
             <p className="wb-panel-foot">
-              Select code or a line number to highlight its diagram nodes.
+              {walkthrough
+                ? "Use the steps above to navigate this walkthrough."
+                : "Select code or a line number to highlight its diagram nodes."}
             </p>
           </section>
         }

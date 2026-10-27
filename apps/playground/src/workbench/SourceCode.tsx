@@ -54,9 +54,9 @@ export function SourceCode({
   onSelect: (ids: string[]) => void;
 }) {
   const ref = useRef<HTMLPreElement>(null);
-  const activeRange =
-    detail.sourceRanges[selected[0]] ??
-    (walkthrough ? detail.steps[active].ranges[0] : undefined);
+  const activeRange = walkthrough
+    ? detail.steps[active].ranges[0]
+    : detail.sourceRanges[selected[0]];
   useEffect(() => {
     if (!activeRange) return;
     const node = ref.current?.querySelector<HTMLElement>(
@@ -118,8 +118,8 @@ export function SourceCode({
       className="wb-source"
       tabIndex={0}
       aria-label="Flow API source"
-      onMouseUp={selectText}
-      onKeyUp={selectText}
+      onMouseUp={walkthrough ? undefined : selectText}
+      onKeyUp={walkthrough ? undefined : selectText}
     >
       <code>
         {detail.source.split("\n").map((line, index) => {
@@ -158,18 +158,25 @@ export function SourceCode({
                 } as CSSProperties
               }
             >
-              <button
-                tabIndex={
-                  ids.some((id) => detail.sourceRanges[id].start === number)
-                    ? 0
-                    : -1
-                }
-                disabled={!ids.length}
-                aria-label={`Inspect code at line ${number}`}
-                onClick={() => onSelect(ids)}
-              >
-                {number}
-              </button>
+              {walkthrough ? (
+                <span className="wb-line-number" aria-hidden="true">
+                  {number}
+                </span>
+              ) : (
+                <button
+                  className="wb-line-number"
+                  tabIndex={
+                    ids.some((id) => detail.sourceRanges[id].start === number)
+                      ? 0
+                      : -1
+                  }
+                  disabled={!ids.length}
+                  aria-label={`Inspect code at line ${number}`}
+                  onClick={() => onSelect(ids)}
+                >
+                  {number}
+                </button>
+              )}
               <span>{tokens(line)}</span>
               {"\n"}
             </span>

@@ -106,6 +106,77 @@ async function assertOpeningView(page, name) {
     "The initial camera does not animate or jump",
   );
 }
+async function assertGuideOwnsSelection(page) {
+  await page
+    .locator(".wb-diagram-panel .flow-overview-canvas")
+    .evaluate((canvas) =>
+      Promise.all(
+        canvas
+          .getAnimations()
+          .map((animation) => animation.finished.catch(() => {})),
+      ),
+    );
+  const selection = () =>
+    page.evaluate(() => ({
+      step: document.querySelector('.wb-timeline [aria-current="step"]')
+        .textContent,
+      narration: document.querySelector(".wb-narrative-content").textContent,
+      lines: [...document.querySelectorAll(".wb-code-line.is-selected")].map(
+        (line) => line.dataset.line,
+      ),
+      nodes: [
+        ...document
+          .querySelector(".wb-diagram-panel .jev-flow-viewer")
+          .shadowRoot.querySelectorAll(".flow-step[data-highlighted]"),
+      ].map((node) => node.dataset.nodeId),
+    }));
+  const expected = await selection();
+  const earlierCode = page.locator('[data-line="32"] > span').last();
+  await earlierCode.hover();
+  assert.deepEqual(
+    await selection(),
+    expected,
+    "Hovering earlier code leaves the walkthrough step unchanged",
+  );
+  const bounds = await earlierCode.boundingBox();
+  await page.mouse.move(bounds.x + 2, bounds.y + bounds.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(bounds.x + 140, bounds.y + bounds.height / 2, {
+    steps: 8,
+  });
+  await page.mouse.up();
+  assert.ok(
+    await page.evaluate(() => !getSelection().isCollapsed),
+    "Guide source remains selectable for copying",
+  );
+  const actual = await selection();
+  await writeFile(
+    new URL("guide-selection.json", output),
+    JSON.stringify({ expected, actual }, null, 2),
+  );
+  await page.screenshot({
+    path: new URL("guide-selection.png", output).pathname,
+  });
+  assert.deepEqual(
+    actual,
+    expected,
+    "Selecting earlier code cannot change the guide step, narration, or highlights",
+  );
+  await page
+    .getByLabel("Flow API source", { exact: true })
+    .press("Shift+ArrowRight");
+  assert.deepEqual(
+    await selection(),
+    expected,
+    "Keyboard text selection cannot change the guide step",
+  );
+  await page.locator('[data-line="32"] > :first-child').click();
+  assert.deepEqual(
+    await selection(),
+    expected,
+    "Line-number clicks cannot navigate the guide",
+  );
+}
 try {
   await server.listen();
   browser = await chromium.launch({ headless: true });
@@ -325,6 +396,7 @@ try {
   await page
     .getByRole("button", { name: "Step-by-step guide", exact: true })
     .click();
+  await assertGuideOwnsSelection(page);
   await page.setViewportSize({ width: 1280, height: 800 });
   await assertWorkspaceFits(page);
   await assertSelectionInView(page);
