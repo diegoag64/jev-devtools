@@ -44,6 +44,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Fixed
 
+- **Focus expanded collection flows.** Opening a collection or loop in the workbench frames its measured item flow instead of focusing the parent card. The expanded flow stays framed when resizing the panels; closing it or choosing another step restores step focus. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 - **Smooth Fit flow controls.** Animate user-triggered fitting in the embedded flow viewer, including its keyboard shortcut. Initial and automatic fits remain immediate, and reduced-motion preferences suppress the transition. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 - **Full cookbook request diagrams.** Show the drawer's request internals and collection item previews in both workbench views using isolated synthetic captures. Run samples from the walkthrough without losing the current step, and inspect streaming requests, probabilities, and animated diagrams inline. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 - **Stable final-step controls.** Keep a disabled Next button on the last walkthrough step instead of replacing it with a wider complete-flow button. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))

@@ -652,6 +652,11 @@ export const FlowOverview = memo(function FlowOverview({
       x: layout.left,
       y: 0,
     });
+  // A collection button owns the camera until another source/timeline selection.
+  // Bind its selection key after the parent's controlled selection has updated.
+  const expansionFocus = useRef<{ id: string; selectionKey?: string }>(
+    undefined,
+  );
   const externalFocus = useRef("");
   const externalArea = useRef<Bounds | undefined>(undefined);
   const externallyControlled = !inline && selectedNodeId !== undefined;
@@ -666,16 +671,41 @@ export const FlowOverview = memo(function FlowOverview({
     if (!externallyControlled) {
       externalArea.current = undefined;
       externalFocus.current = "";
+      expansionFocus.current = undefined;
       return;
     }
-    const areas = (
-      highlightedNodeIds?.length ? highlightedNodeIds : [selectedNodeId]
-    )
-      .map((id) => (id === undefined ? undefined : layout.points.get(id)))
-      .filter((area): area is Bounds => !!area);
+    const requested = expansionFocus.current;
+    if (requested) {
+      requested.selectionKey ??= focusKey;
+      if (
+        requested.selectionKey !== focusKey ||
+        !collectionViews[requested.id]?.open
+      )
+        expansionFocus.current = undefined;
+    }
+    const expansionId = expansionFocus.current?.id;
+    const expanded = expansionId
+      ? layout.expansions.get(expansionId)
+      : undefined;
+    // Suppress the parent-card focus while the new item flow is being measured.
+    if (expanded && !itemSizes[expansionId!]) {
+      externalArea.current = undefined;
+      return;
+    }
+    // Keep the expanded item framed as nested request measurements settle.
+    const targetKey = JSON.stringify([
+      focusKey,
+      expanded ? [expansionId, expanded] : null,
+    ]);
+    const areas = expanded
+      ? // Include the previous/next controls outside the item frame.
+        [{ ...expanded, x: expanded.x - 80, width: expanded.width + 160 }]
+      : (highlightedNodeIds?.length ? highlightedNodeIds : [selectedNodeId])
+          .map((id) => (id === undefined ? undefined : layout.points.get(id)))
+          .filter((area): area is Bounds => !!area);
     if (!areas.length) {
       externalArea.current = undefined;
-      externalFocus.current = focusKey;
+      externalFocus.current = targetKey;
       return;
     }
     const x = Math.min(...areas.map((area) => area.x)),
@@ -686,9 +716,22 @@ export const FlowOverview = memo(function FlowOverview({
       width: Math.max(...areas.map((area) => area.x + area.width)) - x + 48,
       height: Math.max(...areas.map((area) => area.y + area.height)) - y + 48,
     };
-    if (externalFocus.current !== focusKey) {
-      externalFocus.current = focusKey;
-      focusArea(externalArea.current);
+    if (externalFocus.current !== targetKey) {
+      const area = externalArea.current;
+      const focus = () => {
+        externalFocus.current = targetKey;
+        focusArea(area);
+      };
+      if (!expanded) {
+        focus();
+        return;
+      }
+      // Nested diagrams measure in successive renders. Wait for a quiet layout
+      // before framing; another measurement cancels and reschedules this work.
+      let frame = requestAnimationFrame(() => {
+        frame = requestAnimationFrame(focus);
+      });
+      return () => cancelAnimationFrame(frame);
     }
   }, [
     focusKey,
@@ -696,6 +739,9 @@ export const FlowOverview = memo(function FlowOverview({
     highlightedNodeIds,
     externallyControlled,
     layout.points,
+    layout.expansions,
+    collectionViews,
+    itemSizes,
     focusArea,
   ]);
   useEffect(() => {
@@ -729,10 +775,19 @@ export const FlowOverview = memo(function FlowOverview({
   const changeCollection = useCallback(
     (id: string, view: CollectionView) => {
       preserveCamera();
+      if (externallyControlled && view.open && !collectionViews[id]?.open) {
+        expansionFocus.current = { id };
+        // Reopening mounts a new item diagram; do not frame its cached size.
+        setItemSizes((previous) => {
+          const next = { ...previous };
+          delete next[id];
+          return next;
+        });
+      }
       setSelected(id);
       setCollectionViews((previous) => ({ ...previous, [id]: view }));
     },
-    [preserveCamera, setSelected],
+    [preserveCamera, setSelected, externallyControlled, collectionViews],
   );
   const resizeItem = useCallback(
     (id: string, size: Size) => {

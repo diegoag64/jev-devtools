@@ -14,6 +14,7 @@ const server = await createServer({
   server: { host: "127.0.0.1", port: 4182, strictPort: true },
 });
 let browser;
+let context;
 const errors = [];
 const observed = [];
 async function assertWorkspaceFits(page) {
@@ -107,6 +108,130 @@ async function assertOpeningView(page, name) {
     "The initial camera does not animate or jump",
   );
 }
+async function settledExpansion(page, name) {
+  const geometry = await page
+    .locator(".wb-diagram-panel .jev-flow-viewer")
+    .evaluate(async (host) => {
+      const root = host.shadowRoot;
+      let previous,
+        stable = 0,
+        snapshot;
+      const deadline = performance.now() + 5000;
+      while (stable < 4) {
+        if (performance.now() > deadline)
+          throw new Error("Collection camera did not settle");
+        await new Promise(requestAnimationFrame);
+        const bounds = (selector) => {
+          const r = root.querySelector(selector).getBoundingClientRect();
+          return { x: r.x, y: r.y, width: r.width, height: r.height };
+        };
+        snapshot = {
+          viewport: bounds(".flow-overview-viewport"),
+          expansion: bounds(".flow-collection-expansion"),
+          camera: getComputedStyle(root.querySelector(".flow-overview-canvas"))
+            .transform,
+        };
+        const next = JSON.stringify(snapshot);
+        stable = next === previous ? stable + 1 : 0;
+        previous = next;
+      }
+      return snapshot;
+    });
+  await writeFile(
+    new URL(`${name}.json`, output),
+    JSON.stringify(geometry, null, 2),
+  );
+  await page.screenshot({ path: new URL(`${name}.png`, output).pathname });
+  return geometry;
+}
+function assertExpansionFramed({ viewport: v, expansion: e }) {
+  assert.ok(
+    e.x >= v.x - 1 &&
+      e.y >= v.y - 1 &&
+      e.x + e.width <= v.x + v.width + 1 &&
+      e.y + e.height <= v.y + v.height + 1,
+    "Opening a collection frames the expanded flow, not its parent card",
+  );
+  assert.ok(
+    Math.abs(e.x + e.width / 2 - v.x - v.width / 2) < 2 &&
+      Math.abs(e.y + e.height / 2 - v.y - v.height / 2) < 2,
+    "The expanded flow is centered in the viewport",
+  );
+}
+async function assertCollectionFocus(page) {
+  for (const [slug, id, guide] of [
+    ["rag-passages", "classify-passages", false],
+    ["rag-passages", "classify-passages", true],
+    ["hierarchical-classification", "beam-search", false],
+  ]) {
+    await page.goto(`http://127.0.0.1:4182/?cookbook=${slug}`);
+    const card = page.locator(
+      `.wb-diagram-panel .flow-step[data-node-id="${id}"]`,
+    );
+    await card.waitFor();
+    if (guide) {
+      await page
+        .getByRole("button", { name: "Step-by-step guide", exact: true })
+        .click();
+      await page
+        .getByRole("navigation", { name: "Cookbook steps" })
+        .getByRole("button")
+        .nth(2)
+        .click();
+      await page.getByRole("button", { name: "Fit flow", exact: true }).click();
+    }
+    assert.equal(
+      await card
+        .locator(":scope > button")
+        .first()
+        .getAttribute("aria-pressed"),
+      "false",
+      "Start with an unselected collection card",
+    );
+    const stage = await page
+      .locator('.wb-timeline [aria-current="step"]')
+      .innerText();
+    await card.getByRole("button", { name: "View Flow", exact: true }).click();
+    const label = `${slug}-${guide ? "guide" : "complete"}`;
+    assertExpansionFramed(
+      await settledExpansion(page, `collection-focus-${label}`),
+    );
+    if (guide)
+      assert.equal(
+        await page.locator('.wb-timeline [aria-current="step"]').innerText(),
+        stage,
+        "Opening an earlier collection does not navigate the walkthrough",
+      );
+    const expansion = page
+      .locator(".wb-diagram-panel .flow-collection-expansion")
+      .first();
+    await expansion
+      .getByRole("button", { name: "Hide Flow", exact: true })
+      .click();
+    await expansion.waitFor({ state: "detached" });
+    await card
+      .getByRole("button", { name: "View Flow", exact: true })
+      .press("Enter");
+    assertExpansionFramed(
+      await settledExpansion(page, `collection-reopen-${label}`),
+    );
+    await page
+      .getByRole("separator", { name: "Resize code and diagram" })
+      .press("ArrowLeft");
+    assertExpansionFramed(
+      await settledExpansion(page, `collection-resize-${label}`),
+    );
+    if (!guide) {
+      await page
+        .getByRole("navigation", { name: "Cookbook steps" })
+        .getByRole("button")
+        .nth(0)
+        .click();
+      await assertSelectionInView(page);
+    }
+  }
+}
+
 async function assertUserFit(page, { keyboard = false, reduced = false } = {}) {
   const canvas = page.locator(".wb-diagram-panel .flow-overview-canvas");
   const initial = await canvas.evaluate(
@@ -370,7 +495,7 @@ async function assertGuideComments(page) {
 try {
   await server.listen();
   browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
+  context = await browser.newContext({
     viewport: { width: 1600, height: 1100 },
     recordVideo: {
       dir: new URL("video/", output).pathname,
@@ -423,6 +548,7 @@ try {
       }
     };
   });
+  await assertCollectionFocus(page);
   await page.goto("http://127.0.0.1:4182/");
   await page
     .getByRole("heading", { name: "Confidence fallback", exact: true })
@@ -1162,6 +1288,7 @@ try {
     JSON.stringify({ observed, errors }, null, 2),
   );
 } finally {
+  await context?.close();
   await browser?.close();
   await server.close();
 }
