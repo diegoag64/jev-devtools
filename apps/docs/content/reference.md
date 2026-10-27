@@ -913,7 +913,7 @@ For `initial: { count: flow.input.get("count") }`, both the condition and iterat
 
 The runner tests the condition before each iteration. When it becomes false, the loop resolves to the current state. If it starts false, the result is the initial state. If it remains true at the iteration limit, the run rejects with `FlowLoopLimitError`.
 
-A loop may contain a map, but cannot contain another loop.
+A loop may contain a map, but cannot contain another loop. Direct `output()` and `branch()` calls in map bodies, loop bodies, and `if()` paths throw definition errors that name the containing step and operation. Return a value expression instead. Parallel lanes inside these bodies still support terminal outputs and branches as lane values.
 
 #### Returns
 
@@ -1339,22 +1339,26 @@ The error raised when a loop reaches its iteration limit while its condition is 
 #### Signature
 
 ```ts
-new FlowLoopLimitError(): Error
+new FlowLoopLimitError(stepId?: string): FlowLoopLimitError
 error.name: "FlowLoopLimitError"
+error.stepId: string | undefined
 ```
 
-#### Inputs
+#### Parameters
 
-No parameters.
+| Parameter | Type     | Default     | Description                                          |
+| --------- | -------- | ----------- | ---------------------------------------------------- |
+| `stepId`  | `string` | `undefined` | Optional loop step ID included in the error message. |
 
-This exported error class takes no constructor arguments. Catch it around the awaited run if your application handles loop exhaustion, and let unrelated errors propagate. A limit error means the run failed, not that it returned a successful partial result.
+Runtime limit errors supply the failing loop ID. Zero-argument construction keeps the original generic message and an undefined `stepId`. Catch it around the awaited run if your application handles loop exhaustion, and let unrelated errors propagate. A limit error means the run failed, not that it returned a successful partial result.
 
 #### Returns
 
-| Value / member | Type                   | Description                                          |
-| -------------- | ---------------------- | ---------------------------------------------------- |
-| Return         | `FlowLoopLimitError`   | Error instance.                                      |
-| name           | `"FlowLoopLimitError"` | Identifies a still-true condition at the loop limit. |
+| Value / member | Type                   | Description                                                 |
+| -------------- | ---------------------- | ----------------------------------------------------------- |
+| Return         | `FlowLoopLimitError`   | Error instance.                                             |
+| name           | `"FlowLoopLimitError"` | Identifies a still-true condition at the loop limit.        |
+| stepId         | `string \| undefined`  | Read-only failing loop ID, present on runtime limit errors. |
 
 #### Example
 
@@ -1364,13 +1368,13 @@ try {
   await program.run(input, { client });
 } catch (error) {
   if (!(error instanceof FlowLoopLimitError)) throw error;
-  console.error("The flow needs a different stopping rule or iteration limit.");
+  console.error("Loop reached its iteration limit:", error.stepId);
 }
 ```
 
 #### How it works
 
-The catch block handles only loop exhaustion and rethrows other failures. The flow did not complete successfully, so the handler reports the limit instead of treating a partial state as a result.
+The catch block handles only loop exhaustion and rethrows other failures. Captured error fields keep only the error name, without the message or input values. The flow did not complete successfully, so the handler reports the limit instead of treating a partial state as a result.
 
 ## Fixtures and comparison
 
