@@ -1344,7 +1344,7 @@ error.name: "FlowLoopLimitError"
 error.stepId: string | undefined
 ```
 
-#### Inputs
+#### Parameters
 
 | Parameter | Type     | Default     | Description                                          |
 | --------- | -------- | ----------- | ---------------------------------------------------- |
