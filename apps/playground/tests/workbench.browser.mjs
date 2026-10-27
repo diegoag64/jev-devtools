@@ -15,6 +15,76 @@ const server = await createServer({
 let browser;
 const errors = [];
 const observed = [];
+async function assertWorkspaceFits(page) {
+  const size = await page.evaluate(() => {
+    const bounds = (selector) => {
+      const { top, bottom, height } = document
+        .querySelector(selector)
+        .getBoundingClientRect();
+      return { top, bottom, height };
+    };
+    return {
+      viewport: innerHeight,
+      page: document.documentElement.scrollHeight,
+      panels: bounds(".wb-panels"),
+      code: bounds(".wb-source"),
+      diagram: bounds(".wb-viewer"),
+      controls: bounds(".wb-guide-controls"),
+      canvasHeight: document
+        .querySelector(".wb-diagram-panel .jev-flow-viewer")
+        .shadowRoot.querySelector(".flow-overview-viewport").clientHeight,
+    };
+  });
+  assert.ok(
+    size.page <= size.viewport + 1,
+    `The workspace must fit without page scrolling: ${JSON.stringify(size)}`,
+  );
+  for (const region of [size.code, size.diagram, size.controls]) {
+    assert.ok(
+      region.top >= 0 && region.bottom <= size.viewport + 1,
+      "Code, diagram, and guide controls stay in view",
+    );
+    assert.ok(region.height > 0);
+  }
+  assert.ok(
+    size.panels.height >= size.viewport * 0.5,
+    "The panels receive at least half the viewport",
+  );
+  assert.ok(
+    size.canvasHeight >= 80,
+    `The diagram keeps a usable canvas: ${JSON.stringify(size)}`,
+  );
+}
+async function assertSelectionInView(page) {
+  await page.waitForFunction(
+    () => {
+      const root = document.querySelector(
+        ".wb-diagram-panel .jev-flow-viewer",
+      )?.shadowRoot;
+      const viewport = root
+        ?.querySelector(".flow-overview-viewport")
+        ?.getBoundingClientRect();
+      const selected = [
+        ...(root?.querySelectorAll(".flow-step[data-highlighted]") ?? []),
+      ];
+      return (
+        viewport &&
+        selected.length &&
+        selected.every((node) => {
+          const box = node.getBoundingClientRect();
+          return (
+            box.left >= viewport.left - 1 &&
+            box.right <= viewport.right + 1 &&
+            box.top >= viewport.top - 1 &&
+            box.bottom <= viewport.bottom + 1
+          );
+        })
+      );
+    },
+    undefined,
+    { timeout: 5000 },
+  );
+}
 try {
   await server.listen();
   browser = await chromium.launch({ headless: true });
@@ -32,6 +102,54 @@ try {
     .getByRole("heading", { name: "Confidence fallback", exact: true })
     .waitFor();
   await page.locator(".wb-diagram-panel .flow-step").first().waitFor();
+  await page
+    .getByRole("button", { name: "Step-by-step guide", exact: true })
+    .click();
+  await assertWorkspaceFits(page);
+  const divider = page.getByRole("separator", {
+    name: "Resize code and diagram",
+  });
+  const codeWidth = async () =>
+    (await page.locator(".wb-code-panel").boundingBox()).width;
+  const initialWidth = await codeWidth();
+  await divider.focus();
+  await divider.press("ArrowRight");
+  assert.ok(
+    (await codeWidth()) > initialWidth,
+    "Keyboard resizing grows the code pane",
+  );
+  const grip = await divider.boundingBox();
+  await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(grip.x + 130, grip.y + grip.height / 2, { steps: 6 });
+  await page.mouse.up();
+  assert.ok(
+    (await codeWidth()) > initialWidth + 100,
+    "Dragging resizes the panes",
+  );
+  const savedShare = await divider.getAttribute("aria-valuenow");
+  await page.reload();
+  await divider.waitFor();
+  assert.equal(
+    await divider.getAttribute("aria-valuenow"),
+    savedShare,
+    "The split survives a reload",
+  );
+  await divider.press("Home");
+  assert.equal(
+    await divider.getAttribute("aria-valuenow"),
+    await divider.getAttribute("aria-valuemin"),
+  );
+  await divider.press("End");
+  assert.equal(
+    await divider.getAttribute("aria-valuenow"),
+    await divider.getAttribute("aria-valuemax"),
+  );
+  await divider.press("Enter");
+  assert.equal(await divider.getAttribute("aria-valuenow"), "40");
+  await page
+    .getByRole("button", { name: "Complete flow", exact: true })
+    .click();
   const links = await page
     .getByRole("navigation", { name: "Cookbooks", exact: true })
     .getByRole("link")
@@ -83,6 +201,7 @@ try {
         `${title}: diagram grows at stage ${index}`,
       );
       previous = visible;
+      await assertWorkspaceFits(page);
       assert.equal(await page.locator(".wb-narrative a").count(), 1);
       assert.ok(
         (await page.locator(".flow-step[data-highlighted]").count()) > 0,
@@ -139,6 +258,18 @@ try {
   await page
     .getByRole("button", { name: "Step-by-step guide", exact: true })
     .click();
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await assertWorkspaceFits(page);
+  await assertSelectionInView(page);
+  const beforeHide = await codeWidth();
+  await page.getByRole("button", { name: "Toggle cookbook library" }).click();
+  assert.ok(
+    (await codeWidth()) > beforeHide,
+    "Hiding the library gives the panels its width",
+  );
+  await assertSelectionInView(page);
+  await page.getByRole("button", { name: "Toggle cookbook library" }).click();
+  await assertSelectionInView(page);
   await page
     .locator(".wb-narrative-content")
     .evaluate((node) =>
@@ -180,6 +311,7 @@ try {
     .getByRole("status")
     .filter({ hasText: "Sample complete" })
     .waitFor();
+  await page.getByRole("button", { name: "Fit flow", exact: true }).click();
   await page
     .getByRole("button", { name: /Step classify-industry, jev, completed/ })
     .click();
@@ -204,6 +336,7 @@ try {
     .getByRole("status")
     .filter({ hasText: "Sample complete" })
     .waitFor();
+  await page.getByText("Application result", { exact: true }).click();
   assert.match(
     await page.locator(".wb-bottom").innerText(),
     /"level": "group"/,
@@ -248,6 +381,47 @@ try {
   await page
     .getByRole("button", { name: "Step-by-step guide", exact: true })
     .click();
+  await assertWorkspaceFits(page);
+  await divider.waitFor();
+  assert.equal(await divider.getAttribute("aria-orientation"), "horizontal");
+  const codeHeight = (await page.locator(".wb-code-panel").boundingBox())
+    .height;
+  await divider.press("ArrowDown");
+  assert.ok(
+    (await page.locator(".wb-code-panel").boundingBox()).height > codeHeight,
+  );
+  const mobileGrip = await divider.boundingBox();
+  await page.mouse.move(mobileGrip.x + mobileGrip.width / 2, mobileGrip.y + 4);
+  await page.mouse.down();
+  await page.mouse.move(
+    mobileGrip.x + mobileGrip.width / 2,
+    mobileGrip.y + 55,
+    { steps: 4 },
+  );
+  await page.mouse.up();
+  assert.ok(
+    (await page.locator(".wb-code-panel").boundingBox()).height >
+      codeHeight + 30,
+  );
+  await divider.press("Enter");
+  await assertWorkspaceFits(page);
+  await assertSelectionInView(page);
+  await page.waitForFunction(() => {
+    const source = document.querySelector(".wb-source").getBoundingClientRect();
+    const line = document
+      .querySelector(".wb-code-line.is-selected")
+      ?.getBoundingClientRect();
+    return line && line.top >= source.top && line.bottom <= source.bottom;
+  });
+  await page
+    .locator(".wb-diagram-panel .flow-overview-canvas")
+    .evaluate((node) =>
+      Promise.all(
+        node
+          .getAnimations()
+          .map((animation) => animation.finished.catch(() => {})),
+      ),
+    );
   assert.ok(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth + 1,
@@ -258,6 +432,7 @@ try {
     path: new URL("mobile.png", output).pathname,
     fullPage: true,
   });
+  await page.getByRole("button", { name: "Toggle cookbook library" }).click();
   await page.getByLabel("Find a cookbook").fill("not-a-cookbook");
   await page.getByText("No matching cookbooks.", { exact: true }).waitFor();
   await page.goto("http://127.0.0.1:4182/?cookbook=missing");
@@ -354,10 +529,10 @@ try {
     .click();
   assert.equal(await page.getByLabel("Connection", { exact: true }).count(), 0);
   const motion = await browser.newContext({
-    viewport: { width: 1600, height: 1400 },
+    viewport: { width: 1280, height: 800 },
     recordVideo: {
       dir: new URL("motion/", output).pathname,
-      size: { width: 1600, height: 1400 },
+      size: { width: 1280, height: 800 },
     },
   });
   const clip = await motion.newPage();
@@ -365,6 +540,13 @@ try {
   await clip
     .getByRole("button", { name: "Step-by-step guide", exact: true })
     .click();
+  const motionGrip = await clip
+    .getByRole("separator", { name: "Resize code and diagram" })
+    .boundingBox();
+  await clip.mouse.move(motionGrip.x + 4, motionGrip.y + 100);
+  await clip.mouse.down();
+  await clip.mouse.move(motionGrip.x + 140, motionGrip.y + 100, { steps: 15 });
+  await clip.mouse.up();
   for (const index of [0, 1, 2, 3, 2]) {
     await clip
       .getByRole("navigation", { name: "Cookbook steps" })

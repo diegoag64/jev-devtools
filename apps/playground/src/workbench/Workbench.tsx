@@ -10,6 +10,7 @@ import { JevFlowViewer, useJevInspection } from "jev-devtools/viewer";
 import { cookbookCatalog } from "./catalog.js";
 import type { CookbookDetail } from "./types.js";
 import { colors, SourceCode } from "./SourceCode.js";
+import { SplitPanels } from "./SplitPanels.js";
 import { postPlayground, RunError } from "../playground-request.js";
 import "./workbench.css";
 
@@ -27,6 +28,17 @@ function App() {
   const [detail, setDetail] = useState<CookbookDetail>();
   const [loadError, setLoadError] = useState("");
   const [reload, setReload] = useState(0);
+  const [libraryOpen, setLibraryOpen] = useState(
+    () => !matchMedia("(max-width: 1000px)").matches,
+  );
+  useEffect(() => {
+    const query = matchMedia("(max-width: 1000px)");
+    const change = () => {
+      if (query.matches) setLibraryOpen(false);
+    };
+    query.addEventListener("change", change);
+    return () => query.removeEventListener("change", change);
+  }, []);
   useEffect(() => {
     const back = () => setSlug(currentSlug());
     window.addEventListener("popstate", back);
@@ -56,11 +68,11 @@ function App() {
   }, [slug, reload]);
   const recipe = cookbookCatalog.find((item) => item.slug === slug);
   return (
-    <div className="wb-app">
+    <div className="wb-app" data-library-open={libraryOpen || undefined}>
       <a className="wb-skip" href="#workbench">
         Skip to workbench
       </a>
-      <aside className="wb-library">
+      <aside id="cookbook-library" className="wb-library" hidden={!libraryOpen}>
         <a className="wb-brand" href="/">
           jev<span> / playground</span>
         </a>
@@ -104,6 +116,8 @@ function App() {
                           event.preventDefault();
                           history.pushState(null, "", `?cookbook=${item.slug}`);
                           setSlug(item.slug);
+                          if (matchMedia("(max-width: 1000px)").matches)
+                            setLibraryOpen(false);
                         }}
                       >
                         {item.title}
@@ -128,23 +142,19 @@ function App() {
       </aside>
       <main id="workbench" className="wb-main">
         <header className="wb-header">
-          <span>THE FLOW WORKBENCH</span>
+          <button
+            aria-label="Toggle cookbook library"
+            aria-expanded={libraryOpen}
+            aria-controls="cookbook-library"
+            onClick={() => setLibraryOpen((value) => !value)}
+          >
+            ☰ <span>Cookbooks</span>
+          </button>
+          <h1 title={recipe?.title}>{recipe?.title ?? "Cookbook not found"}</h1>
           <a href="https://docs.jevtools.dev/" target="_blank" rel="noreferrer">
             Flow API docs ↗
           </a>
         </header>
-        <div className="wb-title">
-          <div>
-            <p>{recipe?.category ?? "Cookbooks"}</p>
-            <h1>{recipe?.title ?? "Cookbook not found"}</h1>
-            <p>{recipe?.intro}</p>
-          </div>
-          {recipe && (
-            <a href={recipe.source} target="_blank" rel="noreferrer">
-              Original TypeSafe cookbook ↗
-            </a>
-          )}
-        </div>
         {loadError ? (
           <div role="alert" className="wb-empty">
             <p>{loadError}</p>
@@ -290,7 +300,7 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
     }
   }
   return (
-    <>
+    <div className="wb-recipe">
       <div className="wb-toolbar">
         <div className="wb-tabs" aria-label="Workbench view">
           <button
@@ -315,6 +325,7 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
         {detail.steps.map((item, index) => (
           <button
             key={item.id}
+            title={`${item.title} · ${item.api}`}
             style={
               { "--step-color": colors[index % colors.length] } as CSSProperties
             }
@@ -337,24 +348,18 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
           }
         >
           <div key={step.id} className="wb-narrative-content">
-            <p className="wb-kicker">
-              STEP {active + 1} OF {detail.steps.length} · {step.api}
-            </p>
-            <h2>{step.title}</h2>
+            <div className="wb-narrative-title">
+              <span className="wb-kicker">
+                STEP {active + 1} OF {detail.steps.length} · {step.api}
+              </span>
+              <h2>{step.title}</h2>
+            </div>
             <p>{step.explanation}</p>
             <p className="wb-muted">
-              From the original recipe:{" "}
+              Original recipe:{" "}
               <a href={detail.originalSource} target="_blank" rel="noreferrer">
                 {step.originalChapter} ↗
               </a>
-            </p>
-            <p className="wb-muted">
-              The highlighted code adds{" "}
-              {step.nodeIds.length === 1
-                ? "this node"
-                : `these ${step.nodeIds.length} nodes`}{" "}
-              to the diagram. This is the authored structure; run the complete
-              sample to inspect execution.
             </p>
           </div>
           <div className="wb-guide-controls">
@@ -431,120 +436,156 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
           </p>
         </div>
       )}
-      <div className="wb-panels">
-        <section className="wb-code-panel" aria-label="Code panel">
-          <div className="wb-panel-heading">
-            <h2>
-              Flow API <span> / flow.ts</span>
-            </h2>
-            <button
-              onClick={() => {
-                void navigator.clipboard
-                  .writeText(detail.source)
-                  .then(() => setCopied(true))
-                  .catch(() =>
-                    setStatus(
-                      "Could not copy. Select the source text to copy it manually.",
-                    ),
-                  );
-              }}
-            >
-              {copied ? "Copied" : "Copy source"}
-            </button>
-          </div>
-          <SourceCode
-            detail={detail}
-            active={active}
-            walkthrough={walkthrough}
-            selected={selected}
-            onSelect={selectNodes}
-          />
-          <p className="wb-panel-foot">
-            Select code or a line number to highlight its diagram nodes.
-          </p>
-        </section>
-        <section className="wb-diagram-panel" aria-label="Flow diagram">
-          <div className="wb-panel-heading">
-            <h2>{walkthrough ? "Building the flow" : "Flow diagram"}</h2>
-            <span>
-              {walkthrough
-                ? `${active + 1} / ${detail.steps.length} steps`
-                : run
-                  ? `Sample · ${run.status}`
-                  : "Definition · not run"}
-            </span>
-          </div>
-          <div className="wb-viewer">
-            <JevFlowViewer
-              definition={
-                !walkthrough && capturedDefinition
-                  ? capturedDefinition
-                  : walkthrough
-                    ? detail.definition
-                    : authoredDefinition
-              }
-              run={walkthrough ? undefined : run}
-              traces={walkthrough ? [] : inspection.traces}
-              selectedNodeId={selected[0] ?? ""}
-              onNodeSelect={(id) => selectNodes([id])}
-              visibleNodeIds={visible}
-              highlightedNodeIds={selected}
-              nodeAccents={accents}
+      <SplitPanels
+        code={
+          <section
+            id="workbench-code"
+            className="wb-code-panel"
+            aria-label="Code panel"
+          >
+            <div className="wb-panel-heading">
+              <h2>
+                Flow API <span> / flow.ts</span>
+              </h2>
+              <button
+                onClick={() => {
+                  void navigator.clipboard
+                    .writeText(detail.source)
+                    .then(() => setCopied(true))
+                    .catch(() =>
+                      setStatus(
+                        "Could not copy. Select the source text to copy it manually.",
+                      ),
+                    );
+                }}
+              >
+                {copied ? "Copied" : "Copy source"}
+              </button>
+            </div>
+            <SourceCode
+              detail={detail}
+              active={active}
+              walkthrough={walkthrough}
+              selected={selected}
+              onSelect={selectNodes}
             />
-          </div>
-          <p className="wb-panel-foot">
-            {inspection.connection === "connected"
-              ? "Inspector connected"
-              : inspection.connection}{" "}
-            · Diagram generated from the Flow API
-          </p>
-        </section>
-      </div>
-      {nestedNode?.itemDefinition && (
-        <details className="wb-nested" key={nestedNode.id}>
-          <summary>
-            Inside {nestedNode.title ?? nestedNode.id} ·{" "}
-            {nestedNode.kind === "loop" ? "iteration" : "item"} program
-          </summary>
-          <p>
-            This is the authored program inside the selected collection. Running
-            the complete flow captures each item's requests and results in the
-            main diagram.
-          </p>
-          <div className="wb-nested-viewer">
-            <JevFlowViewer definition={nestedNode.itemDefinition} />
-          </div>
-        </details>
-      )}
-      <div className="wb-bottom">
-        <details>
-          <summary>Sample input</summary>
-          <pre>{detail.samples[sample].message}</pre>
-        </details>
-        {result !== undefined && (
-          <details open>
-            <summary>Application result</summary>
-            <pre>{JSON.stringify(result, null, 2)}</pre>
+            <p className="wb-panel-foot">
+              Select code or a line number to highlight its diagram nodes.
+            </p>
+          </section>
+        }
+        diagram={
+          <section className="wb-diagram-panel" aria-label="Flow diagram">
+            <div className="wb-panel-heading">
+              <h2>{walkthrough ? "Building the flow" : "Flow diagram"}</h2>
+              <span>
+                {walkthrough
+                  ? `${active + 1} / ${detail.steps.length} steps`
+                  : run
+                    ? `Sample · ${run.status}`
+                    : "Definition · not run"}
+              </span>
+            </div>
+            <div className="wb-viewer">
+              <JevFlowViewer
+                definition={
+                  !walkthrough && capturedDefinition
+                    ? capturedDefinition
+                    : walkthrough
+                      ? detail.definition
+                      : authoredDefinition
+                }
+                run={walkthrough ? undefined : run}
+                traces={walkthrough ? [] : inspection.traces}
+                selectedNodeId={selected[0] ?? ""}
+                onNodeSelect={(id) => selectNodes([id])}
+                visibleNodeIds={visible}
+                highlightedNodeIds={selected}
+                nodeAccents={accents}
+              />
+            </div>
+            <p className="wb-panel-foot">
+              {inspection.connection === "connected"
+                ? "Inspector connected"
+                : inspection.connection}{" "}
+              · Diagram generated from the Flow API
+            </p>
+          </section>
+        }
+      />
+      <div
+        className="wb-bottom"
+        onKeyDown={(event) => {
+          if (event.key !== "Escape") return;
+          const details = (event.target as Element).closest("details");
+          if (details?.open) {
+            details.open = false;
+            details.querySelector("summary")?.focus();
+          }
+        }}
+      >
+        {nestedNode?.itemDefinition && (
+          <details
+            name="workbench-details"
+            className="wb-nested"
+            key={nestedNode.id}
+          >
+            <summary>
+              Inside {nestedNode.title ?? nestedNode.id} ·{" "}
+              {nestedNode.kind === "loop" ? "iteration" : "item"} program
+            </summary>
+            <div className="wb-extra-content">
+              <p>
+                This is the authored program inside the selected collection.
+                Running the complete flow captures each item's requests and
+                results in the main diagram.
+              </p>
+              <div className="wb-nested-viewer">
+                <JevFlowViewer definition={nestedNode.itemDefinition} />
+              </div>
+            </div>
           </details>
         )}
-        <details>
+        <details name="workbench-details">
+          <summary>Sample input</summary>
+          <div className="wb-extra-content">
+            <pre>{detail.samples[sample].message}</pre>
+          </div>
+        </details>
+        {result !== undefined && (
+          <details name="workbench-details">
+            <summary>Application result</summary>
+            <div className="wb-extra-content">
+              <pre>{JSON.stringify(result, null, 2)}</pre>
+            </div>
+          </details>
+        )}
+        <details name="workbench-details">
           <summary>About this adaptation</summary>
-          <p>{detail.adaptation}</p>
-          <p>
-            This guide follows the TypeSafe cookbook and explains the operations
-            added by this Flow adaptation. Source:{" "}
-            <a href={detail.originalSource} target="_blank" rel="noreferrer">
-              original recipe ↗
-            </a>
-            .
-          </p>
-          <p className="wb-muted">
-            Upstream revision: {detail.sourceRevision}. Local source:{" "}
-            {detail.sourceFile}.
-          </p>
+          <div className="wb-extra-content">
+            <p>
+              {
+                cookbookCatalog.find((recipe) => recipe.slug === detail.slug)
+                  ?.intro
+              }
+            </p>
+            <p>{detail.adaptation}</p>
+            <p>
+              This guide follows the TypeSafe cookbook and explains the
+              operations added by this Flow adaptation. Source:{" "}
+              <a href={detail.originalSource} target="_blank" rel="noreferrer">
+                original recipe ↗
+              </a>
+              .
+            </p>
+            <p className="wb-muted">
+              Upstream revision: {detail.sourceRevision}. Local source:{" "}
+              {detail.sourceFile}.
+            </p>
+          </div>
         </details>
       </div>
-    </>
+    </div>
   );
 }
 

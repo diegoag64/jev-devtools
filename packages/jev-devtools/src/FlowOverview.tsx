@@ -771,6 +771,8 @@ export const FlowOverview = memo(function FlowOverview({
       y: 0,
     });
   const externalFocus = useRef("");
+  const externalArea = useRef<Bounds | undefined>(undefined);
+  const externallyControlled = !inline && selectedNodeId !== undefined;
   const focusKey = JSON.stringify([
     selectedNodeId,
     visibleNodeIds,
@@ -779,35 +781,60 @@ export const FlowOverview = memo(function FlowOverview({
   useEffect(() => {
     // Embedded source/timeline selection follows the corresponding authored
     // nodes. Ordinary capture updates and drawer selections keep their camera.
-    if (
-      inline ||
-      selectedNodeId === undefined ||
-      externalFocus.current === focusKey
-    )
+    if (!externallyControlled) {
+      externalArea.current = undefined;
+      externalFocus.current = "";
       return;
-    externalFocus.current = focusKey;
+    }
     const areas = (
       highlightedNodeIds?.length ? highlightedNodeIds : [selectedNodeId]
     )
-      .map((id) => layout.points.get(id))
+      .map((id) => (id === undefined ? undefined : layout.points.get(id)))
       .filter((area): area is Bounds => !!area);
-    if (!areas.length) return;
+    if (!areas.length) {
+      externalArea.current = undefined;
+      externalFocus.current = focusKey;
+      return;
+    }
     const x = Math.min(...areas.map((area) => area.x)),
       y = Math.min(...areas.map((area) => area.y));
-    focusArea({
+    externalArea.current = {
       x: x - 24,
       y: y - 24,
       width: Math.max(...areas.map((area) => area.x + area.width)) - x + 48,
       height: Math.max(...areas.map((area) => area.y + area.height)) - y + 48,
-    });
+    };
+    if (externalFocus.current !== focusKey) {
+      externalFocus.current = focusKey;
+      focusArea(externalArea.current);
+    }
   }, [
     focusKey,
     selectedNodeId,
     highlightedNodeIds,
-    inline,
+    externallyControlled,
     layout.points,
     focusArea,
   ]);
+  useEffect(() => {
+    const element = viewport.current;
+    if (!externallyControlled || !element) return;
+    let width = element.clientWidth,
+      height = element.clientHeight;
+    // A controlled tutorial selection stays framed when its split pane changes
+    // size. The ordinary drawer keeps its existing pan/zoom preservation policy.
+    const observer = new ResizeObserver(() => {
+      const nextWidth = element.clientWidth,
+        nextHeight = element.clientHeight;
+      if (nextWidth === width && nextHeight === height) return;
+      width = nextWidth;
+      height = nextHeight;
+      if (width > 0 && height > 0 && externalArea.current)
+        focusArea(externalArea.current);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [externallyControlled, viewport, focusArea]);
   const onResize = useCallback(
     (id: string, height: number) => {
       preserveCamera();

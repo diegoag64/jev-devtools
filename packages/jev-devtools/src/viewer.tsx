@@ -155,7 +155,7 @@ export function JevFlowViewer({
     <div
       className="jev-flow-viewer"
       ref={host}
-      style={{ height: "100%", minHeight: 400 }}
+      style={{ height: "100%", minHeight: 0 }}
     >
       {root &&
         createPortal(

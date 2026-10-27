@@ -87,20 +87,20 @@ JevFlowViewer(props: JevFlowViewerProps): ReactElement
 
 #### Inputs
 
-| Prop                                             | Meaning                                                                                  |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| `definition: FlowDefinition`                     | Authored graph to render.                                                                |
-| `run?: FlowRun`                                  | Captured execution for this definition. Omit to show a definition that has not run.      |
-| `traces?: Trace[]`                               | Captured request details, default `[]`.                                                  |
-| `selectedNodeId?: string`                        | Controlled selected node. Omit for internal selection.                                   |
-| `onNodeSelect?: (id: string) => void`            | Receives a selected top-level node ID.                                                   |
-| `visibleNodeIds?: readonly string[]`             | Present only these top-level nodes and their visible dependency edges. Omit to show all. |
-| `highlightedNodeIds?: readonly string[]`         | Add an outline to matching nodes.                                                        |
-| `nodeAccents?: Readonly<Record<string, string>>` | CSS colors for node top rules, indexed by node ID.                                       |
+| Prop                                             | Meaning                                                                                                                           |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `definition: FlowDefinition`                     | Authored graph to render.                                                                                                         |
+| `run?: FlowRun`                                  | Captured execution for this definition. Omit to show a definition that has not run.                                               |
+| `traces?: Trace[]`                               | Captured request details, default `[]`.                                                                                           |
+| `selectedNodeId?: string`                        | Controlled selected node. Keeps the selected or highlighted nodes framed when the container resizes. Omit for internal selection. |
+| `onNodeSelect?: (id: string) => void`            | Receives a selected top-level node ID.                                                                                            |
+| `visibleNodeIds?: readonly string[]`             | Present only these top-level nodes and their visible dependency edges. Omit to show all.                                          |
+| `highlightedNodeIds?: readonly string[]`         | Add an outline to matching nodes.                                                                                                 |
+| `nodeAccents?: Readonly<Record<string, string>>` | CSS colors for node top rules, indexed by node ID.                                                                                |
 
 #### Returns
 
-A React host element. On mount, the diagram renders inside its Shadow DOM with its own styles. SSR renders the empty host; allow at least 400 pixels of height. Display masking is always applied and leaves the supplied data unchanged. Missing request capture remains explicitly unavailable.
+A React host element. On mount, the diagram renders inside its Shadow DOM with its own styles. SSR renders the empty host. Set the container height; 400 pixels or more is recommended, but the viewer can shrink with a smaller split pane. Display masking is always applied and leaves the supplied data unchanged. Missing request capture remains explicitly unavailable.
 
 #### Example
 

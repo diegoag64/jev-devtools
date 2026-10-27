@@ -2090,8 +2090,13 @@
   flex-direction: column;
 }
 .jev-devtools.jev-embedded .flow-overview-viewport {
-  /* Leave room for wrapped controls and details within a 400px embed. */
-  min-height: 200px;
+  /* Split panes can be shorter than a full drawer. Let the canvas use the
+     remaining height while the header and request controls stay accessible. */
+  min-height: 0;
+}
+.jev-devtools.jev-embedded .detail-header {
+  padding: 8px 12px;
+  gap: 10px;
 }
 .jev-devtools.jev-embedded .flow-step[data-accent] {
   border-top: 3px solid var(--flow-node-accent);

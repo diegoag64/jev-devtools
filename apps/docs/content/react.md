@@ -10,7 +10,7 @@ Use `JevDevtools` to display the requests and flows captured by your server adap
 
 <!-- example: viewer.tsx -->
 
-`useJevInspection` connects to the same server adapter when explicitly enabled. It returns validated, display-masked trace and flow snapshots plus a connection status. Match the endpoint to your existing adapter; enable capture on the server separately. Disable or unmount the hook to close both subscriptions. The viewer uses its own Shadow DOM and stylesheet, with an SSR placeholder and a minimum height of 400 pixels.
+`useJevInspection` connects to the same server adapter when explicitly enabled. It returns validated, display-masked trace and flow snapshots plus a connection status. Match the endpoint to your existing adapter; enable capture on the server separately. Disable or unmount the hook to close both subscriptions. The viewer uses its own Shadow DOM and stylesheet, with an SSR placeholder. Set its container height; 400 pixels or more gives the diagram room, and smaller split panes can shrink to fit.
 
 For a tutorial, use `visibleNodeIds` to reveal part of the diagram and `highlightedNodeIds` with `nodeAccents` to connect it to source excerpts. `selectedNodeId` and `onNodeSelect` support controlled selection. These props affect presentation only; keep the original definition for execution. Use your own source map: the package does not derive code ranges. See the [API reference](@/api/reference/#jevflowviewer) for all props.
 
