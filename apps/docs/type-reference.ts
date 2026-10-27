@@ -63,7 +63,12 @@ export function publicTypeReference(referenceMarkdown: string) {
       ),
     ].map((match) => [match[1], match[2]]),
   );
-  const modules = ["jev-devtools", "jev-devtools/server", "jev-devtools/flow"];
+  const modules = [
+    "jev-devtools",
+    "jev-devtools/server",
+    "jev-devtools/flow",
+    "jev-devtools/viewer",
+  ];
   const roots = modules.map((name) =>
     fileURLToPath(import.meta.resolve(name)).replace(/\.js$/, ".d.ts"),
   );

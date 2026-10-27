@@ -57,7 +57,7 @@ try {
   });
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
-  await page.goto("http://127.0.0.1:4182/?cookbook=consistency-nouls");
+  await page.goto("http://127.0.0.1:4182/?legacy=1&cookbook=consistency-nouls");
   await page
     .getByRole("heading", { name: "Keep uncertainty visible." })
     .waitFor();

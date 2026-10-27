@@ -79,7 +79,7 @@ execFileSync(
   [
     "--input-type=module",
     "-e",
-    `import assert from 'node:assert/strict';import React from 'react';import {renderToString} from 'react-dom/server';import {JevDevtools} from 'jev-devtools';import {createJevDevtools} from 'jev-devtools/server';import {defineJevFlow} from 'jev-devtools/flow';assert.equal(renderToString(React.createElement(JevDevtools,{enabled:true})), '');assert.equal(renderToString(React.createElement(JevDevtools)), '');const tools=createJevDevtools({origin:'http://localhost:3000'});assert.equal((await tools.handle(new Request('http://localhost:3000/api/jev-devtools'))).status,404);assert.equal((await defineJevFlow('consumer',flow=>flow.output('done')).run({}, {client:tools.createClient({apiKey:'sample-only'})})).outcome,'done');tools.dispose();console.log('Packed exports, SSR, and disabled endpoint: passed');`,
+    `import assert from 'node:assert/strict';import React from 'react';import {renderToString} from 'react-dom/server';import {JevDevtools} from 'jev-devtools';import {JevFlowViewer} from 'jev-devtools/viewer';import {createJevDevtools} from 'jev-devtools/server';import {defineJevFlow} from 'jev-devtools/flow';assert.equal(renderToString(React.createElement(JevDevtools,{enabled:true})), '');assert.equal(renderToString(React.createElement(JevDevtools)), '');const tools=createJevDevtools({origin:'http://localhost:3000'});assert.equal((await tools.handle(new Request('http://localhost:3000/api/jev-devtools'))).status,404);assert.equal((await defineJevFlow('consumer',flow=>flow.output('done')).run({}, {client:tools.createClient({apiKey:'sample-only'})})).outcome,'done');assert.match(renderToString(React.createElement(JevFlowViewer,{definition:{version:1,id:'static',name:'Static',nodes:[]}})), /jev-flow-viewer/);tools.dispose();console.log('Packed exports, SSR, and disabled endpoint: passed');`,
   ],
   { cwd: consumer, stdio: "inherit" },
 );
@@ -99,6 +99,10 @@ await cp(
 );
 for (const file of ["packed-capture.ts", "packed-capture.test.mjs"])
   await cp(join(root, "scripts/fixtures", file), join(types, file));
+await cp(
+  join(root, "scripts/fixtures/packed-viewer.ts"),
+  join(types, "packed-viewer.ts"),
+);
 for (const file of [
   "packed-expression-contracts.ts",
   "packed-expression-contracts.test.mjs",
@@ -123,6 +127,7 @@ await writeFile(
       "packed-resolved-templates.ts",
       "packed-expression-contracts.ts",
       "packed-capture.ts",
+      "packed-viewer.ts",
     ],
   }),
 );

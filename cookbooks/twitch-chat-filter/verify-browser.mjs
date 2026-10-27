@@ -26,7 +26,9 @@ try {
   page.on("request", (request) => {
     if (request.url().includes("/__jev/run?")) runs++;
   });
-  await page.goto("http://127.0.0.1:4182/?cookbook=twitch-chat-filter");
+  await page.goto(
+    "http://127.0.0.1:4182/?legacy=1&cookbook=twitch-chat-filter",
+  );
   await page
     .getByRole("heading", { name: "One feed, five visible actions" })
     .waitFor();

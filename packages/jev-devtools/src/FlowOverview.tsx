@@ -1,4 +1,12 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import type {
   FlowDefinition,
   FlowNode,
@@ -62,6 +70,8 @@ const RequestNode = memo(function RequestNode({
   y,
   onSelect,
   onResize,
+  accent,
+  highlighted,
 }: {
   node: FlowNode;
   trace: Trace;
@@ -69,6 +79,8 @@ const RequestNode = memo(function RequestNode({
   selected: boolean;
   x: number;
   y: number;
+  accent?: string;
+  highlighted?: boolean;
   onSelect: (id: string) => void;
   onResize: (id: string, height: number) => void;
 }) {
@@ -78,8 +90,18 @@ const RequestNode = memo(function RequestNode({
       ref={ref}
       className={`flow-step flow-request ${selected ? "selected" : ""}`}
       data-status={status}
+      data-node-id={node.id}
+      data-highlighted={highlighted || undefined}
+      data-accent={accent ? "true" : undefined}
       aria-label={`Request ${node.id}`}
-      style={{ left: x, top: y, width: 1120 }}
+      style={
+        {
+          left: x,
+          top: y,
+          width: 1120,
+          "--flow-node-accent": accent,
+        } as CSSProperties
+      }
     >
       <button
         className="flow-request-heading"
@@ -125,6 +147,8 @@ const Card = memo(function Card({
   collectionView,
   onCollectionChange,
   expansionId,
+  accent,
+  highlighted,
 }: {
   node: FlowNode;
   status: string;
@@ -132,6 +156,8 @@ const Card = memo(function Card({
   selected: boolean;
   bounds: Bounds;
   onResize: (id: string, height: number) => void;
+  accent?: string;
+  highlighted?: boolean;
   onSelect: (id: string) => void;
   lanes: Lane[];
   inputs?: ConditionInput[];
@@ -202,11 +228,17 @@ const Card = memo(function Card({
       ref={ref}
       className={`flow-step ${node.kind === "task" ? "flow-task" : ""} ${selected ? "selected" : ""}`}
       data-status={status}
-      style={{
-        left: bounds.x,
-        top: bounds.y,
-        width: bounds.width,
-      }}
+      data-node-id={node.id}
+      data-highlighted={highlighted || undefined}
+      data-accent={accent ? "true" : undefined}
+      style={
+        {
+          left: bounds.x,
+          top: bounds.y,
+          width: bounds.width,
+          "--flow-node-accent": accent,
+        } as CSSProperties
+      }
       aria-label={`${node.kind === "map" ? "Collection" : "Step"} ${node.title ?? node.id}`}
     >
       <button
@@ -467,18 +499,51 @@ const Card = memo(function Card({
   );
 });
 export const FlowOverview = memo(function FlowOverview({
-  definition,
+  definition: fullDefinition,
   run,
   traces,
   inline = false,
+  definitionOnly = false,
+  selectedNodeId,
+  onNodeSelect,
+  visibleNodeIds,
+  highlightedNodeIds,
+  nodeAccents,
 }: {
   definition: FlowDefinition;
   run: FlowRun;
   traces: Trace[];
   inline?: boolean;
+  definitionOnly?: boolean;
+  selectedNodeId?: string;
+  onNodeSelect?: (id: string) => void;
+  visibleNodeIds?: readonly string[];
+  highlightedNodeIds?: readonly string[];
+  nodeAccents?: Readonly<Record<string, string>>;
 }) {
-  const [selected, setSelected] = useState(
+  const definition = useMemo(() => {
+    if (!visibleNodeIds) return fullDefinition;
+    const visible = new Set(visibleNodeIds);
+    return {
+      ...fullDefinition,
+      nodes: fullDefinition.nodes
+        .filter((node) => visible.has(node.id))
+        .map((node) => ({
+          ...node,
+          dependencies: node.dependencies.filter((id) => visible.has(id)),
+        })),
+    };
+  }, [fullDefinition, visibleNodeIds]);
+  const [localSelected, setLocalSelected] = useState(
     () => definition.nodes.find((n) => n.kind === "jev")?.id ?? "",
+  );
+  const selected = selectedNodeId ?? localSelected;
+  const setSelected = useCallback(
+    (id: string) => {
+      setLocalSelected(id);
+      onNodeSelect?.(id);
+    },
+    [onNodeSelect],
   );
   const [details, setDetails] = useState(false);
   const [collectionViews, setCollectionViews] = useState<
@@ -705,6 +770,44 @@ export const FlowOverview = memo(function FlowOverview({
       x: layout.left,
       y: 0,
     });
+  const externalFocus = useRef("");
+  const focusKey = JSON.stringify([
+    selectedNodeId,
+    visibleNodeIds,
+    highlightedNodeIds,
+  ]);
+  useEffect(() => {
+    // Embedded source/timeline selection follows the corresponding authored
+    // nodes. Ordinary capture updates and drawer selections keep their camera.
+    if (
+      inline ||
+      selectedNodeId === undefined ||
+      externalFocus.current === focusKey
+    )
+      return;
+    externalFocus.current = focusKey;
+    const areas = (
+      highlightedNodeIds?.length ? highlightedNodeIds : [selectedNodeId]
+    )
+      .map((id) => layout.points.get(id))
+      .filter((area): area is Bounds => !!area);
+    if (!areas.length) return;
+    const x = Math.min(...areas.map((area) => area.x)),
+      y = Math.min(...areas.map((area) => area.y));
+    focusArea({
+      x: x - 24,
+      y: y - 24,
+      width: Math.max(...areas.map((area) => area.x + area.width)) - x + 48,
+      height: Math.max(...areas.map((area) => area.y + area.height)) - y + 48,
+    });
+  }, [
+    focusKey,
+    selectedNodeId,
+    highlightedNodeIds,
+    inline,
+    layout.points,
+    focusArea,
+  ]);
   const onResize = useCallback(
     (id: string, height: number) => {
       preserveCamera();
@@ -720,7 +823,7 @@ export const FlowOverview = memo(function FlowOverview({
       setSelected(id);
       setCollectionViews((previous) => ({ ...previous, [id]: view }));
     },
-    [preserveCamera],
+    [preserveCamera, setSelected],
   );
   const resizeItem = useCallback(
     (id: string, size: Size) => {
@@ -756,7 +859,9 @@ export const FlowOverview = memo(function FlowOverview({
         {definition.nodes.map((n) => (
           <option key={n.id} value={n.id}>
             {n.title ? `${n.title} (${n.id})` : n.id} ·{" "}
-            {run.steps[n.id]?.status ?? "waiting"}
+            {definitionOnly
+              ? "not run"
+              : (run.steps[n.id]?.status ?? "waiting")}
           </option>
         ))}
       </select>
@@ -774,12 +879,18 @@ export const FlowOverview = memo(function FlowOverview({
         {!inline && (
           <header className="detail-header">
             <div>
-              <span className="eyebrow">Flow run · {run.status}</span>
+              <span className="eyebrow">
+                {definitionOnly
+                  ? "Flow definition"
+                  : `Flow run · ${run.status}`}
+              </span>
               <h2>{run.name}</h2>
             </div>
             <div className="flow-run-summary">
               {run.outcome ? (
                 <strong>Outcome: {run.outcome}</strong>
+              ) : definitionOnly ? (
+                "Authored structure · not executed"
               ) : (
                 (run.error ?? "Execution paths")
               )}
@@ -790,12 +901,14 @@ export const FlowOverview = memo(function FlowOverview({
               </small>
               <div className="flow-run-controls">
                 {stepSelection}
-                <CopyFixtureButton control={fixtureCopy} />
+                {!definitionOnly && <CopyFixtureButton control={fixtureCopy} />}
               </div>
             </div>
           </header>
         )}
-        {!inline && <CopyFixtureReport control={fixtureCopy} />}
+        {!inline && !definitionOnly && (
+          <CopyFixtureReport control={fixtureCopy} />
+        )}
         {inline && <div className="lab-flow-toolbar">{stepSelection}</div>}
         <div className="flow-workspace">
           <div
@@ -933,7 +1046,13 @@ export const FlowOverview = memo(function FlowOverview({
                     key={n.id}
                     node={n}
                     trace={captured}
-                    status={run.steps[n.id]?.status ?? "waiting"}
+                    status={
+                      definitionOnly
+                        ? "not run"
+                        : (run.steps[n.id]?.status ?? "waiting")
+                    }
+                    accent={nodeAccents?.[n.id]}
+                    highlighted={highlightedNodeIds?.includes(n.id)}
                     selected={selected === n.id}
                     x={p.x}
                     y={p.y}
@@ -944,8 +1063,14 @@ export const FlowOverview = memo(function FlowOverview({
                   <Card
                     key={n.id}
                     node={n}
-                    status={run.steps[n.id]?.status ?? "waiting"}
+                    status={
+                      definitionOnly
+                        ? "not run"
+                        : (run.steps[n.id]?.status ?? "waiting")
+                    }
                     decision={run.steps[n.id]?.decision}
+                    accent={nodeAccents?.[n.id]}
+                    highlighted={highlightedNodeIds?.includes(n.id)}
                     selected={selected === n.id}
                     bounds={p}
                     onResize={onResize}

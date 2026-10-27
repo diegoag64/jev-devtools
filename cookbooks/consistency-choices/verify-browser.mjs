@@ -40,7 +40,9 @@ try {
   });
   const page = await context.newPage();
   page.on("pageerror", (error) => errors.push(String(error)));
-  await page.goto("http://127.0.0.1:4182/?cookbook=consistency-choices");
+  await page.goto(
+    "http://127.0.0.1:4182/?legacy=1&cookbook=consistency-choices",
+  );
   await page
     .getByRole("heading", {
       name: "Repeat the rubric. Inspect every decision.",

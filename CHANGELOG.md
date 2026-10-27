@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | Playground requests support custom development ports.                                                      |
+| [Unreleased](#unreleased)                   | Not published                                                                      | Cookbook workbench and narrated guides; embedded flow viewer; custom playground ports.                     |
 | [0.5.5](#055--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.5) | TypeScript fixes; capture and stream validation; clearer setup guidance.                                   |
 | [0.5.4](#054--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.4) | Thirteen Flow cookbooks; routine browser verification; rewritten docs.                                     |
 | [0.5.3](#053--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.3) | Shared flow encoding; simpler releases and publication helpers; flow regression coverage.                  |
@@ -27,6 +27,11 @@ Dates below use UTC and were checked against npm's publication history. The hist
 ## Unreleased
 
 ### Changes
+
+#### Added
+
+- **Cookbook Flow Workbench.** Explore all 19 cookbooks with actual Flow API source beside the drawer's diagram renderer, narrated tutorials, animated graph construction, and linked timeline/code highlights. Synthetic runs expose requests and results inline; the original request lab remains at `?legacy=1`.
+- **Embedded flow viewer.** The new browser-safe `jev-devtools/viewer` export provides `JevFlowViewer` and the opt-in `useJevInspection` hook. Definitions can be displayed before execution, with optional presentation filters, selection, and color cues; the Node runner remains separate.
 
 #### Fixed
 

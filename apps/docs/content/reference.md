@@ -73,6 +73,71 @@ The component enables the inspector only in Vite development builds through `imp
 
 The drawer injects its own stylesheet into its Shadow DOM; no CSS import is needed.
 
+### JevFlowViewer
+
+**Unreleased.** Embed the same diagram and request inspector used by the drawer in an ordinary React layout.
+
+#### Signature
+
+```ts
+JevFlowViewer(props: JevFlowViewerProps): ReactElement
+```
+
+**Import:** `jev-devtools/viewer`. This browser entry does not import the Node flow runner.
+
+#### Inputs
+
+| Prop                                             | Meaning                                                                                  |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `definition: FlowDefinition`                     | Authored graph to render.                                                                |
+| `run?: FlowRun`                                  | Captured execution for this definition. Omit to show a definition that has not run.      |
+| `traces?: Trace[]`                               | Captured request details, default `[]`.                                                  |
+| `selectedNodeId?: string`                        | Controlled selected node. Omit for internal selection.                                   |
+| `onNodeSelect?: (id: string) => void`            | Receives a selected top-level node ID.                                                   |
+| `visibleNodeIds?: readonly string[]`             | Present only these top-level nodes and their visible dependency edges. Omit to show all. |
+| `highlightedNodeIds?: readonly string[]`         | Add an outline to matching nodes.                                                        |
+| `nodeAccents?: Readonly<Record<string, string>>` | CSS colors for node top rules, indexed by node ID.                                       |
+
+#### Returns
+
+A React host element. On mount, the diagram renders inside its Shadow DOM with its own styles. SSR renders the empty host; allow at least 400 pixels of height. Display masking is always applied and leaves the supplied data unchanged. Missing request capture remains explicitly unavailable.
+
+#### Example
+
+<!-- example: viewer.tsx -->
+
+#### How it works
+
+The viewer reuses the drawer's flow cards, request diagrams, details, and pan/zoom controls. Selection can focus nodes; visible-node changes animate unless reduced motion is requested. Presentation filters never modify the supplied definition or execute a flow. Source-code mapping belongs to the application.
+
+### useJevInspection
+
+**Unreleased.** Subscribe to the validated flow and request capture streams used by the drawer.
+
+#### Signature
+
+```ts
+useJevInspection(options?: { endpoint?: string; enabled?: boolean }): InspectionSnapshot
+```
+
+**Import:** `jev-devtools/viewer`.
+
+#### Inputs
+
+`enabled` defaults to `false`. `endpoint` defaults to `/api/jev-devtools` and must be same-origin without credentials, query, or fragment. The server adapter must also be enabled.
+
+#### Returns
+
+`{ flows: { definitions, runs }, traces, connection }`. Disabled state contains empty histories. Connection failures appear in `connection`. Unmounting, disabling, or changing endpoints closes the previous subscriptions. Display masking does not remove values from server capture or transport.
+
+#### Example
+
+The checked `FlowWorkspace` example above selects a captured run, resolves its definition, and passes both to the viewer.
+
+#### How it works
+
+The hook verifies the adapter handshake, then subscribes to validated flow and trace streams. Each update contains the latest retained history, including removals and reconnections.
+
 ## Server adapter
 
 Import factories from `jev-devtools/server`. All server adapter and recorder runtime code belongs on Node.
