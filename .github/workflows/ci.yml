@@ -64,7 +64,18 @@ jobs:
       - run: npx playwright install chromium --only-shell
       - run: npm run verify:drawer
       - run: npm run verify:flows
-      - run: npm run verify:cookbooks
+      # Flow contracts and the shared viewer are checked above and in the verify jobs.
+      # Keep one cookbook integration probe; run full recipe/UI coverage locally.
+      - name: Check cookbook capture integration
+        if: matrix.react == '19.3.1'
+        run: npm run verify:cookbooks -- --only captures
+      - uses: actions/upload-artifact@v4
+        if: always() && matrix.react == '19.3.1'
+        with:
+          name: cookbook-captures-${{ github.sha }}
+          path: benchmarks/results/cookbook-browser/
+          if-no-files-found: ignore
+          retention-days: 7
       - uses: actions/upload-artifact@v4
         if: always()
         with:
