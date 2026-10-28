@@ -38,7 +38,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Performance
 
-- **Coalesce complete flow updates.** Batch ready flow readers over a fixed 16 ms window to reduce repeated nested-run cloning, encoding, transfer, and parsing. Initial and reconnect snapshots stay immediate; terminal states use the same window. Capture policy and version-1 records are unchanged, and aggregate run byte/heap bounds remain open in [#46](https://github.com/diegoag64/jev-devtools/issues/46).
+- **Coalesce complete flow updates.** Batch ready flow readers over a fixed 16 ms window to reduce repeated nested-run cloning, encoding, transfer, and parsing. Initial and reconnect snapshots stay immediate; terminal states use the same window. Capture policy and version-1 records are unchanged, and aggregate run byte/heap bounds remain open in [#46](https://github.com/diegoag64/jev-devtools/issues/46). ([#139](https://github.com/diegoag64/jev-devtools/pull/139))
 
 #### Documentation
 
