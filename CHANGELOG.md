@@ -54,7 +54,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
-- **Flow API design decisions.** Record completed builder/result work, defer broader error and adapter APIs with reconsideration criteria, and track lane-outcome wording in [#143](https://github.com/diegoag64/jev-devtools/issues/143). Preserve the existing observer, recorder, and expression contracts.
+- **Flow API design decisions.** Record completed builder/result work, defer broader error and adapter APIs with reconsideration criteria, and track lane-outcome wording in [#143](https://github.com/diegoag64/jev-devtools/issues/143). Preserve the existing observer, recorder, and expression contracts. ([#144](https://github.com/diegoag64/jev-devtools/pull/144))
 
 - **Unreleased Flow API reference.** Distinguish the working tree's builder and result types from version 0.6.0 in the API reference and definition signatures. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
 
