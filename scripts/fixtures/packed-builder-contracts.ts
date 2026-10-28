@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import {
   defineJevFlow,
+  FlowExpression,
   type ComparableFlow,
   type DefinedJevFlow,
   type FlowBuilder,
@@ -23,11 +24,13 @@ type Ticket = { amount: number; approved: boolean };
 const review = defineJevFlow<Ticket>("typed-review")((f) =>
   f.branch("route", {
     when: f.input.get("approved"),
-    then: (p) =>
-      p.output("approved", {
-        totals: [p.input.get("amount")],
-        ticket: p.input,
-      }),
+    then: (p) => {
+      const receipt = p.task("receipt", {
+        input: { totals: [p.input.get("amount")], ticket: p.input },
+        run: (value) => value,
+      });
+      return p.output("approved", receipt);
+    },
     else: (p) =>
       p.branch("rejection", {
         when: p.input.get("amount").gt(0),
@@ -187,7 +190,7 @@ const nested = defineJevFlow<boolean>("nested-capabilities")((f) => {
 assert.equal((await nested.run(true, options)).value.toFixed(0), "1");
 assert.equal((await nested.run(false, options)).value, 2);
 
-// Whole references, nested templates, readonly tuples, and scalar brands survive output inference.
+// A task assembles an exact JSON result from nested templates, tuples, and scalar brands.
 type Dollars = number & { readonly currency: unique symbol };
 const dollars = 3 as Dollars;
 const branded = defineJevFlow<{ amount: Dollars; values: readonly Dollars[] }>(
@@ -208,11 +211,11 @@ const branded = defineJevFlow<{ amount: Dollars; values: readonly Dollars[] }>(
     },
     (r) => r.input.get("state"),
   );
-  return f.output("money", {
-    state,
-    mapped,
-    pair: [f.input.get("amount"), "usd"] as const,
+  const receipt = f.task("money-receipt", {
+    input: { state, mapped, pair: [f.input.get("amount"), "usd"] as const },
+    run: (value) => value,
   });
+  return f.output("money", receipt);
 });
 const money = await branded.run(
   { amount: dollars, values: [dollars] },
@@ -243,6 +246,89 @@ function dynamicConsumer(result: typeof dynamicResult) {
   return name;
 }
 void dynamicConsumer;
+
+// Output preserves opaque objects. Structural types cannot distinguish this
+// class (even when widened to a record) from a plain object template.
+class Wrapper {
+  constructor(public amount: FlowExpression<number>) {}
+}
+const date = new Date("2026-01-01T00:00:00Z");
+const asset = new Blob(["sample asset"], { type: "text/plain" });
+for (const opaque of [false, true]) {
+  let original!: { amount: FlowExpression<number> };
+  const output = defineJevFlow<number>("opaque-or-template")((f) => {
+    original = opaque ? new Wrapper(f.input) : { amount: f.input };
+    return f.output("done", original);
+  });
+  const result = await output.run(12, options);
+  function unsafeAccess() {
+    // @ts-expect-error original class field may still be an expression
+    return result.value.amount.toFixed(2);
+  }
+  void unsafeAccess;
+  const amount = result.value.amount;
+  if (typeof amount === "number") {
+    assert.equal(opaque, false);
+    assert.equal(amount.toFixed(2), "12.00");
+    assert.notEqual(result.value, original);
+  } else {
+    assert.equal(opaque, true);
+    assert.ok(amount instanceof FlowExpression);
+    assert.equal(result.value, original);
+    assert.equal(amount, original.amount);
+  }
+}
+
+const opaqueValues = defineJevFlow<number>("opaque-nesting")((f) => {
+  const wrapper = new Wrapper(f.input);
+  // Root arrays/tuples resolve elements. Ambiguous objects within them retain
+  // both possibilities, including objects nested inside another plain record.
+  return f.output("nested", [
+    f.input,
+    [date, asset, wrapper, { child: wrapper }, { amount: f.input }],
+  ] as const);
+});
+const opaqueResult = await opaqueValues.run(7, options);
+const numericTupleElement: number = opaqueResult.value[0];
+assert.equal(numericTupleElement.toFixed(1), "7.0");
+const [savedDate, savedAsset, savedWrapper, nestedWrapper, savedRecord] =
+  opaqueResult.value[1];
+const usableDate: Date = savedDate;
+const usableAsset: Blob = savedAsset;
+assert.equal(usableDate, date);
+assert.equal(usableDate.toISOString(), "2026-01-01T00:00:00.000Z");
+assert.equal(usableAsset, asset);
+assert.equal(await usableAsset.text(), "sample asset");
+assert.ok(savedWrapper instanceof Wrapper);
+assert.ok(savedWrapper.amount instanceof FlowExpression);
+assert.equal(nestedWrapper.child, savedWrapper);
+assert.equal(savedRecord.amount, 7);
+function unsafeNestedAccess() {
+  // @ts-expect-error opaque instance fields are not necessarily resolved
+  savedWrapper.amount.toFixed(2);
+  // @ts-expect-error nested objects preserve original-or-resolved possibilities
+  nestedWrapper.child.amount.toFixed(2);
+  // @ts-expect-error even a plain record has a structurally ambiguous prototype
+  savedRecord.amount.toFixed(2);
+}
+void unsafeNestedAccess;
+
+// Whole references return their exact value without walking its object fields.
+const whole = defineJevFlow<Wrapper>("whole-object")((f) =>
+  f.output("whole", f.input),
+);
+const exactWrapper: Wrapper = (await whole.run(savedWrapper, options)).value;
+assert.equal(exactWrapper, savedWrapper);
+assert.ok(exactWrapper.amount instanceof FlowExpression);
+const exactDate = defineJevFlow<Date>("whole-date")((f) =>
+  f.output("date", f.input),
+);
+assert.equal((await exactDate.run(date, options)).value.getUTCFullYear(), 2026);
+const directDate = defineJevFlow("direct-date", (f) => f.output("date", date));
+assert.equal(
+  (await directDate.run(null, options)).value.toISOString(),
+  date.toISOString(),
+);
 
 // Never execute these invalid definitions. Unused expect-error directives fail
 // when declarations accidentally grant capabilities the runtime rejects.

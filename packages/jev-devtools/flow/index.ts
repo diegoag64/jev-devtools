@@ -182,6 +182,24 @@ export type Resolved<T> =
         : T extends object
           ? { [K in keyof T]: Resolved<T[K]> }
           : T;
+// Output traverses arrays and plain records but preserves nonplain objects.
+// Structural types cannot prove an object's prototype. Keep both possibilities
+// for object templates, and preserve callable members of opaque values (Date,
+// SDK assets, and application classes). Whole references already name the exact
+// execution value; unlike a template, that value is not recursively resolved.
+type FlowOutputValue<T> =
+  T extends FlowExpression<infer V>
+    ? V
+    : T extends string | number | boolean | bigint | symbol | null | undefined
+      ? T
+      : T extends (...args: never[]) => unknown
+        ? T
+        : T extends readonly unknown[]
+          ? { [K in keyof T]: FlowOutputValue<T[K]> }
+          : T extends object
+            ? T | { [K in keyof T]: FlowOutputValue<T[K]> }
+            : T;
+
 export type TaskContext = {
   signal: AbortSignal;
   runId: string;
@@ -654,11 +672,12 @@ interface FlowBuilderMethods<T, Scope extends FlowScope> {
   output<Name extends string>(
     name: Name,
   ): FlowExpression<{ outcome: Name; value: undefined }>;
+  /** Object templates retain original-or-resolved possibilities; whole references stay exact. */
   output<Name extends string, V>(
     name: Name,
     value: V,
     display?: FlowDisplay,
-  ): FlowExpression<{ outcome: Name; value: Resolved<V> }>;
+  ): FlowExpression<{ outcome: Name; value: FlowOutputValue<V> }>;
 }
 /** Application execution result, independent of captured FlowRun values. */
 export type FlowResult<O extends FlowOutcome = FlowOutcome> = O & {

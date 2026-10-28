@@ -475,7 +475,7 @@ defineJevFlow<Input>(name)(build): DefinedJevFlow<Input, InferredOutcome>
 
 Use a nonblank name of at most 100 characters. The synchronous `build` callback must return a terminal `output()` or `branch()`.
 
-The curried `defineJevFlow<Input>(name)(build)` form infers the terminal outcome union after fixing the input type. TypeScript cannot partially infer later generic arguments in the existing two-argument form. Existing explicit-input calls keep their broad result; calls without explicit type arguments can infer it. `output()` infers literal names and resolved values, and `branch()` unions its path outcomes. Dynamic string names and broad callback annotations can widen the result. See [inferred application results](@/api/flow/#inferred-application-results).
+The curried `defineJevFlow<Input>(name)(build)` form infers the terminal outcome union after fixing the input type. TypeScript cannot partially infer later generic arguments in the existing two-argument form. Existing explicit-input calls keep their broad result; calls without explicit type arguments can infer it. `output()` infers literal names and output-specific value types, and `branch()` unions its path outcomes. Whole-expression outputs stay exact; direct object templates retain original-or-resolved possibilities. Dynamic string names and broad callback annotations can widen the result. See [inferred application results](@/api/flow/#inferred-application-results).
 
 The returned `{ definition, run }` can be reused for multiple executions. Building it sends no SDK requests. Invalid IDs, scopes, nesting, or terminal structure throw during definition.
 
@@ -860,7 +860,7 @@ Return the branch from the containing flow or path. No steps may follow this ter
 
 #### How it works
 
-`.eq(true)` checks `needsReview`. The selected path calls `output()` with its own outcome name and value. Returning the branch ends the flow; there is no shared step afterward. Use [`if()`](@/api/reference/#flow-if) when the paths should rejoin. Calling `tryBranch()` awaits `route.run({ needsReview: true }, ...)`, then reads outcome `"manual-review"` and value `"A person should review this"` from the finished run.
+`.eq(true)` checks `needsReview`. The selected path calls `output()` with its own outcome name and value. Returning the branch ends the flow; there is no shared step afterward. Use [`if()`](@/api/reference/#flow-if) when the paths should rejoin. Calling `tryBranch()` awaits `route.run({ needsReview: true }, ...)`, then reads outcome `"manual-review"` and a receipt containing `message: "A person should review this"` from the finished run. The receipt task resolves its input fields before the whole result expression reaches `output()`.
 
 ### flow.parallel
 
@@ -1008,7 +1008,7 @@ Defines the end of a flow or branch with a named outcome and optional result dat
 #### Signature
 
 ```ts
-flow.output(name: Name, value: Value, display?: FlowDisplay): Expression<{ outcome: Name; value: Resolved<Value> }>
+flow.output(name: Name, value: Value, display?: FlowDisplay): Expression<{ outcome: Name; value: FlowOutputValue<Value> }>
 flow.output(name: Name): Expression<{ outcome: Name; value: undefined }>
 ```
 
@@ -1020,17 +1020,21 @@ flow.output(name: Name): Expression<{ outcome: Name; value: undefined }>
 | `value?`           | `unknown`     |
 | `display?`         | `FlowDisplay` |
 
-The outcome `name` is also a node ID, so it must be unique in the definition. The optional `value` can contain literals and nested references, which resolve during execution. `display` supplies static inspection metadata.
+The outcome `name` is also a node ID, so it must be unique in the definition. Execution resolves references in arrays and plain records, and preserves nonplain objects such as class instances, Dates, and SDK assets. `display` supplies static inspection metadata.
+
+The internal `FlowOutputValue` type describes this output boundary; it is not a public export. Whole `FlowExpression<Value>` arguments return exactly `Value`, without recursively transforming its fields. Scalars remain exact, and array/tuple elements resolve recursively. Object templates include both the original object and resolved-field possibilities because structural TypeScript types cannot prove their prototype. Callable opaque methods retain their signatures.
+
+For example, `output("done", { amount: flow.input.get("amount") })` requires narrowing `value.amount`, since a structurally identical class would preserve the expression. For an exact JSON object result, assemble it in an existing `task()` and output that task's whole expression. Task input inference remains unchanged. This conservative type does not change runtime object identity, asset behavior, or capture policy.
 
 Return this terminal expression from the flow, branch path, or parallel lane. A lane output is a lane value and does not terminate the containing flow. No steps may follow it in its own scope. Naming an outcome does not perform a business action.
 
 #### Returns
 
-| Value / member   | Type                                                        | Description                                         |
-| ---------------- | ----------------------------------------------------------- | --------------------------------------------------- |
-| Builder return   | `FlowExpression<{ outcome: Name; value: Resolved<Value> }>` | Terminal result reference.                          |
-| Resolved outcome | `Name`                                                      | The supplied name.                                  |
-| Resolved value   | `Resolved<Value>`                                           | The supplied value with nested references resolved. |
+| Value / member   | Type                                                               | Description                                                  |
+| ---------------- | ------------------------------------------------------------------ | ------------------------------------------------------------ |
+| Builder return   | `FlowExpression<{ outcome: Name; value: FlowOutputValue<Value> }>` | Terminal result reference.                                   |
+| Resolved outcome | `Name`                                                             | The supplied name.                                           |
+| Resolved value   | `FlowOutputValue<Value>`                                           | Exact whole-reference value, or conservative template value. |
 
 Inside a synchronous `defineJevFlow()` callback; these references resolve when you await the flow’s `run()`. See the [complete definition and execution](@/guides/flow-basics/#output-finish-with-a-result).
 

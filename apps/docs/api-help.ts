@@ -61,7 +61,7 @@ const flowHelp = {
     props: {
       name: "The outcome string returned by run().",
       "value?":
-        "Optional result data with nested references resolved. Inferred definitions preserve its type; legacy explicit-input definitions return unknown.",
+        "Whole expressions retain their exact value type. Object templates retain original-or-resolved possibilities because opaque objects are preserved. Legacy explicit-input definitions return unknown.",
       "display?": "Optional labels and display metadata for DevTools.",
     },
   },

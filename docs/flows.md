@@ -96,8 +96,13 @@ const review = defineJevFlow<{ approved: boolean; amount: number }>("review")(
   (flow) =>
     flow.branch("route", {
       when: flow.input.get("approved"),
-      then: (path) =>
-        path.output("approved", { amount: path.input.get("amount") }),
+      then: (path) => {
+        const receipt = path.task("receipt", {
+          input: { amount: path.input.get("amount") },
+          run: (value) => value,
+        });
+        return path.output("approved", receipt);
+      },
       else: (path) => path.output("rejected"),
     }),
 );
@@ -105,7 +110,11 @@ const result = await review.run({ approved: true, amount: 12 }, { client });
 if (result.outcome === "approved") console.log(result.value.amount.toFixed(2));
 ```
 
-`output()` preserves literal names and resolves nested value references in its type. `branch()` unions its path results, including nested branches. Dynamic string names remain `string`; broad callback annotations can also widen results. `DefinedJevFlow<Input, Outcome>` names the executable definition, and `FlowResult<Outcome>` adds `runId` to the application outcome. Both default to the broad `FlowOutcome`. These types describe execution values, independently of redacted or truncated `FlowRun` captures.
+`output()` preserves literal names. Whole `FlowExpression<Value>` outputs retain exactly `Value`; scalars and array/tuple elements also retain their inferred types. Object templates conservatively include both the original object and recursively resolved fields. TypeScript cannot distinguish every plain record from a structurally identical class, and execution preserves nonplain objects such as class instances, Dates, and SDK assets.
+
+This means `output("done", { amount: flow.input.get("amount") })` requires narrowing `value.amount` before numeric operations, even though that literal record resolves at runtime. The receipt task above assembles and validates JSON, then outputs its whole expression to obtain an exact object result. Existing task input inference is unchanged. Date and asset methods remain callable, and opaque instances keep their runtime identity.
+
+`branch()` unions its path results, including nested branches. Dynamic string names remain `string`; broad callback annotations can also widen results. `DefinedJevFlow<Input, Outcome>` names the executable definition, and `FlowResult<Outcome>` adds `runId` to the application outcome. Both default to the broad `FlowOutcome`. These types describe execution values, independently of redacted or truncated `FlowRun` captures.
 
 ## Function steps and runtime requests
 

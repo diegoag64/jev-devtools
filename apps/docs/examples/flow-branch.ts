@@ -6,7 +6,16 @@ export const route = defineJevFlow<{ needsReview: boolean }>("route")((
 ) => {
   return flow.branch("pick-path", {
     when: flow.input.get("needsReview").eq(true),
-    then: (path) => path.output("manual-review", "A person should review this"),
+    then: (path) => {
+      const receipt = path.task("review-receipt", {
+        input: {
+          message: "A person should review this",
+          needsReview: path.input.get("needsReview"),
+        },
+        run: (value) => value,
+      });
+      return path.output("manual-review", receipt);
+    },
     else: (path) => path.output("ready", 1),
   });
 });
@@ -26,7 +35,7 @@ export async function tryBranch() {
   );
   console.log(result.outcome); // "manual-review"
   if (result.outcome === "manual-review") {
-    console.log(result.value.toUpperCase()); // "A PERSON SHOULD REVIEW THIS"
+    console.log(result.value.message.toUpperCase()); // "A PERSON SHOULD REVIEW THIS"
   } else {
     console.log(result.value.toFixed(0)); // "1"
   }

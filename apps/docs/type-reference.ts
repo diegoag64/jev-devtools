@@ -33,6 +33,8 @@ const descriptions: Record<string, string> = {
 };
 
 const supportingDescriptions: Record<string, string> = {
+  FlowOutputValue:
+    "The internal output-boundary value type. Whole references stay exact, arrays resolve elements, and ambiguous object templates retain original-or-resolved possibilities. Callable opaque members keep their signatures.",
   FlowScope:
     "The enclosing collection context used to restrict builder methods through nested paths and lanes.",
   FlowBuilderMethods:

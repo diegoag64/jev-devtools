@@ -30,7 +30,9 @@ Use `defineJevFlow<Input>(name)(build)` to specify the input and infer a discrim
 
 <!-- example: flow-branch.ts -->
 
-`route.run()` returns either `"manual-review"` with a string or `"ready"` with a number. `tryBranch()` narrows the result by its outcome before using its value. Nested object and array output templates resolve references in the returned type. Dynamic names remain `string`, and broad return annotations can widen inferred results.
+`route.run()` returns either `"manual-review"` with a receipt object or `"ready"` with a number. `tryBranch()` narrows the result by its outcome before using its value. The task assembles a JSON receipt, and outputting its whole expression retains the exact object type. Whole references are not recursively reinterpreted. Scalars and array/tuple elements also retain their inferred types.
+
+Direct object templates include both the original object and resolved-field possibilities. TypeScript cannot prove whether a structural object is a plain record or an opaque class instance. For example, `output("done", { amount: flow.input.get("amount") })` requires narrowing `value.amount` before numeric operations. A class with that field retains its expression at runtime, while the plain record resolves it. Dates and SDK assets retain their identity and callable methods. Use an existing JSON task and output its whole result expression when the handler needs an exact object shape. Dynamic names remain `string`, and broad return annotations can widen inferred results.
 
 `DefinedJevFlow<Input, Outcome>` and `FlowResult<Outcome>` name executable definitions and application results. They default to `FlowOutcome` for helpers that accept any outcome. Captured `FlowRun` values retain their separate, potentially redacted shape.
 
@@ -68,11 +70,11 @@ Use [flow expressions](@/api/expressions/) for that condition. A JavaScript `if`
 
 ### Return interfaces
 
-| Method        | Type                                                        | Description                                                              |
-| ------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `branch(...)` | `FlowExpression<A \| B>`                                    | Union of terminal results from both paths.                               |
-| `if(...)`     | `FlowExpression<A \| B>`                                    | Selected value, available to shared steps after the join.                |
-| `output(...)` | `FlowExpression<{ outcome: Name; value: Resolved<Value> }>` | Literal outcome name and resolved value; omitted values are `undefined`. |
+| Method        | Type                                 | Description                                                                                              |
+| ------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `branch(...)` | `FlowExpression<A \| B>`             | Union of terminal results from both paths.                                                               |
+| `if(...)`     | `FlowExpression<A \| B>`             | Selected value, available to shared steps after the join.                                                |
+| `output(...)` | `FlowExpression` of the named output | Literal name and output-specific value type; object templates retain original-or-resolved possibilities. |
 
 Value bodies receive `FlowValueBuilder` and cannot call `output()` or `branch()` directly. Roots, terminal branch paths, and parallel lanes receive `FlowBuilder`. Collection scope propagates through nested paths and lanes: map descendants cannot create maps or loops; loop descendants cannot create loops but can create maps. Let callback types infer these capabilities. Shared helpers should accept only the methods they use.
 
