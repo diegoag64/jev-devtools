@@ -22,6 +22,8 @@ Application code uses three JavaScript entry points: the SSR-safe React componen
 
 Definitions and runs are separate version-1 records streamed over `/flows/events`. The 0.4.0 drawer understands task, collection, merge, and loop records; keep the server and drawer on the same build. Definitions are limited to 256 nodes including templates and 16 nested blocks, while a run shares a 1,024-expanded-step budget. Execution is in-process with cooperative cancellation, without durable state, resume, or automatic task retries. See the [flow guide](flows.md) for scope and nesting constraints.
 
+The [Flow API decision record](flow-api-decisions.md) explains the retained compatibility contracts, deferred error and adapter proposals, and the accepted lane-label follow-up from #52.
+
 ## Flow capture boundaries
 
 Execution values and inspector captures have different owners. The [capture path/context table](integration.md#capture-paths-and-context) defines the callback boundary. Custom callbacks receive bounded detached views and a frozen capture kind. Private omission guards prevent policies from confusing cutoffs with ordinary missing data; warnings survive root replacements. Task/child caches include the callback path so reused data cannot inherit another path's policy. When changing capture limits, redaction, or warning metadata, trace every boundary below, including nested map/loop runs. A loss before the recorder cannot be recovered by adding recorder warnings alone. The metadata contract is in [the stream protocol](stream-protocol.md#flow-capture-warnings).

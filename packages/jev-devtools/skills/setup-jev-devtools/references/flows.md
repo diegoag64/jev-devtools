@@ -140,6 +140,8 @@ Let callback parameter types infer their scope. Value bodies use `FlowValueBuild
 
 For reusable helpers, accept only the required capabilities, such as `Pick<FlowValueBuilder<Input>, "task">`. Use `DefinedJevFlow<Input, Outcome>` for executable definitions and `FlowResult<Outcome>` for application results. Their default outcome is the broad `FlowOutcome`. Keep captured `FlowRun` data separate from execution results.
 
+Use `ReturnType<typeof createJevDevtools>` when a helper needs the complete adapter type; there is no public `Adapter` alias. Existing observer, recorder, and expression APIs remain supported. Preserve application rejection identity and cancellation behavior in integrations; captured error names are separate from application errors and their causes.
+
 ## API rules that affect generated code
 
 | API                                                                                 | Contract                                                                                                                                                                                                                 |
