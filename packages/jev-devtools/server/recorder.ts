@@ -39,10 +39,73 @@ const credentialKeys = new Set([
 ]);
 const safeMessage = (value: string) =>
   value.replace(/Bearer\s+\S+/gi, "Bearer [redacted]").slice(0, 500);
+/** The capture boundary, independent of field names and runtime values. */
+export type CaptureContext = {
+  readonly kind:
+    | "request"
+    | "response"
+    | "step-data"
+    | "condition-rule"
+    | "outcome";
+};
+
 export type CaptureOptions = {
   limit?: number;
-  redact?: (path: string[], value: unknown) => unknown;
+  /** Existing paths are unchanged; context distinguishes otherwise identical paths. */
+  redact?: (path: string[], value: unknown, context: CaptureContext) => unknown;
 };
+
+// Custom callbacks receive a detached graph, including SDK image handles. Keep
+// aliases/cycles intact so capture's existing repeated-reference policy still applies.
+function detachForRedaction(value: unknown): unknown {
+  const copies = new WeakMap<object, unknown>();
+  const copy = (input: unknown): unknown => {
+    if (input === null || typeof input !== "object") {
+      if (typeof input === "function")
+        throw new TypeError("Uncloneable capture");
+      return input;
+    }
+    if (copies.has(input)) return copies.get(input);
+    if (input instanceof Image) {
+      const reference = String(input);
+      const detached = new Image(
+        input.data instanceof Blob
+          ? input.data.slice()
+          : Uint8Array.from(input.data),
+      );
+      detached.toString = () => reference;
+      detached.toJSON = () => reference;
+      copies.set(input, detached);
+      return detached;
+    }
+    if (
+      input instanceof Date ||
+      input instanceof RegExp ||
+      input instanceof Map ||
+      input instanceof Set ||
+      input instanceof ArrayBuffer ||
+      ArrayBuffer.isView(input) ||
+      input instanceof Blob
+    ) {
+      const detached = structuredClone(input);
+      copies.set(input, detached);
+      return detached;
+    }
+    const detached = Array.isArray(input)
+      ? new Array(input.length)
+      : Object.create(Object.getPrototypeOf(input));
+    copies.set(input, detached);
+    for (const [key, child] of Object.entries(input))
+      Object.defineProperty(detached, key, {
+        value: copy(child),
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+    return detached;
+  };
+  return copy(value);
+}
 
 // Snapshot before the caller can mutate its request. Bounded and cycle-safe;
 // image handles become explicit previews/references instead of opaque SDK objects.
@@ -50,7 +113,9 @@ export function capture(
   value: unknown,
   warnings: Set<string>,
   redact?: CaptureOptions["redact"],
+  context: CaptureContext = { kind: "request" },
 ): Json {
+  const detachedContext = Object.freeze({ kind: context.kind });
   const seen = new WeakSet<object>();
   let budget = 96_000;
   const visit = (input: unknown, path: string[], depth: number): Json => {
@@ -60,7 +125,7 @@ export function capture(
       return "[redacted]";
     }
     if (redact) {
-      const redacted = redact(path, input);
+      const redacted = redact([...path], input, detachedContext);
       if (!Object.is(redacted, input))
         warnings.add("Capture contains redacted values.");
       input = redacted;
@@ -134,7 +199,7 @@ export function capture(
         .map(([key, v]) => [key, visit(v, [...path, key], depth + 1)]),
     );
   };
-  return visit(value, [], 0);
+  return visit(redact ? detachForRedaction(value) : value, [], 0);
 }
 
 export class JevRecorder {
@@ -273,6 +338,7 @@ export class JevRecorder {
               { ...request, model: request.model ?? client.defaultModel },
               warnings,
               this.options.redact,
+              { kind: "request" },
             );
           } catch {
             captured = null;
@@ -333,7 +399,9 @@ export class JevRecorder {
                 let result: Json | undefined;
                 try {
                   const data = await response.clone().json();
-                  result = capture(data, warnings, this.options.redact);
+                  result = capture(data, warnings, this.options.redact, {
+                    kind: "response",
+                  });
                 } catch {
                   // Capture failures are not SDK failures, and redactor errors
                   // may contain the sensitive values they were meant to hide.

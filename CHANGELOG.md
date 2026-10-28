@@ -30,6 +30,10 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ### Changes
 
+#### Added
+
+- **Capture-kind redaction context.** Distinguish requests, responses, step data, condition rules, and outcomes with a frozen third callback argument. Existing `(path, value)` policies and paths remain valid; reused captures respect their path, and custom callbacks receive detached values, including SDK images.
+
 #### Changed
 
 - **One cookbook playground.** Retire the legacy Request lab, result dashboards, manual sandbox, and live-mode form. Keep source, diagrams, guides, and complete sample results in the workbench. Remove unused form dependencies and move shared browser verification to the workbench; recipe runtime and package inspector checks remain. ([#137](https://github.com/diegoag64/jev-devtools/pull/137))

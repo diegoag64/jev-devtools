@@ -156,15 +156,15 @@ Each call creates independent in-memory histories. Use [`getJevDevtools()`](#get
 
 #### Inputs
 
-| Input                                                           | Default             | Meaning                                                       |
-| --------------------------------------------------------------- | ------------------- | ------------------------------------------------------------- |
-| `origin: string`                                                | Required            | Exact browser origin, including port.                         |
-| `enabled?: boolean`                                             | `false`             | Enable recording and HTTP endpoints.                          |
-| `endpoint?: string`                                             | `/api/jev-devtools` | Absolute path without query or fragment.                      |
-| `limit?: number`                                                | `50`                | Global trace retention; clamped to 1–200.                     |
-| `redact?: (path: string[], value: unknown) => unknown`          | None                | Transform the captured copy before storage/delivery.          |
-| `authorize?: (request: Request) => boolean \| Promise<boolean>` | None                | Access check; required for enabled non-loopback origins.      |
-| `getSession?: (request: Request) => string \| Promise<string>`  | `"local"`           | Trusted recording scope, nonempty and at most 200 characters. |
+| Input                                                                           | Default             | Meaning                                                       |
+| ------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------- |
+| `origin: string`                                                                | Required            | Exact browser origin, including port.                         |
+| `enabled?: boolean`                                                             | `false`             | Enable recording and HTTP endpoints.                          |
+| `endpoint?: string`                                                             | `/api/jev-devtools` | Absolute path without query or fragment.                      |
+| `limit?: number`                                                                | `50`                | Global trace retention; clamped to 1–200.                     |
+| `redact?: (path: string[], value: unknown, context: CaptureContext) => unknown` | None                | Transform the captured copy before storage/delivery.          |
+| `authorize?: (request: Request) => boolean \| Promise<boolean>`                 | None                | Access check; required for enabled non-loopback origins.      |
+| `getSession?: (request: Request) => string \| Promise<string>`                  | `"local"`           | Trusted recording scope, nonempty and at most 200 characters. |
 
 Invalid origin or endpoint configuration throws. Enabling a non-loopback origin without `authorize` also throws. See [Privacy & access](@/guides/privacy/) for authentication, session scopes, and redaction.
 
@@ -1649,7 +1649,7 @@ new JevRecorder(options?: CaptureOptions): JevRecorder
 | ------------------ | ---------------- |
 | `options?`         | `CaptureOptions` |
 
-The optional `limit` defaults to 50 and is clamped to 1–200 across all sessions. The optional `redact(path, value)` callback transforms captured values. If transformed JSON cannot support a structured request or result view, `Trace.capture` retains it and `captureWarnings` explains the unavailable view. The drawer displays usable fields beside placeholders for incompatible fields. Fixture export still reports an incompatible response as missing.
+The optional `limit` defaults to 50 and is clamped to 1–200 across all sessions. The optional `redact(path, value, context)` callback transforms captured values. If transformed JSON cannot support a structured request or result view, `Trace.capture` retains it and `captureWarnings` explains the unavailable view. The drawer displays usable fields beside placeholders for incompatible fields. Fixture export still reports an incompatible response as missing.
 
 History is bounded process memory, not durable storage. Pair `instrument()` with `transport()` to record both logical SDK calls and their HTTP attempts.
 

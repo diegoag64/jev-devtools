@@ -27,6 +27,8 @@ const inspector = createJevDevtools({
 
 The callback changes the inspection copy before storage or streaming. It does not change SDK inputs, responses, or application runtime values. If you use `getJevDevtools()`, put the same options in its factory and restart after changing the policy.
 
+**Unreleased:** the third callback argument is a frozen [`CaptureContext`](@/api/reference/#type-capturecontext) with kind `request`, `response`, `step-data`, `condition-rule`, or `outcome`. Existing `(path, value)` policies keep their paths and scope. Use the kind to distinguish request state from an outcome field named `state`. The [capture path/context table](https://github.com/diegoag64/jev-devtools/blob/main/docs/integration.md#capture-paths-and-context) covers tasks, merges, loops, conditions, and nested items. Policies must be deterministic because unchanged captures can be cached.
+
 Redaction can also replace a request root with `null` or a score with a string. The drawer keeps usable fields visible and shows a placeholder only for each incompatible field, with a capture warning. Replacing a whole value leaves that whole value unavailable. Raw retains the bounded redacted JSON in `Trace.capture`; application values remain unchanged. See [transformed captures](@/api/recorder/#transformed-captures).
 
 Known credential fields are always redacted. Extend the policy for your own data: field-name matching cannot detect every secret embedded in prose, URLs, images, or unusual field names.
