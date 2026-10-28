@@ -995,9 +995,12 @@ try {
   await page.screenshot({
     path: new URL("collection-preview-parity.png", output).pathname,
   });
-  await collection
+  // Close from the expanded flow toolbar; fitting can move the parent card
+  // beneath the canvas controls.
+  await itemFlow
     .getByRole("button", { name: "Hide Flow", exact: true })
     .click();
+  await itemFlow.waitFor({ state: "detached" });
   await page.locator(".wb-nested summary").click();
   await page.locator(".wb-nested .flow-step").first().waitFor();
   await page.goto(
