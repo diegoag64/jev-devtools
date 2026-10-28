@@ -40,14 +40,26 @@ test("documented task examples return the explained values and report loop exhau
   assert.equal(first.value, "Ada");
   assert.equal((await tryTask()).value, "Hello, Ada!");
   for (const express of [true, false])
-    assert.equal((await (express ? tryDelivery() : delivery.run({ express }, { client }))).value,
-      `Delivery in ${express ? 1 : 5} day(s)`);
+    assert.equal(
+      (await (express ? tryDelivery() : delivery.run({ express }, { client })))
+        .value,
+      `Delivery in ${express ? 1 : 5} day(s)`,
+    );
   for (const needsReview of [true, false])
-    assert.equal((await (needsReview ? tryBranch() : route.run({ needsReview }, { client }))).outcome,
-      needsReview ? "manual-review" : "ready");
+    assert.equal(
+      (
+        await (needsReview
+          ? tryBranch()
+          : route.run({ needsReview }, { client }))
+      ).outcome,
+      needsReview ? "manual-review" : "ready",
+    );
   assert.deepEqual((await tryParallel()).value, { regular: 100, sale: 80 });
   assert.deepEqual((await tryMap()).value, [4, 8, 12]);
-  assert.deepEqual((await doubleEach.run({ numbers: [] }, { client })).value, []);
+  assert.deepEqual(
+    (await doubleEach.run({ numbers: [] }, { client })).value,
+    [],
+  );
   assert.equal((await tryLoop()).value, 3);
   const { summary: result, counted } = await tryOperations();
   assert.deepEqual((await tryJoin()).value, { left: 4, right: 9 });
@@ -84,6 +96,26 @@ test("interactive examples fail the build on TypeScript errors", async () => {
 // or SDK options into API help; the real pages cover the standard spellings.
 test("API help follows imported aliases while respecting local scope and option ownership", async () => {
   const cases = [
+    {
+      language: "ts",
+      source: `import { defineJevFlow as define } from "jev-devtools/flow";
+const flow = define<{ amount: number }>("typed")((f) => f.output("done", f.input.get("amount")));
+flow.run({ amount: 1 }, options);
+const build = define<null>("separate");
+const second = build((f) => f.output("empty"));
+second.run(null, options);`,
+      labels: [
+        "define",
+        "output",
+        "input",
+        "get",
+        "run",
+        "define",
+        "build",
+        "output",
+        "run",
+      ],
+    },
     {
       language: "ts",
       source: `import { createJevDevtools as make } from "jev-devtools/server";
@@ -124,8 +156,10 @@ const ordinary: string = "hello";`,
 // The changelog belongs to the selected source revision. Preserve its content
 // and links without interpreting embedded markup as executable page content.
 test("changelog releases preserve source anchors and resolve repository links safely", () => {
-  const source = "https://github.com/diegoag64/jev-devtools/blob/reviewed-commit/CHANGELOG.md";
-  const result = renderChangelog(`# Changelog
+  const source =
+    "https://github.com/diegoag64/jev-devtools/blob/reviewed-commit/CHANGELOG.md";
+  const result = renderChangelog(
+    `# Changelog
 
 Introductory context.
 
@@ -151,29 +185,58 @@ Introductory context.
 #### Fixed
 
 - Another correction.
-`, source);
+`,
+    source,
+  );
   assert.ok(result.html.includes('id="123--october-25-2026-experimental"'));
-  assert.ok(result.html.includes('href="https://github.com/diegoag64/jev-devtools/blob/reviewed-commit/docs/releases.md#release"'));
+  assert.ok(
+    result.html.includes(
+      'href="https://github.com/diegoag64/jev-devtools/blob/reviewed-commit/docs/releases.md#release"',
+    ),
+  );
   assert.ok(result.html.includes("Not published to npm"));
-  assert.ok(result.html.includes('href="#123--october-25-2026-experimental-fixed"'));
-  assert.ok(result.html.includes('id="123--october-25-2026-experimental-fixed"'));
-  assert.ok(result.html.includes('id="122--october-24-2026-experimental-fixed"'));
+  assert.ok(
+    result.html.includes('href="#123--october-25-2026-experimental-fixed"'),
+  );
+  assert.ok(
+    result.html.includes('id="123--october-25-2026-experimental-fixed"'),
+  );
+  assert.ok(
+    result.html.includes('id="122--october-24-2026-experimental-fixed"'),
+  );
   assert.ok(result.html.includes("A pending change."));
   assert.ok(result.html.includes("Introductory context."));
   assert.ok(!result.html.includes("<script>"));
   assert.ok(!result.html.includes('href="javascript:'));
-  assert.throws(() => renderChangelog("<html>Gateway error</html>"), /Invalid changelog/);
+  assert.throws(
+    () => renderChangelog("<html>Gateway error</html>"),
+    /Invalid changelog/,
+  );
 });
 
 // Exercise the actual documented request forms with stored SDK responses.
 // The prose deliberately does not promise this answer from a live model.
 test("beginner Jev examples resolve named answers and factory answer objects", async () => {
   const answers = {
-    team: { type: "choice", choice: "billing", probabilities: { billing: 0.8, support: 0.2 }, confidence: 0.6 },
+    team: {
+      type: "choice",
+      choice: "billing",
+      probabilities: { billing: 0.8, support: 0.2 },
+      confidence: 0.6,
+    },
   };
-  const stored = (flow: string, step: string) => replayClient({
-    version: 1, flow, steps: { [step]: { model: "jev-sample", answers } },
-  });
-  assert.equal((await tryClassify(stored("classify", "ask-team"))).value, "billing");
-  assert.deepEqual((await tryCustomQuestion(stored("custom-question", "ask"))).value, answers);
+  const stored = (flow: string, step: string) =>
+    replayClient({
+      version: 1,
+      flow,
+      steps: { [step]: { model: "jev-sample", answers } },
+    });
+  assert.equal(
+    (await tryClassify(stored("classify", "ask-team"))).value,
+    "billing",
+  );
+  assert.deepEqual(
+    (await tryCustomQuestion(stored("custom-question", "ask"))).value,
+    answers,
+  );
 });

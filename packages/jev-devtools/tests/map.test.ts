@@ -294,10 +294,11 @@ test("map validates its bounds and scopes before execution and enforces the expa
         f.output(
           "done",
           f.map("outer", { items: [1], input: {}, maxItems: 1 }, (item) =>
+            // @ts-expect-error exercise JavaScript runtime validation
             item.map(
               "inner",
               { items: [2], input: {}, maxItems: 1 },
-              (inner) => inner.input,
+              (inner: { input: unknown }) => inner.input,
             ),
           ),
         ),

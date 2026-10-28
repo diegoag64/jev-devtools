@@ -28,7 +28,17 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
+### Compatibility and upgrade
+
+- **Builder scope types match runtime legality.** Helpers that require a full `FlowBuilder` may need a narrower `FlowValueBuilder` or `Pick` parameter in map, loop, and `if()` bodies. Valid nested lane outputs and branches remain supported. Existing explicit-input two-argument definitions keep their broad result type. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
+
+- **Output templates preserve opaque values.** Direct object outputs include original-or-projected fields that may be absent because structural types encode neither prototypes nor enumerability. Direct arrays retain positional types but do not promise attached properties. Narrow direct Date/asset values before calling methods, or output a whole expression for exact values and methods. Runtime identity and input inference are unchanged. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
+
 ### Changes
+
+#### Added
+
+- **Inferred Flow outcomes.** Use `defineJevFlow<Input>(name)(build)` to infer terminal names, branch unions, and resolved output values after specifying the input type. `DefinedJevFlow` and `FlowResult` name executable definitions and application results. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
 
 #### Changed
 
@@ -36,7 +46,13 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 - **Playground controls and navigation.** Use one select component in the cookbook workbench with the diagram chevron and control styling. Rename the sidebar header to jevtools playground, remove the redundant library close button, and link to docs.jevtools.dev. ([#137](https://github.com/diegoag64/jev-devtools/pull/137))
 
+#### Fixed
+
+- **Scope-specific Flow builders.** Reject unsupported terminal calls and collection nesting in TypeScript, including nested paths and lanes. Runtime validation and diagnostics remain unchanged. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
+
 #### Documentation
+
+- **Unreleased Flow API reference.** Distinguish the working tree's builder and result types from version 0.6.0 in the API reference and definition signatures. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
 
 - **Explore cookbooks without setup.** Point guides, cookbook READMEs, and bundled agent guidance to playground.jevtools.dev. Add a Cookbook Playground hero button and a Flow API learning link to the landing page. Local contributor setup remains available. ([#137](https://github.com/diegoag64/jev-devtools/pull/137))
 

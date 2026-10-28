@@ -115,6 +115,10 @@ await withTemporaryProject("jev-consumer-", async (temp) => {
     join(root, "scripts/fixtures/packed-flow-diagnostics.ts"),
     join(types, "packed-flow-diagnostics.ts"),
   );
+  await cp(
+    join(root, "scripts/fixtures/packed-builder-contracts.ts"),
+    join(types, "packed-builder-contracts.ts"),
+  );
   // No skipLibCheck: it would also skip the archive's own declarations.
   await writeFile(
     join(types, "tsconfig.json"),
@@ -130,6 +134,7 @@ await withTemporaryProject("jev-consumer-", async (temp) => {
       },
       files: [
         "flow.ts",
+        "packed-builder-contracts.ts",
         "packed-flow-diagnostics.ts",
         "packed-resolved-templates.ts",
         "packed-expression-contracts.ts",
@@ -144,6 +149,10 @@ await withTemporaryProject("jev-consumer-", async (temp) => {
     { cwd: consumer, stdio: "inherit" },
   );
   console.log("Packed flow types: passed");
+  execFileSync(process.execPath, [join(types, "packed-builder-contracts.js")], {
+    cwd: consumer,
+    stdio: "inherit",
+  });
   execFileSync(process.execPath, [join(types, "packed-flow-diagnostics.js")], {
     cwd: consumer,
     stdio: "inherit",
