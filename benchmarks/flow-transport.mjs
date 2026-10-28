@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFile, mkdir, writeFile } from "node:fs/promises";
+import { readFile, readdir, mkdir, writeFile } from "node:fs/promises";
 import { cpus, platform, release } from "node:os";
 import { resolve, join, sep } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
@@ -18,16 +18,28 @@ const output = resolve(
 assert.ok(output.startsWith(join(root, "benchmarks/results") + sep));
 const rounds = Number(process.env.BENCH_ROUNDS ?? 3);
 assert.ok(Number.isSafeInteger(rounds) && rounds >= 1 && rounds <= 20);
-const cases = ["disabled", "no-readers", "fast-1", "stalled-1", "fast-3"];
+const cases = [
+  "disabled",
+  "observer",
+  "no-readers",
+  "fast-1",
+  "stalled-1",
+  "fast-3",
+];
 const selected = process.env.BENCH_CASE ? [process.env.BENCH_CASE] : cases;
 assert.ok(selected.every((name) => cases.includes(name)));
 const origin = "http://localhost:5198";
+const workload = process.env.BENCH_WORKLOAD ?? "map";
+assert.ok(["map", "nested-history"].includes(workload));
+// Resource sampling is a separate diagnostic, not part of timing comparisons.
+const resources = process.env.BENCH_RESOURCES === "1";
+if (resources) assert.ok(rounds === 1 && selected.length === 1);
 const client = {
   systemOne() {
     throw new Error("Unexpected SDK request");
   },
 };
-const flow = defineJevFlow("transport-map", (f) => {
+const mapFlow = defineJevFlow("transport-map", (f) => {
   const items = f.map(
     "items",
     {
@@ -47,21 +59,104 @@ const flow = defineJevFlow("transport-map", (f) => {
   );
   return f.output("done", items);
 });
+const nestedFlow = defineJevFlow("transport-nested", (f) => {
+  const rounds = f.loop(
+    "rounds",
+    {
+      initial: 0,
+      input: f.input,
+      maxIterations: 2,
+      while: (state) => state.lt(2),
+    },
+    (round) => {
+      round.map(
+        "batch",
+        {
+          items: Array.from({ length: 8 }, (_, i) => i),
+          input: round.input.get("context"),
+          maxItems: 8,
+          concurrency: 2,
+        },
+        (item) =>
+          item.task("work", {
+            input: item.input,
+            run: async ({ item: index, context }) => {
+              if (!context.seed) await delay(3 + (index % 4));
+              return "n".repeat(4000);
+            },
+          }),
+      );
+      return round.task("advance", {
+        input: round.input.get("state"),
+        run: (n) => n + 1,
+      });
+    },
+  );
+  return f.output("done", rounds);
+});
+const flow = workload === "map" ? mapFlow : nestedFlow;
+function validateFinal(final) {
+  assert.equal(final.status, "success");
+  const batches =
+    workload === "map"
+      ? [final.steps.items.collection]
+      : final.steps.rounds.collection.items.map((round) => {
+          assert.equal(round.run.status, "success");
+          return round.run.steps.batch.collection;
+        });
+  assert.equal(batches.length, workload === "map" ? 1 : 2);
+  for (const batch of batches) {
+    assert.equal(batch.items.length, workload === "map" ? 64 : 8);
+    for (const item of batch.items) {
+      assert.equal(item.run.status, "success");
+      assert.equal(
+        item.run.steps.work.data.output,
+        workload === "map" ? "x".repeat(16000) : "n".repeat(4000),
+      );
+    }
+  }
+}
 async function measure(name) {
   const inspector = createJevDevtools({ origin, enabled: name !== "disabled" });
+  const seeded = new Set();
+  let observerUpdates = 0;
+  const observer = {
+    startFlow() {
+      return {
+        update() {
+          observerUpdates++;
+        },
+        request(_link, _trace, callback) {
+          return callback();
+        },
+      };
+    },
+  };
+  const devtools = name === "observer" ? observer : inspector;
+  if (workload === "nested-history") {
+    for (let i = 0; i < 12; i++) {
+      const result = await flow.run({ seed: true }, { client, devtools });
+      assert.equal(result.value, 2);
+      seeded.add(result.runId);
+    }
+  }
   const streams = [];
   const count =
     name === "fast-3" ? 3 : ["fast-1", "stalled-1"].includes(name) ? 1 : 0;
   const decoder = new TextDecoder();
   async function drain(reader) {
     let bytes = 0,
-      messages = 0;
+      messages = 0,
+      clientMs = 0,
+      initialBytes = 0,
+      initialClientMs = 0;
     const definitions = new Map(),
       runs = new Map();
     for (;;) {
       const chunk = await reader.read();
       assert.equal(chunk.done, false, "Stream ended before final state");
       bytes += chunk.value.byteLength;
+      const clientStarted = performance.now();
       const text = decoder.decode(chunk.value);
       if (!text.startsWith("event: flows\n")) continue;
       messages++;
@@ -79,39 +174,62 @@ async function measure(name) {
         if (!used.has(id)) definitions.delete(id);
       for (const id of runs.keys())
         if (!update.order.includes(id)) runs.delete(id);
-      const final = current.find((r) => r.status === "success");
+      const clientElapsed = performance.now() - clientStarted;
+      clientMs += clientElapsed;
+      if (messages === 1) {
+        initialBytes = chunk.value.byteLength;
+        initialClientMs = clientElapsed;
+      }
+      const final = current.find(
+        (r) => r.status === "success" && !seeded.has(r.id),
+      );
       if (final) {
-        assert.equal(current.length, 1);
-        assert.equal(final.steps.items.collection.items.length, 64);
-        for (const item of final.steps.items.collection.items) {
-          assert.equal(item.run.status, "success");
-          assert.equal(item.run.steps.work.data.output, "x".repeat(16000));
-        }
+        assert.equal(current.length, seeded.size + 1);
+        for (const run of current) validateFinal(run);
         const finalBytes = Buffer.byteLength(JSON.stringify(final));
         return {
           bytes,
           messages,
           finalBytes,
           amplification: bytes / finalBytes,
+          clientMs,
+          initialBytes,
+          initialClientMs,
           finalWarnings: final.captureWarnings,
         };
       }
     }
   }
   let pending = [];
+  let sampler;
   try {
+    global.gc();
+    const beforeConnect = process.memoryUsage();
+    let sampledHeapMax = beforeConnect.heapUsed,
+      sampledRssMax = beforeConnect.rss;
+    if (resources)
+      sampler = setInterval(() => {
+        const memory = process.memoryUsage();
+        sampledHeapMax = Math.max(sampledHeapMax, memory.heapUsed);
+        sampledRssMax = Math.max(sampledRssMax, memory.rss);
+      }, 1);
+    const connectionStarted = performance.now();
     for (let i = 0; i < count; i++) {
       const response = await inspector.handle(
         new Request(origin + "/api/jev-devtools/flows/events"),
       );
       streams.push(response.body.getReader());
     }
+    const connectionMs = performance.now() - connectionStarted;
     global.gc();
     const heapBefore = process.memoryUsage().heapUsed;
     const cpuBefore = process.cpuUsage(),
       started = performance.now();
     if (name !== "stalled-1") pending = streams.map(drain);
-    const result = await flow.run(null, { client, devtools: inspector });
+    let result = await flow.run(workload === "map" ? null : { seed: false }, {
+      client,
+      devtools,
+    });
     const executionMs = performance.now() - started;
     if (name === "stalled-1") pending = streams.map(drain);
     const readers = await Promise.all(pending);
@@ -119,20 +237,77 @@ async function measure(name) {
       cpu = process.cpuUsage(cpuBefore);
     const completionHeapDeltaMiB =
       (process.memoryUsage().heapUsed - heapBefore) / 1024 ** 2;
-    assert.deepEqual(result.value, Array(64).fill("x".repeat(16000)));
+    assert.deepEqual(
+      result.value,
+      workload === "map" ? Array(64).fill("x".repeat(16000)) : 2,
+    );
+    const completedId = result.runId;
+    result = null;
+    clearInterval(sampler);
+    const completionMemory = process.memoryUsage();
+    sampledHeapMax = Math.max(sampledHeapMax, completionMemory.heapUsed);
+    sampledRssMax = Math.max(sampledRssMax, completionMemory.rss);
     global.gc();
     const retainedHeapDeltaMiB =
       (process.memoryUsage().heapUsed - heapBefore) / 1024 ** 2;
+    // Initial/reconnect full snapshots are measured separately from execution.
+    let reconnect;
+    if (count) {
+      const started = performance.now();
+      const response = await inspector.handle(
+        new Request(origin + "/api/jev-devtools/flows/events"),
+      );
+      const reader = response.body.getReader();
+      const chunk = await reader.read();
+      const serverMs = performance.now() - started;
+      const parseStarted = performance.now();
+      const update = JSON.parse(decoder.decode(chunk.value).split("data: ")[1]);
+      const parseMs = performance.now() - parseStarted;
+      assert.equal(update.upserts.length, seeded.size + 1);
+      assert.equal(update.upserts[0].id, completedId);
+      for (const run of update.upserts) validateFinal(run);
+      reconnect = { serverMs, parseMs, bytes: chunk.value.byteLength };
+      await reader.cancel();
+    }
+    let memory;
+    if (resources) {
+      await Promise.all(streams.map((reader) => reader.cancel()));
+      global.gc();
+      const retained = process.memoryUsage();
+      await inspector.handle(
+        new Request(origin + "/api/jev-devtools/clear", {
+          method: "DELETE",
+          headers: { origin },
+        }),
+      );
+      await new Promise(setImmediate);
+      global.gc();
+      memory = {
+        beforeConnect,
+        completionMemory,
+        sampledHeapMax,
+        sampledRssMax,
+        retainedWithHistory: retained,
+        afterClear: process.memoryUsage(),
+        maxRssKiB: process.resourceUsage().maxRSS,
+      };
+    }
     return {
       name,
+      connectionMs,
+      deliveryLagMs: elapsedMs - executionMs,
+      observerUpdates,
       executionMs,
       elapsedMs,
       cpuMs: (cpu.user + cpu.system) / 1000,
       completionHeapDeltaMiB,
       retainedHeapDeltaMiB,
       readers,
+      reconnect,
+      memory,
     };
   } finally {
+    clearInterval(sampler);
     inspector.dispose();
     await Promise.all(streams.map((r) => r.cancel()));
     await Promise.allSettled(pending);
@@ -141,12 +316,29 @@ async function measure(name) {
 await mkdir(output, { recursive: true });
 const git = (...args) =>
   execFileSync("git", args, { cwd: root, encoding: "utf8" }).trim();
+const archiveRevision = process.env.BENCH_ARCHIVE_REVISION;
+if (archiveRevision) assert.match(archiveRevision, /^[a-f0-9]{40}$/);
+else
+  assert.equal(
+    git("rev-parse", "--show-toplevel"),
+    root,
+    "Set BENCH_ARCHIVE_REVISION for an archived baseline",
+  );
+const sourceHash = createHash("sha256");
+for (const directory of ["flow", "server", "src"]) {
+  const base = join(root, "packages/jev-devtools", directory);
+  for (const file of (await readdir(base, { recursive: true })).sort()) {
+    if (!/\.tsx?$/.test(file)) continue;
+    sourceHash
+      .update(directory + "/" + file)
+      .update(await readFile(join(base, file)));
+  }
+}
 const report = {
-  revision: git("rev-parse", "HEAD"),
-  dirty: !!git("status", "--porcelain"),
-  packageDiffSha256: createHash("sha256")
-    .update(git("diff", "HEAD", "--", "packages/jev-devtools"))
-    .digest("hex"),
+  revision: archiveRevision ?? git("rev-parse", "HEAD"),
+  archive: !!archiveRevision,
+  dirty: archiveRevision ? undefined : !!git("status", "--porcelain"),
+  packageSourceSha256: sourceHash.digest("hex"),
   benchmarkSha256: createHash("sha256")
     .update(await readFile(import.meta.filename))
     .digest("hex"),
@@ -154,11 +346,13 @@ const report = {
   cpu: cpus()[0].model,
   platform: platform(),
   osRelease: release(),
+  workload,
+  resources,
   method:
-    "One warmup per case; sequential cases with reversed order on alternate rounds. Public exports from this checkout's build. Wall/process CPU includes same-process decoding/validation. GC outside timing. Retained heap delta keeps adapter/history alive; not peak memory or a leak test. No network or inference.",
+    "One warmup per timing case; sequential cases reversed on alternate rounds. Resource diagnostic has no warmup and one case/round, 1ms memory sampling (lower bound on peak), process maxRSS, and post-GC history/clear checkpoints; not a leak test. Public exports; no network/inference. Execution timings exclude history seeding, connection encoding and reconnect. Client time includes decode/JSON parse and map reconstruction but not browser validation/rendering. Completion heap is allocation pressure. Observer case projects snapshots without recorder storage.",
   samples: [],
 };
-for (const name of selected) await measure(name);
+if (!resources) for (const name of selected) await measure(name);
 for (let round = 0; round < rounds; round++) {
   for (const name of round % 2 ? [...selected].reverse() : selected) {
     const sample = { round, ...(await measure(name)) };

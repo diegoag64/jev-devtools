@@ -119,7 +119,7 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
   ) => EncodedFlow;
   type FlowFlush = (updateFor: FlowUpdateFor) => void;
   const pendingFlows = new Set<FlowFlush>();
-  let scheduledFlows: ReturnType<typeof setImmediate> | undefined;
+  let scheduledFlows: ReturnType<typeof setTimeout> | undefined;
   const encodeFlowUpdate: FlowUpdateFor = (
     session,
     cursor,
@@ -137,7 +137,10 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
   function scheduleFlow(flush: FlowFlush) {
     pendingFlows.add(flush);
     if (scheduledFlows) return;
-    scheduledFlows = setImmediate(() => {
+    // Full nested runs are expensive to clone, encode, and parse. Coalesce ready
+    // readers for one frame-sized window. Do not reset the timer on new updates:
+    // sustained activity must still publish, including terminal state.
+    scheduledFlows = setTimeout(() => {
       scheduledFlows = undefined;
       const batch = [...pendingFlows];
       pendingFlows.clear();
@@ -167,12 +170,12 @@ export function createJevDevtools(options: JevDevtoolsServerOptions) {
         return { ...update, bytes: update.bytes.slice() };
       };
       for (const deliver of batch) deliver(updateFor);
-    });
+    }, 16);
   }
   function unscheduleFlow(flush: FlowFlush) {
     pendingFlows.delete(flush);
     if (!pendingFlows.size && scheduledFlows) {
-      clearImmediate(scheduledFlows);
+      clearTimeout(scheduledFlows);
       scheduledFlows = undefined;
     }
   }

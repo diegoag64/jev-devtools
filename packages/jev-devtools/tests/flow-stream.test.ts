@@ -179,24 +179,28 @@ for (const transition of ["first use", "clear", "eviction"] as const) {
 }
 
 test("slow flow readers catch up across clear/reuse without losing definitions or final state", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
   const { inspector, shared, other, run } = fixture(t);
   await run("A");
   await run("A", other);
   const b = await reader(t, inspector, "B");
   assert.deepEqual((await b.next()).order, []);
   const first = await run("B");
-  await nextTurn(); // Fill the real stream queue, without reading it.
+  t.mock.timers.tick(16); // Fill the real stream queue, without reading it.
   await inspector.handle(request("B", "/clear", "DELETE"));
-  await nextTurn(); // Backpressure prevents this intermediate clear from being queued.
+  t.mock.timers.tick(16); // Backpressure prevents this intermediate clear from being queued.
   const last = await run("B");
-  await nextTurn();
+  t.mock.timers.tick(16);
   const queued = await b.next();
   assert.deepEqual(
     queued.definitions.map((d) => d.id),
     [shared.definition.id],
   );
   assert.deepEqual(queued.order, [first.runId]);
-  const caughtUp = await b.next();
+  const catchup = b.next();
+  await nextTurn(); // Let the real stream pull join the next delivery window.
+  t.mock.timers.tick(16);
+  const caughtUp = await catchup;
   assert.deepEqual(
     caughtUp.definitions,
     [],
