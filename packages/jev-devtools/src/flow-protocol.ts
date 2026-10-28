@@ -1,4 +1,4 @@
-import type { Json } from "./protocol.js";
+import type { CaptureFidelity, Json } from "./protocol.js";
 /** Authored diagram copy, never instructions for Jev or executable routing logic. */
 export type FlowDisplay = { title?: string; description?: string };
 /** Rule literals are captured/redacted by the recorder before browser delivery. */
@@ -39,6 +39,8 @@ export type FlowNode = FlowDisplay & {
   conditionRule?: Json | FlowCondition;
   /** Capture limitations for conditionRule; absent in older captures. */
   conditionCaptureWarnings?: string[];
+  /** Fidelity of conditionRule only; references still need captured operands. */
+  conditionCaptureFidelity?: CaptureFidelity;
   /** Named concurrent lanes; optional for older captures. */
   lanes?: string[];
   /** Reusable item program; map nesting is not supported in v1. */
@@ -68,6 +70,8 @@ export type FlowStep = {
   error?: string;
   /** Optional bounded, redacted task input/output or selected merge value; never executable code. */
   data?: Json;
+  /** Fidelity of data only, not the step's recorded status or decision. */
+  captureFidelity?: CaptureFidelity;
   captureWarnings?: string[];
   loop?: { maxIterations: number; stopReason?: "condition" | "limit" };
   collection?: {
@@ -91,6 +95,8 @@ export type FlowRun = {
   steps: Record<string, FlowStep>;
   outcome?: string;
   value?: Json;
+  /** Fidelity of value only, not the run or its child steps. */
+  captureFidelity?: CaptureFidelity;
   /** Capture limitations for value, including observer failures; absent in older captures. */
   captureWarnings?: string[];
   error?: string;

@@ -74,6 +74,10 @@ for (const kind of ["text", "array", "rule"] as const) {
           ? (rule!.args[1] as { value: string }).value
           : (run.value as string | number[]);
       assert.equal(captured.length, Math.min(size, limit));
+      assert.equal(
+        kind === "rule" ? node!.conditionCaptureFidelity : run.captureFidelity,
+        size > limit ? "modified" : "exact",
+      );
       assert.deepEqual(
         (kind === "rule"
           ? node!.conditionCaptureWarnings
@@ -169,6 +173,10 @@ test("map item and loop iteration captures retain warnings in nested runs and ru
   const update = await history(inspector),
     run = update.upserts[0];
   for (const id of ["items", "repeat"]) {
+    assert.equal(
+      run.steps[id].collection!.items[0].run!.captureFidelity,
+      "modified",
+    );
     assert.ok(
       run.steps[id].collection!.items[0].run!.captureWarnings!.includes(
         textWarning,

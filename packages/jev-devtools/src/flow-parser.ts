@@ -105,6 +105,9 @@ function definitionCheck(): Check<FlowDefinition> {
           merge: optional(shape({ condition: id, then: id, else: id })),
           conditionRule: optional(json),
           conditionCaptureWarnings: optional(strings),
+          conditionCaptureFidelity: optional(
+            literal("exact", "modified", "unknown"),
+          ),
           lanes: optional(array(text)),
           itemDefinition: optional(definition(depth + 1)),
         })(value) &&
@@ -139,6 +142,7 @@ function runCheck(definition: FlowDefinition): Check<FlowRun> {
         outcome: optional(text),
         value: optional(json),
         captureWarnings: optional(strings),
+        captureFidelity: optional(literal("exact", "modified", "unknown")),
         error: optional(text),
         steps: (value): value is Record<string, FlowStep> => {
           if (!record(value) || Object.keys(value).length !== nodes.size)
@@ -158,6 +162,9 @@ function runCheck(definition: FlowDefinition): Check<FlowRun> {
               error: optional(text),
               data: optional(json),
               captureWarnings: optional(strings),
+              captureFidelity: optional(
+                literal("exact", "modified", "unknown"),
+              ),
               loop: optional(
                 shape({
                   maxIterations: iterations,

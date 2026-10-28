@@ -194,6 +194,8 @@ test("captures an image reference and Box response through SDK multipart seriali
   const photo = (trace.request.state as Record<string, any>).photo;
   assert.match(photo.preview, /^data:image\/png;base64,/);
   assert.ok(photo.bytes > 0);
+  assert.equal(trace.captureFidelity?.request, "modified");
+  assert.equal(trace.captureFidelity?.result, "exact");
   assert.equal(trace.result?.answers.mug.box?.left, 0.35);
 });
 

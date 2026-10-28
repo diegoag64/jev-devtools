@@ -6,6 +6,7 @@ export type {
   StreamSnapshot,
   TraceDelta,
   Json,
+  CaptureFidelity,
   AnswerView,
   QuestionView,
 } from "./protocol.js";

@@ -6,6 +6,9 @@ export type Json =
   | string
   | Json[]
   | { [key: string]: Json };
+/** Fidelity of captured JSON values, not runtime object identity or replay eligibility.
+ * Missing metadata means unknown. Custom redactors cannot certify exactness. */
+export type CaptureFidelity = "exact" | "modified" | "unknown";
 export type QuestionView = {
   type: string;
   instructions?: Json;
@@ -46,6 +49,8 @@ export type Trace = {
    * Presence, including null, identifies an unavailable section. Never infer
    * availability from user strings. The recorder owns this metadata. */
   capture?: { request?: Json; result?: Json };
+  /** Independent provenance for each captured section; absent in older captures. */
+  captureFidelity?: { request?: CaptureFidelity; result?: CaptureFidelity };
   requestId?: string;
   error?: { name: string; message: string; status?: number };
   attempts: {

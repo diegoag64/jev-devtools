@@ -12,6 +12,8 @@ const descriptions: Record<string, string> = {
   StreamSnapshot: "Version 2 initial trace history with a revision cursor.",
   TraceDelta:
     "Version 2 incremental update. order is authoritative: remove retained IDs absent from it.",
+  CaptureFidelity:
+    "Whether one captured JSON section is exact, modified, or unknown. Absence means unknown. Exactness does not establish reference availability or replay equivalence.",
   Json: "The JSON-safe shape used for captured data, which may be redacted or truncated.",
   AnswerView:
     "Validated structured answer fields; available fields depend on the question type. Incompatible redacted response content remains in Trace.capture.result.",
@@ -19,7 +21,7 @@ const descriptions: Record<string, string> = {
   FlowDefinition:
     "Static recipe graph, including its identity, name, and node metadata.",
   FlowRun:
-    "Captured execution state, with per-step progress and optional outcome, value, capture warnings, or error.",
+    "Captured execution state, with per-step progress and optional outcome, value, capture warnings, fidelity, or error. Run fidelity applies only to value.",
   FlowStep:
     "Captured step state, timing, decisions, trace linkage, and collection/loop progress.",
   BuiltFlowFixture:
@@ -40,7 +42,7 @@ const supportingDescriptions: Record<string, string> = {
   ExpressionFields:
     "The fields available to get(): object fields, or array indices and length. Common keys across union members remain selectable; missing values still fail during execution.",
   FlowNode:
-    "One step in a flow’s static graph, including its kind, dependencies, and any nested item program. Optional conditionCaptureWarnings describe limitations in captured conditionRule data. The inspector uses these nodes to display the recipe.",
+    "One step in a flow’s static graph, including its kind, dependencies, and any nested item program. Optional conditionCaptureWarnings and conditionCaptureFidelity describe captured conditionRule data. The inspector uses these nodes to display the recipe.",
   FlowCondition:
     "A recorded description of a condition, built from references, literal values, and comparison operators. It lets the inspector display the rule behind a decision.",
   AnswerValue:

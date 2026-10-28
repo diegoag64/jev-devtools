@@ -1,3 +1,4 @@
+import { types } from "node:util";
 import type { Json } from "../src/protocol.js";
 
 /** Detached JSON snapshot, without capture truncation or lossy JSON.stringify. */
@@ -5,6 +6,7 @@ export function jsonSnapshot(
   value: unknown,
   seen = new Set<object>(),
   depth = 0,
+  onUncertain?: () => void,
 ): Json {
   if (depth > 40) throw new TypeError("Task data nesting exceeds 40");
   if (value === null || typeof value === "string" || typeof value === "boolean")
@@ -21,14 +23,24 @@ export function jsonSnapshot(
   if (seen.has(value)) throw new TypeError("Task data cannot contain cycles");
   if (Object.getOwnPropertySymbols(value).length)
     throw new TypeError("Task data cannot contain symbol keys");
+  if (
+    onUncertain &&
+    (types.isProxy(value) ||
+      Object.values(Object.getOwnPropertyDescriptors(value)).some(
+        (field) => field.get || field.set,
+      ))
+  )
+    onUncertain?.();
   seen.add(value);
   try {
     if (Array.isArray(value))
-      return Array.from(value, (v) => jsonSnapshot(v, seen, depth + 1));
+      return Array.from(value, (v) =>
+        jsonSnapshot(v, seen, depth + 1, onUncertain),
+      );
     return Object.fromEntries(
       Object.entries(value).map(([k, v]) => [
         k,
-        jsonSnapshot(v, seen, depth + 1),
+        jsonSnapshot(v, seen, depth + 1, onUncertain),
       ]),
     );
   } finally {
@@ -37,7 +49,10 @@ export function jsonSnapshot(
 }
 
 /** Observer-only copy: preserve aliases inside the snapshot, never to execution data. */
-export function observerSnapshot(value: unknown): Json {
+export function observerSnapshot(
+  value: unknown,
+  onUncertain?: () => void,
+): Json {
   type Copy = { value: Json; height: number };
   const copies = new WeakMap<object, Copy>();
   const ancestors = new Set<object>();
@@ -60,6 +75,14 @@ export function observerSnapshot(value: unknown): Json {
       throw new TypeError("Observer data must be JSON-compatible");
     if (ancestors.has(input))
       throw new TypeError("Observer data cannot contain cycles");
+    if (
+      onUncertain &&
+      (types.isProxy(input) ||
+        Object.values(Object.getOwnPropertyDescriptors(input)).some(
+          (field) => field.get || field.set,
+        ))
+    )
+      onUncertain?.();
     ancestors.add(input);
     try {
       let height = 0;

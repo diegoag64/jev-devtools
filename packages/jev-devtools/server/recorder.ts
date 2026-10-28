@@ -1,5 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "node:crypto";
+import { types } from "node:util";
 import { Image, TypeSafeClient } from "@typesafe-ai/sdk";
 import type {
   Fetch,
@@ -8,7 +9,7 @@ import type {
   RequestOptions,
 } from "@typesafe-ai/sdk";
 import { projectTraceCapture } from "../src/capture-view.js";
-import type { Json, Trace } from "../src/protocol.js";
+import type { CaptureFidelity, Json, Trace } from "../src/protocol.js";
 
 // Whole field names only: tokenCount, sessionId, apiKeyName, etc. stay useful.
 // Keep the documented lists in docs/integration.md aligned with these policies.
@@ -51,6 +52,17 @@ export function capture(
   warnings: Set<string>,
   redact?: CaptureOptions["redact"],
 ): Json {
+  return captureWithFidelity(value, warnings, redact).value;
+}
+
+/** Internal capture result. Fidelity covers this traversal, not an upstream snapshot. */
+export function captureWithFidelity(
+  value: unknown,
+  warnings: Set<string>,
+  redact?: CaptureOptions["redact"],
+): { value: Json; fidelity: CaptureFidelity } {
+  let modified = false;
+  let uncertain = !!redact;
   const seen = new WeakSet<object>();
   let budget = 96_000;
   const visit = (input: unknown, path: string[], depth: number): Json => {
@@ -70,7 +82,11 @@ export function capture(
       warnings.add("Capture size/depth limit reached.");
       return "[truncated]";
     }
-    if (input === null || input === undefined) return null;
+    if (input === undefined) {
+      modified = true;
+      return null;
+    }
+    if (input === null) return null;
     if (typeof input === "string") {
       const text = input.slice(0, Math.min(budget, 16_000));
       budget -= text.length;
@@ -79,12 +95,22 @@ export function capture(
       return text;
     }
     if (typeof input === "boolean") return input;
-    if (typeof input === "number")
-      return Number.isFinite(input) ? input : String(input);
-    if (typeof input !== "object") return String(input);
-    if (seen.has(input)) return "[circular/repeated reference]";
+    if (typeof input === "number") {
+      if (Number.isFinite(input)) return input;
+      modified = true;
+      return String(input);
+    }
+    if (typeof input !== "object") {
+      modified = true;
+      return String(input);
+    }
+    if (seen.has(input)) {
+      modified = true;
+      return "[circular/repeated reference]";
+    }
     seen.add(input);
     if (input instanceof Image) {
+      modified = true;
       const bytes = input.data,
         result: { [key: string]: Json } = {
           kind: "image",
@@ -113,13 +139,35 @@ export function capture(
         );
       return result;
     }
+    if (types.isProxy(input)) uncertain = true;
     if (Array.isArray(input)) {
+      // Inspect only retained indices, without enumerating a potentially huge array.
+      // Extra array properties are not part of its JSON value.
+      for (let index = 0; index < Math.min(input.length, 150); index++) {
+        const field = Object.getOwnPropertyDescriptor(input, String(index));
+        if (!field) modified = true;
+        else if (field.get || field.set) uncertain = true;
+      }
       if (input.length > 150)
         warnings.add("Long collection truncated in capture.");
       return input
         .slice(0, 150)
         .map((v, i) => visit(v, [...path, String(i)], depth + 1));
     }
+    if (
+      Object.getPrototypeOf(input) !== Object.prototype &&
+      Object.getPrototypeOf(input) !== null
+    )
+      modified = true;
+    if (Object.getOwnPropertySymbols(input).length) modified = true;
+    if (
+      !uncertain &&
+      Object.keys(input).some((key) => {
+        const field = Object.getOwnPropertyDescriptor(input, key);
+        return field?.get || field?.set;
+      })
+    )
+      uncertain = true;
     const entries = Object.entries(input);
     // Choice maps need room for the full roster; retain the overall byte/depth
     // budget and the smaller general-purpose object/array limit.
@@ -134,7 +182,12 @@ export function capture(
         .map(([key, v]) => [key, visit(v, [...path, key], depth + 1)]),
     );
   };
-  return visit(value, [], 0);
+  const captured = visit(value, [], 0);
+  return {
+    value: captured,
+    fidelity:
+      modified || warnings.size ? "modified" : uncertain ? "unknown" : "exact",
+  };
 }
 
 export class JevRecorder {
@@ -268,12 +321,24 @@ export class JevRecorder {
             started = performance.now(),
             warnings = new Set<string>();
           let captured: Json;
+          let requestFidelity: CaptureFidelity = "modified";
           try {
-            captured = capture(
+            const result = captureWithFidelity(
               { ...request, model: request.model ?? client.defaultModel },
               warnings,
               this.options.redact,
             );
+            captured = result.value;
+            requestFidelity = result.fidelity;
+            // Spreading the request above resolves root accessors before traversal.
+            if (
+              requestFidelity === "exact" &&
+              (types.isProxy(request) ||
+                Object.values(Object.getOwnPropertyDescriptors(request)).some(
+                  (field) => field.get || field.set,
+                ))
+            )
+              requestFidelity = "unknown";
           } catch {
             captured = null;
             warnings.add("Input snapshot failed; request continues normally.");
@@ -288,6 +353,7 @@ export class JevRecorder {
               startedAt: Date.now(),
               status: "pending",
               request: captured,
+              captureFidelity: { request: requestFidelity },
               attempts: [],
               captureWarnings: [...warnings],
             }),
@@ -331,13 +397,23 @@ export class JevRecorder {
               .asResponse()
               .then(async (response) => {
                 let result: Json | undefined;
+                let resultFidelity: CaptureFidelity = "modified";
+                const resultWarnings = new Set<string>();
                 try {
                   const data = await response.clone().json();
-                  result = capture(data, warnings, this.options.redact);
+                  const captured = captureWithFidelity(
+                    data,
+                    resultWarnings,
+                    this.options.redact,
+                  );
+                  result = captured.value;
+                  resultFidelity = captured.fidelity;
                 } catch {
                   // Capture failures are not SDK failures, and redactor errors
                   // may contain the sensitive values they were meant to hide.
-                  warnings.add("Response snapshot failed; result unavailable.");
+                  resultWarnings.add(
+                    "Response snapshot failed; result unavailable.",
+                  );
                 }
                 this.update(id, (t) => {
                   t.status = "success";
@@ -349,8 +425,12 @@ export class JevRecorder {
                     projectTraceCapture({
                       ...t,
                       result,
+                      captureFidelity: {
+                        ...t.captureFidelity,
+                        result: resultFidelity,
+                      },
                       captureWarnings: [
-                        ...new Set([...t.captureWarnings, ...warnings]),
+                        ...new Set([...t.captureWarnings, ...resultWarnings]),
                       ],
                     }),
                   );

@@ -30,6 +30,10 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ### Changes
 
+#### Added
+
+- **Capture fidelity.** Add optional exact, modified, or unknown provenance for captured requests, responses, rules, step data, and outcomes. Legacy captures remain readable; custom callbacks cannot certify exactness, and fixture export semantics stay unchanged.
+
 #### Changed
 
 - **One cookbook playground.** Retire the legacy Request lab, result dashboards, manual sandbox, and live-mode form. Keep source, diagrams, guides, and complete sample results in the workbench. Remove unused form dependencies and move shared browser verification to the workbench; recipe runtime and package inspector checks remain. ([#137](https://github.com/diegoag64/jev-devtools/pull/137))

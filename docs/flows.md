@@ -191,6 +191,8 @@ Captured outcome values and condition rules retain optional warnings beside thei
 
 Strings are limited to 16,000 characters and arrays/general objects to 150 entries, within a depth-12 and approximate 96,000-character capture budget. For example, a 20,000-character rule literal is displayed shortened with a warning; the recorded decision still uses the full literal. Older captures may omit warning fields, which does not prove completeness. User strings that resemble capture placeholders are still user data. See [the metadata contract and redactor limitations](stream-protocol.md#flow-capture-warnings). Replay fixtures export Jev responses, not these outcome/rule fields.
 
+Optional `conditionCaptureFidelity` on nodes and `captureFidelity` on steps and runs describe their rule, data, and outcome sections. Only `exact` sections can supply original values to analysis; `modified`, `unknown`, and absent metadata cannot. Custom redactors always prevent exact certification, even if warnings are empty. Exact sections still need valid operators and resolvable references. See the [consumer rules and compatibility limits](stream-protocol.md#capture-fidelity-and-analysis-consumers). Fixture export and replay semantics are unchanged.
+
 Structured condition rules also have a 128-node projection budget. Exceeding it retains `conditionCaptureWarnings` before server capture; it does not change execution. Unsupported rule literals likewise carry an explicit warning.
 
 ## Explain steps in the diagram

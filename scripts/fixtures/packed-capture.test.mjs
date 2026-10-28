@@ -7,6 +7,10 @@ for (const mode of ["normal", "root-null", "score-string"]) {
     const { result, trace } = await captureExample(mode);
     assert.equal(result.answers.q.score, 1);
     assert.equal(trace.status, "success");
+    assert.equal(
+      trace.captureFidelity.result,
+      mode === "normal" ? "unknown" : "modified",
+    );
     if (mode === "normal") {
       assert.equal(structuredScore(trace), "1.00");
       assert.equal(trace.capture, undefined);

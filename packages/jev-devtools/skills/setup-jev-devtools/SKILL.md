@@ -49,6 +49,8 @@ When asked to build or inspect connected calls, read [references/flows.md](refer
 - In 0.5.0, `redactAdditionalSensitiveData` defaults to true and masks supported personal fields in the drawer only; those values still exist in capture/stream/browser memory. Known credentials and custom server redactions cannot be revealed by disabling display masking. Keep application-specific server redaction for data that must not reach the browser.
 - Preserve authentication and project redaction. Shared/non-loopback access requires a real `authorize(request)` check; do not bypass it with `() => true`. Keep local defaults unless shared access is requested. Without `authorize`, Node middleware accepts only loopback connections; Web Request routes can't check the connection, so their dev server must listen on `127.0.0.1` or set a real `authorize`. Separate processes require a different architecture, not extra adapter instances.
 
+When implementing analysis over captures, read the fidelity guidance in [references/flows.md](references/flows.md#capture-fidelity). Empty warnings and agreement with a recorded decision do not establish original values.
+
 ## Finish and verify
 
 Read [references/verify.md](references/verify.md). Build/typecheck the consumer, check configuration and SSE, and demonstrate a captured sample or authorized existing request. Verify the disabled production behavior. Explain any unverified step instead of calling a build alone a working integration.
