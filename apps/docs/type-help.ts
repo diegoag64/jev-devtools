@@ -40,7 +40,7 @@ export const typeHelp: Record<string, Help> = {
       "limit?":
         "Maximum retained traces across all sessions. Defaults to 50; clamped to 1–200.",
       "redact?":
-        "Called with the unchanged field path, detached value, and frozen capture-kind context. Existing two-argument callbacks remain valid. Return the value to store in the captured copy, for example a masked string. Keep credentials on the server.",
+        "Called with the unchanged field path, bounded detached value, and frozen capture-kind context. Access to omitted content fails closed with capture warnings. Existing two-argument callbacks remain valid. Return the value to store in the captured copy, for example a masked string. Keep credentials on the server.",
     },
   },
   JevDevtoolsProps: {

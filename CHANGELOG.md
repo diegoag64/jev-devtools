@@ -32,7 +32,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **Capture-kind redaction context.** Distinguish requests, responses, step data, condition rules, and outcomes with a frozen third callback argument. Existing `(path, value)` policies and paths remain valid; reused captures respect their path, and custom callbacks receive detached values, including SDK images. ([#138](https://github.com/diegoag64/jev-devtools/pull/138))
+- **Capture-kind redaction context.** Distinguish requests, responses, step data, condition rules, and outcomes with a frozen third callback argument. Existing `(path, value)` policies and paths remain valid; reused captures respect their path, and custom callbacks receive bounded detached views, including SDK images. Identity policies keep shallow data with omission warnings; policies that read omitted content fail closed. ([#138](https://github.com/diegoag64/jev-devtools/pull/138))
 
 #### Changed
 
