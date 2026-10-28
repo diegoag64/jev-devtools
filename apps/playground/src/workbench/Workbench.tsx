@@ -1,9 +1,12 @@
 import {
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type CSSProperties,
+  type Dispatch,
+  type SetStateAction,
 } from "react";
 import { createRoot } from "react-dom/client";
 import { JevFlowViewer, useJevInspection } from "jev-devtools/viewer";
@@ -31,7 +34,7 @@ function App() {
   const [slug, setSlug] = useState(currentSlug);
   const [search, setSearch] = useState("");
   const [detail, setDetail] = useState<CookbookDetail>();
-  const [loadError, setLoadError] = useState("");
+  const [loading, setLoading] = useState({ slug: "", slow: false, error: "" });
   const [reload, setReload] = useState(0);
   const [libraryOpen, setLibraryOpen] = useState(
     () => !matchMedia("(max-width: 1000px)").matches,
@@ -51,8 +54,12 @@ function App() {
   }, []);
   useEffect(() => {
     const abort = new AbortController();
-    setDetail(undefined);
-    setLoadError("");
+    setLoading({ slug, slow: false, error: "" });
+    // Returning to the displayed cookbook cancels the destination request.
+    if (detail?.slug === slug) return;
+    const timer = window.setTimeout(() => {
+      setLoading({ slug, slow: true, error: "" });
+    }, 180);
     void fetch(endpoint(`cookbooks/${encodeURIComponent(slug)}`), {
       signal: abort.signal,
     })
@@ -64,12 +71,22 @@ function App() {
               : "The cookbook could not be loaded. Check the local server and try again.",
           );
         const data: CookbookDetail = await response.json();
-        if (!abort.signal.aborted) setDetail(data);
+        if (!abort.signal.aborted) {
+          clearTimeout(timer);
+          setDetail(data);
+          setLoading({ slug, slow: false, error: "" });
+        }
       })
       .catch((error) => {
-        if (!abort.signal.aborted) setLoadError(error.message);
+        if (!abort.signal.aborted) {
+          clearTimeout(timer);
+          setLoading({ slug, slow: false, error: error.message });
+        }
       });
-    return () => abort.abort();
+    return () => {
+      clearTimeout(timer);
+      abort.abort();
+    };
   }, [slug, reload]);
   const recipe = cookbookCatalog.find((item) => item.slug === slug);
   return (
@@ -144,7 +161,10 @@ function App() {
         </footer>
       </aside>
       <main id="workbench" className="wb-main">
-        <h1 className="wb-sr-only">{recipe?.title ?? "Cookbook not found"}</h1>
+        <h1 className="wb-sr-only">
+          {cookbookCatalog.find((item) => item.slug === detail?.slug)?.title ??
+            "Cookbook workspace"}
+        </h1>
         <button
           className="wb-library-toggle"
           aria-label="Toggle cookbook library"
@@ -168,29 +188,96 @@ function App() {
             <path d="M9 4v16" />
           </svg>
         </button>
-        {loadError ? (
-          <div role="alert" className="wb-empty">
-            <p>{loadError}</p>
-            <button onClick={() => setReload((value) => value + 1)}>
-              Try again
-            </button>
-          </div>
-        ) : detail?.slug === slug ? (
-          <Recipe key={slug} detail={detail} />
+        <div
+          className="wb-navigation-status"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {loading.slug === slug &&
+            (loading.error ? (
+              <>
+                <span>
+                  Could not open {recipe?.title ?? slug}. {loading.error}
+                </span>
+                <button onClick={() => setReload((value) => value + 1)}>
+                  Try again
+                </button>
+              </>
+            ) : loading.slow ? (
+              <>
+                <span className="wb-opening-indicator" aria-hidden="true" />
+                Opening {recipe?.title ?? slug}…
+              </>
+            ) : null)}
+        </div>
+        {detail ? (
+          <Recipe
+            detail={detail}
+            blocked={detail.slug !== slug}
+            dimmed={
+              detail.slug !== slug &&
+              loading.slug === slug &&
+              (loading.slow || !!loading.error)
+            }
+          />
         ) : (
-          <p className="wb-empty" role="status">
-            Loading the flow and its source…
-          </p>
+          <div
+            className="wb-skeleton"
+            aria-label="Loading cookbook workspace"
+            aria-busy="true"
+          >
+            <div className="wb-skeleton-toolbar" />
+            <div className="wb-skeleton-ribbon" />
+            <div className="wb-skeleton-controls" />
+            <div className="wb-skeleton-panels">
+              <div />
+              <div />
+            </div>
+          </div>
         )}
       </main>
     </div>
   );
 }
 
-function Recipe({ detail }: { detail: CookbookDetail }) {
+// Return the new cookbook's defaults in the same render as its detail. State
+// resets must not wait for an effect that could paint mixed source/sample data.
+function useCookbookState<T>(
+  detail: CookbookDetail,
+  initial: T,
+): [T, Dispatch<SetStateAction<T>>] {
+  const [state, setState] = useState({ detail, value: initial });
+  const value = state.detail === detail ? state.value : initial;
+  if (state.detail !== detail) setState({ detail, value });
+  return [
+    value,
+    (next) =>
+      setState((previous) => ({
+        detail,
+        value:
+          typeof next === "function"
+            ? (next as (value: T) => T)(
+                previous.detail === detail ? previous.value : initial,
+              )
+            : next,
+      })),
+  ];
+}
+
+function Recipe({
+  detail,
+  blocked,
+  dimmed,
+}: {
+  detail: CookbookDetail;
+  blocked: boolean;
+  dimmed: boolean;
+}) {
+  const root = useRef<HTMLDivElement>(null);
   const [walkthrough, setWalkthrough] = useState(false);
-  const [active, setActive] = useState(0);
-  const [selection, setSelection] = useState<string[]>([]);
+  const [active, setActive] = useCookbookState(detail, 0);
+  const [selection, setSelection] = useCookbookState<string[]>(detail, []);
   const timeline = useRef<HTMLElement>(null);
   useEffect(() => {
     const nav = timeline.current;
@@ -206,15 +293,19 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
           ? button.right - viewport.right
           : 0;
     if (delta) nav.scrollLeft += delta;
-  }, [active]);
+  }, [active, detail]);
   // The guide owns its focus; free inspection belongs to the complete view.
-  const selected = walkthrough ? detail.steps[active].nodeIds : selection;
-  const [sample, setSample] = useState(Object.keys(detail.samples)[0]);
-  const [preview, setPreview] = useState<CookbookPreview | undefined>(
+  const [sample, setSample] = useCookbookState(
+    detail,
+    Object.keys(detail.samples)[0],
+  );
+  const [preview, setPreview] = useCookbookState<CookbookPreview | undefined>(
+    detail,
     detail.preview,
   );
-  const [previewError, setPreviewError] = useState("");
+  const [previewError, setPreviewError] = useCookbookState(detail, "");
   useEffect(() => {
+    if (blocked) return;
     if (sample === detail.preview.sampleId) {
       setPreview(detail.preview);
       setPreviewError("");
@@ -240,13 +331,22 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
         if (!abort.signal.aborted) setPreviewError(error.message);
       });
     return () => abort.abort();
-  }, [detail, sample]);
-  const [runId, setRunId] = useState<string>();
-  const [startedAt, setStartedAt] = useState<number>();
-  const [finishedAt, setFinishedAt] = useState<number>();
-  const [result, setResult] = useState<unknown>();
-  const [status, setStatus] = useState("");
-  const [busy, setBusy] = useState(false);
+  }, [detail, sample, blocked]);
+  const [runId, setRunId] = useCookbookState<string | undefined>(
+    detail,
+    undefined,
+  );
+  const [startedAt, setStartedAt] = useCookbookState<number | undefined>(
+    detail,
+    undefined,
+  );
+  const [finishedAt, setFinishedAt] = useCookbookState<number | undefined>(
+    detail,
+    undefined,
+  );
+  const [result, setResult] = useCookbookState<unknown>(detail, undefined);
+  const [status, setStatus] = useCookbookState(detail, "");
+  const [busy, setBusy] = useCookbookState(detail, false);
   const request = useRef<
     { controller: AbortController; id: string } | undefined
   >(undefined);
@@ -261,6 +361,48 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
     );
   };
   useEffect(() => () => stop(), []);
+  useLayoutEffect(() => {
+    if (blocked) {
+      stop();
+      setBusy(false);
+      setFinishedAt(Date.now());
+      setStatus("");
+    }
+    // Move focus only when its cookbook content is becoming inert. Shell
+    // controls and library navigation retain focus, including in the modal.
+    const regions = root.current?.querySelectorAll<HTMLElement>(
+      "[data-cookbook-content]",
+    );
+    if (
+      blocked &&
+      [...(regions ?? [])].some((node) => node.contains(document.activeElement))
+    ) {
+      const target =
+        root.current?.querySelector<HTMLElement>("[data-close-expanded]") ??
+        document.querySelector<HTMLElement>(".wb-library-toggle");
+      target?.focus({ preventScroll: true });
+    }
+    regions?.forEach((node) => {
+      node.inert = blocked;
+    });
+    if (blocked)
+      root.current
+        ?.querySelector<HTMLElement>("#cookbook-overview")
+        ?.hidePopover();
+  }, [blocked, detail, walkthrough]);
+  useLayoutEffect(() => {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const animations = [
+      ...(root.current?.querySelectorAll("[data-cookbook-fade]") ?? []),
+    ].map((node) =>
+      node.animate([{ opacity: 0.6 }, { opacity: 1 }], {
+        duration: 170,
+        easing: "ease-out",
+      }),
+    );
+    return () => animations.forEach((animation) => animation.cancel());
+  }, [detail]);
+  const selected = walkthrough ? detail.steps[active].nodeIds : selection;
   const authoredDefinition = detail.variants[sample] ?? detail.definition;
   const run =
     inspection.flows.runs.find((item) => item.id === runId) ??
@@ -310,11 +452,12 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
     [detail],
   );
   function chooseStep(index: number) {
+    if (blocked) return;
     setActive(index);
     setSelection(detail.steps[index].nodeIds);
   }
   function selectNodes(ids: string[]) {
-    if (walkthrough) return;
+    if (walkthrough || blocked) return;
     setSelection(ids);
     const index = detail.steps.findIndex((item) =>
       item.nodeIds.includes(ids[0]),
@@ -322,6 +465,7 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
     if (index >= 0) setActive(index);
   }
   async function start() {
+    if (blocked) return;
     stop();
     const pending = {
       controller: new AbortController(),
@@ -384,7 +528,13 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
     </div>
   );
   return (
-    <div className="wb-recipe">
+    <div
+      ref={root}
+      className="wb-recipe"
+      data-cookbook={detail.slug}
+      data-dimmed={dimmed || undefined}
+      aria-busy={blocked}
+    >
       <div className="wb-toolbar">
         <div className="wb-tabs" aria-label="Workbench view">
           <button
@@ -406,18 +556,30 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
         <div className="wb-toolbar-links">
           <span className="wb-transport">Synthetic samples · no API key</span>
           <CookbookOverview
+            disabled={blocked}
             detail={detail}
             title={
               cookbookCatalog.find((recipe) => recipe.slug === detail.slug)!
                 .title
             }
           />
-          <a href={detail.originalSource} target="_blank" rel="noreferrer">
+          <a
+            data-cookbook-content
+            href={detail.originalSource}
+            target="_blank"
+            rel="noreferrer"
+          >
             Original Cookbook <span aria-hidden="true">↗</span>
           </a>
         </div>
       </div>
-      <nav ref={timeline} className="wb-timeline" aria-label="Cookbook steps">
+      <nav
+        ref={timeline}
+        className="wb-timeline"
+        aria-label="Cookbook steps"
+        data-cookbook-content
+        data-cookbook-fade
+      >
         {detail.steps.map((item, index) => (
           <button
             key={item.id}
@@ -436,12 +598,17 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
       {walkthrough && (
         <section
           className="wb-narrative"
+          data-cookbook-content
           aria-label="Step explanation"
           style={
             { "--step-color": colors[active % colors.length] } as CSSProperties
           }
         >
-          <div key={step.id} className="wb-narrative-content wb-prose">
+          <div
+            key={`${detail.slug}:${step.id}`}
+            className="wb-narrative-content wb-prose"
+            data-cookbook-fade
+          >
             <div className="wb-narrative-title">
               <span className="wb-kicker">
                 STEP {active + 1} OF {detail.steps.length} · {step.api}
@@ -455,13 +622,13 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
           {guideControls}
         </section>
       )}
-      <div className="wb-runbar">
+      <div className="wb-runbar" data-cookbook-content>
         <label>
           Sample
           <NativeSelect
             size="sm"
             aria-label="Cookbook sample"
-            disabled={busy}
+            disabled={busy || blocked}
             value={sample}
             onChange={(event) => {
               setSample(event.target.value);
@@ -481,24 +648,25 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
         </label>
         <button
           className="wb-primary"
-          disabled={busy}
+          disabled={busy || blocked}
           onClick={() => void start()}
         >
           {busy ? "Running…" : "Run sample ↗"}
         </button>
-        {busy && (
-          <button
-            onClick={() => {
-              stop();
-              setFinishedAt(Date.now());
-              setBusy(false);
-              setRunId(run?.id);
-              setStatus("Sample cancelled.");
-            }}
-          >
-            Cancel
-          </button>
-        )}
+        <button
+          className="wb-cancel"
+          data-running={busy || undefined}
+          disabled={!busy || blocked}
+          onClick={() => {
+            stop();
+            setFinishedAt(Date.now());
+            setBusy(false);
+            setRunId(run?.id);
+            setStatus("Sample cancelled.");
+          }}
+        >
+          Cancel
+        </button>
         <p role="status">
           {status ||
             previewError ||
@@ -514,6 +682,7 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
           walkthrough && (
             <div
               className="wb-expanded-guide"
+              data-cookbook-content
               role="group"
               aria-label="Walkthrough controls"
             >
@@ -535,6 +704,7 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
           >
             <SourceCode
               panelActions={panelActions}
+              disabled={blocked}
               detail={detail}
               active={active}
               walkthrough={walkthrough}
@@ -568,13 +738,14 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
                 {panelActions}
               </div>
             </div>
-            <div className="wb-viewer">
+            <div className="wb-viewer" data-cookbook-content data-cookbook-fade>
               {showingPreview && !currentPreview && !previewError ? (
                 <p className="wb-preview-loading" role="status">
                   Preparing the sample diagram…
                 </p>
               ) : (
                 <JevFlowViewer
+                  key={detail.slug}
                   definition={displayedDefinition ?? authoredDefinition}
                   run={displayedRun}
                   traces={displayedTraces}
@@ -596,7 +767,10 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
         )}
       />
       <div
+        key={detail.slug}
         className="wb-bottom"
+        data-cookbook-content
+        data-cookbook-fade
         onKeyDown={(event) => {
           if (event.key !== "Escape") return;
           const details = (event.target as Element).closest("details");
