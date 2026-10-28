@@ -874,6 +874,75 @@ test("accessor and proxy outcomes stay unknown through observer and merge copies
   }
 });
 
+// The recorder cannot see a hook once an upstream Flow snapshot drops it.
+// Preserve uncertainty through both runtime copies without invoking the hook.
+for (const shape of ["array", "object"] as const) {
+  for (const hook of [false, true]) {
+    for (const path of ["direct", "merge", "nested"] as const) {
+      test(`Flow serialization hook fidelity: ${shape}/${hook}/${path}`, async (t) => {
+        const value = shape === "array" ? [0.9] : { score: 0.9 };
+        let calls = 0;
+        if (hook)
+          Object.defineProperty(value, "toJSON", {
+            value: () => {
+              calls++;
+              return shape === "array" ? [0.6] : { score: 0.6 };
+            },
+          });
+        const inspector = createJevDevtools({ origin, enabled: true });
+        t.after(() => inspector.dispose());
+        const flow = defineJevFlow<{ value: typeof value; flag: boolean }>(
+          "serialization-hook",
+          (f) => {
+            const selected =
+              path === "merge"
+                ? f.if("choose", {
+                    when: f.input.get("flag").eq(true),
+                    then: (p) => p.input.get("value"),
+                    else: (p) => p.input.get("value"),
+                  })
+                : f.input.get("value");
+            return f.output(
+              "done",
+              path === "nested" ? { values: [selected] } : selected,
+            );
+          },
+        );
+        const result = await flow.run(
+          { value, flag: true },
+          { client, devtools: inspector },
+        );
+        if (path === "nested") {
+          assert.ok(
+            result.value &&
+              typeof result.value === "object" &&
+              "values" in result.value,
+          );
+          assert.ok(Array.isArray(result.value.values));
+          assert.equal(result.value.values[0], value);
+        } else assert.equal(result.value, value);
+        const { run } = await history(inspector);
+        const expected = shape === "array" ? [0.9] : { score: 0.9 };
+        assert.deepEqual(
+          run.value,
+          path === "nested" ? { values: [expected] } : expected,
+        );
+        assert.equal(calls, 0);
+        assert.deepEqual(run.captureWarnings, []);
+        assert.equal(run.captureFidelity, hook ? "unknown" : "exact");
+        if (path === "merge") {
+          const merged = Object.values(run.steps).find(
+            (step) => step.data !== undefined,
+          )!;
+          assert.deepEqual(merged.data, { output: expected });
+          assert.deepEqual(merged.captureWarnings, []);
+          assert.equal(merged.captureFidelity, hook ? "unknown" : "exact");
+        }
+      });
+    }
+  }
+}
+
 test("array provenance visits retained indices without enumerating the entire input", () => {
   let descriptors = 0;
   const value = new Proxy(Array(151).fill(1), {

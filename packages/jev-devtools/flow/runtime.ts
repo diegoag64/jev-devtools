@@ -26,6 +26,8 @@ export function jsonSnapshot(
   if (
     onUncertain &&
     (types.isProxy(value) ||
+      // Copying omits serialization hooks; preserve provenance without reading them.
+      "toJSON" in value ||
       // Array.from can use an inherited custom iterator. Retain execution
       // normalization semantics, but do not certify its capture as exact.
       (Array.isArray(value) &&
@@ -82,6 +84,7 @@ export function observerSnapshot(
     if (
       onUncertain &&
       (types.isProxy(input) ||
+        "toJSON" in input ||
         (Array.isArray(input) &&
           Object.getPrototypeOf(input) !== Array.prototype) ||
         Object.values(Object.getOwnPropertyDescriptors(input)).some(
