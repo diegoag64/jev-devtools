@@ -1,4 +1,5 @@
 import { parallelQuestionsFlow } from "../../../cookbooks/parallel-questions/flow.js";
+import { readCookbook } from "./workbench.js";
 import { parallelQuestionsSampleTransport } from "../../../cookbooks/parallel-questions/samples.js";
 import {
   parallelQuestionsCases,
@@ -212,6 +213,27 @@ export function jevInspectorServer(
           }
           if (req.method === "GET" && url.pathname === "/__jev/config") {
             send(res, 200, { liveAvailable: !!apiKey, version: 1 });
+            return;
+          }
+          if (
+            req.method === "GET" &&
+            url.pathname.startsWith("/__jev/cookbooks/")
+          ) {
+            try {
+              const cookbook = await readCookbook(
+                url.pathname.slice("/__jev/cookbooks/".length),
+                url.searchParams.get("sample") ?? undefined,
+              );
+              send(
+                res,
+                cookbook ? 200 : 404,
+                cookbook ?? { error: "Unknown cookbook" },
+              );
+            } catch {
+              send(res, 500, {
+                error: "The cookbook source could not be loaded.",
+              });
+            }
             return;
           }
           if (req.method !== "POST") {

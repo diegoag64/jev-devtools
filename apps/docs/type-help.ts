@@ -5,6 +5,22 @@ import type { ApiHover } from "./api-hovers.js";
 // Curated reading aids, not generated expansions of every generic. Keep these
 // aligned with the public declarations; type-reference.ts reuses descriptions.
 export const typeHelp: Record<string, Help> = {
+  JevFlowViewerProps: {
+    title: "JevFlowViewerProps",
+    importFrom: "jev-devtools/viewer",
+    description:
+      "Unreleased. Graph, optional captured execution, and presentation controls for the embedded flow viewer. Filtering and highlighting do not change execution.",
+    signature:
+      "type JevFlowViewerProps = { definition: FlowDefinition; run?: FlowRun; traces?: Trace[]; selectedNodeId?: string; onNodeSelect?: (id: string) => void; visibleNodeIds?: readonly string[]; highlightedNodeIds?: readonly string[]; nodeAccents?: Readonly<Record<string, string>>; }",
+  },
+  InspectionSnapshot: {
+    title: "InspectionSnapshot",
+    importFrom: "jev-devtools/viewer",
+    description:
+      "Unreleased. Latest validated, display-masked request and flow history, plus the inspector connection status.",
+    signature:
+      "type InspectionSnapshot = { traces: Trace[]; flows: { runs: FlowRun[]; definitions: FlowDefinition[] }; connection: string; }",
+  },
   CaptureOptions: {
     title: "CaptureOptions",
     importFrom: "jev-devtools/server",

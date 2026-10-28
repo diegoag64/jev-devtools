@@ -23,7 +23,7 @@ try {
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
   page.setDefaultTimeout(15_000);
-  await page.goto("http://127.0.0.1:4182/?cookbook=reranking");
+  await page.goto("http://127.0.0.1:4182/?legacy=1&cookbook=reranking");
   await page
     .getByRole("heading", { name: "One query. A new candidate order." })
     .waitFor();

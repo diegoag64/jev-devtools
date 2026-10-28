@@ -9,13 +9,9 @@
   },
   "include": [
     "src/index.tsx",
+    "src/viewer.tsx",
     "server/index.ts",
     "flow/index.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "lib",
-    "dist",
-    "tests"
-  ]
+  "exclude": ["node_modules", "lib", "dist", "tests"]
 }

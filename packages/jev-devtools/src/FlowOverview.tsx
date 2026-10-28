@@ -1,4 +1,13 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import type {
   FlowDefinition,
   FlowNode,
@@ -37,7 +46,8 @@ function useNodeHeight<T extends HTMLElement>(
   onResize: (id: string, height: number) => void,
 ) {
   const ref = useRef<T>(null);
-  useEffect(() => {
+  // The first camera fit must use measured card heights before anything paints.
+  useLayoutEffect(() => {
     const element = ref.current;
     if (!element) return;
     let previous = 0;
@@ -66,6 +76,8 @@ const RequestNode = memo(function RequestNode({
   y,
   onSelect,
   onResize,
+  accent,
+  highlighted,
 }: {
   node: FlowNode;
   trace: Trace;
@@ -73,6 +85,8 @@ const RequestNode = memo(function RequestNode({
   selected: boolean;
   x: number;
   y: number;
+  accent?: string;
+  highlighted?: boolean;
   onSelect: (id: string) => void;
   onResize: (id: string, height: number) => void;
 }) {
@@ -82,8 +96,18 @@ const RequestNode = memo(function RequestNode({
       ref={ref}
       className={`flow-step flow-request ${selected ? "selected" : ""}`}
       data-status={status}
+      data-node-id={node.id}
+      data-highlighted={highlighted || undefined}
+      data-accent={accent ? "true" : undefined}
       aria-label={`Request ${node.id}`}
-      style={{ left: x, top: y, width: 1120 }}
+      style={
+        {
+          left: x,
+          top: y,
+          width: 1120,
+          "--flow-node-accent": accent,
+        } as CSSProperties
+      }
     >
       <button
         className="flow-request-heading"
@@ -129,6 +153,8 @@ const Card = memo(function Card({
   collectionView,
   onCollectionChange,
   expansionId,
+  accent,
+  highlighted,
 }: {
   node: FlowNode;
   status: string;
@@ -136,6 +162,8 @@ const Card = memo(function Card({
   selected: boolean;
   bounds: Bounds;
   onResize: (id: string, height: number) => void;
+  accent?: string;
+  highlighted?: boolean;
   onSelect: (id: string) => void;
   lanes: Lane[];
   inputs?: ConditionInput[];
@@ -206,11 +234,17 @@ const Card = memo(function Card({
       ref={ref}
       className={`flow-step ${node.kind === "task" ? "flow-task" : ""} ${selected ? "selected" : ""}`}
       data-status={status}
-      style={{
-        left: bounds.x,
-        top: bounds.y,
-        width: bounds.width,
-      }}
+      data-node-id={node.id}
+      data-highlighted={highlighted || undefined}
+      data-accent={accent ? "true" : undefined}
+      style={
+        {
+          left: bounds.x,
+          top: bounds.y,
+          width: bounds.width,
+          "--flow-node-accent": accent,
+        } as CSSProperties
+      }
       aria-label={`${node.kind === "map" ? "Collection" : "Step"} ${node.title ?? node.id}`}
     >
       <button
@@ -471,18 +505,51 @@ const Card = memo(function Card({
   );
 });
 export const FlowOverview = memo(function FlowOverview({
-  definition,
+  definition: fullDefinition,
   run,
   traces,
   inline = false,
+  definitionOnly = false,
+  selectedNodeId,
+  onNodeSelect,
+  visibleNodeIds,
+  highlightedNodeIds,
+  nodeAccents,
 }: {
   definition: FlowDefinition;
   run: FlowRun;
   traces: Trace[];
   inline?: boolean;
+  definitionOnly?: boolean;
+  selectedNodeId?: string;
+  onNodeSelect?: (id: string) => void;
+  visibleNodeIds?: readonly string[];
+  highlightedNodeIds?: readonly string[];
+  nodeAccents?: Readonly<Record<string, string>>;
 }) {
-  const [selected, setSelected] = useState(
+  const definition = useMemo(() => {
+    if (!visibleNodeIds) return fullDefinition;
+    const visible = new Set(visibleNodeIds);
+    return {
+      ...fullDefinition,
+      nodes: fullDefinition.nodes
+        .filter((node) => visible.has(node.id))
+        .map((node) => ({
+          ...node,
+          dependencies: node.dependencies.filter((id) => visible.has(id)),
+        })),
+    };
+  }, [fullDefinition, visibleNodeIds]);
+  const [localSelected, setLocalSelected] = useState(
     () => definition.nodes.find((n) => n.kind === "jev")?.id ?? "",
+  );
+  const selected = selectedNodeId ?? localSelected;
+  const setSelected = useCallback(
+    (id: string) => {
+      setLocalSelected(id);
+      onNodeSelect?.(id);
+    },
+    [onNodeSelect],
   );
   const [details, setDetails] = useState(false);
   const [collectionViews, setCollectionViews] = useState<
@@ -585,6 +652,117 @@ export const FlowOverview = memo(function FlowOverview({
       x: layout.left,
       y: 0,
     });
+  // A collection button owns the camera until another source/timeline selection.
+  // Bind its selection key after the parent's controlled selection has updated.
+  const expansionFocus = useRef<{ id: string; selectionKey?: string }>(
+    undefined,
+  );
+  const externalFocus = useRef("");
+  const externalArea = useRef<Bounds | undefined>(undefined);
+  const externallyControlled = !inline && selectedNodeId !== undefined;
+  const focusKey = JSON.stringify([
+    selectedNodeId,
+    visibleNodeIds,
+    highlightedNodeIds,
+  ]);
+  useEffect(() => {
+    // Embedded source/timeline selection follows the corresponding authored
+    // nodes. Ordinary capture updates and drawer selections keep their camera.
+    if (!externallyControlled) {
+      externalArea.current = undefined;
+      externalFocus.current = "";
+      expansionFocus.current = undefined;
+      return;
+    }
+    const requested = expansionFocus.current;
+    if (requested) {
+      requested.selectionKey ??= focusKey;
+      if (
+        requested.selectionKey !== focusKey ||
+        !collectionViews[requested.id]?.open
+      )
+        expansionFocus.current = undefined;
+    }
+    const expansionId = expansionFocus.current?.id;
+    const expanded = expansionId
+      ? layout.expansions.get(expansionId)
+      : undefined;
+    // Suppress the parent-card focus while the new item flow is being measured.
+    if (expanded && !itemSizes[expansionId!]) {
+      externalArea.current = undefined;
+      return;
+    }
+    // Keep the expanded item framed as nested request measurements settle.
+    const targetKey = JSON.stringify([
+      focusKey,
+      expanded ? [expansionId, expanded] : null,
+    ]);
+    const areas = expanded
+      ? // Include the previous/next controls outside the item frame.
+        [{ ...expanded, x: expanded.x - 80, width: expanded.width + 160 }]
+      : (highlightedNodeIds?.length ? highlightedNodeIds : [selectedNodeId])
+          .map((id) => (id === undefined ? undefined : layout.points.get(id)))
+          .filter((area): area is Bounds => !!area);
+    if (!areas.length) {
+      externalArea.current = undefined;
+      externalFocus.current = targetKey;
+      return;
+    }
+    const x = Math.min(...areas.map((area) => area.x)),
+      y = Math.min(...areas.map((area) => area.y));
+    externalArea.current = {
+      x: x - 24,
+      y: y - 24,
+      width: Math.max(...areas.map((area) => area.x + area.width)) - x + 48,
+      height: Math.max(...areas.map((area) => area.y + area.height)) - y + 48,
+    };
+    if (externalFocus.current !== targetKey) {
+      const area = externalArea.current;
+      const focus = () => {
+        externalFocus.current = targetKey;
+        focusArea(area);
+      };
+      if (!expanded) {
+        focus();
+        return;
+      }
+      // Nested diagrams measure in successive renders. Wait for a quiet layout
+      // before framing; another measurement cancels and reschedules this work.
+      let frame = requestAnimationFrame(() => {
+        frame = requestAnimationFrame(focus);
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [
+    focusKey,
+    selectedNodeId,
+    highlightedNodeIds,
+    externallyControlled,
+    layout.points,
+    layout.expansions,
+    collectionViews,
+    itemSizes,
+    focusArea,
+  ]);
+  useEffect(() => {
+    const element = viewport.current;
+    if (!externallyControlled || !element) return;
+    let width = element.clientWidth,
+      height = element.clientHeight;
+    // A controlled tutorial selection stays framed when its split pane changes
+    // size. The ordinary drawer keeps its existing pan/zoom preservation policy.
+    const observer = new ResizeObserver(() => {
+      const nextWidth = element.clientWidth,
+        nextHeight = element.clientHeight;
+      if (nextWidth === width && nextHeight === height) return;
+      width = nextWidth;
+      height = nextHeight;
+      if (width > 0 && height > 0 && externalArea.current)
+        focusArea(externalArea.current);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [externallyControlled, viewport, focusArea]);
   const onResize = useCallback(
     (id: string, height: number) => {
       preserveCamera();
@@ -597,10 +775,19 @@ export const FlowOverview = memo(function FlowOverview({
   const changeCollection = useCallback(
     (id: string, view: CollectionView) => {
       preserveCamera();
+      if (externallyControlled && view.open && !collectionViews[id]?.open) {
+        expansionFocus.current = { id };
+        // Reopening mounts a new item diagram; do not frame its cached size.
+        setItemSizes((previous) => {
+          const next = { ...previous };
+          delete next[id];
+          return next;
+        });
+      }
       setSelected(id);
       setCollectionViews((previous) => ({ ...previous, [id]: view }));
     },
-    [preserveCamera],
+    [preserveCamera, setSelected, externallyControlled, collectionViews],
   );
   const resizeItem = useCallback(
     (id: string, size: Size) => {
@@ -636,7 +823,9 @@ export const FlowOverview = memo(function FlowOverview({
         {definition.nodes.map((n) => (
           <option key={n.id} value={n.id}>
             {n.title ? `${n.title} (${n.id})` : n.id} ·{" "}
-            {run.steps[n.id]?.status ?? "waiting"}
+            {definitionOnly
+              ? "not run"
+              : (run.steps[n.id]?.status ?? "waiting")}
           </option>
         ))}
       </select>
@@ -654,12 +843,18 @@ export const FlowOverview = memo(function FlowOverview({
         {!inline && (
           <header className="detail-header">
             <div>
-              <span className="eyebrow">Flow run · {run.status}</span>
+              <span className="eyebrow">
+                {definitionOnly
+                  ? "Flow definition"
+                  : `Flow run · ${run.status}`}
+              </span>
               <h2>{run.name}</h2>
             </div>
             <div className="flow-run-summary">
               {run.outcome ? (
                 <strong>Outcome: {run.outcome}</strong>
+              ) : definitionOnly ? (
+                "Authored structure · not executed"
               ) : (
                 (run.error ?? "Execution paths")
               )}
@@ -670,12 +865,14 @@ export const FlowOverview = memo(function FlowOverview({
               </small>
               <div className="flow-run-controls">
                 {stepSelection}
-                <CopyFixtureButton control={fixtureCopy} />
+                {!definitionOnly && <CopyFixtureButton control={fixtureCopy} />}
               </div>
             </div>
           </header>
         )}
-        {!inline && <CopyFixtureReport control={fixtureCopy} />}
+        {!inline && !definitionOnly && (
+          <CopyFixtureReport control={fixtureCopy} />
+        )}
         {inline && <div className="lab-flow-toolbar">{stepSelection}</div>}
         <div className="flow-workspace">
           <div
@@ -813,7 +1010,13 @@ export const FlowOverview = memo(function FlowOverview({
                     key={n.id}
                     node={n}
                     trace={captured}
-                    status={run.steps[n.id]?.status ?? "waiting"}
+                    status={
+                      definitionOnly
+                        ? "not run"
+                        : (run.steps[n.id]?.status ?? "waiting")
+                    }
+                    accent={nodeAccents?.[n.id]}
+                    highlighted={highlightedNodeIds?.includes(n.id)}
                     selected={selected === n.id}
                     x={p.x}
                     y={p.y}
@@ -824,8 +1027,14 @@ export const FlowOverview = memo(function FlowOverview({
                   <Card
                     key={n.id}
                     node={n}
-                    status={run.steps[n.id]?.status ?? "waiting"}
+                    status={
+                      definitionOnly
+                        ? "not run"
+                        : (run.steps[n.id]?.status ?? "waiting")
+                    }
                     decision={run.steps[n.id]?.decision}
+                    accent={nodeAccents?.[n.id]}
+                    highlighted={highlightedNodeIds?.includes(n.id)}
                     selected={selected === n.id}
                     bounds={p}
                     onResize={onResize}

@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | No changes yet.                                                                                            |
+| [Unreleased](#unreleased)                   | Not published                                                                      | Cookbook workbench and narrated guides; embedded flow viewer.                                              |
 | [0.5.6](#056--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.6) | Clearer Flow diagnostics; custom playground ports; focused CI checks.                                      |
 | [0.5.5](#055--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.5) | TypeScript fixes; capture and stream validation; clearer setup guidance.                                   |
 | [0.5.4](#054--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.4) | Thirteen Flow cookbooks; routine browser verification; rewritten docs.                                     |
@@ -27,7 +27,36 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No changes yet.
+### Changes
+
+#### Added
+
+- **Walkthrough navigation in expanded panes.** Keep Previous and Next controls and the current step title in expanded code and diagram views. Advance the guide without closing the popup, and retain the reached step when returning to the split view. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+
+- **Expanded and single-pane workbench views.** Open code or diagrams in a large popup using compact header controls. Show either pane alone, snap the divider to an edge, and restore the previous split without resetting source or diagram state. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+
+- **Self-contained cookbook guides.** Each cookbook has an overview popup and step explanations that teach the recipe and its Flow API method choices. A single Original Cookbook link replaces the repeated chapter links; library controls now use a separate panel icon. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+
+- **Optional cookbook code comments.** Read concise step explanations beside the Flow API source in all 19 cookbooks. A small comment toggle beside Copy source remembers your preference; copying includes the notes only when shown, while original line numbers and diagram links stay intact. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+- **Cookbook Flow Workbench.** Explore all 19 cookbooks with actual Flow API source beside the drawer's diagram renderer, compact narrated tutorials, animated graph construction, and linked timeline/code highlights. The workspace fills the viewport with resizable code and diagram panels; synthetic runs expose requests and results inline, and the original request lab remains at `?legacy=1`. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+- **Embedded flow viewer.** The new browser-safe `jev-devtools/viewer` export provides `JevFlowViewer` and the opt-in `useJevInspection` hook. Definitions can be displayed before execution, with optional presentation filters, selection, and color cues; the Node runner remains separate. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+
+#### Changed
+
+- **Compact source copying.** Use a copy icon in the workbench header, with a checkmark after copying and an accessible label and tooltip. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+
+- **Cookbook color cues and focus.** Keep each ribbon's step color visible when inactive. Highlight embedded diagram cards with a subtle, card-toned backdrop glow while retaining their colored top accents and keyboard focus indicators. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+- **More room for cookbook flows.** Remove the playground's top header and use a compact horizontal ribbon for cookbook steps. Library access stays in the view toolbar, leaving more height for the code and diagram. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+
+#### Fixed
+
+- **Focus expanded collection flows.** Opening a collection or loop in the workbench frames its measured item flow instead of focusing the parent card. The expanded flow stays framed when resizing the panels; closing it or choosing another step restores step focus. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+- **Smooth Fit flow controls.** Animate user-triggered fitting in the embedded flow viewer, including its keyboard shortcut. Initial and automatic fits remain immediate, and reduced-motion preferences suppress the transition. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+- **Full cookbook request diagrams.** Show the drawer's request internals and collection item previews in both workbench views using isolated synthetic captures. Run samples from the walkthrough without losing the current step, and inspect streaming requests, probabilities, and animated diagrams inline. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+- **Stable final-step controls.** Keep a disabled Next button on the last walkthrough step instead of replacing it with a wider complete-flow button. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+- **Walkthrough focus follows its step.** Keep the narrated step and its highlights fixed while hovering, selecting text, or clicking line numbers in earlier code. Guide navigation stays with Previous, Next, and the timeline; complete-flow code inspection remains interactive. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+- **Stable playground opening view.** Keep cookbook source at its first line and fit the diagram before its first visible frame. Automatic fitting no longer animates on load; selecting code or advancing the walkthrough still scrolls and focuses the corresponding nodes. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
+- **Refresh with multiple playground tabs.** Pages release their live inspector streams when hidden or starting navigation, so occupied HTTP/1 connections cannot block a refresh. The workbench and drawer reconnect with fresh retained captures when a tab becomes visible again or navigation is cancelled. ([#130](https://github.com/diegoag64/jev-devtools/pull/130))
 
 ## 0.5.6 — Prepared release
 

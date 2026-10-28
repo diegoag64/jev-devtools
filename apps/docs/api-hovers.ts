@@ -31,6 +31,7 @@ const functions: Record<string, Spec> = {
   },
   recorder: { help: "recorder", result: "recorder", options: [0, "recorder"] },
   replay: { help: "replay" },
+  inspection: { help: "inspection", options: [0, "inspection"] },
   all: { help: "all", result: "expression" },
   any: { help: "any", result: "expression" },
   not: { help: "not", result: "expression" },
@@ -84,6 +85,10 @@ const methods: Record<string, Record<string, Spec>> = {
 };
 const exportsByModule: Record<string, Record<string, string>> = {
   "jev-devtools": { JevDevtools: "component", FlowFixture: "fixture" },
+  "jev-devtools/viewer": {
+    JevFlowViewer: "viewer",
+    useJevInspection: "fn:inspection",
+  },
   "jev-devtools/server": {
     createJevDevtools: "fn:adapterCreate",
     getJevDevtools: "fn:adapterShared",
@@ -317,12 +322,14 @@ export function apiHovers(
     if (ts.isJsxSelfClosingElement(node) || ts.isJsxOpeningElement(node)) {
       if (
         ts.isIdentifier(node.tagName) &&
-        env.get(node.tagName.text) === "component"
+        ["component", "viewer"].includes(env.get(node.tagName.text) ?? "")
       ) {
-        add(node.tagName, apiHelp.react);
+        const key =
+          env.get(node.tagName.text) === "viewer" ? "viewer" : "react";
+        add(node.tagName, apiHelp[key]);
         for (const attr of node.attributes.properties)
           if (ts.isJsxAttribute(attr)) {
-            const help = propertyHelp("react", attr.name.getText(source));
+            const help = propertyHelp(key, attr.name.getText(source));
             if (help) add(attr.name, help);
           }
       }

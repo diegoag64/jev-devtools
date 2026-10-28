@@ -47,7 +47,7 @@ try {
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
-  await page.goto(base + "/?cookbook=date-extraction");
+  await page.goto(base + "/?legacy=1&cookbook=date-extraction");
   assert.equal(await page.locator("#scenario").inputValue(), "flow-date");
   assert.equal(await page.locator("#context").getAttribute("readonly"), "");
   assert.equal(

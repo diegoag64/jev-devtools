@@ -35,7 +35,11 @@ test("playground and inspector use the configured port and reject other origins"
   const session = "00000000-0000-4000-8000-000000000000";
   try {
     await hook(server);
-    for (const path of ["/__jev/config", "/api/jev-devtools"]) {
+    for (const path of [
+      "/__jev/config",
+      "/api/jev-devtools",
+      "/__jev/cookbooks/confidence-fallback",
+    ]) {
       const url = `${origin}${path}?session=${session}`;
       assert.equal((await fetch(url)).status, 200, path);
       const wrongHostStatus = await new Promise<number | undefined>(

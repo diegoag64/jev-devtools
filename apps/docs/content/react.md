@@ -4,6 +4,18 @@ Use `JevDevtools` to display the requests and flows captured by your server adap
 
 <!-- example: client.tsx -->
 
+## Embed a flow in a workspace
+
+**Unreleased.** `jev-devtools/viewer` exposes the drawer's diagram without a drawer. Give `JevFlowViewer` a `definition`, and optionally a captured `run` and `traces`. Omitting `run` displays the authored structure as **not executed**. Rendering a definition never executes it.
+
+<!-- example: viewer.tsx -->
+
+`useJevInspection` connects to the same server adapter when explicitly enabled. It returns validated, display-masked trace and flow snapshots plus a connection status. Match the endpoint to your existing adapter; enable capture on the server separately. Disable or unmount the hook to close both subscriptions. The viewer uses its own Shadow DOM and stylesheet, with an SSR placeholder. Set its container height; 400 pixels or more gives the diagram room, and smaller split panes can shrink to fit.
+
+For a tutorial, use `visibleNodeIds` to reveal part of the diagram and `highlightedNodeIds` with `nodeAccents` to connect it to source excerpts. `selectedNodeId` and `onNodeSelect` support controlled selection. These props affect presentation only; keep the original definition for execution. Use your own source map: the package does not derive code ranges. See the [API reference](@/api/reference/#jevflowviewer) for all props.
+
+## Drawer lifecycle
+
 `Root` renders the inspector beside the application content. In Vite, `import.meta.env.DEV` enables it during development. `defaultOpen={false}` starts with the launcher so the user can open the drawer when needed.
 
 ### Rendered output
@@ -37,7 +49,7 @@ Document-level transforms, clipping, and page JavaScript can still affect the ho
 
 When `defaultOpen` is false, the panel first mounts when opened. After that, closing it preserves selection, filters, and view state while incoming traces continue to update history.
 
-Disabling or unmounting the component closes its subscription. Server capture continues independently until the server adapter is disabled or disposed.
+Disabling or unmounting the component closes its subscriptions. The drawer and `useJevInspection` also close their streams while the browser page is hidden or starts navigation, which frees connections for a refresh. Returning to the page reconnects and retrieves the retained history; cancelling navigation resumes the streams after one second. Server capture continues independently until the server adapter is disabled or disposed; recorder limits still apply while a page is hidden.
 
 ## Browser-safe types
 

@@ -44,7 +44,7 @@ try {
   });
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
-  await page.goto(`${url}/?cookbook=line-search`);
+  await page.goto(`${url}/?legacy=1&cookbook=line-search`);
   await page
     .getByRole("heading", { name: "Line-by-line search", exact: true })
     .waitFor();

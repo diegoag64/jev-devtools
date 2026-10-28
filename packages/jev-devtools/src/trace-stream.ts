@@ -1,7 +1,19 @@
 import type { Trace } from "./protocol.js";
 import { TraceStore } from "./trace-store.js";
+import { connectVisibleStream } from "./visible-stream.js";
 
 export function connectTraceStream(
+  url: string,
+  onTraces: (traces: Trace[]) => void,
+  onConnection: (status: string) => void,
+) {
+  return connectVisibleStream(() => {
+    onConnection("connecting");
+    return openTraceStream(url, onTraces, onConnection);
+  });
+}
+
+function openTraceStream(
   url: string,
   onTraces: (traces: Trace[]) => void,
   onConnection: (status: string) => void,
@@ -28,7 +40,7 @@ export function connectTraceStream(
     pending = next;
     if (frame !== undefined) return;
     // Merge every protocol event, but render only the newest state per frame.
-    // Background tabs may suspend rAF; keep delivery bounded there as well.
+    // Keep delivery bounded if animation frames are throttled.
     frame = requestAnimationFrame(publish);
     fallback = setTimeout(publish, 100);
   };

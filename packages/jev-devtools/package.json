@@ -22,6 +22,10 @@
     "./flow": {
       "types": "./lib/flow/index.d.ts",
       "import": "./lib/flow/index.js"
+    },
+    "./viewer": {
+      "types": "./lib/src/viewer.d.ts",
+      "import": "./lib/src/viewer.js"
     }
   },
   "files": [

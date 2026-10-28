@@ -89,7 +89,7 @@ try {
     );
   let session;
   for (const [index, [slug, scenario, caseField]] of recipes.entries()) {
-    await page.goto(`http://127.0.0.1:4182/?cookbook=${slug}`);
+    await page.goto(`http://127.0.0.1:4182/?legacy=1&cookbook=${slug}`);
     await page.locator("#scenario").waitFor();
     assert.equal(await page.locator("#scenario").inputValue(), scenario);
     const nextSession = await page.evaluate(() =>

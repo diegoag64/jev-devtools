@@ -60,7 +60,9 @@ try {
   page.on("pageerror", (error) => console.error("Browser page error:", error));
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
-  await page.goto("http://127.0.0.1:4182/?cookbook=confidence-fallback");
+  await page.goto(
+    "http://127.0.0.1:4182/?legacy=1&cookbook=confidence-fallback",
+  );
   await page
     .getByRole("heading", { name: "Choose how specific to be." })
     .waitFor();

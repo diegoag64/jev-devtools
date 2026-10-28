@@ -14,6 +14,8 @@ The skill is versioned in `.agents/skills/port-jev-to-flow/`. In Codex, invoke `
 
 ## Choose an example
 
+Cookbook links open the Flow Workbench: source beside the actual diagram, a narrated step-by-step guide based on the original recipe, and synthetic execution with inline inspection. Use the timeline or select source code to highlight its nodes. The earlier result dashboards and drawer remain available by adding `legacy=1` to a cookbook URL; recipe README instructions that mention the drawer describe that Request lab view.
+
 ### Added in this round
 
 These 13 ports preserve the source recipes' assessment and routing logic using the existing Flow API. Each README describes the source, fixtures, thresholds, and adaptation limits.

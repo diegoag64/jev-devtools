@@ -1,4 +1,5 @@
 import { parseFlowUpdate } from "./flow-parser.js";
+import { connectVisibleStream } from "./visible-stream.js";
 import type { FlowDefinition, FlowRun } from "./flow-protocol.js";
 export type FlowHistory = { runs: FlowRun[]; definitions: FlowDefinition[] };
 export const emptyFlows: FlowHistory = { runs: [], definitions: [] };
@@ -7,6 +8,10 @@ export function connectFlowStream(
   url: string,
   onUpdate: (history: FlowHistory) => void,
 ) {
+  return connectVisibleStream(() => openFlowStream(url, onUpdate));
+}
+
+function openFlowStream(url: string, onUpdate: (history: FlowHistory) => void) {
   let alive = true,
     source: EventSource | undefined,
     frame: number | undefined,
