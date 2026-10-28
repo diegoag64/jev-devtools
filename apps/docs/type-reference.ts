@@ -33,6 +33,10 @@ const descriptions: Record<string, string> = {
 };
 
 const supportingDescriptions: Record<string, string> = {
+  FlowScope:
+    "The enclosing collection context used to restrict builder methods through nested paths and lanes.",
+  FlowBuilderMethods:
+    "The complete builder method signatures before scope-specific capabilities are selected. Use the public FlowBuilder or FlowValueBuilder types.",
   FlowHistory:
     "Retained flow runs and their definitions inside an InspectionSnapshot. The validated stream updates both collections together, including removal and reconnection snapshots.",
   Scalar:
@@ -134,7 +138,17 @@ export function publicTypeReference(referenceMarkdown: string) {
     // A variable declaration has no statement wrapper in getText().
     const text = ts.isVariableDeclaration(node)
       ? `declare const ${node.getText()};`
-      : node.getText();
+      : ts.isFunctionDeclaration(node)
+        ? node
+            .getSourceFile()
+            .statements.filter(
+              (statement): statement is ts.FunctionDeclaration =>
+                ts.isFunctionDeclaration(statement) &&
+                statement.name?.text === node.name?.text,
+            )
+            .map((statement) => statement.getText())
+            .join("\n")
+        : node.getText();
     return `<details>\n<summary>Exact TypeScript declaration</summary>\n\n\x60\x60\x60ts\n${text}\n\x60\x60\x60\n\n</details>`;
   };
   return (

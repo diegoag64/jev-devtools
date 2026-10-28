@@ -121,6 +121,7 @@ test("if scopes prevent leaked values and terminal arms, while direct prior valu
       defineJevFlow<boolean>("terminal", (f) => {
         f.if("gate", {
           when: f.input,
+          // @ts-expect-error exercise JavaScript runtime validation
           then: (a) => a.output("early"),
           else: (a) => a.input,
         });

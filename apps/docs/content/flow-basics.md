@@ -88,7 +88,7 @@ if (typeof result.value !== "string") {
 console.log(result.value.toUpperCase());
 ```
 
-For the original `{ name: "Ada" }` input, this adds `HELLO, ADA!` to the console output. The public `value` type is `unknown`, even though this task produces a string.
+For the original `{ name: "Ada" }` input, this adds `HELLO, ADA!` to the console output. This example uses the existing explicit-input two-argument form, so `value` remains `unknown`. The [inferred result form](@/api/flow/#inferred-application-results) preserves the terminal value type.
 
 ## Inspect the greeting flow
 

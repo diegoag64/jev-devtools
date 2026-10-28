@@ -11,9 +11,10 @@ export type Help = {
 const flowHelp = {
   define: {
     title: "defineJevFlow()",
-    signature: "defineJevFlow<Input>(name, build)",
+    signature:
+      "defineJevFlow<Input>(name, build) or defineJevFlow<Input>(name)(build)",
     description:
-      "Describe a flow once, then run it with different inputs. Defining it does not send requests.",
+      "Describe a flow once, then run it with different inputs. The curried form infers terminal results after the explicit input type. Defining it sends no requests.",
     props: {
       name: "The flow name shown in DevTools.",
       build: "Receives a builder. Return an output or a terminal branch.",
@@ -43,7 +44,7 @@ const flowHelp = {
     title: "flow.branch()",
     signature: "flow.branch(id, { when, then, else }, display?)",
     description:
-      "Finish the flow by choosing one of two paths. Each path must return an output or another branch.",
+      "Finish this terminal scope by choosing one of two paths. The result unions their outcome types. Inside a parallel lane, the outcome is a lane value.",
     props: {
       id: "A unique step ID within this flow.",
       when: "A flow condition evaluated when the branch runs.",
@@ -60,7 +61,7 @@ const flowHelp = {
     props: {
       name: "The outcome string returned by run().",
       "value?":
-        "Optional result data. Narrow its type in your application before using it.",
+        "Optional result data with nested references resolved. Inferred definitions preserve its type; legacy explicit-input definitions return unknown.",
       "display?": "Optional labels and display metadata for DevTools.",
     },
   },

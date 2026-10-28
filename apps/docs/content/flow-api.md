@@ -22,6 +22,16 @@ Import from `jev-devtools/flow` in Node code. [`defineJevFlow<Input>()`](@/api/r
 
 [`run`](@/api/reference/#flow-run) accepts a required `client` with `systemOne`, optional `devtools: FlowObserver`, and optional `signal: AbortSignal`. It resolves to `{ runId, outcome, value? }`. `definition` exposes the static graph for inspection. Definitions make no SDK calls.
 
+## Inferred application results
+
+Use `defineJevFlow<Input>(name)(build)` to specify the input and infer a discriminated union of terminal names and values. The extra call lets TypeScript infer the result after fixing the input type. The existing `defineJevFlow<Input>(name, build)` form retains its broad `FlowOutcome` result for compatibility. Without explicit type arguments, the two-argument form also infers terminal results.
+
+<!-- example: flow-branch.ts -->
+
+`route.run()` returns either `"manual-review"` with a string or `"ready"` with a number. `tryBranch()` narrows the result by its outcome before using its value. Nested object and array output templates resolve references in the returned type. Dynamic names remain `string`, and broad return annotations can widen inferred results.
+
+`DefinedJevFlow<Input, Outcome>` and `FlowResult<Outcome>` name executable definitions and application results. They default to `FlowOutcome` for helpers that accept any outcome. Captured `FlowRun` values retain their separate, potentially redacted shape.
+
 ## Requests and function steps
 
 | Method                                                                         | Arguments and result                                                                                                                                                                       |
@@ -56,11 +66,13 @@ Use [flow expressions](@/api/expressions/) for that condition. A JavaScript `if`
 
 ### Return interfaces
 
-| Method        | Type                          | Description                                               |
-| ------------- | ----------------------------- | --------------------------------------------------------- |
-| `branch(...)` | `FlowExpression<FlowOutcome>` | Terminal result of the selected path.                     |
-| `if(...)`     | `FlowExpression<A \| B>`      | Selected value, available to shared steps after the join. |
-| `output(...)` | `FlowExpression<FlowOutcome>` | Terminal outcome name and optional resolved value.        |
+| Method        | Type                                                        | Description                                                              |
+| ------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `branch(...)` | `FlowExpression<A \| B>`                                    | Union of terminal results from both paths.                               |
+| `if(...)`     | `FlowExpression<A \| B>`                                    | Selected value, available to shared steps after the join.                |
+| `output(...)` | `FlowExpression<{ outcome: Name; value: Resolved<Value> }>` | Literal outcome name and resolved value; omitted values are `undefined`. |
+
+Value bodies receive `FlowValueBuilder` and cannot call `output()` or `branch()` directly. Roots, terminal branch paths, and parallel lanes receive `FlowBuilder`. Collection scope propagates through nested paths and lanes: map descendants cannot create maps or loops; loop descendants cannot create loops but can create maps. Let callback types infer these capabilities. Shared helpers should accept only the methods they use.
 
 ## Parallel lanes
 
@@ -162,7 +174,7 @@ Check `missing` for completed steps whose response was unavailable, and `warning
 
 ## Related types
 
-[`FlowBuilder`](@/api/reference/#type-flowbuilder), [`FlowRunOptions`](@/api/reference/#type-flowrunoptions), [`FlowOutcome`](@/api/reference/#type-flowoutcome), [`FlowTask`](@/api/reference/#type-flowtask), [`FlowRequestFactory`](@/api/reference/#type-flowrequestfactory), [`TaskContext`](@/api/reference/#type-taskcontext), and [`Resolved`](@/api/reference/#type-resolved) describe builder and execution contracts. [`FlowDefinition`](@/api/reference/#type-flowdefinition), [`FlowRun`](@/api/reference/#type-flowrun), [`FlowStep`](@/api/reference/#type-flowstep), [`FlowDisplay`](@/api/reference/#type-flowdisplay), and [`FlowObserver`](@/api/reference/#type-flowobserver) describe inspection data and callbacks. [`FlowFixture`](@/api/reference/#type-flowfixture) and [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture) describe replay data (new in 0.5.0). See [recorder and types](@/api/recorder/).
+[`FlowBuilder`](@/api/reference/#type-flowbuilder), [`FlowValueBuilder`](@/api/reference/#type-flowvaluebuilder), [`DefinedJevFlow`](@/api/reference/#type-definedjevflow), [`FlowResult`](@/api/reference/#type-flowresult), [`FlowRunOptions`](@/api/reference/#type-flowrunoptions), [`FlowOutcome`](@/api/reference/#type-flowoutcome), [`FlowTask`](@/api/reference/#type-flowtask), [`FlowRequestFactory`](@/api/reference/#type-flowrequestfactory), [`TaskContext`](@/api/reference/#type-taskcontext), and [`Resolved`](@/api/reference/#type-resolved) describe builder and execution contracts. [`FlowDefinition`](@/api/reference/#type-flowdefinition), [`FlowRun`](@/api/reference/#type-flowrun), [`FlowStep`](@/api/reference/#type-flowstep), [`FlowDisplay`](@/api/reference/#type-flowdisplay), and [`FlowObserver`](@/api/reference/#type-flowobserver) describe inspection data and callbacks. [`FlowFixture`](@/api/reference/#type-flowfixture) and [`BuiltFlowFixture`](@/api/reference/#type-builtflowfixture) describe replay data (new in 0.5.0). See [recorder and types](@/api/recorder/).
 
 <a id="compare-a-fixture-with-a-live-run-unreleased"></a>
 

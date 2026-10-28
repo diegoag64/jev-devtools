@@ -87,7 +87,25 @@ For a complete sample of assessment reuse and application routing, run [LLM guar
 
 Definitions are synchronous and make no SDK calls. Plain request/value templates are copied at definition time. Treat SDK asset instances as immutable. References from another definition, a sibling lane, or a branch-local scope cannot be used outside their available scope. Structural validation happens while defining, before any run can dispatch; input-dependent missing values and invalid comparisons fail when reached during execution.
 
-Question/answer reference types are inferred. `run()` returns `{runId, outcome: string, value?: unknown}` in v1: supplying `defineJevFlow<Ticket>` keeps the input ergonomic, but does not infer a discriminated union of all terminal values. Narrow the returned value in application code.
+Question and answer reference types are inferred. Existing `defineJevFlow<Ticket>(name, build)` calls retain `{ runId, outcome: string, value?: unknown }`; narrow their returned values in application code.
+
+For inferred terminal results with an explicit input type, use `defineJevFlow<Ticket>(name)(build)`. TypeScript cannot infer a later generic argument after you explicitly supply the first one. The extra call fixes the input type first, then infers the outcome union from the callback. This additive form needs no migration of existing definitions. Calls without explicit type arguments also infer their terminal results.
+
+```ts
+const review = defineJevFlow<{ approved: boolean; amount: number }>("review")(
+  (flow) =>
+    flow.branch("route", {
+      when: flow.input.get("approved"),
+      then: (path) =>
+        path.output("approved", { amount: path.input.get("amount") }),
+      else: (path) => path.output("rejected"),
+    }),
+);
+const result = await review.run({ approved: true, amount: 12 }, { client });
+if (result.outcome === "approved") console.log(result.value.amount.toFixed(2));
+```
+
+`output()` preserves literal names and resolves nested value references in its type. `branch()` unions its path results, including nested branches. Dynamic string names remain `string`; broad callback annotations can also widen results. `DefinedJevFlow<Input, Outcome>` names the executable definition, and `FlowResult<Outcome>` adds `runId` to the application outcome. Both default to the broad `FlowOutcome`. These types describe execution values, independently of redacted or truncated `FlowRun` captures.
 
 ## Function steps and runtime requests
 
@@ -436,7 +454,9 @@ Before each iteration, the runner checks the condition against the current state
 
 `maxIterations` is required, integer 1–64. After the last permitted iteration, the condition is checked again: false means normal completion; true throws exported `FlowLoopLimitError`. Runtime limit errors include the failing loop ID in `stepId` and the message. `new FlowLoopLimitError()` remains supported with an undefined `stepId` and the original generic message. Captured error fields retain only the error name, without the message or input values. The loop records `stopReason: "limit"`, keeps completed iterations inspectable, and blocks shared downstream work. A partial state is not returned as a successful final result. Task/request failures and cancellation also stop iteration. No automatic task retry, fallback, persistence or resume is added; remote side effects still require cooperative cancellation.
 
-Direct `output()` and terminal `branch()` calls in map bodies, loop bodies, and `if()` paths fail during definition. The error names the containing step, the body or path, and the unsupported operation. Return a value expression instead. Parallel lanes inside these bodies still support terminal outputs and branches as lane values. The shared `FlowBuilder` type remains unchanged, so some invalid terminal calls still compile.
+Direct `output()` and terminal `branch()` calls in map bodies, loop bodies, and `if()` paths fail during definition. The error names the containing step, the body or path, and the unsupported operation. Return a value expression instead. Parallel lanes inside these bodies still support terminal outputs and branches as lane values. TypeScript also rejects these direct terminal calls. `FlowValueBuilder<Input, Scope>` describes value bodies, and `FlowBuilder<Input, Scope>` describes roots, terminal branch paths, and lanes. The default scope is `"flow"`; `"map"` removes both `map()` and `loop()`, and `"loop"` removes `loop()`. These restrictions follow nested paths and lanes. A loop can contain a map, including inside a lane branch; a map cannot contain a loop or another map.
+
+Let callback parameter types infer their scope. For shared helpers, accept the capabilities the helper needs, such as `Pick<FlowValueBuilder<Input>, "task">`. Helpers previously annotated as a full `FlowBuilder` may need a narrower parameter when passed to a value body. Runtime validation remains necessary for JavaScript, assertions, reference ownership, terminal order, and size limits.
 
 An iteration can contain tasks, Jev requests, `if()`, parallel lanes and **one level of `map()`**. Nested loops, loops inside maps and nested maps are unsupported. Pass outer data through `input`. Loop and collection templates count recursively toward the 256-node definition limit. The entire run shares the 1,024-expanded-step budget across sibling loops and all nested item executions; each program invocation reserves its own nodes and a map reserves all its immediate item programs before dispatch. The budget never resets at iteration boundaries. Exceeding it fails explicitly rather than truncating the work. The existing per-map concurrency limit is not a global request-rate limiter.
 
