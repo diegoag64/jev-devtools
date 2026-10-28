@@ -4,6 +4,7 @@ import {
   defineJevFlow,
   FlowLoopLimitError,
   type FlowBuilder,
+  type FlowValueBuilder,
   type FlowRun,
 } from "../flow/index.js";
 
@@ -108,7 +109,9 @@ for (const context of ["map", "loop", "if"] as const) {
         () =>
           defineJevFlow<null>("private-flow-name", (f) => {
             if (context === "map")
-              f.map("batch", { items: [1], input: null, maxItems: 1 }, body);
+              f.map("batch", { items: [1], input: null, maxItems: 1 }, (item) =>
+                body(item as unknown as FlowBuilder<unknown>),
+              );
             else if (context === "loop")
               f.loop(
                 "retry",
@@ -126,7 +129,7 @@ for (const context of ["map", "loop", "if"] as const) {
             else
               f.if("choose", {
                 when: f.input.eq(null),
-                then: body,
+                then: (p) => body(p as FlowBuilder<unknown>),
                 else: (p) => p.input,
               });
             return f.output("done");
@@ -159,12 +162,14 @@ test("nested if and map diagnostics identify the immediate value-returning conte
                 r.if("choose", {
                   when: r.input.get("state").eq(0),
                   then: (p) => p.input,
+                  // @ts-expect-error exercise JavaScript runtime validation
                   else: (p) => p.output("bad"),
                 });
               else
                 r.map(
                   "batch",
                   { items: [1], input: null, maxItems: 1 },
+                  // @ts-expect-error exercise JavaScript runtime validation
                   (item) => item.output("bad"),
                 );
               return r.input.get("state");
@@ -180,7 +185,7 @@ test("nested if and map diagnostics identify the immediate value-returning conte
 });
 
 test("parallel lanes still return terminal outputs and branches inside map, loop and if bodies", async () => {
-  const terminals = (b: FlowBuilder<unknown>) => {
+  const terminals = (b: FlowValueBuilder<unknown, "map">) => {
     const when = b.task("predicate", { input: true, run: (value) => value });
     return b.parallel("lanes", {
       direct: (lane) => lane.output("lane-output", 1),
