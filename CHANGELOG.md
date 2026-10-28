@@ -32,13 +32,13 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Changed
 
-- **One cookbook playground.** Retire the legacy Request lab, result dashboards, manual sandbox, and live-mode form. Keep source, diagrams, guides, and complete sample results in the workbench. Remove unused form dependencies and move shared browser verification to the workbench; recipe runtime and package inspector checks remain.
+- **One cookbook playground.** Retire the legacy Request lab, result dashboards, manual sandbox, and live-mode form. Keep source, diagrams, guides, and complete sample results in the workbench. Remove unused form dependencies and move shared browser verification to the workbench; recipe runtime and package inspector checks remain. ([#137](https://github.com/diegoag64/jev-devtools/pull/137))
 
-- **Playground controls and navigation.** Use one select component in the cookbook workbench with the diagram chevron and control styling. Rename the sidebar header to jevtools playground, remove the redundant library close button, and link to docs.jevtools.dev.
+- **Playground controls and navigation.** Use one select component in the cookbook workbench with the diagram chevron and control styling. Rename the sidebar header to jevtools playground, remove the redundant library close button, and link to docs.jevtools.dev. ([#137](https://github.com/diegoag64/jev-devtools/pull/137))
 
 #### Documentation
 
-- **Explore cookbooks without setup.** Point guides, cookbook READMEs, and bundled agent guidance to playground.jevtools.dev. Add a Cookbook Playground hero button and a Flow API learning link to the landing page. Local contributor setup remains available.
+- **Explore cookbooks without setup.** Point guides, cookbook READMEs, and bundled agent guidance to playground.jevtools.dev. Add a Cookbook Playground hero button and a Flow API learning link to the landing page. Local contributor setup remains available. ([#137](https://github.com/diegoag64/jev-devtools/pull/137))
 
 #### Maintenance
 
