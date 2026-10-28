@@ -1,6 +1,8 @@
 # Confidence fallback
 
-A runnable TypeScript adaptation of TypeSafe’s [Classification using confidence](https://docs.typesafe.ai/cookbooks/classification_using_confidence). Run `npm ci` and `npm run dev` from the repository root, then open [the sample](http://127.0.0.1:4182/?cookbook=confidence-fallback). No API key is required. Choose a case, run it, and inspect **Jev DevTools → Flows**.
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=confidence-fallback) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=confidence-fallback&legacy=1).
+
+A runnable TypeScript adaptation of TypeSafe’s [Classification using confidence](https://docs.typesafe.ai/cookbooks/classification_using_confidence). Open [the sample](https://playground.jevtools.dev/?cookbook=confidence-fallback&legacy=1). No API key is required. Choose a case, run it, and inspect **Jev DevTools → Flows**.
 
 The flow validates the selected document, asks one `Choice` over the original **75 SIC major groups**, and checks the returned **API confidence ≥0.90**. At or above the cutoff it reports the two-digit group; below it a task computes the selected group’s actual parent division. Both paths join before the result attaches the group description and complete probability distribution. Every valid case makes exactly one request. The diagram describes application execution, not model reasoning.
 

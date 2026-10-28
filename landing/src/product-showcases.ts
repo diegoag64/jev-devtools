@@ -26,7 +26,7 @@ export const flowApiShowcase = `
   <div class="wrap">
   <div class="product-heading">
     <h2 id="flow-api-title">Code to diagrams<br /><span>via the Flow API</span></h2>
-    <div><p>Use the Flow API to define System One requests and application logic in TypeScript. It supports functions, branches, parallel steps, maps, and loops. Inspect recorded runs as diagrams.</p><a class="text-link" href="${flowGuide}">Explore the Flow API</a></div>
+    <div><p>Use the Flow API to define System One requests and application logic in TypeScript. It supports functions, branches, parallel steps, maps, and loops. Inspect recorded runs as diagrams.</p><p>See how Jev requests and code form complete workflows in the <a href="https://playground.jevtools.dev/">Cookbook Playground</a>. Read the source beside each diagram and follow the step-by-step guides. No installation or API key needed.</p><a class="text-link" href="${flowGuide}">Explore the Flow API</a></div>
   </div>
   <div class="api-comparison">
     <div class="api-source code-window">

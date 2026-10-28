@@ -1,8 +1,10 @@
 # Structure recovery · sample showcase
 
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=structure-recovery) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=structure-recovery&legacy=1).
+
 A local TypeScript adaptation of the [official Structure Recovery cookbook](https://docs.typesafe.ai/cookbooks/autoformat). It uses the existing `task()`, dynamic `jev()` and `if()` APIs. No additional execution primitive is introduced.
 
-Run `npm ci` and `npm run dev` from the repository root, then open [the local cookbook](http://127.0.0.1:4182/?cookbook=structure-recovery). Choose **Structure sample** and click **Run sample**. No key or paid inference is needed. Samples are fixed, read-only documents with authored synthetic answers; live mode is disabled.
+Open [the cookbook](https://playground.jevtools.dev/?cookbook=structure-recovery&legacy=1). Choose **Sample** and click **Run sample**. No key or paid inference is needed. Samples are fixed, read-only documents with authored synthetic answers; live mode is disabled.
 
 ## Follow the full flow
 
@@ -13,12 +15,12 @@ Run `npm ci` and `npm run dev` from the repository root, then open [the local co
 5. **Render Markdown in code** uses returned Choice labels. Adjacent list items form one group, numbered when their mean step probability is at least 0.5; adjacent code blocks share a fence. Only relevant companions affect each type's formatting. Confidence is displayed, not used as a gate.
 6. **Recovered document** exposes the original/preview comparison, Markdown source, join decisions, source lines, and every type probability. Open **Jev DevTools → Flows**, select the newest run, and inspect the complete connected requests and function steps. The request's **Questions** tab retains all companion answers, including unused ones.
 
-| Sample | What to inspect |
-| --- | --- |
-| Team memo | Twelve lines become nine blocks. Five stitch questions, then 36 classification questions. List steps of 40% and 60% produce a numbered list because the group mean is exactly 50%. The low-confidence paragraph remains a paragraph. |
-| Threshold boundaries | Joins at exactly 20% and 50%; splits at 19.9% and 49.9%, using the previous line's punctuation. |
-| Blank-line separation | No stitch questions; one classification request. The blank boundary is preserved. |
-| Empty document | No Jev requests; explicit bypasses and empty Markdown. |
+| Sample                | What to inspect                                                                                                                                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Team memo             | Twelve lines become nine blocks. Five stitch questions, then 36 classification questions. List steps of 40% and 60% produce a numbered list because the group mean is exactly 50%. The low-confidence paragraph remains a paragraph. |
+| Threshold boundaries  | Joins at exactly 20% and 50%; splits at 19.9% and 49.9%, using the previous line's punctuation.                                                                                                                                      |
+| Blank-line separation | No stitch questions; one classification request. The blank boundary is preserved.                                                                                                                                                    |
+| Empty document        | No Jev requests; explicit bypasses and empty Markdown.                                                                                                                                                                               |
 
 ## Fidelity and limits
 
@@ -30,4 +32,4 @@ Formatting preserves the normalized input wording, adding Markdown markers; it d
 
 Requests with no questions are explicitly bypassed, an adaptation that makes separated and empty inputs runnable. The normal memo uses two sequential requests, not one request per line or block. Cancellation prevents downstream work and clears the previous page result. Fixture delays only make progress visible.
 
-Implementation: `flow.ts`; sample choices: `cases.ts`; fixed transport: `samples.ts`; behavior checks: `../../apps/playground/tests/structure.test.ts`. This uses the 0.4.0 flow API; the cookbook application and sample fixtures run from this repository and are not bundled in npm. Adding an API key alone does not enable live mode.
+Implementation: `flow.ts`; sample choices: `cases.ts`; fixed transport: `samples.ts`; behavior checks: `../../apps/playground/tests/structure.test.ts`. This uses the 0.4.0 flow API; the cookbook application and sample fixtures live in this repository and are not bundled in npm. Adding an API key alone does not enable live mode.

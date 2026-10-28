@@ -1114,7 +1114,7 @@ try {
   await mobileOverview.waitFor({ state: "hidden" });
   await page.getByRole("button", { name: "Toggle cookbook library" }).click();
   await page
-    .getByRole("button", { name: "Close cookbook library", exact: true })
+    .getByRole("button", { name: "Toggle cookbook library", exact: true })
     .click();
   assert.equal(await page.getByLabel("Find a cookbook").isVisible(), false);
   assert.equal(
@@ -1122,7 +1122,7 @@ try {
       .getByRole("button", { name: "Toggle cookbook library" })
       .evaluate((node) => node === document.activeElement),
     true,
-    "Closing the mobile library restores focus to its toolbar control",
+    "Closing the mobile library keeps focus on its toolbar control",
   );
   await page.getByRole("button", { name: "Toggle cookbook library" }).click();
   await page.getByLabel("Find a cookbook").fill("not-a-cookbook");

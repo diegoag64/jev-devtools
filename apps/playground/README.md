@@ -1,6 +1,10 @@
 # Playground
 
-Run these commands from a terminal to start the local development playground.
+Explore the [Cookbook Playground](https://playground.jevtools.dev/) without downloading the repository or installing the package. Read source beside the diagrams, follow the step-by-step guides, and run synthetic samples without an API key.
+
+## Local development
+
+To edit the playground or its cookbooks, start the local development server.
 
 Requires Node **22.12+** (24 recommended).
 
@@ -25,7 +29,7 @@ The [Request lab](http://127.0.0.1:4182/?legacy=1) retains individual calls, edg
 
 ## Cookbook examples
 
-The [cookbook guide](../../cookbooks/README.md) lists runnable examples, their local URLs, and the flow patterns they demonstrate. They use the public flow API. The playground, cookbook code, and fixtures live in this repository and are not bundled in the npm package.
+The [cookbook guide](../../cookbooks/README.md) lists runnable examples, their hosted URLs, and the flow patterns they demonstrate. They use the public flow API. The playground, cookbook code, and fixtures live in this repository and are not bundled in the npm package.
 
 The [LLM guardrails cookbook](../../cookbooks/guardrails/README.md) screens one selected input or output message per run. It reuses one synthetic assessment under strict and permissive policies; no LLM generation or live inference is enabled.
 
@@ -64,3 +68,7 @@ The [Function calling cookbook](../../cookbooks/function-calling/README.md) open
 Open `http://127.0.0.1:4182/?cookbook=consistency-choices` for the [Choice self-consistency adaptation](../../cookbooks/consistency-choices/README.md). It keeps the original post, eight Choice questions and 15 sequential requests, with authored varying distributions. Inspect each repeat and its question gates in Flows, or open the Request lab with `legacy=1` and select heatmap cells for raw probabilities and separate confidence. Below 0.60 abstains; exactly 0.60 accepts. Samples do not measure consistency, accuracy, latency or cost; live mode and other-provider comparisons are excluded.
 
 The [Noul self-consistency cookbook](../../cookbooks/consistency-nouls/README.md) runs at `/?cookbook=consistency-nouls`. It preserves fifteen sequential fourteen-question requests and the inclusive 0.30–0.70 uncertainty band. Its authored variation and statistics are fixture demonstrations, not measured model consistency or a provider comparison; live mode is rejected.
+
+### Select controls
+
+Use `NativeSelect` and `NativeSelectOption` from `src/components/ui/native-select.tsx` for every playground select. The component owns the chevron, border, surface, focus, disabled, and forced-colors states in plain CSS, so it works in both the workbench and Request lab. Use `size="sm"` for compact toolbars and keep width constraints in the consuming layout. The styles match the diagram selects in `packages/jev-devtools/src/inspector.css`; review both when changing the control design. The viewer keeps its styles inside its shadow root.

@@ -1,6 +1,8 @@
 # Date extraction · sample showcase
 
-A community-maintained TypeScript adaptation of the [official TypeSafe Date extraction cookbook](https://docs.typesafe.ai/cookbooks/date_extraction_cookbook). Run `npm ci` and `npm run dev` from the repository root, then open [Date extraction](http://127.0.0.1:4182/?cookbook=date-extraction). Choose a **Date sample** and **Run sample**. No API key is required; live mode is disabled on the server even when a key exists.
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=date-extraction) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=date-extraction&legacy=1).
+
+A community-maintained TypeScript adaptation of the [official TypeSafe Date extraction cookbook](https://docs.typesafe.ai/cookbooks/date_extraction_cookbook). Open [Date extraction](https://playground.jevtools.dev/?cookbook=date-extraction&legacy=1). Choose a **Sample** and **Run sample**. No API key is required; live mode is disabled on the server even when a key exists.
 
 The reference date is visibly fixed to **Thursday, 2026-07-30**, matching the source. Each requested role sends one Jev request with the original seven Choice questions: `mode`, `month`, `day`, `year`, `day_anchor`, `weekday`, and `week_offset`. The model only reads text; calendar math happens in the **Assemble the calendar date** task. Outputs are JSON ISO date strings (`YYYY-MM-DD`) or `null`.
 

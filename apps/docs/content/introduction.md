@@ -66,6 +66,6 @@ Choose a starting point for your task:
 
 - [Quick start](@/getting-started/) connects a Vite React app and an Express server, then captures a request.
 - [Next.js](@/guides/nextjs/) sets up the App Router's server adapter and Client Component.
-- [Examples and cookbooks](@/examples/) includes no-key sample apps and complete application flows.
+- [Cookbook Playground](https://playground.jevtools.dev/) shows source, diagrams, and guided workflows without installation or an API key. [Examples and cookbooks](@/examples/) helps you choose a flow.
 - [API glossary](@/api/reference/) lists method inputs, return values, and examples.
 - [Troubleshooting](@/guides/troubleshooting/) helps resolve an empty drawer, rejected connections, or missing captures.

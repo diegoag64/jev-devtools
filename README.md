@@ -12,7 +12,7 @@ Inspect request inputs, returned answers and probabilities, retries, and errors.
 [![MIT license](https://img.shields.io/badge/License-MIT-E551BA?labelColor=0D0A0F)](LICENSE)
 [![Status: experimental](https://img.shields.io/badge/Status-experimental-E551BA?labelColor=0D0A0F)](#add-to-your-app)
 
-[Website](https://jevtools.dev/) · [Documentation](https://docs.jevtools.dev/) · [API reference](https://docs.jevtools.dev/api/reference/) · [For AI agents](#for-ai-agents)
+[Website](https://jevtools.dev/) · [Documentation](https://docs.jevtools.dev/) · [Cookbook Playground](https://playground.jevtools.dev/) · [API reference](https://docs.jevtools.dev/api/reference/) · [For AI agents](#for-ai-agents)
 
 </div>
 
@@ -34,18 +34,13 @@ Diagrams show captured inputs, responses, and routing rules you define. They do 
 
 <a id="run-the-playground"></a>
 
-## Try the local playground
+<a id="try-the-local-playground"></a>
 
-Run labeled samples without an API key or inference calls. Use Node 22.12+. [Contributor setup](CONTRIBUTING.md) describes the pinned development runtime.
+## Try the Cookbook Playground
 
-```sh
-git clone https://github.com/diegoag64/jev-devtools.git
-cd jev-devtools
-npm ci
-npm run dev
-```
+Open the [Cookbook Playground](https://playground.jevtools.dev/) to explore Jev requests and application code as connected flows. Read the source beside each diagram, follow a step-by-step guide, and run labeled synthetic samples. No download, installation, or API key is needed.
 
-Open [the playground](http://127.0.0.1:4182/), run a sample scenario, and open **Jev DevTools**. Select the recorded request to inspect its inputs and answers. The [playground guide](apps/playground/README.md) covers scenarios, the edge-case sandbox, and optional live mode.
+To modify the playground, follow its [local development guide](apps/playground/README.md#local-development).
 
 <a id="install-in-another-react-app"></a>
 
@@ -154,7 +149,7 @@ Use `compareWithFixture` to compare a run with saved answers, including routing 
 
 ## Explore cookbook examples
 
-The [cookbook collection](cookbooks/README.md) contains runnable adaptations of official TypeSafe recipes, including passage classification, skill selection, structured extraction, and memory. The examples use Flow APIs available since **0.4.0** and labeled sample responses. They run from this repository without an API key. Cookbook application code and fixtures are not bundled in npm.
+The [cookbook collection](cookbooks/README.md) contains runnable adaptations of official TypeSafe recipes, including passage classification, skill selection, structured extraction, and memory. The examples use Flow APIs available since **0.4.0** and labeled sample responses. Explore them in the [Cookbook Playground](https://playground.jevtools.dev/) without an API key or local setup. Cookbook application code and fixtures are not bundled in npm.
 
 <a id="set-up-with-your-coding-agent"></a>
 

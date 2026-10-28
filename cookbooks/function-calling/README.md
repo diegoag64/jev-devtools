@@ -1,6 +1,8 @@
 # Function calling
 
-A runnable TypeScript adaptation of the [official TypeSafe Function Calling cookbook](https://docs.typesafe.ai/cookbooks/function_calling). From the repository root, run `npm ci` and `npm run dev`, then open [the function-calling sample](http://127.0.0.1:4182/?cookbook=function-calling).
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=function-calling) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=function-calling&legacy=1).
+
+A runnable TypeScript adaptation of the [official TypeSafe Function Calling cookbook](https://docs.typesafe.ai/cookbooks/function_calling). Open [the function-calling sample](https://playground.jevtools.dev/?cookbook=function-calling&legacy=1).
 
 Choose a fixed command and **Run sample**. The result is a proposed function name and explicit kwargs, with omitted defaults displayed separately. Open **Jev DevTools → Flows**: the request contains all 54 answers, and the selected-argument collection exposes each omit/fill branch. No tool is executed. The output does not load market data, generate financial charts or place trades.
 

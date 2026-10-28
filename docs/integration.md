@@ -195,19 +195,19 @@ Only visible and nearby cards (plus any focused card) are in the DOM. Browser Fi
 
 The recorder preserves the original SDK APIPromise, including response helpers and cancellation. It observes a cloned response without consuming the caller's body. AsyncLocalStorage correlates transport attempts/retries with their logical request. Total latency covers the logical call; attempt latency ends at response headers.
 
-## Local playground and independent example
+<a id="local-playground-and-independent-example"></a>
 
-```sh
-npm run dev
-```
+## Playground and independent example
 
-Open **http://127.0.0.1:4182/**. The original Diagram Motion Lab and `/docs/` stay in their separate repository. The playground uses the same public component and adapter described above. Its minimal form uses shadcn Button, Native Select, Textarea, and Label components; the top bar and hero are omitted, and application results appear after a run. Its drawer starts closed so the application result remains visible; open **Jev DevTools** in the bottom-right corner to inspect the request.
+Explore the [Cookbook Playground](https://playground.jevtools.dev/) without installation or an API key. It shows source beside connected diagrams and provides step-by-step guides for workflows that combine Jev requests and code. Use the [local development guide](../apps/playground/README.md#local-development) when modifying the playground.
+
+The [Request lab](https://playground.jevtools.dev/?legacy=1) uses the same public component and adapter described above. Its drawer starts closed so the application result remains visible. Open **Jev DevTools** in the bottom-right corner to inspect a request.
 
 Samples cover triage (Choice, Score, Noul), image regions (Box + Noul), retry after 429, failure, and cancellation. Choose a sample outcome (blocked payment, delayed delivery, or quick question) to compare different fixture responses. Sample answers and usage are fixed by that selection, even if the context changes. They use the real SDK's serialization/retry paths with a custom fetch and make no inference calls.
 
 Successful runs also update an application preview: Choice selects a support queue, Score sets a priority, and Noul suggests a human handoff. **Why this outcome?** explains the signals. Image runs show the returned Box with a toggleable overlay, gated by the separate Noul presence answer. Retry, failure, and cancellation have explicit states; a failed run never applies an earlier result. Priority and presence thresholds are labeled demo policies, and no actual ticket is sent.
 
-For optional live mode, copy `apps/playground/.env.example` to `apps/playground/.env.local`, set `TYPESAFE_API_KEY` there, and restart. No key is accepted in the browser. The image example uses the SDK's experimental image contract. Live behavior has not been verified.
+For optional live mode in a local checkout, copy `apps/playground/.env.example` to `apps/playground/.env.local`, set `TYPESAFE_API_KEY` there, and restart. No key is accepted in the browser. The image example uses the SDK's experimental image contract. Live behavior has not been verified.
 
 To try the minimal independent consumer after `npm run pack:devtools`:
 
@@ -241,4 +241,4 @@ Package verification packs the library, installs it into a temporary independent
 
 Library output is `packages/jev-devtools/lib/`; the playground's production build is separate and intentionally shows only a local-tool notice. No production deployment is included.
 
-The playground controls live in `apps/playground/src/components/ui/` and are generated from [shadcn/ui](https://ui.shadcn.com/docs/installation/vite), with direct Radix imports and the local `cn` helper. `apps/playground/components.json` configures future additions. Tailwind utilities and theme tokens are in `apps/playground/src/controls.css`; global preflight is omitted to preserve inspector styling. These dependencies are playground-only and are not needed by consumers of the packaged inspector.
+The playground controls live in `apps/playground/src/components/ui/`. `NativeSelect` uses shared plain CSS that matches the diagram selects. The other controls are generated from [shadcn/ui](https://ui.shadcn.com/docs/installation/vite), with direct Radix imports and the local `cn` helper. `apps/playground/components.json` configures future additions. Tailwind utilities and theme tokens are in `apps/playground/src/controls.css`; global preflight is omitted to preserve inspector styling. These dependencies are playground-only and are not needed by consumers of the packaged inspector.

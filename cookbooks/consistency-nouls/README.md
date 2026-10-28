@@ -1,6 +1,8 @@
 # Noul self-consistency
 
-A runnable TypeScript adaptation of [TypeSafe's Noul self-consistency recipe](https://docs.typesafe.ai/cookbooks/consistency_noul_cookbook), using existing public `jev-devtools/flow` methods. From the repository root, run `npm ci` and `npm run dev`, then open [the sample](http://127.0.0.1:4182/?cookbook=consistency-nouls). No API key is needed; live requests are rejected on the server.
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=consistency-nouls) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=consistency-nouls&legacy=1).
+
+A runnable TypeScript adaptation of [TypeSafe's Noul self-consistency recipe](https://docs.typesafe.ai/cookbooks/consistency_noul_cookbook), using existing public `jev-devtools/flow` methods. Open [the sample](https://playground.jevtools.dev/?cookbook=consistency-nouls&legacy=1). No API key is needed; live requests are rejected on the server.
 
 ## What is preserved
 

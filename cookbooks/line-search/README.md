@@ -1,6 +1,8 @@
 # Line-by-line search
 
-Run `npm run dev` from the repository root and open [the local cookbook](http://127.0.0.1:4182/?cookbook=line-search). Choose a sample, run it, then open **Jev DevTools → Flows**.
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=line-search) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=line-search&legacy=1).
+
+Open [the cookbook](https://playground.jevtools.dev/?cookbook=line-search&legacy=1). Choose a sample, run it, then open **Jev DevTools → Flows**.
 
 This TypeScript adaptation of the [official TypeSafe recipe](https://docs.typesafe.ai/cookbooks/semantic_find) uses existing public `jev-devtools/flow` methods. It bundles the complete pinned 218-line GitHub Terms of Service document with zero-based IDs `L000`–`L217`. This is a historical recipe fixture, not current policy guidance.
 

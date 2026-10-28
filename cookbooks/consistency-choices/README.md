@@ -1,6 +1,8 @@
 # Choice self-consistency
 
-A runnable TypeScript adaptation of the [official TypeSafe Choice self-consistency recipe](https://docs.typesafe.ai/cookbooks/consistency_choice_cookbook), using public `jev-devtools/flow` methods. Run `npm ci` and `npm run dev` at the repository root, then open [the cookbook](http://127.0.0.1:4182/?cookbook=consistency-choices).
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=consistency-choices) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=consistency-choices&legacy=1).
+
+A runnable TypeScript adaptation of the [official TypeSafe Choice self-consistency recipe](https://docs.typesafe.ai/cookbooks/consistency_choice_cookbook), using public `jev-devtools/flow` methods. Open [the cookbook](https://playground.jevtools.dev/?cookbook=consistency-choices&legacy=1).
 
 Choose a synthetic case, run it, and select heatmap cells for every label probability, raw Choice label and separate confidence. In **Jev DevTools → Flows**, choose a repeat in the collection and **View Flow** to inspect the request, deterministic argmax task and each question’s gate. All raw answers are retained in the application report. Captured task previews have the normal bounded/redacted inspector limits; inspect individual requests for their answers.
 

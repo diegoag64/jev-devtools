@@ -1,5 +1,7 @@
 Build a flow that asks Jev to classify a support message, selects a team from the answer, and returns that team's name. You will be able to inspect the request and the selected path together in the drawer.
 
+To explore complete flows before writing code, open the [Cookbook Playground](https://playground.jevtools.dev/). Its source, diagrams, and step-by-step guides need no local setup or API key.
+
 Before starting, connect the drawer with [Quick start](@/getting-started/) or the [Next.js guide](@/guides/nextjs/) and confirm that a single request appears. This example expects `server.ts` to export your shared `inspector` and its instrumented `jev` client. Keep all flow code on Node.
 
 If flow definitions are new to you, [Flows from scratch](@/guides/flow-basics/) introduces them with a task that needs no API key. The request below uses your client's configured transport, which makes live inference calls unless you have supplied a sample transport.

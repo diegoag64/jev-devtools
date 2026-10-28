@@ -1,15 +1,12 @@
 # RAG passage classification
 
-Local adaptation of [TypeSafe's cookbook](https://docs.typesafe.ai/cookbooks/classifying_rag_passages). Uses `flow.map()` from Jev DevTools 0.4.0. Run the cookbook from this repository; its application code and fixtures are not bundled in npm.
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=rag-passages) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=rag-passages&legacy=1).
+
+Local adaptation of [TypeSafe's cookbook](https://docs.typesafe.ai/cookbooks/classifying_rag_passages). Uses `flow.map()` from Jev DevTools 0.4.0. Explore it in the hosted playground; its application code and fixtures are not bundled in npm.
 
 ## Try the full sample flow
 
-```sh
-npm install
-npm run dev
-```
-
-Open [RAG passages](http://127.0.0.1:4182/?cookbook=rag-passages), choose a case, and **Run sample**. No keys or external API calls are needed.
+Open [RAG passages](https://playground.jevtools.dev/?cookbook=rag-passages&legacy=1), choose a case, and **Run sample**. No keys or external API calls are needed.
 
 - **False premise:** twelve candidates; a conflicting passage survives while the planted injection is excluded.
 - **Answerable:** twelve candidates; four sources reach the evidence block. Other passages show injection, relevance and insufficient-evidence exclusions.

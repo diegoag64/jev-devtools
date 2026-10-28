@@ -1,6 +1,8 @@
 # Twitch chat filter · finite sample feed
 
-A TypeScript adaptation of the [official Twitch chat filter](https://docs.typesafe.ai/cookbooks/twitch_chat_filter), using public `jev-devtools/flow` methods. Run `npm ci` and `npm run dev` from the repository root, then open [the local cookbook](http://127.0.0.1:4182/?cookbook=twitch-chat-filter). Select a **Twitch sample** and **Run sample**. No key is needed; live inference is disabled server-side.
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=twitch-chat-filter) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=twitch-chat-filter&legacy=1).
+
+A TypeScript adaptation of the [official Twitch chat filter](https://docs.typesafe.ai/cookbooks/twitch_chat_filter), using public `jev-devtools/flow` methods. Open [the cookbook](https://playground.jevtools.dev/?cookbook=twitch-chat-filter&legacy=1). Select a **Sample** and **Run sample**. No key is needed; live inference is disabled server-side.
 
 ## Explore the policy
 

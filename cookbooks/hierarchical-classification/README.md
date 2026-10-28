@@ -1,8 +1,10 @@
 # Hierarchical classification · sample showcase
 
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=hierarchical-classification) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=hierarchical-classification&legacy=1).
+
 A local TypeScript adaptation of the [official hierarchical classification cookbook](https://docs.typesafe.ai/cookbooks/hierarchical_classification). It uses `flow.loop()`, `map()`, and `if()` from Jev DevTools 0.4.0 to compare width-three beam search with width-one greedy search.
 
-Run `npm ci` then `npm run dev` from the repository root. Open [the local cookbook](http://127.0.0.1:4182/?cookbook=hierarchical-classification), choose **Hierarchy sample**, and click **Run sample**. No key or paid inference is needed. Live mode is disabled. Restart an older dev server after rebuilding the package.
+Open [the cookbook](https://playground.jevtools.dev/?cookbook=hierarchical-classification&legacy=1), choose **Sample**, and click **Run sample**. No key or paid inference is needed. Live mode is disabled.
 
 ## Follow the full flow
 
@@ -14,12 +16,12 @@ Run `npm ci` then `npm run dev` from the repository root. Open [the local cookbo
 6. **Keep the best paths** ranks finished and expanded candidates together and returns the next state. The condition repeats while any retained path remains expandable.
 7. On completion, the page compares selected leaves and exposes every retained/pruned path and distribution by iteration. Details also exposes captured state and per-iteration outcomes.
 
-| Case | Expected behavior |
-| --- | --- |
-| Beam recovery | Root Audio has 55%, Cameras 35%, Accessories 10%. Camera evidence at the next level lets beam select Cameras → Mirrorless → Interchangeable lens. Greedy stays with Audio → Speakers. Five total Jev sample requests: three for beam, two for greedy. |
-| Single-child paths | Both searches follow Catalog → Archive in two iterations with zero Jev requests. |
-| Already at a leaf | Both return the preselected leaf with zero iterations and zero requests. This is a bypass demonstration, not an inferred classification. |
-| Iteration limit | Both are capped at one iteration. The run intentionally fails with `FlowLoopLimitError`; inspect the incomplete Loop in Flows. No final comparison is produced. |
+| Case               | Expected behavior                                                                                                                                                                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Beam recovery      | Root Audio has 55%, Cameras 35%, Accessories 10%. Camera evidence at the next level lets beam select Cameras → Mirrorless → Interchangeable lens. Greedy stays with Audio → Speakers. Five total Jev sample requests: three for beam, two for greedy. |
+| Single-child paths | Both searches follow Catalog → Archive in two iterations with zero Jev requests.                                                                                                                                                                      |
+| Already at a leaf  | Both return the preselected leaf with zero iterations and zero requests. This is a bypass demonstration, not an inferred classification.                                                                                                              |
+| Iteration limit    | Both are capped at one iteration. The run intentionally fails with `FlowLoopLimitError`; inspect the incomplete Loop in Flows. No final comparison is produced.                                                                                       |
 
 The page's scores rank paths; they are **not calibrated confidence**. The normal case compares `sqrt(0.35 × 0.95) ≈ 0.577` against `sqrt(0.55 × 0.34) ≈ 0.432`. A single-child edge does not change the product or decision count. Paths with no scoring decisions have structural score 1, not a measured 100% certainty.
 
@@ -33,4 +35,4 @@ The taxonomy, documents and all probabilities are authored synthetic fixtures. W
 
 The implementation is in `flow.ts`, scenarios in `cases.ts`, and the SDK transport in `samples.ts`. `provenance.json` records the reviewed source hash and adaptations; `LICENSE.typesafe` retains the upstream MIT notice for the adapted algorithm and instruction text. See `../../apps/playground/tests/hierarchy.test.ts` for execution/fidelity checks and [the flow API guide](../../docs/flows.md#stateful-iteration-flowloop) for limits.
 
-The flow APIs are included in Jev DevTools 0.4.0. The cookbook application and sample fixtures run from this repository and are not bundled in npm. To use real providers later, deliberately replace the sample transport, preserve the request and scoring contracts, and authorize/bound the new inference calls. Adding a key alone does not enable live mode.
+The flow APIs are included in Jev DevTools 0.4.0. The cookbook application and sample fixtures live in this repository and are not bundled in npm. To use real providers later, deliberately replace the sample transport, preserve the request and scoring contracts, and authorize/bound the new inference calls. Adding a key alone does not enable live mode.

@@ -1,6 +1,8 @@
 # Parallel questions · sample showcase
 
-A runnable TypeScript adaptation of the [official Parallel Questions cookbook](https://docs.typesafe.ai/cookbooks/parallel_questions), using public `task()`, runtime `jev()`, `loop()`, `map()` and `output()` APIs. Run `npm ci` and `npm run dev` from the repository root, then open [the local sample](http://127.0.0.1:4182/?cookbook=parallel-questions). Choose a **Parallel questions sample** and click **Run sample**. No key or remote inference is needed.
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=parallel-questions) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=parallel-questions&legacy=1).
+
+A runnable TypeScript adaptation of the [official Parallel Questions cookbook](https://docs.typesafe.ai/cookbooks/parallel_questions), using public `task()`, runtime `jev()`, `loop()`, `map()` and `output()` APIs. Open [the sample](https://playground.jevtools.dev/?cookbook=parallel-questions&legacy=1). Choose a **Sample** and click **Run sample**. No key or remote inference is needed.
 
 ## Execution and inspection
 

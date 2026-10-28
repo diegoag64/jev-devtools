@@ -1,17 +1,12 @@
 # Skill suggestion
 
-A local TypeScript port of the official [TypeSafe skill-suggestion cookbook](https://docs.typesafe.ai/cookbooks/skill_suggestion), using Jev DevTools function steps and runtime requests. **Uses the 0.4.0 flow API.** Run this cookbook from the repository; its application code and fixtures are not bundled in npm.
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=skill-suggestion) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=skill-suggestion&legacy=1).
 
-## Run locally
+A local TypeScript port of the official [TypeSafe skill-suggestion cookbook](https://docs.typesafe.ai/cookbooks/skill_suggestion), using Jev DevTools function steps and runtime requests. **Uses the 0.4.0 flow API.** Explore it in the hosted playground; its application code and fixtures are not bundled in npm.
 
-From the repository root:
+## Explore the cookbook
 
-```sh
-npm install
-npm run dev
-```
-
-Open [the skill cookbook](http://127.0.0.1:4182/?cookbook=skill-suggestion), choose a synthetic case, and run it. Open **Jev DevTools → Flows** for the connected diagram. Select a function and open **Show details** in the bottom bar to inspect inputs/output, or use each Jev request's question picker to inspect its gate/fit answers. The initial Choice has 182 accessible probabilities, with compact expansion and search.
+Open [the skill cookbook](https://playground.jevtools.dev/?cookbook=skill-suggestion&legacy=1), choose a synthetic case, and run it. Open **Jev DevTools → Flows** for the connected diagram. Select a function and open **Show details** in the bottom bar to inspect inputs/output, or use each Jev request's question picker to inspect its gate/fit answers. The initial Choice has 182 accessible probabilities, with compact expansion and search.
 
 The three synthetic cases exercise:
 
@@ -33,9 +28,9 @@ These responses are authored demonstrations, **not official cached results or me
 
 The first request's state is `{ request, recent_context: "" }`; the second uses the same shape. Question instructions, thresholds, names, and excerpt rules follow the official `suggest()` algorithm. The source's agent evaluation over 488 requests and its external LLM calls are deliberately outside this local selection demo. This implements the full selection flow, not that benchmark or a Hermes agent integration.
 
-## Live mode
+## Live mode in a local checkout
 
-Put your key in the ignored **`apps/playground/.env.local`**, then restart the development server:
+Follow the [local development guide](../../apps/playground/README.md#local-development), then put your key in the ignored **`apps/playground/.env.local`**, then restart the development server:
 
 ```dotenv
 TYPESAFE_API_KEY=your-local-key

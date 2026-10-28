@@ -10,7 +10,7 @@ A React inspector for TypeSafe Jev requests captured through a Node server adapt
 
 ![Jev DevTools sample recording showing the request drawer and diagrams.](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/docs/assets/jev-devtools-preview.gif)
 
-The recording uses sample responses. Try the [sample apps and cookbooks](https://docs.jevtools.dev/examples/) without an API key. Cookbook application code and fixtures live in the repository and are not bundled in npm.
+The recording uses sample responses. Try the [Cookbook Playground](https://playground.jevtools.dev/) without installation or an API key. Cookbook application code and fixtures live in the repository and are not bundled in npm.
 
 ## Install
 
@@ -152,7 +152,7 @@ npm does not register skills with coding tools automatically. Point the agent to
 
 ## Documentation and contributing
 
-Use the [documentation](https://docs.jevtools.dev/) for guides and API examples, and the [repository](https://github.com/diegoag64/jev-devtools/) for sample apps and cookbooks. See [Contributing](https://github.com/diegoag64/jev-devtools/blob/main/CONTRIBUTING.md) for repository setup, verification, and the pull request workflow. Merging, npm publication, and deployment each require explicit authorization.
+Use the [documentation](https://docs.jevtools.dev/) for guides and API examples, and the [Cookbook Playground](https://playground.jevtools.dev/) to explore Jev requests and code in complete flows. See [Contributing](https://github.com/diegoag64/jev-devtools/blob/main/CONTRIBUTING.md) for repository setup, verification, and the pull request workflow. Merging, npm publication, and deployment each require explicit authorization.
 
 ## Credits and license
 

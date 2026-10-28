@@ -1,0 +1,51 @@
+/* Match the diagram controls in packages/jev-devtools/src/inspector.css.
+   Both playground views use this component; keep sizing at the call site. */
+.playground-select {
+  display: inline-block;
+  width: fit-content;
+  min-width: 0;
+}
+.playground-select select {
+  width: 100%;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid #3b303d;
+  border-radius: 5px;
+  background-color: #17121b;
+  color: #eee8ed;
+  color-scheme: dark;
+  font:
+    12px/1.5 system-ui,
+    sans-serif;
+  cursor: pointer;
+  appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%23bcadbf' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
+}
+.playground-select select[data-size="sm"] {
+  font-size: 11px;
+}
+.playground-select select:hover:not(:disabled) {
+  border-color: #e551ba;
+}
+.playground-select select:focus-visible {
+  outline: 2px solid #e551ba;
+  outline-offset: 3px;
+}
+.playground-select select:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.playground-select select[aria-invalid="true"] {
+  border-color: #f06c7c;
+}
+@media (forced-colors: active) {
+  .playground-select select {
+    /* Preserve a visible system arrow when background images are suppressed. */
+    appearance: auto;
+    background-image: none;
+  }
+}

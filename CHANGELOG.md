@@ -30,6 +30,14 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ### Changes
 
+#### Changed
+
+- **Playground controls and navigation.** Use one select component across the workbench and Request lab with the diagram chevron and control styling. Rename the sidebar header to jevtools playground, remove the redundant library close button, and link to docs.jevtools.dev.
+
+#### Documentation
+
+- **Explore cookbooks without setup.** Point guides, cookbook READMEs, and bundled agent guidance to playground.jevtools.dev. Add a Cookbook Playground hero button and a Flow API learning link to the landing page. Local contributor setup remains available.
+
 #### Maintenance
 
 - **Releases without repeated approvals.** A versioned release request covers its release PR merge, npm and GitHub publication, and matching docs deployment while preserving verification and request limits. Add a read-only environment preflight and document the one-time GitHub setup to remove required reviewers while retaining the main-only environment and OIDC trust. ([#135](https://github.com/diegoag64/jev-devtools/pull/135))

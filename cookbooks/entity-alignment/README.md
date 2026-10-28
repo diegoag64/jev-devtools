@@ -1,6 +1,8 @@
 # Entity alignment
 
-A runnable TypeScript adaptation of the [official TypeSafe entity-alignment recipe](https://docs.typesafe.ai/cookbooks/entity_alignment), using public `jev-devtools/flow` methods. Run `npm ci && npm run dev` from the repository root, then open [Entity alignment](http://127.0.0.1:4182/?cookbook=entity-alignment).
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=entity-alignment) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=entity-alignment&legacy=1).
+
+A runnable TypeScript adaptation of the [official TypeSafe entity-alignment recipe](https://docs.typesafe.ai/cookbooks/entity_alignment), using public `jev-devtools/flow` methods. Open [Entity alignment](https://playground.jevtools.dev/?cookbook=entity-alignment&legacy=1).
 
 Choose an example or boundary case, run the sample, and open **Jev DevTools → Flows**. Inspect the loaded pair, the single four-question request, the evidence task and the selected route. Expand the Score and each companion answer in the request inspector.
 

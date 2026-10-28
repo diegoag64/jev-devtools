@@ -1,6 +1,8 @@
 # Re-ranking
 
-A runnable TypeScript adaptation of [TypeSafe's re-ranking recipe](https://docs.typesafe.ai/cookbooks/rerank_typesafe), using public `jev-devtools/flow` methods. Run `npm ci` and `npm run dev`, then open [Re-ranking](http://127.0.0.1:4182/?cookbook=reranking). Choose a sample and **Run sample**. No API key is needed.
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=reranking) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=reranking&legacy=1).
+
+A runnable TypeScript adaptation of [TypeSafe's re-ranking recipe](https://docs.typesafe.ai/cookbooks/rerank_typesafe), using public `jev-devtools/flow` methods. Open [Re-ranking](https://playground.jevtools.dev/?cookbook=reranking&legacy=1). Choose a sample and **Run sample**. No API key is needed.
 
 ## Explore
 

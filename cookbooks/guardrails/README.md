@@ -1,10 +1,12 @@
 # LLM guardrails
 
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=guardrails) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=guardrails&legacy=1).
+
 A TypeScript adaptation of the official [Guardrails for LLMs recipe](https://docs.typesafe.ai/cookbooks/llm_guardrails), using public `jev-devtools/flow` methods available since 0.4.0. The application and fixtures run from this repository; they are not shipped in npm.
 
-## Run locally
+## Explore the cookbook
 
-Run `npm ci` and `npm run dev` at the repository root, then open [the guardrails sample](http://127.0.0.1:4182/?cookbook=guardrails). Select a case and click **Run sample**. No key is required. Context is read-only and the server rejects an edited message or unknown case. Live mode is disabled for this cookbook even if a server key exists.
+Open [the guardrails sample](https://playground.jevtools.dev/?cookbook=guardrails&legacy=1). Select a case and click **Run sample**. No key is required. Context is read-only and the server rejects an edited message or unknown case. Live mode is disabled for this cookbook even if a server key exists.
 
 Each run screens **one selected side**, input or output, in a single SDK request. Output messages are authored fixtures, not LLM-generated replies. This is the source's individual `screen()`/`guard()` pattern, not an end-to-end generation pipeline. Cases cover ordinary input, output refusal, differing policies, exact review/action boundaries, a severity upgrade, high severity without a triggered hazard, and overlapping hazards.
 

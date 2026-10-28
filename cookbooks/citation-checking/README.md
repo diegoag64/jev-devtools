@@ -1,6 +1,8 @@
 # Citation checking
 
-A runnable TypeScript adaptation of [TypeSafe’s Double-checking citations](https://docs.typesafe.ai/cookbooks/citation_check), using public `jev-devtools/flow` methods. From the repository root run `npm ci` and `npm run dev`, then open [Citation checking](http://127.0.0.1:4182/?cookbook=citation-checking).
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=citation-checking) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=citation-checking&legacy=1).
+
+A runnable TypeScript adaptation of [TypeSafe’s Double-checking citations](https://docs.typesafe.ai/cookbooks/citation_check), using public `jev-devtools/flow` methods. Open [Citation checking](https://playground.jevtools.dev/?cookbook=citation-checking&legacy=1).
 
 Choose a sample and **Run sample**. Expand a citation to see its claim, original quote, normalized match highlight, cited versus actual section, Choice probabilities, API confidence and action. Open **Jev DevTools → Flows**, select **Check citations in order**, choose an item, then **View Flow** to inspect its matching task, conditional request and confidence route.
 

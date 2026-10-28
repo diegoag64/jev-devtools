@@ -1,6 +1,8 @@
 # Pre-parsed value extraction
 
-A runnable TypeScript adaptation of the [official TypeSafe recipe](https://docs.typesafe.ai/cookbooks/pre_parsed_value_extraction_cookbook). Start `npm run dev` from the repository root and open [the sample](http://127.0.0.1:4182/?cookbook=pre-parsed-extraction). No API key is required. The server accepts only the selected fixed document and uses synthetic responses; adding a key does not enable live inference.
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=pre-parsed-extraction) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=pre-parsed-extraction&legacy=1).
+
+A runnable TypeScript adaptation of the [official TypeSafe recipe](https://docs.typesafe.ai/cookbooks/pre_parsed_value_extraction_cookbook). Open [the sample](https://playground.jevtools.dev/?cookbook=pre-parsed-extraction&legacy=1). No API key is required. The server accepts only the selected fixed document and uses synthetic responses; adding a key does not enable live inference.
 
 ## Follow the execution
 

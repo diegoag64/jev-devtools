@@ -1,15 +1,10 @@
 # SDE cascade · sample showcase
 
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=sde-cascade) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=sde-cascade&legacy=1).
+
 A local TypeScript adaptation of the [official TypeSafe SDE cascade](https://docs.typesafe.ai/cookbooks/sde_cascade), built with `flow.if()` from Jev DevTools 0.4.0. This is a community-maintained walkthrough, not an official integration or evaluation result.
 
-From the repository root:
-
-```sh
-npm ci
-npm run dev
-```
-
-Open [the SDE cookbook](http://127.0.0.1:4182/?cookbook=sde-cascade), choose an **SDE sample**, and click **Run sample**. Open **Jev DevTools → Flows**, select the latest run, and expand the drawer. No API key is required. Live mode is disabled even when a server key is present. If an older dev server is running, restart it after building the updated package.
+Open [the SDE cookbook](https://playground.jevtools.dev/?cookbook=sde-cascade&legacy=1), choose a **Sample**, and click **Run sample**. Open **Jev DevTools → Flows**, select the latest run, and expand the drawer. No API key is required. Live mode is disabled even when a server key is present.
 
 ## What to inspect
 
@@ -21,12 +16,12 @@ Open [the SDE cookbook](http://127.0.0.1:4182/?cookbook=sde-cascade), choose an 
 
 Click a step and **Show Details** to inspect captured inputs/outputs. The page also shows a compact before/after comparison and every per-field score.
 
-| Sample | Expected route | Demonstrates |
-| --- | --- | --- |
-| Fabricated description | Stronger extractor | A 95% hallucination flag replaces a fabricated description with an empty value. |
-| Overall judge alone is high | Keep cheap | A 96% overall judgment does not trigger escalation when field flags stay low. |
-| Exactly 70% | Keep cheap | The threshold is strictly greater-than, not greater-than-or-equal. |
-| Wrongly empty date | Stronger extractor | A 91% `absence_wrong` flag fills in the missing date. |
+| Sample                      | Expected route     | Demonstrates                                                                    |
+| --------------------------- | ------------------ | ------------------------------------------------------------------------------- |
+| Fabricated description      | Stronger extractor | A 95% hallucination flag replaces a fabricated description with an empty value. |
+| Overall judge alone is high | Keep cheap         | A 96% overall judgment does not trigger escalation when field flags stay low.   |
+| Exactly 70%                 | Keep cheap         | The threshold is strictly greater-than, not greater-than-or-equal.              |
+| Wrongly empty date          | Stronger extractor | A 91% `absence_wrong` flag fills in the missing date.                           |
 
 These probabilities are **synthetic**, including the deliberately conflicting overall/per-field case. They illustrate the rule, not Jev accuracy. Context is read-only in sample mode. The server rejects mismatched documents, extractions and question batteries rather than pretending an arbitrary input matches a fixture.
 
@@ -49,4 +44,4 @@ To adapt this to real extraction, replace the two task callbacks with your serve
 - `LICENSE.typesafe`: upstream notice retained with the adapted code.
 - `../../apps/playground/tests/sde-cascade.test.ts`: complete executions, boundary/fidelity checks, fixture mismatch and cancellation.
 
-The flow API is included in Jev DevTools 0.4.0. The cookbook application and sample fixtures run from this repository and are not bundled in npm. See [the flow guide](../../docs/flows.md#returning-conditionals-flowif) for syntax and execution limits.
+The flow API is included in Jev DevTools 0.4.0. The cookbook application and sample fixtures live in this repository and are not bundled in npm. See [the flow guide](../../docs/flows.md#returning-conditionals-flowif) for syntax and execution limits.
