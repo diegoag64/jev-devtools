@@ -90,6 +90,7 @@ function App() {
     };
   }, [slug, reload]);
   const recipe = cookbookCatalog.find((item) => item.slug === slug);
+  const navigationFailed = loading.slug === slug && !!loading.error;
   const navigationFeedback =
     loading.slug === slug &&
     (loading.error ? (
@@ -210,6 +211,7 @@ function App() {
           <Recipe
             detail={detail}
             navigationFeedback={navigationFeedback}
+            navigationFailed={navigationFailed}
             blocked={detail.slug !== slug}
             dimmed={
               detail.slug !== slug &&
@@ -221,12 +223,16 @@ function App() {
           <div
             className="wb-skeleton"
             aria-label="Loading cookbook workspace"
-            aria-busy="true"
+            aria-busy={!navigationFailed}
           >
             <div className="wb-skeleton-toolbar" />
             <div className="wb-skeleton-ribbon" />
             <div className="wb-skeleton-controls">
-              <div className="wb-run-status" role="status" aria-live="polite">
+              <div
+                className="wb-run-status"
+                role={navigationFailed ? "alert" : "status"}
+                aria-live={navigationFailed ? "assertive" : "polite"}
+              >
                 {navigationFeedback}
               </div>
             </div>
@@ -270,11 +276,13 @@ function Recipe({
   blocked,
   dimmed,
   navigationFeedback,
+  navigationFailed,
 }: {
   detail: CookbookDetail;
   blocked: boolean;
   dimmed: boolean;
   navigationFeedback: ReactNode;
+  navigationFailed: boolean;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const [walkthrough, setWalkthrough] = useState(false);
@@ -673,8 +681,8 @@ function Recipe({
         </button>
         <div
           className="wb-run-status"
-          role="status"
-          aria-live="polite"
+          role={navigationFailed ? "alert" : "status"}
+          aria-live={navigationFailed ? "assertive" : "polite"}
           aria-atomic="true"
         >
           {navigationFeedback || (
