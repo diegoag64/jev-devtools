@@ -1,14 +1,14 @@
 # Define and inspect connected Jev calls
 
-**Unreleased workspace viewer:** `JevFlowViewer` and `useJevInspection` from `jev-devtools/viewer` embed the drawer's diagrams in a React workspace. Supply a definition for an unexecuted graph, or add its captured run and traces. Presentation-only node filters, selection callbacks, highlights, and accents support narrated tutorials. See the [React viewer guide](../apps/docs/content/react.md). The Node runner stays on the server; rendering never executes a flow.
+**Workspace viewer in 0.6.0:** `JevFlowViewer` and `useJevInspection` from `jev-devtools/viewer` embed the drawer's diagrams in a React workspace. Supply a definition for an unexecuted graph, or add its captured run and traces. Presentation-only node filters, selection callbacks, highlights, and accents support narrated tutorials. See the [React viewer guide](../apps/docs/content/react.md). The Node runner stays on the server; rendering never executes a flow.
 
-For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/flow-basics/). This file describes version 0.5.6; see the [compatibility notes](../CHANGELOG.md#056--prepared-release) and [verified publication status](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.6).
+For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/flow-basics/). This file describes version 0.6.0; see the [compatibility notes](../CHANGELOG.md#060--prepared-release) and [verified publication status](https://github.com/diegoag64/jev-devtools/releases/tag/v0.6.0).
 
 The flow API includes function steps, runtime requests, collections, returning conditionals, loops, replay, and fixture comparison. Replay and comparison are new in **0.5.0**. Existing single-request integrations remain supported; adopting flows is optional. For publication status, check the [changelog](../CHANGELOG.md).
 
 Start with the [integration guide](integration.md) or [Next.js setup](nextjs.md) to mount the drawer and expose the shared inspector. For coding agents, the [bundled flow recipe](../packages/jev-devtools/skills/setup-jev-devtools/references/flows.md) includes a complete parallel-checks → decision → branch example and no-key verification. It ships with npm for offline, version-matched use.
 
-The examples below import `@typesafe-ai/sdk` question helpers; declare it as a direct dependency in the server workspace (0.5.6 requires SDK `>=0.7.0 <0.8.0`, verified with 0.7.0). Keep API keys and both `/server` and `/flow` imports in Node code.
+The examples below import `@typesafe-ai/sdk` question helpers; declare it as a direct dependency in the server workspace (0.6.0 requires SDK `>=0.7.0 <0.8.0`, verified with 0.7.0). Keep API keys and both `/server` and `/flow` imports in Node code.
 
 `jev-devtools/flow` is a TypeScript/Node entry point. A definition builds an inspectable, bounded graph once; each `run()` executes an independent instance. This is an in-process helper for Jev calls and application-owned function steps. Tasks can execute server code with side effects; the runner does not provide durable execution or rollback.
 

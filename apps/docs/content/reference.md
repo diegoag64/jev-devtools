@@ -1,6 +1,6 @@
 Look up an API by name to find its signature, parameters, return type, example, and failure behavior. Each entry has a permanent link. For a first integration, start with [Quick start](@/getting-started/). For a first flow, use [Flows from scratch](@/guides/flow-basics/).
 
-These docs describe **version 0.5.6**. [See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.6) Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
+These docs describe **version 0.6.0**. [See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.6.0) Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
 
 <details class="reference-notes">
 <summary>How to read the signatures</summary>
@@ -75,7 +75,7 @@ The drawer injects its own stylesheet into its Shadow DOM; no CSS import is need
 
 ### JevFlowViewer
 
-**Unreleased.** Embed the same diagram and request inspector used by the drawer in an ordinary React layout.
+**Version 0.6.0.** Embed the same diagram and request inspector used by the drawer in an ordinary React layout.
 
 #### Signature
 
@@ -112,7 +112,7 @@ The viewer reuses the drawer's flow cards, request diagrams, details, and pan/zo
 
 ### useJevInspection
 
-**Unreleased.** Subscribe to the validated flow and request capture streams used by the drawer.
+**Version 0.6.0.** Subscribe to the validated flow and request capture streams used by the drawer.
 
 #### Signature
 

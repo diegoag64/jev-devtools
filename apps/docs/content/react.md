@@ -6,7 +6,7 @@ Use `JevDevtools` to display the requests and flows captured by your server adap
 
 ## Embed a flow in a workspace
 
-**Unreleased.** `jev-devtools/viewer` exposes the drawer's diagram without a drawer. Give `JevFlowViewer` a `definition`, and optionally a captured `run` and `traces`. Omitting `run` displays the authored structure as **not executed**. Rendering a definition never executes it.
+**Version 0.6.0.** `jev-devtools/viewer` exposes the drawer's diagram without a drawer. Give `JevFlowViewer` a `definition`, and optionally a captured `run` and `traces`. Omitting `run` displays the authored structure as **not executed**. Rendering a definition never executes it.
 
 <!-- example: viewer.tsx -->
 
