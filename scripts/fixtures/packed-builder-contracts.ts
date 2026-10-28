@@ -436,6 +436,27 @@ function unsafePatternedProperty() {
 }
 void unsafePatternedProperty;
 
+// Branded integer patterns also cannot prove a concrete positional key.
+type BrandedIndex = bigint & { readonly indexBrand: unique symbol };
+const brandedExtras: Record<`${BrandedIndex}`, string> = {};
+const brandedArray = defineJevFlow<number>("branded-index-array")((f) =>
+  f.output("array", Object.assign([f.input], brandedExtras)),
+);
+const brandedResult = (await brandedArray.run(8, options)).value;
+const brandedKey = `${0n as BrandedIndex}` as const;
+assert.equal(Reflect.get(brandedResult, brandedKey), 8);
+assert.equal(brandedResult[0].toFixed(0), "8");
+function unsafeBrandedProperty() {
+  // @ts-expect-error a branded key pattern cannot certify a string element
+  const value: string | undefined = brandedResult[brandedKey];
+  if (value !== undefined) value.toUpperCase();
+  const noPatternGuarantee: `${BrandedIndex}` extends keyof typeof brandedResult
+    ? true
+    : false = false;
+  return noPatternGuarantee;
+}
+void unsafeBrandedProperty;
+
 const taggedTuple = defineJevFlow<number>("tagged-tuple")((f) =>
   f.output(
     "tuple",

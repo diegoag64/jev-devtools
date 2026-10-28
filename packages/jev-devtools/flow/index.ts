@@ -189,18 +189,20 @@ type FlowOutputIndexWithinBound<
   Bound extends string = "4294967294",
   Order extends "eq" | "lt" | "gt" = "eq",
 > = Value extends `${infer Digit}${infer Rest}`
-  ? Bound extends `${infer BoundDigit}${infer BoundRest}`
-    ? FlowOutputIndexWithinBound<
-        Rest,
-        BoundRest,
-        Order extends "eq"
-          ? Digit extends BoundDigit
-            ? "eq"
-            : "0123456789" extends `${string}${Digit}${string}${BoundDigit}${string}`
-              ? "lt"
-              : "gt"
-          : Order
-      >
+  ? Digit extends "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+    ? Bound extends `${infer BoundDigit}${infer BoundRest}`
+      ? FlowOutputIndexWithinBound<
+          Rest,
+          BoundRest,
+          Order extends "eq"
+            ? Digit extends BoundDigit
+              ? "eq"
+              : "0123456789" extends `${string}${Digit}${string}${BoundDigit}${string}`
+                ? "lt"
+                : "gt"
+            : Order
+        >
+      : false
     : false
   : Bound extends ""
     ? Order extends "gt"
