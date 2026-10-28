@@ -8,9 +8,7 @@ process.once("SIGINT", interrupt);
 process.once("SIGTERM", interrupt);
 try {
   if (args.length && (args.length !== 2 || args[0] !== "--only"))
-    throw new Error(
-      "Usage: npm run verify:cookbooks -- [--only <recipe-or-collection>]",
-    );
+    throw new Error("Usage: npm run verify:cookbooks -- [--only <check>]");
   await runBrowserSuite(fileURLToPath(new URL("../", import.meta.url)), {
     only: args[1],
     signal: controller.signal,

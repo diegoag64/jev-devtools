@@ -2,8 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { createElement } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
 import type { FlowRun, FlowObserver } from "jev-devtools/flow";
 import { TypeSafeClient } from "@typesafe-ai/sdk";
 import {
@@ -22,7 +20,6 @@ import {
   describe,
   division,
 } from "../../../cookbooks/confidence-fallback/taxonomy.js";
-import { ConfidenceCookbookResult } from "../src/ConfidenceCookbookResult.js";
 function run(
   caseId: ConfidenceCase,
   message: string = confidenceCases[caseId].message,
@@ -117,17 +114,6 @@ test("confidence cutoff uses API confidence inclusively, requests all 75 groups 
       ) < 1e-12,
     );
     assert.equal(value.groupDescription, describe(group));
-    const html = renderToStaticMarkup(
-      createElement(ConfidenceCookbookResult, { result: completed }),
-    );
-    for (const text of [
-      label,
-      "API confidence",
-      "Largest class probability",
-      "synthetic",
-      confidence.toFixed(3),
-    ])
-      assert.ok(html.includes(text), text);
   }
 });
 test("pinned taxonomy keeps 444 original codes, 75 groups, description rules and every division range", () => {

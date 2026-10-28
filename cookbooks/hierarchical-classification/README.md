@@ -1,14 +1,14 @@
 # Hierarchical classification · sample showcase
 
-Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=hierarchical-classification) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=hierarchical-classification&legacy=1).
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=hierarchical-classification) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
 
 A local TypeScript adaptation of the [official hierarchical classification cookbook](https://docs.typesafe.ai/cookbooks/hierarchical_classification). It uses `flow.loop()`, `map()`, and `if()` from Jev DevTools 0.4.0 to compare width-three beam search with width-one greedy search.
 
-Open [the cookbook](https://playground.jevtools.dev/?cookbook=hierarchical-classification&legacy=1), choose **Sample**, and click **Run sample**. No key or paid inference is needed. Live mode is disabled.
+Open [the cookbook](https://playground.jevtools.dev/?cookbook=hierarchical-classification), choose **Sample**, and click **Run sample**. No key or paid inference is needed. Live mode is disabled.
 
 ## Follow the full flow
 
-1. Open **Jev DevTools → Flows** and select the newest run.
+1. Inspect **Flow diagram** and select the newest run.
 2. The initial frontier feeds two searches. Each **Loop** carries its ranked candidates into the next iteration; the join waits for both searches.
 3. Select an iteration in either Loop card and click **View Flow**. Its full diagram appears below, with navigation arrows that preserve the original graph and camera.
 4. **Prepare this frontier** separates completed leaves from expandable candidates. The **Assess frontier nodes** collection runs one item per expandable path, with concurrency three.
@@ -36,3 +36,5 @@ The taxonomy, documents and all probabilities are authored synthetic fixtures. W
 The implementation is in `flow.ts`, scenarios in `cases.ts`, and the SDK transport in `samples.ts`. `provenance.json` records the reviewed source hash and adaptations; `LICENSE.typesafe` retains the upstream MIT notice for the adapted algorithm and instruction text. See `../../apps/playground/tests/hierarchy.test.ts` for execution/fidelity checks and [the flow API guide](../../docs/flows.md#stateful-iteration-flowloop) for limits.
 
 The flow APIs are included in Jev DevTools 0.4.0. The cookbook application and sample fixtures live in this repository and are not bundled in npm. To use real providers later, deliberately replace the sample transport, preserve the request and scoring contracts, and authorize/bound the new inference calls. Adding a key alone does not enable live mode.
+
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

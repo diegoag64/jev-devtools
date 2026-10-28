@@ -10,7 +10,9 @@ A React inspector for TypeSafe Jev requests captured through a Node server adapt
 
 ![Jev DevTools sample recording showing the request drawer and diagrams.](https://raw.githubusercontent.com/diegoag64/jev-devtools/main/docs/assets/jev-devtools-preview.gif)
 
-The recording uses sample responses. Try the [Cookbook Playground](https://playground.jevtools.dev/) without installation or an API key. Cookbook application code and fixtures live in the repository and are not bundled in npm.
+The recording uses sample responses.
+
+See how the [Cookbook Playground](https://playground.jevtools.dev/) uses the Flow API to implement TypeSafe cookbooks and display their execution as diagrams. Read each recipe's TypeScript beside its diagram, follow the step-by-step guide, and inspect how Jev requests connect to code, branches, and loops. Samples use fixed synthetic responses and need no installation or API key. Cookbook code and fixtures live in the repository and are not bundled in npm.
 
 ## Install
 

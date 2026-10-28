@@ -19,13 +19,13 @@ For drawer changes, run `npx playwright install chromium --only-shell` once, the
 
 ## Formatting changed files
 
-`npm run verify:cookbooks` builds the package and runs all discovered cookbook browser checks sequentially. It covers the real playground's registration, sample guards, request inspection, switching, cancellation and desktop/mobile behavior. The complete suite runs locally in `verify:all`. Use `npm run verify:cookbooks -- --only <recipe-or-collection>` for focused work.
+`npm run verify:cookbooks` builds the package and runs all discovered cookbook browser checks sequentially. It covers the real playground's registration, sample guards, request inspection, switching, cancellation and desktop/mobile behavior. The complete suite runs locally in `verify:all`. Use `npm run verify:cookbooks -- --only <check>` for focused work.
 
-CI runs only `npm run verify:cookbooks -- --only captures`, on React 19, and uploads its report and logs. This probe compares final retained captures with application results for five representative cookbooks. Recipe-specific UI behavior and collection-wide switching are covered by local full verification, not by this CI probe. Direct Flow runtime, capture, transport and packed declaration tests remain in CI, along with shared drawer and Flow viewer browser checks on React 18 and 19. CI selects and asserts the same React/React DOM versions at both the workspace root and playground to avoid mixed runtimes. These are correctness checks, not performance benchmarks.
+CI runs only `npm run verify:cookbooks -- --only captures`, on React 19, and uploads its report and logs. This probe compares final retained captures with application results for five representative cookbooks. Collection-wide sample execution, switching, complete results, and workbench interactions are covered by local full verification. Recipe runtime tests retain source-fidelity and boundary checks. Direct Flow runtime, capture, transport and packed declaration tests remain in CI, along with shared drawer and Flow viewer browser checks on React 18 and 19. CI selects and asserts the same React/React DOM versions at both the workspace root and playground to avoid mixed runtimes. These are correctness checks, not performance benchmarks.
 
 The cookbook runner owns a cross-worktree lock in the OS temporary directory and requires loopback port 4182 to be free. A busy lock fails with owner details; retry after the owner finishes. Do not wrap this command in another cookbook lock. The runner terminates its owned process groups on failure, timeout or interruption. Provider fetches are blocked and no real API key reaches the check. The capture-comparison probe uses a dedicated `capture-verification` Vite mode with the supported 200-request history limit, so all seventy Parallel Questions requests are available in its final snapshot without relying on SSE delivery timing. The collection probe separately verifies normal fifty-trace eviction; normal playground configuration is unchanged.
 
-Each cookbook run writes to a unique ignored `benchmarks/results/cookbook-browser/` directory. Its authoritative `summary.json` records the source revision/hash, complete versus selected scope, per-check logs/evidence, and terminal status. Recipe-specific `summary.json` files contain observations; use the suite report for pass/freshness claims. A failure preserves its own evidence and never overwrites an earlier success. New `cookbooks/*/verify-browser.mjs` and `apps/playground/tests/*.browser.mjs` entry points are discovered automatically and use `scripts/cookbook-browser-context.mjs` for the runner-owned evidence directory.
+Each cookbook run writes to a unique ignored `benchmarks/results/cookbook-browser/` directory. Its authoritative `summary.json` records the source revision/hash, complete versus selected scope, per-check logs/evidence, and terminal status. Individual check `summary.json` files contain observations; use the suite report for pass/freshness claims. A failure preserves its own evidence and never overwrites an earlier success. New `cookbooks/*/verify-browser.mjs` and `apps/playground/tests/*.browser.mjs` entry points are discovered automatically and use `scripts/cookbook-browser-context.mjs` for the runner-owned evidence directory.
 
 Prettier is pinned in the development dependencies and configured by `.prettierrc.json`. Run `npm run format` to format files changed since the merge base with `origin/main`, including staged, unstaged, and untracked files. Run `npm run format:check` for a read-only check; both accept `-- --base <revision>`. Fetch the base first. Deleted files, lockfiles, generated output, and files without a supported parser are excluded. CI uses the PR base SHA (or the previous push SHA on main). This adopts formatting as files change without a repository-wide reformat.
 
@@ -133,12 +133,12 @@ Use the [release checklist and completion rule](docs/releases.md#release-checkli
 | `packages/jev-devtools` | React drawer, diagrams, recorder, Node adapter, scoped CSS         |
 | `landing`               | Independently locked Vite website for jevtools.dev; see its README |
 | `apps/docs`             | Static Vite documentation app; start with `npm run dev:docs`       |
-| `apps/playground`       | Sample/live scenarios, minimal shadcn form, application previews   |
+| `apps/playground`       | Cookbook source, guided diagrams, and synthetic sample execution   |
 | `examples/react-vite`   | Independent consumer using only public package exports             |
 | `examples/nextjs-app`   | Next.js App Router consumer using the packed package               |
 | `docs`                  | Integration, architecture, provenance, and release process         |
 
-See the [playground guide](apps/playground/README.md) for sample scenarios and the manual sandbox. The static diagram lab and its `/docs/` replica remain in the original repo.
+See the [playground guide](apps/playground/README.md) for cookbook guides and synthetic samples. The static diagram lab and its `/docs/` replica remain in the original repo.
 
 ## Boundary and contract verification
 

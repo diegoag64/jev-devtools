@@ -1,18 +1,18 @@
 # RAG passage classification
 
-Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=rag-passages) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=rag-passages&legacy=1).
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=rag-passages) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
 
 Local adaptation of [TypeSafe's cookbook](https://docs.typesafe.ai/cookbooks/classifying_rag_passages). Uses `flow.map()` from Jev DevTools 0.4.0. Explore it in the hosted playground; its application code and fixtures are not bundled in npm.
 
 ## Try the full sample flow
 
-Open [RAG passages](https://playground.jevtools.dev/?cookbook=rag-passages&legacy=1), choose a case, and **Run sample**. No keys or external API calls are needed.
+Open [RAG passages](https://playground.jevtools.dev/?cookbook=rag-passages), choose a case, and **Run sample**. No keys or external API calls are needed.
 
 - **False premise:** twelve candidates; a conflicting passage survives while the planted injection is excluded.
 - **Answerable:** twelve candidates; four sources reach the evidence block. Other passages show injection, relevance and insufficient-evidence exclusions.
 - **Empty retrieval:** zero candidates; the collection completes without Jev calls and the answer reports insufficient evidence.
 
-Open **Jev DevTools → Flows**, select **Classify retrieved passages**, choose a **Collection item** inside its card, and click **View Flow**. Its connected diagram appears below the collection on the same canvas, with the actual Jev request, four answer options, routing function and result. Change the item selector to switch that diagram in place; **Hide Flow** collapses it. The parent flow stays visible and shares pan/zoom with the item diagram. The collection shows completed/running/queued counts; at most four passages execute at a time. **Cancel** stops active and queued work. The result cards use the same item numbers and expose all scores, reasons and passage text.
+In **Flow diagram**, select **Classify retrieved passages**, choose a **Collection item** inside its card, and click **View Flow**. Its connected diagram appears below the collection on the same canvas, with the actual Jev request, four answer options, routing function and result. Change the item selector to switch that diagram in place; **Hide Flow** collapses it. The parent flow stays visible and shares pan/zoom with the item diagram. The collection shows completed/running/queued counts; at most four passages execute at a time. **Cancel** stops active and queued work. **Application result** retains all scores, reasons, and passage text in input order.
 
 ## Fidelity and sample boundaries
 
@@ -43,3 +43,5 @@ A future live adaptation can replace the retrieval and generation tasks with ser
 - [TypeSafe MIT license](LICENSE.typesafe) and [Supabase Apache 2.0 license](LICENSE.supabase).
 
 The upstream cookbook attributes official-documentation passages to Supabase Auth docs at abbreviated revision `2440b06`; that abbreviated URL did not resolve during this implementation. We pin the retrievable TypeSafe corpus snapshot instead. The Apache notice was retrieved from the Supabase repository's `master/LICENSE`. The `forum-injection` record was authored upstream as an adversarial example and is treated only as data. This community adaptation is not an official TypeSafe or Supabase product.
+
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

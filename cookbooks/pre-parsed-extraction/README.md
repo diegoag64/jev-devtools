@@ -1,14 +1,14 @@
 # Pre-parsed value extraction
 
-Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=pre-parsed-extraction) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=pre-parsed-extraction&legacy=1).
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=pre-parsed-extraction) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
 
-A runnable TypeScript adaptation of the [official TypeSafe recipe](https://docs.typesafe.ai/cookbooks/pre_parsed_value_extraction_cookbook). Open [the sample](https://playground.jevtools.dev/?cookbook=pre-parsed-extraction&legacy=1). No API key is required. The server accepts only the selected fixed document and uses synthetic responses; adding a key does not enable live inference.
+A runnable TypeScript adaptation of the [official TypeSafe recipe](https://docs.typesafe.ai/cookbooks/pre_parsed_value_extraction_cookbook). Open [the sample](https://playground.jevtools.dev/?cookbook=pre-parsed-extraction). No API key is required. The server accepts only the selected fixed document and uses synthetic responses; adding a key does not enable live inference.
 
 ## Follow the execution
 
 1. Choose an email, phone, money, threshold, missing-value or empty-candidate sample and click **Run sample**.
 2. Compare document-order regex candidates, the verbatim selected span and the normalized result. Expand Choice answers to see API confidence and option probabilities separately.
-3. Open **Jev DevTools → Flows**. Select **Select values sequentially**, choose a collection item and **View Flow** to inspect its helper request and copied answer. For money, expand **Check and normalize each amount** to inspect the later Noul, strict credit decision and decimal parsing task.
+3. Inspect **Flow diagram**. Select **Select values sequentially**, choose a collection item and **View Flow** to inspect its helper request and copied answer. For money, expand **Check and normalize each amount** to inspect the later Noul, strict credit decision and decimal parsing task.
 
 The recipe documents produce `dana.personal@gmail.com` for the receipt, `dana.whit@acme-corp.com` for the sender, `+14155550177` for the mobile, and `1315.50 USD` (charge) / `50.00 USD` (credit). These are outputs of authored synthetic selections and real transformations, not fresh model results or recorded official measurements.
 
@@ -28,4 +28,4 @@ The recipe documents produce `dana.personal@gmail.com` for the receipt, `dana.wh
 
 The focused tests execute the public Flow API and real SDK. They protect complete request transcripts, counts/order, deduplication, the 254-candidate boundary, none/empty bypasses, exact decimal preservation, phone normalization, threshold boundaries, cancellation and rejection of edited inputs/prompts. Full repository verification also checks the package, playground, docs, drawer and flows.
 
-To repeat the focused checks, run `node --import tsx --test apps/playground/tests/pre-parsed-extraction.test.ts`. After building the package, run `npm run verify:cookbooks -- --only pre-parsed-extraction` for local browser evidence. The runner acquires the shared browser lock and owns process cleanup; retry after the reported owner finishes if the lock is occupied. Each run has a unique evidence directory and a source-bound verification report. Evidence stays in ignored `benchmarks/results/cookbook-browser/`.
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

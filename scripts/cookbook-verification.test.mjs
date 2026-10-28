@@ -31,14 +31,7 @@ test("discovery includes new cookbook and playground browser entry points and re
     );
     assert.deepEqual(
       (await discoverBrowserChecks(root)).map((c) => c.name),
-      [
-        "captures",
-        "collection",
-        "confidence-fallback",
-        "existing",
-        "line-search",
-        "new-recipe",
-      ],
+      ["captures", "collection", "existing", "new-recipe"],
     );
     await writeFile(
       join(root, "apps/playground/tests/new-recipe.browser.mjs"),

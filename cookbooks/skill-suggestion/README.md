@@ -1,12 +1,12 @@
 # Skill suggestion
 
-Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=skill-suggestion) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=skill-suggestion&legacy=1).
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=skill-suggestion) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
 
 A local TypeScript port of the official [TypeSafe skill-suggestion cookbook](https://docs.typesafe.ai/cookbooks/skill_suggestion), using Jev DevTools function steps and runtime requests. **Uses the 0.4.0 flow API.** Explore it in the hosted playground; its application code and fixtures are not bundled in npm.
 
 ## Explore the cookbook
 
-Open [the skill cookbook](https://playground.jevtools.dev/?cookbook=skill-suggestion&legacy=1), choose a synthetic case, and run it. Open **Jev DevTools → Flows** for the connected diagram. Select a function and open **Show details** in the bottom bar to inspect inputs/output, or use each Jev request's question picker to inspect its gate/fit answers. The initial Choice has 182 accessible probabilities, with compact expansion and search.
+Open [the skill cookbook](https://playground.jevtools.dev/?cookbook=skill-suggestion), choose a synthetic case, and run it. Inspect **Flow diagram** for the connected diagram. Select a function and open **Show details** in the bottom bar to inspect inputs/output, or use each Jev request's question picker to inspect its gate/fit answers. The initial Choice has 182 accessible probabilities, with compact expansion and search.
 
 The three synthetic cases exercise:
 
@@ -28,17 +28,9 @@ These responses are authored demonstrations, **not official cached results or me
 
 The first request's state is `{ request, recent_context: "" }`; the second uses the same shape. Question instructions, thresholds, names, and excerpt rules follow the official `suggest()` algorithm. The source's agent evaluation over 488 requests and its external LLM calls are deliberately outside this local selection demo. This implements the full selection flow, not that benchmark or a Hermes agent integration.
 
-## Live mode in a local checkout
+## Adapt the recipe to your app
 
-Follow the [local development guide](../../apps/playground/README.md#local-development), then put your key in the ignored **`apps/playground/.env.local`**, then restart the development server:
-
-```dotenv
-TYPESAFE_API_KEY=your-local-key
-# Optional: choose a model explicitly if you want to depart from the source pin.
-TYPESAFE_COOKBOOK_MODEL=jev-1.12
-```
-
-Select **Live**, edit the request, and run it. Live runs make one or two logical Jev requests, with automatic SDK retries disabled in this demo. Cancellation propagates to the SDK; it does not undo already completed calls. Keys remain on the server. The source model `jev-1.12` is the default; if unavailable, configure an available model explicitly. There is no silent model or sample fallback. Live model quality/availability was not verified during implementation.
+The playground runs fixed synthetic samples. To use live inference, integrate the flow into your own Node server using the [Flow guide](../../docs/flows.md). Preserve the recipe's request contracts and routing rules. Keep credentials on the server and verify live behavior separately.
 
 ## Code and reuse
 
@@ -68,3 +60,5 @@ The cookbook uses public `jev-devtools/flow` and SDK exports. `reranked.answers`
 The roster is pinned to [TypeSafe's public examples](https://github.com/typesafe-ai/typesafe-public-examples/blob/25e9d373f4853b3e7e300e55a194f50e54838f68/cookbooks/skill_suggestion/hermes_roster.json). [provenance.json](provenance.json) records its source hash, local hash, and transformation. Only the five consumed fields are kept, and bodies are truncated at the same 700-code-point boundary as the recipe. Original roster order is preserved. The upstream docs describe this as a pinned Hermes snapshot; we pin the supplied snapshot rather than claiming an independently verified Hermes revision.
 
 See [TypeSafe's MIT notice](LICENSE.typesafe) and [Nous Research's MIT notice](LICENSE.hermes). Embedded skill text is data for assessment, not instructions executed by this app. The gallery is a community adaptation, not an official TypeSafe product or an endorsement of its synthetic outcomes.
+
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

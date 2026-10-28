@@ -1,8 +1,6 @@
 import type { FlowRun } from "jev-devtools/flow";
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createElement } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
 import { TypeSafeClient, type Fetch } from "@typesafe-ai/sdk";
 import { consistencyFlow } from "../../../cookbooks/consistency-choices/flow.js";
 import {
@@ -26,7 +24,6 @@ import {
   type ConsistencyResult,
   type RepeatResult,
 } from "../../../cookbooks/consistency-choices/analysis.js";
-import { ConsistencyCookbookResult } from "../src/ConsistencyCookbookResult.js";
 const near = (actual: number | null, expected: number) =>
   assert.ok(
     actual !== null && Math.abs(actual - expected) < 1e-12,
@@ -405,21 +402,4 @@ test("server-side flow and fixture validation reject edited input, wrong model/r
   const items = observed.steps.repeats.collection!.items;
   assert.equal(items[0].run!.steps.argmax.startedAt, undefined);
   assert.ok(items.slice(1).every((item) => item.run === undefined));
-});
-test("result renders every heatmap cell, exact boundary values and separate confidence without claiming measured consistency", async () => {
-  const { data } = await run("boundaries");
-  const html = renderToStaticMarkup(
-    createElement(ConsistencyCookbookResult, { result: { value: data } }),
-  );
-  assert.equal((html.match(/class="consistency-cell"/g) ?? []).length, 120);
-  for (const text of [
-    "0.599",
-    "0.600",
-    "0.601",
-    "separate API confidence",
-    "not measured model consistency",
-    "all 120 answers",
-    "Raw response for this repeat",
-  ])
-    assert.ok(html.includes(text), text);
 });

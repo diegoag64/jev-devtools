@@ -141,8 +141,6 @@ function App() {
         </nav>
         <footer>
           <a href="https://docs.jevtools.dev/">JevTools docs ↗</a>
-          <a href="?legacy=1">Request lab ↗</a>
-          <p>Individual calls & edge cases</p>
         </footer>
       </aside>
       <main id="workbench" className="wb-main">

@@ -22,9 +22,6 @@ import {
   locate,
   relationQuestions,
 } from "../../../cookbooks/citation-checking/recipe.js";
-import { renderToStaticMarkup } from "react-dom/server";
-import { createElement } from "react";
-import { CitationCookbookResult } from "../src/CitationCookbookResult.js";
 
 // Contract: normalization and numeric section selection precede inference. A
 // substring in the wrong cited section must send its actual matching section.
@@ -244,21 +241,6 @@ test("all five citation samples execute real tasks and exact conditional request
         ["found", "found", "missing"],
       );
       assert.equal(rows[1].sectionNumber, "4.1.3");
-    }
-    if (caseId === "missing") {
-      const html = renderToStaticMarkup(
-        createElement(CitationCookbookResult, { result: { value: { rows } } }),
-      );
-      assert.match(html, /null · no Jev call/);
-      assert.match(html, /fabricated deterministically/);
-    }
-    if (caseId === "section") {
-      const html = renderToStaticMarkup(
-        createElement(CitationCookbookResult, { result: { value: { rows } } }),
-      );
-      assert.match(html, /Human review required/);
-      assert.match(html, /No quote supplied/);
-      assert.match(html, /Choice probabilities · separate from confidence/);
     }
   }
 });

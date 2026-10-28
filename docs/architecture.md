@@ -4,7 +4,7 @@ Application code uses three JavaScript entry points: the SSR-safe React componen
 
 `createJevDevtools()` owns a bounded in-memory recorder. Its `createClient()` instruments the SDK's `systemOne` calls while preserving APIPromise behavior. AsyncLocalStorage links retries to the logical call. The adapter exposes configuration, SSE snapshots, and scoped clearing; the React drawer handles subscriptions and displays diagrams. There is no network interception or hidden-model reasoning capture.
 
-`apps/playground` uses only package exports. Its custom fetch fixtures pass through the real SDK. It owns ticket-routing thresholds, scenario inputs, shadcn controls, and application result previews. These are not inspector policies or package dependencies.
+`apps/playground` uses only package exports. Its custom fetch fixtures pass through the real SDK. It owns cookbook guides, fixed sample inputs, and the workbench controls. Preview captures and sample runs share the same recipe setup; previews use a private recorder while runs stream into the visible inspector. These are not inspector policies or package dependencies.
 
 `getJevDevtools(key, createOptions)` shares an adapter in a versioned global registry within one Node realm. Its first configuration remains active across module reloads; disposal removes the key. It does not aggregate across processes.
 

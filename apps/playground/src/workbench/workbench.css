@@ -174,11 +174,6 @@ pre:focus-visible {
   margin-top: 8px;
   text-decoration: none;
 }
-.wb-library footer p {
-  font-size: 11px;
-  color: #858c9a;
-  margin: 7px 0 0;
-}
 .wb-main {
   position: relative;
   min-width: 0;

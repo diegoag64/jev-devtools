@@ -1,15 +1,15 @@
 # SDE cascade · sample showcase
 
-Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=sde-cascade) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=sde-cascade&legacy=1).
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=sde-cascade) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
 
 A local TypeScript adaptation of the [official TypeSafe SDE cascade](https://docs.typesafe.ai/cookbooks/sde_cascade), built with `flow.if()` from Jev DevTools 0.4.0. This is a community-maintained walkthrough, not an official integration or evaluation result.
 
-Open [the SDE cookbook](https://playground.jevtools.dev/?cookbook=sde-cascade&legacy=1), choose a **Sample**, and click **Run sample**. Open **Jev DevTools → Flows**, select the latest run, and expand the drawer. No API key is required. Live mode is disabled even when a server key is present.
+Open [the SDE cookbook](https://playground.jevtools.dev/?cookbook=sde-cascade), choose a **Sample**, and click **Run sample**. Inspect the inline **Flow diagram**. No API key is required. Live mode is disabled even when a server key is present.
 
 ## What to inspect
 
 1. **Cheap extraction · sample** returns the candidate from an authored fixture.
-2. **Verify every extracted field** builds one Jev request from that candidate. Nonempty fields get seven independent Nouls; empty fields get only `absence_wrong`. The overall judge is separate. Use the request's question selector or Questions tab to access every answer.
+2. **Verify every extracted field** builds one Jev request from that candidate. Nonempty fields get seven independent Nouls; empty fields get only `absence_wrong`. The overall judge is separate. Use the request's question selector to access every answer.
 3. **Read per-field flags** excludes the overall judge and finds the highest field probability.
 4. **Does any field need escalation?** uses strict `.gt(0.7)`. One path calls the stronger-extractor fixture; the other keeps the candidate. The other path is visibly untaken.
 5. **Selected result** rejoins the paths. **Compare the final record** runs once on either route, then returns the record, all field scores, and a field diff.
@@ -45,3 +45,5 @@ To adapt this to real extraction, replace the two task callbacks with your serve
 - `../../apps/playground/tests/sde-cascade.test.ts`: complete executions, boundary/fidelity checks, fixture mismatch and cancellation.
 
 The flow API is included in Jev DevTools 0.4.0. The cookbook application and sample fixtures live in this repository and are not bundled in npm. See [the flow guide](../../docs/flows.md#returning-conditionals-flowif) for syntax and execution limits.
+
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

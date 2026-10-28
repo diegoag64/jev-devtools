@@ -30,8 +30,8 @@ try {
     ["function-calling", 1],
     ["line-search", 1],
   ]) {
-    await page.goto("http://127.0.0.1:4182/?legacy=1&cookbook=" + slug);
-    await page.locator("#scenario").waitFor();
+    await page.goto("http://127.0.0.1:4182/?cookbook=" + slug);
+    await page.getByLabel("Cookbook sample").waitFor();
     await page.evaluate(async () => {
       const response = await fetch("/api/jev-devtools/clear", {
         method: "DELETE",
@@ -42,7 +42,9 @@ try {
     const response = page.waitForResponse((r) =>
       r.url().includes("/__jev/run"),
     );
-    await page.getByRole("button", { name: "Run sample", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Run sample ↗", exact: true })
+      .click();
     const data = await (await response).json();
     // Subscribe after completion: the initial snapshot must contain every
     // request, regardless of delivery coalescing or backpressure during the run.
@@ -72,6 +74,15 @@ try {
     );
     assert.ok(traces.every((trace) => trace.status === "success"));
     const value = data.flow.value;
+    const result = page
+      .locator(".wb-bottom details")
+      .filter({ has: page.getByText("Application result", { exact: true }) });
+    await result.locator("summary").click();
+    assert.deepEqual(
+      JSON.parse(await result.locator("pre").innerText()),
+      value,
+      `${slug}: the workbench retains the complete application result`,
+    );
     await writeFile(
       output + "/capture-" + slug + ".json",
       JSON.stringify({ value, traces }),
@@ -108,16 +119,6 @@ try {
             assert.deepEqual(trace.result.answers[key][k], raw[k]);
           answers++;
         }
-      }
-      const cells = page.locator(".consistency-cell");
-      assert.equal(await cells.count(), 120);
-      for (let i = 0; i < 120; i++) {
-        await cells.nth(i).click();
-        assert.equal(await cells.nth(i).getAttribute("aria-pressed"), "true");
-        assert.ok(
-          (await page.locator(".consistency-detail[aria-live] dl").innerText())
-            .length > 0,
-        );
       }
     } else if (slug === "consistency-nouls") {
       for (const repeat of value.repeats) {

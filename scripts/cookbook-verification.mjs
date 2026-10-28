@@ -24,11 +24,6 @@ export async function discoverBrowserChecks(root) {
   const checks = [
     { name: "captures", script: "scripts/verify-cookbook-captures.mjs" },
     { name: "collection", script: "scripts/verify-cookbook-collection.mjs" },
-    {
-      name: "confidence-fallback",
-      script: "scripts/verify-confidence-cookbook.mjs",
-    },
-    { name: "line-search", script: "scripts/verify-line-search.mjs" },
   ];
   for (const entry of await readdir(join(root, "cookbooks"), {
     withFileTypes: true,

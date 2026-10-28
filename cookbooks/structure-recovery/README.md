@@ -1,10 +1,10 @@
 # Structure recovery · sample showcase
 
-Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=structure-recovery) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=structure-recovery&legacy=1).
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=structure-recovery) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
 
 A local TypeScript adaptation of the [official Structure Recovery cookbook](https://docs.typesafe.ai/cookbooks/autoformat). It uses the existing `task()`, dynamic `jev()` and `if()` APIs. No additional execution primitive is introduced.
 
-Open [the cookbook](https://playground.jevtools.dev/?cookbook=structure-recovery&legacy=1). Choose **Sample** and click **Run sample**. No key or paid inference is needed. Samples are fixed, read-only documents with authored synthetic answers; live mode is disabled.
+Open [the cookbook](https://playground.jevtools.dev/?cookbook=structure-recovery). Choose **Sample** and click **Run sample**. No key or paid inference is needed. Samples are fixed, read-only documents with authored synthetic answers; live mode is disabled.
 
 ## Follow the full flow
 
@@ -13,7 +13,7 @@ Open [the cookbook](https://playground.jevtools.dev/?cookbook=structure-recovery
 3. **Restore text blocks** joins at `p >= 0.2` after unfinished text and `p >= 0.5` after terminal punctuation. Blank lines always prevent joins. The task records each probability, threshold, decision, and source-line mapping.
 4. **Pass 2 · classify recovered blocks** constructs questions from the actual merged blocks, tagged `B000`, etc. Every block gets content type, step-order and callout questions; heading-level questions are included only for blocks up to 90 Unicode characters. All questions share one request. Empty input bypasses it.
 5. **Render Markdown in code** uses returned Choice labels. Adjacent list items form one group, numbered when their mean step probability is at least 0.5; adjacent code blocks share a fence. Only relevant companions affect each type's formatting. Confidence is displayed, not used as a gate.
-6. **Recovered document** exposes the original/preview comparison, Markdown source, join decisions, source lines, and every type probability. Open **Jev DevTools → Flows**, select the newest run, and inspect the complete connected requests and function steps. The request's **Questions** tab retains all companion answers, including unused ones.
+6. **Application result** contains the recovered Markdown, join decisions, source lines, and type probabilities. Inspect **Flow diagram** for the complete connected requests and function steps. The request question picker retains all companion answers, including unused ones.
 
 | Sample                | What to inspect                                                                                                                                                                                                                      |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -28,8 +28,10 @@ Question wording, three criteria dictionaries, `jev-1.12`, line/block tagging, w
 
 The sample documents and all responses are authored fixtures, not the upstream memo or published cached measurements. The sample transport matches the complete model/state/question set and independently authored expected merged blocks; mismatches fail instead of receiving unrelated answers. No timing, price or accuracy result from the original is reproduced. `provenance.json` records the reviewed source hash and differences; `LICENSE.typesafe` retains attribution for the adapted algorithm, prompts and criteria.
 
-Formatting preserves the normalized input wording, adding Markdown markers; it does not preserve original whitespace byte-for-byte. The preview renders React text nodes and known elements, never injected HTML or arbitrary Markdown HTML. The Markdown source remains visible for inspection. Code fences and existing source markers have the same limitations as the simple upstream renderer.
+Formatting preserves the normalized input wording, adding Markdown markers; it does not preserve original whitespace byte-for-byte. **Application result** displays the returned Markdown as JSON text, without rendering embedded HTML. Code fences and existing source markers have the same limitations as the simple upstream renderer.
 
 Requests with no questions are explicitly bypassed, an adaptation that makes separated and empty inputs runnable. The normal memo uses two sequential requests, not one request per line or block. Cancellation prevents downstream work and clears the previous page result. Fixture delays only make progress visible.
 
 Implementation: `flow.ts`; sample choices: `cases.ts`; fixed transport: `samples.ts`; behavior checks: `../../apps/playground/tests/structure.test.ts`. This uses the 0.4.0 flow API; the cookbook application and sample fixtures live in this repository and are not bundled in npm. Adding an API key alone does not enable live mode.
+
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

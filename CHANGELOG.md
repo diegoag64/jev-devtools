@@ -32,7 +32,9 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Changed
 
-- **Playground controls and navigation.** Use one select component across the workbench and Request lab with the diagram chevron and control styling. Rename the sidebar header to jevtools playground, remove the redundant library close button, and link to docs.jevtools.dev.
+- **One cookbook playground.** Retire the legacy Request lab, result dashboards, manual sandbox, and live-mode form. Keep source, diagrams, guides, and complete sample results in the workbench. Remove unused form dependencies and move shared browser verification to the workbench; recipe runtime and package inspector checks remain.
+
+- **Playground controls and navigation.** Use one select component in the cookbook workbench with the diagram chevron and control styling. Rename the sidebar header to jevtools playground, remove the redundant library close button, and link to docs.jevtools.dev.
 
 #### Documentation
 

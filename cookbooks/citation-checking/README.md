@@ -1,10 +1,10 @@
 # Citation checking
 
-Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=citation-checking) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=citation-checking&legacy=1).
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=citation-checking) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
 
-A runnable TypeScript adaptation of [TypeSafe’s Double-checking citations](https://docs.typesafe.ai/cookbooks/citation_check), using public `jev-devtools/flow` methods. Open [Citation checking](https://playground.jevtools.dev/?cookbook=citation-checking&legacy=1).
+A runnable TypeScript adaptation of [TypeSafe’s Double-checking citations](https://docs.typesafe.ai/cookbooks/citation_check), using public `jev-devtools/flow` methods. Open [Citation checking](https://playground.jevtools.dev/?cookbook=citation-checking).
 
-Choose a sample and **Run sample**. Expand a citation to see its claim, original quote, normalized match highlight, cited versus actual section, Choice probabilities, API confidence and action. Open **Jev DevTools → Flows**, select **Check citations in order**, choose an item, then **View Flow** to inspect its matching task, conditional request and confidence route.
+Choose a sample and **Run sample**. Open **Application result** to inspect each citation's claim, original quote, normalized match, cited and actual sections, probabilities, confidence, and action. In **Flow diagram**, select **Check citations in order**, choose an item, then **View Flow** to inspect its matching task, conditional request and confidence route.
 
 ## Source behavior and adaptation
 
@@ -30,6 +30,6 @@ All Jev responses are authored synthetic fixtures, not the official cached measu
 
 [provenance.json](provenance.json) pins the official asset commit and SHA-256 hashes. [LICENSE.typesafe](LICENSE.typesafe) covers the upstream example material and adapted recipe code. RFC 7519 retains its own IETF Trust copyright and legal notice in [rfc7519.txt](rfc7519.txt); see [LICENSE.rfc](LICENSE.rfc). The extra cases and all response values are local additions.
 
-`apps/playground/tests/citation-checking.test.ts` checks source hashes, RFC section parsing, normalization, numeric first-match selection, claim-only and empty-string behavior, request counts/order/state/questions through public Flow execution, confidence boundaries, result markup, fixture mismatches and inference failure. Run it with `node --import tsx --test apps/playground/tests/citation-checking.test.ts` after building the package. Repository-wide verification and drawer/docs checks remain required for contributions.
+`apps/playground/tests/citation-checking.test.ts` checks source hashes, RFC section parsing, normalization, numeric first-match selection, claim-only and empty-string behavior, request counts/order/state/questions through public Flow execution, confidence boundaries, fixture mismatches and inference failure. Run it with `node --import tsx --test apps/playground/tests/citation-checking.test.ts` after building the package. Repository-wide verification and drawer/docs checks remain required for contributions.
 
-`npm run verify:cookbooks -- --only citation-checking` checks all five browser cases, server-side input/live-mode rejection, the expanded flow and mobile layout. The runner owns the shared browser lock and a unique evidence directory. It stops its owned server in `finally` and saves screenshots, video and logs under ignored `benchmarks/results/cookbook-browser/`.
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

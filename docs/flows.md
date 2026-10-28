@@ -177,7 +177,7 @@ const evaluation = flow.task(
 
 ### Try the sample in your browser
 
-Open the [Request lab](https://playground.jevtools.dev/?legacy=1) and select **Flow · Functions + dynamic questions (synthetic)**. Run the sample, open **Jev DevTools → Flows**, and select **Keep the top three skills**. Inspect its output, then the next request's three Choice criteria. Both model responses are synthetic fixtures; no API key or remote call is required. This demonstrates the API, not a faithful port of the official cookbook.
+Open the [skill-suggestion cookbook](https://playground.jevtools.dev/?cookbook=skill-suggestion) to follow tasks, dynamic questions, and routing in the workbench. Read the TypeScript beside the diagram and run a synthetic sample without an API key.
 
 For a complete one-request adaptation, try the [line-search cookbook](https://playground.jevtools.dev/?cookbook=line-search): tagging → runtime Choice + Noul request → ranking/lookup → existence branches. It uses the complete pinned document and synthetic responses; the result UI retains every line beyond bounded capture previews.
 

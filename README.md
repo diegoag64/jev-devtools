@@ -38,7 +38,7 @@ Diagrams show captured inputs, responses, and routing rules you define. They do 
 
 ## Try the Cookbook Playground
 
-Open the [Cookbook Playground](https://playground.jevtools.dev/) to explore Jev requests and application code as connected flows. Read the source beside each diagram, follow a step-by-step guide, and run labeled synthetic samples. No download, installation, or API key is needed.
+See how the [Cookbook Playground](https://playground.jevtools.dev/) uses the Flow API to implement TypeSafe cookbooks and display their execution as diagrams. Read each recipe's TypeScript beside its diagram, follow the step-by-step guide, and inspect how Jev requests connect to code, branches, and loops. Samples use fixed synthetic responses and need no installation or API key.
 
 To modify the playground, follow its [local development guide](apps/playground/README.md#local-development).
 

@@ -30,8 +30,6 @@ Choose a cookbook and a **Sample**. Use **Step-by-step guide** to follow its Flo
 
 Every cookbook uses labeled synthetic responses. Samples demonstrate execution and inspection, not model accuracy, latency, or cost. The [cookbook source and adaptation notes](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/README.md) document the original recipes, application policies, and limitations. Application code and fixtures are not bundled in npm.
 
-The [Request lab](https://playground.jevtools.dev/?legacy=1) contains the earlier result dashboards, individual request scenarios, and drawer inspection.
-
 ## Integrate the inspector into your app
 
 The independent [React + Vite](https://github.com/diegoag64/jev-devtools/tree/main/examples/react-vite) and [Next.js App Router](https://github.com/diegoag64/jev-devtools/tree/main/examples/nextjs-app) examples show how to connect public package exports to a server. Their READMEs contain local setup instructions for developers adapting an integration. To modify the playground itself, use its [contributor setup](https://github.com/diegoag64/jev-devtools/blob/main/apps/playground/README.md#local-development).

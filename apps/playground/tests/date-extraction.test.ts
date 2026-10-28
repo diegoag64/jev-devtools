@@ -22,9 +22,6 @@ import {
   TODAY,
   type Parts,
 } from "../../../cookbooks/date-extraction/recipe.js";
-import { DateCookbookResult } from "../src/DateCookbookResult.js";
-import { createElement } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
 
 const absolute = (month = "August", day = "14", year = "2026"): Parts => ({
   mode: { choice: "absolute", confidence: 0.95 },
@@ -261,20 +258,6 @@ test("all samples execute real public flows: ordered requests, calendar tasks, s
         ["review", "accept", "accept", "review", "review", "accept"],
       );
       assert.equal(result.rows[4].confidence, null);
-      const html = renderToStaticMarkup(
-        createElement(DateCookbookResult, { result: output }),
-      );
-      for (const text of [
-        TODAY,
-        "0.59999",
-        "0.6",
-        "0.60001",
-        "Unavailable",
-        "Needs review",
-        "Accepted",
-        "Used component confidence unavailable",
-      ])
-        assert.ok(html.includes(text));
     }
   }
 });

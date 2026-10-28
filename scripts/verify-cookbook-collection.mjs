@@ -1,6 +1,6 @@
 import { browserOutput } from "./cookbook-browser-context.mjs";
 // Run via npm run verify:cookbooks -- --only collection.
-// This checks shared registration/state/transport boundaries; recipe scripts own fidelity checks.
+// Shared workbench registration, state and transport; runtime recipe tests own fidelity.
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -61,14 +61,23 @@ try {
     const response = page.waitForResponse(
       (r) => r.url().includes("/__jev/run") && r.request().method() === "POST",
     );
-    await page.getByRole("button", { name: "Run sample", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Run sample ↗", exact: true })
+      .click();
     const r = await response;
     assert.equal(r.status(), 200, await r.text());
     await page
-      .getByRole("button", { name: "Run sample", exact: true })
+      .getByRole("button", { name: "Run sample ↗", exact: true })
       .waitFor();
-    await page.locator(".cookbook-result").waitFor();
-    assert.equal(await page.locator(".cookbook-result").count(), 1);
+    const result = page
+      .locator(".wb-bottom details")
+      .filter({ has: page.getByText("Application result", { exact: true }) });
+    await result.locator("summary").click();
+    assert.deepEqual(
+      JSON.parse(await result.locator("pre").innerText()),
+      (await r.json()).flow.value,
+    );
+    await result.locator("summary").click();
     return { body: await r.json(), request: r.request().postDataJSON() };
   };
   const traces = () =>
@@ -88,21 +97,14 @@ try {
         }),
     );
   let session;
-  for (const [index, [slug, scenario, caseField]] of recipes.entries()) {
-    await page.goto(`http://127.0.0.1:4182/?legacy=1&cookbook=${slug}`);
-    await page.locator("#scenario").waitFor();
-    assert.equal(await page.locator("#scenario").inputValue(), scenario);
+  for (const [slug, scenario, caseField] of recipes) {
+    await page.goto(`http://127.0.0.1:4182/?cookbook=${slug}`);
+    await page.getByLabel("Cookbook sample").waitFor();
     const nextSession = await page.evaluate(() =>
       sessionStorage.getItem("jev-inspector-session"),
     );
     if (session) assert.equal(nextSession, session);
     else session = nextSession;
-    assert.equal(await page.locator("#context").getAttribute("readonly"), "");
-    if (scenario !== "flow-skills")
-      assert.equal(
-        await page.locator('#transport option[value="live"]').isDisabled(),
-        true,
-      );
     const { body, request } = await run();
     assert.equal(request.scenario, scenario);
     assert.ok(request[caseField]);
@@ -117,10 +119,6 @@ try {
         ),
         130,
       );
-      assert.equal(
-        await page.locator(".cookbook-result details pre").count(),
-        65,
-      );
       assert.equal(captured.length, 50);
       assert.ok(
         captured.filter((t) => t.label.includes("Parallel")).length < 70,
@@ -131,27 +129,22 @@ try {
       });
     }
     if (slug === "consistency-choices")
-      assert.equal(await page.locator(".consistency-cell").count(), 120);
-    if (slug === "consistency-nouls") {
-      assert.equal(await page.locator(".noul-matrix tbody td").count(), 210);
+      assert.equal(body.flow.value.samples.length, 15);
+    if (slug === "consistency-nouls")
       assert.ok(
         body.flow.value.repeats.every(
-          (r) => r.returnedModel && r.requestedModel,
+          (r) => r.answers.length === 14 && r.returnedModel && r.requestedModel,
         ),
       );
-    }
     if (slug === "line-search")
-      assert.equal(
-        await page.locator(".cookbook-result details li").count(),
-        218,
-      );
+      assert.equal(body.flow.value.ranked.length, 218);
     if (slug === "function-calling")
       assert.ok(
         captured.some(
           (t) => Object.keys(t.result?.answers ?? {}).length === 54,
         ),
       );
-    if (index < 13) {
+    {
       const statuses = await page.evaluate(
         async ({ request, caseField }) => {
           const post = async (extra) =>
@@ -178,7 +171,7 @@ try {
         { request, caseField },
       );
       assert.deepEqual(statuses, [400, 400, 400]);
-      const control = page.locator('select[id$="-case"]');
+      const control = page.getByLabel("Cookbook sample");
       const options = await control
         .locator("option")
         .evaluateAll((es) => es.map((e) => e.value));
@@ -186,7 +179,10 @@ try {
         await control.selectOption(
           options.find((v) => v !== request[caseField]),
         );
-        assert.equal(await page.locator(".cookbook-result").count(), 0);
+        assert.equal(
+          await page.getByText("Application result", { exact: true }).count(),
+          0,
+        );
         await run();
       }
     }
@@ -211,42 +207,29 @@ try {
       status: "passed",
     });
   }
-  // Changing the scenario in one mounted app must clear the previous result and select its own input/transport.
+  // Switch recipes in one mounted workbench and cancel a long sample.
+  if (!(await page.getByLabel("Find a cookbook").isVisible()))
+    await page.getByRole("button", { name: "Toggle cookbook library" }).click();
   for (const index of [11, 17, 12, 14, 9, 13, 0, 18]) {
-    const [, scenario] = recipes[index];
-    await page.locator("#scenario").selectOption(scenario);
-    assert.equal(await page.locator(".cookbook-result").count(), 0);
-    assert.equal(await page.locator("#transport").inputValue(), "sample");
+    const [slug] = recipes[index];
+    await page.locator(`a[href="?cookbook=${slug}"]`).click();
+    await page.getByLabel("Cookbook sample").waitFor();
+    assert.equal(
+      await page.getByText("Application result", { exact: true }).count(),
+      0,
+    );
     await run();
   }
-  await page.locator("#scenario").selectOption("flow-parallel-questions");
-  await page.getByRole("button", { name: "Run sample", exact: true }).click();
+  await page.locator('a[href="?cookbook=parallel-questions"]').click();
+  await page.getByRole("button", { name: "Run sample ↗", exact: true }).click();
   await page.getByRole("button", { name: "Cancel", exact: true }).click();
-  await page.getByRole("button", { name: "Run sample", exact: true }).waitFor();
-  assert.equal(await page.locator(".cookbook-result").count(), 0);
-  for (const scenario of [
-    "triage",
-    "image",
-    "retry",
-    "error",
-    "stress",
-    "flow-approve",
-    "flow-functions",
-    "flow-manual",
-    "flow-other",
-    "flow-parallel",
-    "flow-error",
-    "flow-cancel",
-  ]) {
-    assert.equal(
-      await page.locator(`#scenario option[value="${scenario}"]`).count(),
-      1,
-    );
-  }
-  await page.locator("#scenario").selectOption("triage");
-  const response = page.waitForResponse((r) => r.url().includes("/__jev/run"));
-  await page.getByRole("button", { name: "Run sample", exact: true }).click();
-  assert.equal((await response).status(), 200);
+  await page
+    .getByRole("button", { name: "Run sample ↗", exact: true })
+    .waitFor();
+  assert.equal(
+    await page.getByText("Application result", { exact: true }).count(),
+    0,
+  );
   assert.deepEqual(errors, []);
   assert.deepEqual(external, []);
   await writeFile(
@@ -257,7 +240,6 @@ try {
         checks,
         sharedSwitches: 8,
         cancellation: "passed",
-        ordinaryScenario: "triage passed; all base options retained",
         external,
         errors,
       },

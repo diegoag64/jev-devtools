@@ -201,14 +201,6 @@ The recorder preserves the original SDK APIPromise, including response helpers a
 
 Explore the [Cookbook Playground](https://playground.jevtools.dev/) without installation or an API key. It shows source beside connected diagrams and provides step-by-step guides for workflows that combine Jev requests and code. Use the [local development guide](../apps/playground/README.md#local-development) when modifying the playground.
 
-The [Request lab](https://playground.jevtools.dev/?legacy=1) uses the same public component and adapter described above. Its drawer starts closed so the application result remains visible. Open **Jev DevTools** in the bottom-right corner to inspect a request.
-
-Samples cover triage (Choice, Score, Noul), image regions (Box + Noul), retry after 429, failure, and cancellation. Choose a sample outcome (blocked payment, delayed delivery, or quick question) to compare different fixture responses. Sample answers and usage are fixed by that selection, even if the context changes. They use the real SDK's serialization/retry paths with a custom fetch and make no inference calls.
-
-Successful runs also update an application preview: Choice selects a support queue, Score sets a priority, and Noul suggests a human handoff. **Why this outcome?** explains the signals. Image runs show the returned Box with a toggleable overlay, gated by the separate Noul presence answer. Retry, failure, and cancellation have explicit states; a failed run never applies an earlier result. Priority and presence thresholds are labeled demo policies, and no actual ticket is sent.
-
-For optional live mode in a local checkout, copy `apps/playground/.env.example` to `apps/playground/.env.local`, set `TYPESAFE_API_KEY` there, and restart. No key is accepted in the browser. The image example uses the SDK's experimental image contract. Live behavior has not been verified.
-
 To try the minimal independent consumer after `npm run pack:devtools`:
 
 ```sh
@@ -241,4 +233,4 @@ Package verification packs the library, installs it into a temporary independent
 
 Library output is `packages/jev-devtools/lib/`; the playground's production build is separate and intentionally shows only a local-tool notice. No production deployment is included.
 
-The playground controls live in `apps/playground/src/components/ui/`. `NativeSelect` uses shared plain CSS that matches the diagram selects. The other controls are generated from [shadcn/ui](https://ui.shadcn.com/docs/installation/vite), with direct Radix imports and the local `cn` helper. `apps/playground/components.json` configures future additions. Tailwind utilities and theme tokens are in `apps/playground/src/controls.css`; global preflight is omitted to preserve inspector styling. These dependencies are playground-only and are not needed by consumers of the packaged inspector.
+The playground uses `NativeSelect` in `apps/playground/src/components/ui/` for all selects. Its plain CSS matches the diagram controls. The workbench owns page styles; the embedded viewer keeps package styles in its shadow root. No Tailwind or shadcn dependencies are needed.

@@ -1,8 +1,8 @@
 # Noul self-consistency
 
-Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=consistency-nouls) with source, diagrams, and a step-by-step guide. No installation is needed. For the result dashboards and drawer controls described below, use [Request lab](https://playground.jevtools.dev/?cookbook=consistency-nouls&legacy=1).
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=consistency-nouls) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
 
-A runnable TypeScript adaptation of [TypeSafe's Noul self-consistency recipe](https://docs.typesafe.ai/cookbooks/consistency_noul_cookbook), using existing public `jev-devtools/flow` methods. Open [the sample](https://playground.jevtools.dev/?cookbook=consistency-nouls&legacy=1). No API key is needed; live requests are rejected on the server.
+A runnable TypeScript adaptation of [TypeSafe's Noul self-consistency recipe](https://docs.typesafe.ai/cookbooks/consistency_noul_cookbook), using existing public `jev-devtools/flow` methods. Open [the sample](https://playground.jevtools.dev/?cookbook=consistency-nouls). No API key is needed; live requests are rejected on the server.
 
 ## What is preserved
 
@@ -14,7 +14,7 @@ The official auto-insurance claim, all fourteen question texts and their order, 
 
 An inspectable `flow.if()` routes each repeat to its uncertain-question review list or the no-review path. No additional model request is made for routing. Yes/no are question-level decisions; they do not approve or deny the claim. No human is contacted and no payout is executed.
 
-`flow.task()` prepares repeat inputs, reads answers, applies thresholds, and computes per-question mean, min/max, population standard deviation (divide by 15), decision counts, and the mean of those deviations. The statistics are descriptive additions for the teaching UI, not a reproduction of the source's published measurements. Open Jev DevTools → Flows → the repeat collection → select an item → View Flow to inspect its complete execution. Large aggregate inspector captures can be bounded; the application result retains every answer, and each request remains independently inspectable.
+`flow.task()` prepares repeat inputs, reads answers, applies thresholds, and computes per-question mean, min/max, population standard deviation (divide by 15), decision counts, and the mean of those deviations. The statistics are descriptive additions for the teaching UI, not a reproduction of the source's published measurements. In **Flow diagram**, select an item in the repeat collection and click **View Flow** to inspect its execution. Large aggregate inspector captures can be bounded; the application result retains every answer, and each request remains independently inspectable.
 
 ## Samples and adaptation boundaries
 
@@ -35,3 +35,5 @@ Requested and returned models remain distinct. The public flow Jev reference exp
 [provenance.json](provenance.json) records the reviewed Markdown hash and upstream repository revision. The public upstream repository has no Noul-consistency directory/cache at that revision; this adaptation follows executable code on the docs page. [claim.json](claim.json) and [questions.json](questions.json) preserve its inputs. [LICENSE.typesafe](LICENSE.typesafe) retains the upstream MIT notice; the repository license alone does not establish a separate docs-site license. Probabilities and returned model labels in [samples.ts](samples.ts) are authored locally; no published cache or chart is copied.
 
 The focused tests run real SDK calls through public Flow APIs and protect fifteen-request order, single-call concurrency, all question/state values, thresholds and neighboring values, selected/untaken review paths, actual descriptive statistics, returned-model distinction, invalid inputs and cancellation. Cancellation waits for transport settlement before asserting that later requests, routing and statistics did not execute. Use `node --import tsx --test apps/playground/tests/consistency-nouls.test.ts` after building the package; `npm run verify:all` supplies the complete repository checks.
+
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

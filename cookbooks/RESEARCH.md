@@ -9,7 +9,7 @@ Historical research: API limitations below describe the reviewed 0.3.0 baseline,
 Reviewed all 20 pages linked by the [official cookbook index](https://docs.typesafe.ai/cookbooks), including their executable examples and routing rules, then compared them with:
 
 - [Flow implementation](../packages/jev-devtools/flow/index.ts) and [public guide](../docs/flows.md).
-- [Current playground server](../apps/playground/server/plugin.ts), [example flows](../apps/playground/server/flows.ts), and [playground UI](../apps/playground/src/Playground.tsx).
+- [Current playground server](../apps/playground/server/plugin.ts), [example flows](../apps/playground/server/flows.ts), and [playground UI](https://github.com/diegoag64/jev-devtools/blob/96a7eec/apps/playground/src/Playground.tsx).
 - The [official examples repository](https://github.com/typesafe-ai/typesafe-public-examples/tree/25e9d373f4853b3e7e300e55a194f50e54838f68), its file tree, license, and the memory/chat caches.
 
 The [catalog](README.md) accounts for every indexed recipe. Extra directories in the upstream examples repository are not automatically additional published cookbooks. [sources.json](sources.json) records page URLs, byte counts, and SHA-256 hashes of the Markdown fetched for this review. The docs pages themselves are not revision-pinned, so those hashes identify the reviewed content, not a retrievable immutable URL.
