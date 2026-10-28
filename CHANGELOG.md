@@ -28,11 +28,21 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
+### Compatibility and upgrade
+
+- **Builder scope types match runtime legality.** Helpers that require a full `FlowBuilder` may need a narrower `FlowValueBuilder` or `Pick` parameter in map, loop, and `if()` bodies. Valid nested lane outputs and branches remain supported. Existing explicit-input two-argument definitions keep their broad result type. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
+
+- **Output templates preserve opaque values.** Direct object outputs include original-or-projected fields that may be absent because structural types encode neither prototypes nor enumerability. Direct arrays retain positional types but do not promise attached properties. Narrow direct Date/asset values before calling methods, or output a whole expression for exact values and methods. Runtime identity and input inference are unchanged. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
+
 ### Changes
 
 #### Added
 
-- **Capture fidelity.** Add optional exact, modified, or unknown provenance for captured requests, responses, rules, step data, and outcomes. Legacy captures remain readable; custom callbacks cannot certify exactness, and fixture export semantics stay unchanged. ([#141](https://github.com/diegoag64/jev-devtools/pull/141))
+- **Capture fidelity.** Add optional exact, modified, or unknown provenance for captured requests, responses, rules, step data, and outcomes. Legacy captures remain readable; custom callbacks cannot certify exactness, detachment omissions downgrade fidelity even after root replacement, and fixture export semantics stay unchanged. ([#141](https://github.com/diegoag64/jev-devtools/pull/141))
+
+- **Capture-kind redaction context.** Distinguish requests, responses, step data, condition rules, and outcomes with a frozen third callback argument. Existing `(path, value)` policies and paths remain valid; reused captures respect their path, and custom callbacks receive bounded detached views, including SDK images. Identity policies keep shallow data with omission warnings; policies that read omitted content fail closed. ([#138](https://github.com/diegoag64/jev-devtools/pull/138))
+
+- **Inferred Flow outcomes.** Use `defineJevFlow<Input>(name)(build)` to infer terminal names, branch unions, and resolved output values after specifying the input type. `DefinedJevFlow` and `FlowResult` name executable definitions and application results. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
 
 #### Changed
 
@@ -40,11 +50,19 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 - **Playground controls and navigation.** Use one select component in the cookbook workbench with the diagram chevron and control styling. Rename the sidebar header to jevtools playground, remove the redundant library close button, and link to docs.jevtools.dev. ([#137](https://github.com/diegoag64/jev-devtools/pull/137))
 
+#### Fixed
+
+- **Scope-specific Flow builders.** Reject unsupported terminal calls and collection nesting in TypeScript, including nested paths and lanes. Runtime validation and diagnostics remain unchanged. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
+
 #### Documentation
+
+- **Unreleased Flow API reference.** Distinguish the working tree's builder and result types from version 0.6.0 in the API reference and definition signatures. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
 
 - **Explore cookbooks without setup.** Point guides, cookbook READMEs, and bundled agent guidance to playground.jevtools.dev. Add a Cookbook Playground hero button and a Flow API learning link to the landing page. Local contributor setup remains available. ([#137](https://github.com/diegoag64/jev-devtools/pull/137))
 
 #### Maintenance
+
+- **Verification fixture cleanup.** Remove independent React and Next.js test installations and temporary playground builds after success, failure, and handled cancellation. Stop owned workers before deletion, report cleanup failures, and keep full-suite logs under ignored `benchmarks/results/`. ([#142](https://github.com/diegoag64/jev-devtools/pull/142))
 
 - **Releases without repeated approvals.** A versioned release request covers its release PR merge, npm and GitHub publication, and matching docs deployment while preserving verification and request limits. Add a read-only environment preflight and document the one-time GitHub setup to remove required reviewers while retaining the main-only environment and OIDC trust. ([#135](https://github.com/diegoag64/jev-devtools/pull/135))
 

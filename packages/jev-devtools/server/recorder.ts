@@ -2,6 +2,11 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "node:crypto";
 import { types } from "node:util";
 import { Image, TypeSafeClient } from "@typesafe-ai/sdk";
+import {
+  detachForRedaction,
+  captureLimits,
+  captureEntryLimit,
+} from "./capture-copy.js";
 import type {
   Fetch,
   Questions,
@@ -40,9 +45,20 @@ const credentialKeys = new Set([
 ]);
 const safeMessage = (value: string) =>
   value.replace(/Bearer\s+\S+/gi, "Bearer [redacted]").slice(0, 500);
+/** The capture boundary, independent of field names and runtime values. */
+export type CaptureContext = {
+  readonly kind:
+    | "request"
+    | "response"
+    | "step-data"
+    | "condition-rule"
+    | "outcome";
+};
+
 export type CaptureOptions = {
   limit?: number;
-  redact?: (path: string[], value: unknown) => unknown;
+  /** Existing paths are unchanged; context distinguishes otherwise identical paths. */
+  redact?: (path: string[], value: unknown, context: CaptureContext) => unknown;
 };
 
 // Snapshot before the caller can mutate its request. Bounded and cycle-safe;
@@ -51,8 +67,9 @@ export function capture(
   value: unknown,
   warnings: Set<string>,
   redact?: CaptureOptions["redact"],
+  context: CaptureContext = { kind: "request" },
 ): Json {
-  return captureWithFidelity(value, warnings, redact).value;
+  return captureWithFidelity(value, warnings, redact, context).value;
 }
 
 /** Internal capture result. Fidelity covers this traversal, not an upstream snapshot. */
@@ -60,25 +77,34 @@ export function captureWithFidelity(
   value: unknown,
   warnings: Set<string>,
   redact?: CaptureOptions["redact"],
+  context: CaptureContext = { kind: "request" },
 ): { value: Json; fidelity: CaptureFidelity } {
   let modified = false;
   let uncertain = !!redact;
+  const detachedContext = Object.freeze({ kind: context.kind });
+  const detached = redact ? detachForRedaction(value, warnings) : undefined;
   const seen = new WeakSet<object>();
-  let budget = 96_000;
+  let budget: number = captureLimits.budget;
   const visit = (input: unknown, path: string[], depth: number): Json => {
     const key = (path.at(-1) ?? "").replace(/[-_]/g, "").toLowerCase();
     if (credentialKeys.has(key)) {
       warnings.add("Capture contains redacted values.");
       return "[redacted]";
     }
+    // A cutoff is control metadata, never a fabricated callback value.
+    if (detached?.projection(input)?.omitted) return "[truncated]";
     if (redact) {
-      const redacted = redact(path, input);
+      const redacted = redact([...path], input, detachedContext);
+      detached?.assertPolicyAccess();
       if (!Object.is(redacted, input))
         warnings.add("Capture contains redacted values.");
       input = redacted;
     }
+    const projection = detached?.projection(input);
+    if (projection?.omitted) return "[truncated]";
+    if (projection) input = projection.value;
     budget -= 8 + (path.at(-1)?.length ?? 0);
-    if (budget <= 0 || depth > 12) {
+    if (budget <= 0 || depth > captureLimits.depth) {
       warnings.add("Capture size/depth limit reached.");
       return "[truncated]";
     }
@@ -88,7 +114,7 @@ export function captureWithFidelity(
     }
     if (input === null) return null;
     if (typeof input === "string") {
-      const text = input.slice(0, Math.min(budget, 16_000));
+      const text = input.slice(0, Math.min(budget, captureLimits.text));
       budget -= text.length;
       if (text.length < input.length)
         warnings.add("Long text truncated in capture.");
@@ -115,6 +141,8 @@ export function captureWithFidelity(
     seen.add(input);
     if (input instanceof Image) {
       modified = true;
+      const omitted = projection?.image?.();
+      if (omitted) return { kind: "image", ...omitted };
       const bytes = input.data,
         result: { [key: string]: Json } = {
           kind: "image",
@@ -123,7 +151,7 @@ export function captureWithFidelity(
         };
       if (
         bytes instanceof Uint8Array &&
-        bytes.byteLength < 48_000 &&
+        bytes.byteLength < captureLimits.imageBytes &&
         budget > bytes.byteLength * 1.4
       ) {
         const format =
@@ -147,7 +175,7 @@ export function captureWithFidelity(
     if (Array.isArray(input)) {
       // Inspect only retained indices, without enumerating a potentially huge array.
       // Extra array properties are not part of its JSON value.
-      const length = Math.min(input.length, 150);
+      const length = Math.min(input.length, captureLimits.entries);
       const output = new Array<Json>(length);
       for (let index = 0; index < length; index++) {
         const field = Object.getOwnPropertyDescriptor(input, String(index));
@@ -162,7 +190,7 @@ export function captureWithFidelity(
             depth + 1,
           );
       }
-      if (input.length > 150)
+      if (input.length > captureLimits.entries)
         warnings.add("Long collection truncated in capture.");
       return output;
     }
@@ -180,21 +208,21 @@ export function captureWithFidelity(
       })
     )
       uncertain = true;
-    const entries = Object.entries(input);
-    // Choice maps need room for the full roster; retain the overall byte/depth
-    // budget and the smaller general-purpose object/array limit.
-    const entryLimit = ["criteria", "probabilities"].includes(path.at(-1) ?? "")
-      ? 256
-      : 150;
-    if (entries.length > entryLimit)
-      warnings.add("Long collection truncated in capture.");
-    return Object.fromEntries(
-      entries
-        .slice(0, entryLimit)
-        .map(([key, v]) => [key, visit(v, [...path, key], depth + 1)]),
-    );
+    const entries: [string, Json][] = [];
+    for (const key in input) {
+      if (!Object.hasOwn(input, key)) continue;
+      if (entries.length >= captureEntryLimit(path.at(-1))) {
+        warnings.add("Long collection truncated in capture.");
+        break;
+      }
+      entries.push([
+        key,
+        visit(Reflect.get(input, key), [...path, key], depth + 1),
+      ]);
+    }
+    return Object.fromEntries(entries);
   };
-  const captured = visit(value, [], 0);
+  const captured = visit(detached ? detached.value : value, [], 0);
   return {
     value: captured,
     fidelity:
@@ -354,6 +382,7 @@ export class JevRecorder {
               { ...request, model: request.model ?? client.defaultModel },
               warnings,
               this.options.redact,
+              { kind: "request" },
             );
             captured = result.value;
             requestFidelity = result.fidelity;
@@ -425,6 +454,7 @@ export class JevRecorder {
                     data,
                     resultWarnings,
                     this.options.redact,
+                    { kind: "response" },
                   );
                   result = captured.value;
                   resultFidelity = captured.fidelity;

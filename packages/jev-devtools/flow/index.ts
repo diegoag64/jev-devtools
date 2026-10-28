@@ -184,6 +184,93 @@ export type Resolved<T> =
         : T extends object
           ? { [K in keyof T]: Resolved<T[K]> }
           : T;
+// Compare canonical decimal indices with the largest array index. Recursion
+// stops after at most eleven digits, without constructing a huge tuple.
+type FlowOutputIndexWithinBound<
+  Value extends string,
+  Bound extends string = "4294967294",
+  Order extends "eq" | "lt" | "gt" = "eq",
+> = Value extends `${infer Digit}${infer Rest}`
+  ? Digit extends "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+    ? Bound extends `${infer BoundDigit}${infer BoundRest}`
+      ? FlowOutputIndexWithinBound<
+          Rest,
+          BoundRest,
+          Order extends "eq"
+            ? Digit extends BoundDigit
+              ? "eq"
+              : "0123456789" extends `${string}${Digit}${string}${BoundDigit}${string}`
+                ? "lt"
+                : "gt"
+            : Order
+        >
+      : false
+    : false
+  : Bound extends ""
+    ? Order extends "gt"
+      ? false
+      : true
+    : true;
+type FlowOutputIndex<Key> = Key extends `${infer Index extends bigint}`
+  ? bigint extends Index
+    ? never // A broad key pattern cannot prove canonical spelling or range.
+    : `${Index}` extends Key
+      ? Key extends `-${string}`
+        ? never
+        : FlowOutputIndexWithinBound<Key> extends true
+          ? Key
+          : never
+      : never
+  : never;
+// Rebuild standard array methods and known positions without promising attached
+// string/symbol properties that array.map() does not copy. Variadic inference
+// keeps ordinary optional/rest tuples; augmented arrays can need the structural
+// fallback, which retains known positions but may widen a rest element union.
+type FlowOutputArrayShape<T extends readonly unknown[]> = (T extends unknown[]
+  ? Array<FlowOutputValue<T[number]>>
+  : ReadonlyArray<FlowOutputValue<T[number]>>) & {
+  [K in keyof T as K extends "length"
+    ? K
+    : FlowOutputIndex<K>]: K extends "length" ? T[K] : FlowOutputValue<T[K]>;
+};
+type FlowOutputElements<T extends readonly unknown[]> = {
+  [K in keyof T]: FlowOutputValue<T[K]>;
+};
+type FlowOutputArray<T extends readonly unknown[]> = T extends readonly [
+  ...infer Items,
+]
+  ? Items extends T
+    ? T extends unknown[]
+      ? FlowOutputElements<Items>
+      : Readonly<FlowOutputElements<Items>>
+    : FlowOutputArrayShape<T>
+  : FlowOutputArrayShape<T>;
+// Structural types prove neither prototype nor enumerability. Object.entries()
+// may omit any declared field and discards symbols; fromEntries() also restores
+// Object.prototype methods when a non-enumerable override was omitted. Keep the
+// original opaque value as a possibility, and retain callable signatures for
+// narrowing. Whole references bypass template traversal and stay exact.
+type FlowOutputValue<T> =
+  T extends FlowExpression<infer V>
+    ? V
+    : T extends string | number | boolean | bigint | symbol | null | undefined
+      ? T
+      : T extends (...args: never[]) => unknown
+        ? T
+        : T extends readonly unknown[]
+          ? FlowOutputArray<T>
+          : T extends object
+            ?
+                | T
+                | {
+                    [K in keyof T]?: K extends symbol
+                      ? never
+                      :
+                          | FlowOutputValue<T[K]>
+                          | (K extends keyof Object ? Object[K] : never);
+                  }
+            : T;
+
 export type TaskContext = {
   signal: AbortSignal;
   runId: string;
@@ -499,7 +586,26 @@ function evaluate(
   return ast.op === "lt" ? a < b : ast.op === "gt" ? a > b : a >= b;
 }
 
-export interface FlowBuilder<T> {
+type FlowScope = "flow" | "map" | "loop";
+/** Value-returning scope. Collection restrictions follow nested paths and lanes. */
+export type FlowValueBuilder<T, Scope extends FlowScope = "flow"> = Omit<
+  FlowBuilderMethods<T, Scope>,
+  | "output"
+  | "branch"
+  | (Scope extends "map"
+      ? "map" | "loop"
+      : Scope extends "loop"
+        ? "loop"
+        : never)
+>;
+/** Terminal-capable root, branch path, or parallel lane. */
+export type FlowBuilder<T, Scope extends FlowScope = "flow"> = FlowValueBuilder<
+  T,
+  Scope
+> &
+  Pick<FlowBuilderMethods<T, Scope>, "output" | "branch">;
+
+interface FlowBuilderMethods<T, Scope extends FlowScope> {
   readonly input: FlowExpression<T>;
   jev<const Q extends Questions>(
     id: string,
@@ -532,7 +638,10 @@ export interface FlowBuilder<T> {
       maxItems: number;
     },
     build: (
-      item: FlowBuilder<{ item: I; index: number; context: Resolved<C> }>,
+      item: FlowValueBuilder<
+        { item: I; index: number; context: Resolved<C> },
+        "map"
+      >,
     ) => FlowExpression<O>,
     display?: FlowDisplay,
   ): FlowExpression<O[]>;
@@ -546,11 +655,14 @@ export interface FlowBuilder<T> {
       maxItems: number;
     },
     build: (
-      item: FlowBuilder<{
-        item: Resolved<I>;
-        index: number;
-        context: Resolved<C>;
-      }>,
+      item: FlowValueBuilder<
+        {
+          item: Resolved<I>;
+          index: number;
+          context: Resolved<C>;
+        },
+        "map"
+      >,
     ) => FlowExpression<O>,
     display?: FlowDisplay,
   ): FlowExpression<O[]>;
@@ -575,7 +687,10 @@ export interface FlowBuilder<T> {
         | null;
     },
     build: (
-      iteration: FlowBuilder<{ state: S; index: number; context: Resolved<C> }>,
+      iteration: FlowValueBuilder<
+        { state: S; index: number; context: Resolved<C> },
+        "loop"
+      >,
     ) => FlowExpression<NoInfer<S>>,
     display?: FlowDisplay,
   ): FlowExpression<S>;
@@ -591,11 +706,14 @@ export interface FlowBuilder<T> {
       maxIterations: number;
     },
     build: (
-      iteration: FlowBuilder<{
-        state: Resolved<S>;
-        index: number;
-        context: Resolved<C>;
-      }>,
+      iteration: FlowValueBuilder<
+        {
+          state: Resolved<S>;
+          index: number;
+          context: Resolved<C>;
+        },
+        "loop"
+      >,
     ) => FlowExpression<NoInfer<Resolved<S>>>,
     display?: FlowDisplay,
   ): FlowExpression<Resolved<S>>;
@@ -604,41 +722,73 @@ export interface FlowBuilder<T> {
     id: string,
     paths: {
       when: FlowExpression<boolean>;
-      then: (path: FlowBuilder<T>) => FlowExpression<A>;
-      else: (path: FlowBuilder<T>) => FlowExpression<B>;
+      then: (path: FlowValueBuilder<T, Scope>) => FlowExpression<A>;
+      else: (path: FlowValueBuilder<T, Scope>) => FlowExpression<B>;
     },
     display?: FlowDisplay,
   ): FlowExpression<A | B>;
   /** Terminal decision: each callback must return output() or another branch(). */
-  branch(
+  branch<A extends FlowOutcome, B extends FlowOutcome>(
     id: string,
     paths: {
       when: FlowExpression<boolean>;
-      then: (path: FlowBuilder<T>) => FlowExpression<FlowOutcome>;
-      else: (path: FlowBuilder<T>) => FlowExpression<FlowOutcome>;
+      then: (path: FlowBuilder<T, Scope>) => FlowExpression<A>;
+      else: (path: FlowBuilder<T, Scope>) => FlowExpression<B>;
     },
     display?: FlowDisplay,
-  ): FlowExpression<FlowOutcome>;
+  ): FlowExpression<A | B>;
   parallel<
     const B extends Record<
       string,
-      (lane: FlowBuilder<T>) => FlowExpression<unknown>
+      (lane: FlowBuilder<T, Scope>) => FlowExpression<unknown>
     >,
   >(
     id: string,
     lanes: B,
     display?: FlowDisplay,
   ): { [K in keyof B]: ReturnType<B[K]> };
-  output(
-    name: string,
-    value?: unknown,
+  output<Name extends string>(
+    name: Name,
+  ): FlowExpression<{ outcome: Name; value: undefined }>;
+  /** Object fields may be absent or unresolved; array extras are omitted. Whole references stay exact. */
+  output<Name extends string, V>(
+    name: Name,
+    value: V,
     display?: FlowDisplay,
-  ): FlowExpression<FlowOutcome>;
+  ): FlowExpression<{ outcome: Name; value: FlowOutputValue<V> }>;
 }
+/** Application execution result, independent of captured FlowRun values. */
+export type FlowResult<O extends FlowOutcome = FlowOutcome> = O & {
+  runId: string;
+};
+/** Executable definition for application helpers and registries. */
+export type DefinedJevFlow<T, O extends FlowOutcome = FlowOutcome> = {
+  definition: FlowDefinition;
+  run(input: T, options: FlowRunOptions): Promise<FlowResult<O>>;
+};
+/** Specify the input first, then infer the returned terminal outcome union. */
 export function defineJevFlow<T>(
   name: string,
-  build: (flow: FlowBuilder<T>) => FlowExpression<FlowOutcome>,
-) {
+): <O extends FlowOutcome>(
+  build: (flow: FlowBuilder<T>) => FlowExpression<O>,
+) => DefinedJevFlow<T, O>;
+/** Existing explicit-input calls retain the broad FlowOutcome default. */
+export function defineJevFlow<T, O extends FlowOutcome = FlowOutcome>(
+  name: string,
+  build: (flow: FlowBuilder<T>) => FlowExpression<O>,
+): DefinedJevFlow<T, O>;
+export function defineJevFlow<T, O extends FlowOutcome = FlowOutcome>(
+  name: string,
+  build?: (flow: FlowBuilder<T>) => FlowExpression<O>,
+):
+  | DefinedJevFlow<T, O>
+  | (<R extends FlowOutcome>(
+      build: (flow: FlowBuilder<T>) => FlowExpression<R>,
+    ) => DefinedJevFlow<T, R>) {
+  if (build === undefined)
+    return <R extends FlowOutcome>(
+      callback: (flow: FlowBuilder<T>) => FlowExpression<R>,
+    ) => defineJevFlow<T, R>(name, callback);
   const owner = {},
     ids = new Set<string>(),
     nodes: FlowNode[] = [];
@@ -1063,7 +1213,7 @@ export function defineJevFlow<T>(
           true,
         );
         terminal = true;
-        return new FlowExpression<FlowOutcome>({ op: "ref", id }, owner);
+        return new FlowExpression({ op: "ref", id }, owner) as never;
       },
       parallel(id, lanes, display) {
         const prior = [...previous],
@@ -1095,7 +1245,7 @@ export function defineJevFlow<T>(
         nodes.find((n) => n.id === id)!.lanes = Object.keys(lanes);
         return refs as never;
       },
-      output(outcome, value, display) {
+      output(outcome: string, value?: unknown, display?: FlowDisplay) {
         const step = add(outcome, "output", value, display);
         step.outcome = outcome;
         step.value = mapValue(value, (e) => e);
@@ -1103,7 +1253,7 @@ export function defineJevFlow<T>(
         return new FlowExpression<FlowOutcome>(
           { op: "ref", id: outcome },
           owner,
-        );
+        ) as never;
       },
     };
     builderIds.set(builder, ids);
@@ -1165,10 +1315,7 @@ export function defineJevFlow<T>(
   Object.freeze(definitionView);
   return {
     definition: definitionView,
-    async run(
-      data: T,
-      options: FlowRunOptions,
-    ): Promise<{ runId: string; outcome: string; value?: unknown }> {
+    async run(data: T, options: FlowRunOptions): Promise<FlowResult<O>> {
       const controller = new AbortController();
       // Preserve the initiating failure before aborting siblings: their cancellation
       // can reach a surrounding parallel join before the failing map settles.
@@ -1749,7 +1896,7 @@ export function defineJevFlow<T>(
         // emit() detaches the observer's output; callers keep the actual typed value.
         if (result.value !== undefined)
           run.value = result.value as FlowRun["value"];
-        return { runId: run.id, ...result };
+        return { runId: run.id, ...result } as FlowResult<O>;
       } catch (error) {
         run.status =
           error instanceof Error &&

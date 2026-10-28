@@ -119,6 +119,79 @@ for (const mode of ["none", "identity", "replacement", "mutation"] as const) {
   });
 }
 
+// Unlike the credential-mutation cases, these callbacks leave warnings empty.
+// The shared traversal must both isolate SDK execution and withhold exactness.
+for (const mode of ["identity", "mutation"] as const) {
+  test(`detached SDK callbacks retain unknown fidelity with empty warnings: ${mode}`, async (t) => {
+    const kinds = new Set<string>();
+    const inspector = createJevDevtools({
+      origin,
+      enabled: true,
+      redact: (path, value, context) => {
+        assert.ok(Object.isFrozen(context));
+        kinds.add(context.kind);
+        if (mode === "mutation" && path.join(".") === "state")
+          (value as { score: number }).score =
+            context.kind === "request" ? 0.6 : 0.4;
+        return value;
+      },
+    });
+    t.after(() => inspector.dispose());
+    const state = { score: 0.9 };
+    let sent: unknown;
+    const sdk = inspector.createClient({
+      apiKey: "sample",
+      logLevel: "off",
+      compression: false,
+      fetch: async (_input, init) => {
+        sent = JSON.parse(init!.body as string).state;
+        return Response.json({
+          model: "sample",
+          answers: { q: { type: "score", score: 0.9 } },
+          state: { score: 0.9 },
+        });
+      },
+    });
+    const result = await sdk.systemOne({
+      state,
+      questions: { q: score("score", ["low", "high"]) },
+    });
+    assert.equal(result.answers.q.score, 0.9);
+    await nextTurn();
+    await nextTurn();
+    const response = await inspector.handle(
+      new Request(origin + "/api/jev-devtools/events"),
+    );
+    const reader = response.body!.getReader();
+    let trace: Trace;
+    try {
+      trace = JSON.parse(
+        new TextDecoder()
+          .decode((await reader.read()).value)
+          .split("data: ")[1],
+      ).traces[0];
+    } finally {
+      await reader.cancel();
+    }
+    assert.deepEqual(state, { score: 0.9 });
+    assert.deepEqual(sent, state);
+    assert.equal(
+      (trace.request as any).state.score,
+      mode === "mutation" ? 0.6 : 0.9,
+    );
+    assert.equal(
+      (trace.result as any).state.score,
+      mode === "mutation" ? 0.4 : 0.9,
+    );
+    assert.deepEqual(trace.captureFidelity, {
+      request: "unknown",
+      result: "unknown",
+    });
+    assert.deepEqual(trace.captureWarnings, []);
+    assert.deepEqual(kinds, new Set(["request", "response"]));
+  });
+}
+
 test("signed-zero transport normalization downgrades rules, step data, and outcomes", async (t) => {
   for (const value of [-0, 0]) {
     const inspector = createJevDevtools({ origin, enabled: true });

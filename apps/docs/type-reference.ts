@@ -35,6 +35,22 @@ const descriptions: Record<string, string> = {
 };
 
 const supportingDescriptions: Record<string, string> = {
+  FlowOutputIndexWithinBound:
+    "Checks a canonical decimal index against 4294967294, the largest JavaScript array index, with bounded digit comparison.",
+  FlowOutputIndex:
+    "Retains canonical nonnegative array-index keys. Numeric-looking attached properties are omitted from direct array output shapes.",
+  FlowOutputArrayShape:
+    "Structural fallback for augmented arrays/tuples. Rebuilds standard array methods and known positions without attached properties; augmented rest element unions may widen.",
+  FlowOutputElements:
+    "Resolves a reconstructed tuple's positional elements while preserving ordinary optional and rest positions.",
+  FlowOutputArray:
+    "Reconstructs ordinary array and tuple output shapes, preserving readonly and positional types without promising attached properties.",
+  FlowOutputValue:
+    "The internal output-boundary value type. Whole references stay exact. Direct object fields may be absent or unresolved, and callable methods require appropriate narrowing.",
+  FlowScope:
+    "The enclosing collection context used to restrict builder methods through nested paths and lanes.",
+  FlowBuilderMethods:
+    "The complete builder method signatures before scope-specific capabilities are selected. Use the public FlowBuilder or FlowValueBuilder types.",
   FlowHistory:
     "Retained flow runs and their definitions inside an InspectionSnapshot. The validated stream updates both collections together, including removal and reconnection snapshots.",
   Scalar:
@@ -136,7 +152,17 @@ export function publicTypeReference(referenceMarkdown: string) {
     // A variable declaration has no statement wrapper in getText().
     const text = ts.isVariableDeclaration(node)
       ? `declare const ${node.getText()};`
-      : node.getText();
+      : ts.isFunctionDeclaration(node)
+        ? node
+            .getSourceFile()
+            .statements.filter(
+              (statement): statement is ts.FunctionDeclaration =>
+                ts.isFunctionDeclaration(statement) &&
+                statement.name?.text === node.name?.text,
+            )
+            .map((statement) => statement.getText())
+            .join("\n")
+        : node.getText();
     return `<details>\n<summary>Exact TypeScript declaration</summary>\n\n\x60\x60\x60ts\n${text}\n\x60\x60\x60\n\n</details>`;
   };
   return (
