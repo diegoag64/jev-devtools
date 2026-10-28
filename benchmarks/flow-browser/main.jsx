@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { JevDevtools } from "jev-devtools";
+const budget = new URLSearchParams(window.location.search).has("budget");
 function App() {
   const [status, setStatus] = useState("Ready");
   const [scenario, setScenario] = useState("flow-approve");
   const run = async () => {
     setStatus("Running");
-    const r = await fetch("/run?scenario=" + scenario, { method: "POST" });
+    const r = await fetch(
+      "/run?scenario=" + scenario + (budget ? "&budget=1" : ""),
+      { method: "POST" },
+    );
     const body = await r.json();
     setStatus(body.outcome ?? body.error ?? "Done");
   };
@@ -47,7 +51,11 @@ function App() {
       <p role="status" id="status">
         {status}
       </p>
-      <JevDevtools enabled defaultOpen={false} />
+      <JevDevtools
+        enabled
+        defaultOpen={false}
+        endpoint={budget ? "/api/budget" : undefined}
+      />
     </>
   );
 }

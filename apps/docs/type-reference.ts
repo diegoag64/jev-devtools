@@ -19,9 +19,9 @@ const descriptions: Record<string, string> = {
   FlowDefinition:
     "Static recipe graph, including its identity, name, and node metadata.",
   FlowRun:
-    "Captured execution state, with per-step progress and optional outcome, value, capture warnings, or error.",
+    "Captured execution state, with per-step progress and optional outcome, value, capture warnings, or error. valueOmitted identifies an outcome removed by the aggregate capture budget.",
   FlowStep:
-    "Captured step state, timing, decisions, trace linkage, and collection/loop progress.",
+    "Captured step state, timing, decisions, trace linkage, and collection/loop progress. dataOmitted identifies data removed by the aggregate capture budget.",
   BuiltFlowFixture:
     "Available since 0.5.0. Exported fixture plus missing capture IDs and warnings to inspect before saving.",
   AnswerChange:

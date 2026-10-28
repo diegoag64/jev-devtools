@@ -68,6 +68,8 @@ export type FlowStep = {
   error?: string;
   /** Optional bounded, redacted task input/output or selected merge value; never executable code. */
   data?: Json;
+  /** The entire data field was omitted by the aggregate flow value budget. */
+  dataOmitted?: "budget";
   captureWarnings?: string[];
   loop?: { maxIterations: number; stopReason?: "condition" | "limit" };
   collection?: {
@@ -91,6 +93,8 @@ export type FlowRun = {
   steps: Record<string, FlowStep>;
   outcome?: string;
   value?: Json;
+  /** The entire outcome value was omitted by the aggregate flow value budget. */
+  valueOmitted?: "budget";
   /** Capture limitations for value, including observer failures; absent in older captures. */
   captureWarnings?: string[];
   error?: string;

@@ -113,6 +113,8 @@ export const jev = inspector.createClient({
 });
 ```
 
+Unreleased: set `flowCaptureBytes` to a nonnegative safe integer to bound the aggregate serialized step data and outcomes in each nested flow capture. For example, `flowCaptureBytes: 262_144` admits up to 256 KiB of those values after redaction. Omit the option to preserve the existing policy. Zero omits all data/outcome fields, with explicit metadata and viewer warnings. Steps, items, statuses, trace links, and application results remain intact. Metadata, definitions, request traces, and observer allocations are outside this budget. See the [counting and admission policy](stream-protocol.md#aggregate-flow-value-budget).
+
 For Express, Connect, or Vite's development server, mount the middleware at the application root, before any fallback route. It delegates unrelated paths:
 
 ```ts

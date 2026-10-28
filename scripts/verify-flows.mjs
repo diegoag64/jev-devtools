@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { checkMobileRequests } from "./check-mobile-requests.mjs";
 import { checkShortDrawerControls } from "./check-flow-controls.mjs";
 import { checkCapturedConditions } from "./check-captured-conditions.mjs";
+import { checkFlowBudget } from "./check-flow-budget.mjs";
 import { checkNestedFlows } from "./check-nested-flows.mjs";
 const origin = process.env.FLOW_URL ?? "http://127.0.0.1:4230";
 const output = process.env.FLOW_RESULTS ?? "benchmarks/results/flows";
@@ -598,6 +599,7 @@ try {
   await checkShortDrawerControls({ browser, origin, output });
   await checkNestedFlows({ browser, origin, output });
   await checkCapturedConditions({ browser, origin, output });
+  await checkFlowBudget({ browser, origin, output });
   console.log(
     "Flows verified: first and later step clicks preserve the camera, explicit focus/fit/picker navigation works; floating controls stay fixed, do not initiate panning and fit narrow screens; connected request diagrams, question switching with one preserved camera, parallel wait explanation, outcome paths, untaken nodes, request details, pinned camera/selection across incoming runs and reopening, cancellation, readable capture warnings.",
   );

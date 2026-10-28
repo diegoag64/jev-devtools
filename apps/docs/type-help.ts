@@ -33,12 +33,14 @@ export const typeHelp: Record<string, Help> = {
     title: "CaptureOptions",
     importFrom: "jev-devtools/server",
     description:
-      "Controls how much request history is kept and how captured values are redacted. Shared by JevRecorder and the server adapter; it does not change the SDK response your application receives.",
+      "Controls retained history, optional aggregate flow value bytes, and captured-value redaction. Shared by JevRecorder and the server adapter; it does not change the SDK response your application receives.",
     signature:
-      "type CaptureOptions = {\n  limit?: number;\n  redact?: (path: string[], value: unknown, context: CaptureContext) => unknown;\n}",
+      "type CaptureOptions = {\n  limit?: number;\n  flowCaptureBytes?: number;\n  redact?: (path: string[], value: unknown, context: CaptureContext) => unknown;\n}",
     props: {
       "limit?":
         "Maximum retained traces across all sessions. Defaults to 50; clamped to 1–200.",
+      "flowCaptureBytes?":
+        "Unreleased. Optional nonnegative safe integer. Caps aggregate UTF-8 JSON bytes of flow step data and outcomes, including nested runs. Zero omits those fields with metadata. Excludes structural metadata, definitions, request traces, and observer memory. Used only by the adapter; no default cap.",
       "redact?":
         "Called with the unchanged field path, bounded detached value, and frozen capture-kind context. Access to omitted content fails closed with capture warnings. Existing two-argument callbacks remain valid. Return the value to store in the captured copy, for example a masked string. Keep credentials on the server.",
     },

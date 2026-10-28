@@ -56,6 +56,8 @@ export type CaptureContext = {
 
 export type CaptureOptions = {
   limit?: number;
+  /** Optional aggregate UTF-8 JSON bytes of flow step data and outcomes, including nested runs. Excludes metadata, definitions, traces, and observer snapshots. */
+  flowCaptureBytes?: number;
   /** Existing paths are unchanged; context distinguishes otherwise identical paths. */
   redact?: (path: string[], value: unknown, context: CaptureContext) => unknown;
 };
