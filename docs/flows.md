@@ -75,6 +75,8 @@ Try the [entity-alignment cookbook](https://playground.jevtools.dev/?cookbook=en
 
 For a complete sample of assessment reuse and application routing, run [LLM guardrails](https://playground.jevtools.dev/?cookbook=guardrails). One input or output battery feeds strict and permissive policy tasks; the diagram exposes the default strict route. Messages and answers are synthetic, with no LLM generation.
 
+Flow delivery sends an immediate full snapshot on connection or reconnect. Later changes use a fixed 16 ms coalescing window, including terminal states and clear. Sustained activity does not reset the deadline; event-loop load can add delay. Execution results remain independent of delivery. Coalescing preserves complete retained captures under the existing per-value policy, which is not a whole-run byte or heap budget. See the [delivery contract](stream-protocol.md#flow-delivery).
+
 ## Operations and references
 
 - `jev(id, request)` queues one ordinary SDK `systemOne` call. Preserve SDK questions, model selection, assets, and multiple questions. `state` may contain nested expressions. SDK assets remain SDK assets; the flow does not invent another question format.

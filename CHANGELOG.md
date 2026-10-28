@@ -36,6 +36,10 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 - **Playground controls and navigation.** Use one select component in the cookbook workbench with the diagram chevron and control styling. Rename the sidebar header to jevtools playground, remove the redundant library close button, and link to docs.jevtools.dev. ([#137](https://github.com/diegoag64/jev-devtools/pull/137))
 
+#### Performance
+
+- **Coalesce complete flow updates.** Batch ready flow readers over a fixed 16 ms window to reduce repeated nested-run cloning, encoding, transfer, and parsing. Initial and reconnect snapshots stay immediate; terminal states use the same window. Capture policy and version-1 records are unchanged, and aggregate run byte/heap bounds remain open in [#46](https://github.com/diegoag64/jev-devtools/issues/46).
+
 #### Documentation
 
 - **Explore cookbooks without setup.** Point guides, cookbook READMEs, and bundled agent guidance to playground.jevtools.dev. Add a Cookbook Playground hero button and a Flow API learning link to the landing page. Local contributor setup remains available. ([#137](https://github.com/diegoag64/jev-devtools/pull/137))

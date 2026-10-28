@@ -88,6 +88,8 @@ Route the base path **and all subpaths** to the same adapter. The drawer reads c
 
 Disabled or unmatched Web Request routes return 404. Access failures return 403. Errors from authorization or session callbacks can reject a Web Request handler. Node middleware contains route errors as HTTP 500 or a destroyed response. See the [stream protocol](https://github.com/diegoag64/jev-devtools/blob/main/docs/stream-protocol.md) when building another viewer.
 
+Flow connections receive an immediate full snapshot. Later changes, including terminal states and clear, coalesce over a fixed 16 ms window that new updates do not extend. Event-loop load can add delay. Slow readers catch up to retained state when ready; reconnects receive another immediate full snapshot. Coalescing reduces repeated updates but does not bound whole-run capture bytes or memory.
+
 ## getJevDevtools(key, createOptions)
 
 Get or create a shared adapter for one Node realm. Use a stable key so module reloads can reuse its history.
