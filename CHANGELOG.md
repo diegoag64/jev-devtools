@@ -8,7 +8,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 | Version                                     | Published (UTC)                                                                    | Highlights                                                                                                 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [Unreleased](#unreleased)                   | Not published                                                                      | No changes yet.                                                                                            |
+| [Unreleased](#unreleased)                   | Not published                                                                      | One request covers the complete release; checked environment setup.                                        |
 | [0.6.0](#060--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.6.0) | Cookbook workbench and narrated guides; embedded flow viewer; reliable multi-tab inspection.               |
 | [0.5.6](#056--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.6) | Clearer Flow diagnostics; custom playground ports; focused CI checks.                                      |
 | [0.5.5](#055--prepared-release)             | [See release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.5) | TypeScript fixes; capture and stream validation; clearer setup guidance.                                   |
@@ -28,7 +28,11 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ## Unreleased
 
-No changes yet.
+### Changes
+
+#### Maintenance
+
+- **Releases without repeated approvals.** A versioned release request covers its release PR merge, npm and GitHub publication, and matching docs deployment while preserving verification and request limits. Add a read-only environment preflight and document the one-time GitHub setup to remove required reviewers while retaining the main-only environment and OIDC trust. ([#135](https://github.com/diegoag64/jev-devtools/pull/135))
 
 ## 0.6.0 — Prepared release
 

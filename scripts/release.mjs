@@ -86,7 +86,88 @@ function summary(text) {
     writeFileSync(process.env.GITHUB_STEP_SUMMARY, `${text}\n`, { flag: "a" });
 }
 
-if (command === "prepare") {
+if (command === "check-environment") {
+  // Read settings before packing or publishing. Keep administration out of CI.
+  const endpoint = `repos/${repository}/environments/npm-release`;
+  const environment = JSON.parse(run("gh", ["api", endpoint]));
+  const setup = "See docs/releases.md#approval-and-trust-configuration.";
+  assert.equal(
+    environment.name,
+    "npm-release",
+    "Unexpected release environment",
+  );
+  assert.equal(
+    environment.can_admins_bypass,
+    false,
+    `npm-release must disable administrator bypass. ${setup}`,
+  );
+  assert.deepEqual(
+    environment.deployment_branch_policy,
+    { protected_branches: false, custom_branch_policies: true },
+    `npm-release must use a selected main branch policy. ${setup}`,
+  );
+  assert.ok(
+    Array.isArray(environment.protection_rules),
+    "Missing protection rules",
+  );
+  for (const rule of environment.protection_rules) {
+    if (rule.type === "required_reviewers")
+      assert.equal(
+        rule.reviewers?.length,
+        0,
+        `npm-release requires reviewers. ${setup}`,
+      );
+    else if (rule.type === "wait_timer")
+      assert.equal(
+        rule.wait_timer,
+        0,
+        `npm-release has a wait timer. ${setup}`,
+      );
+    else
+      assert.equal(
+        rule.type,
+        "branch_policy",
+        `Unexpected release protection rule: ${rule.type}. ${setup}`,
+      );
+  }
+  const policies = JSON.parse(
+    run("gh", ["api", `${endpoint}/deployment-branch-policies?per_page=100`]),
+  );
+  assert.equal(
+    policies.total_count,
+    1,
+    `npm-release must allow only main. ${setup}`,
+  );
+  assert.equal(
+    policies.branch_policies?.length,
+    1,
+    "Missing release branch policy",
+  );
+  assert.deepEqual(
+    {
+      name: policies.branch_policies[0].name,
+      type: policies.branch_policies[0].type,
+    },
+    { name: "main", type: "branch" },
+    `npm-release must allow the main branch only, with no tag policy. ${setup}`,
+  );
+  const custom = JSON.parse(
+    run("gh", ["api", `${endpoint}/deployment_protection_rules`]),
+  );
+  assert.equal(
+    custom.total_count,
+    0,
+    `npm-release has custom deployment protection rules. ${setup}`,
+  );
+  assert.equal(
+    custom.custom_deployment_protection_rules?.length,
+    0,
+    "Unexpected custom deployment protection rules",
+  );
+  console.log(
+    "npm-release verified: no reviewers or delay, main branch only, administrator bypass disabled.",
+  );
+} else if (command === "prepare") {
   const commit = run("git", ["rev-parse", "HEAD"]);
   assert.equal(
     commit,
@@ -153,7 +234,7 @@ if (command === "prepare") {
     );
   }
   summary(
-    `## Release candidate ${version}\n\nCommit: \`${commit}\`\n\nArchive SHA-256: \`${meta.sha256}\`\n\nInspect the release-candidate artifact and notes before approving npm-release.`,
+    `## Release candidate ${version}\n\nCommit: \`${commit}\`\n\nArchive SHA-256: \`${meta.sha256}\`\n\nFor an authorized release, verified candidates publish without another deployment approval. Dry runs do not publish.`,
   );
 } else if (command === "check-artifact") {
   const meta = artifact();
@@ -301,7 +382,7 @@ if (command === "prepare") {
     process.env.GITHUB_REPOSITORY === repository && /^\d+$/.test(runId ?? "")
       ? `- [Publication workflow](https://github.com/${repository}/actions/runs/${runId}) (includes fresh registry consumer checks).\n`
       : "";
-  const verifiedNotes = `${latest.body.trimEnd()}\n\n## Publication verification\n\n- npm publication: ${publication.publishedAt} (UTC).\n- Approved source and verified tag: \`${meta.commit}\`.\n- Archive SHA-256: \`${meta.sha256}\`.\n- npm integrity: \`${meta.integrity}\`; registry integrity and provenance checked by the publish job.\n${workflow}- GitHub release published, non-prerelease, and Latest verified at ${verifiedAt} (UTC); npm latest also matched this version. These are observations at verification time.\n\nPackage publication is verified. Hosted docs require a separate explicit request and live verification; record their result here after deployment. See [the release checklist](https://github.com/${repository}/blob/${meta.commit}/docs/releases.md#release-checklist).\n`;
+  const verifiedNotes = `${latest.body.trimEnd()}\n\n## Publication verification\n\n- npm publication: ${publication.publishedAt} (UTC).\n- Approved source and verified tag: \`${meta.commit}\`.\n- Archive SHA-256: \`${meta.sha256}\`.\n- npm integrity: \`${meta.integrity}\`; registry integrity and provenance checked by the publish job.\n${workflow}- GitHub release published, non-prerelease, and Latest verified at ${verifiedAt} (UTC); npm latest also matched this version. These are observations at verification time.\n\nPackage publication is verified. Continue the matching docs deployment under the initial release request unless it excludes docs; verify it live and record the result here. This GitHub workflow does not deploy docs. See [the release checklist](https://github.com/${repository}/blob/${meta.commit}/docs/releases.md#release-checklist).\n`;
   const verifiedNotesPath = join(folder, "verified-notes.md");
   writeFileSync(verifiedNotesPath, verifiedNotes);
   run("gh", [
@@ -322,10 +403,10 @@ if (command === "prepare") {
     "Release notes readback differs; publication is partial, recover notes without republishing",
   );
   summary(
-    `## Package publication verified\n\n[npm ${meta.version}](https://www.npmjs.com/package/jev-devtools/v/${meta.version}) · [GitHub release](${latest.html_url})\n\nCommit: \`${meta.commit}\`\n\nVerification results are recorded in the release notes. **Docs pending:** complete the separately authorized docs publication and live checks, then update these release notes. No receipt-only source PR is required. Do not republish this version.`,
+    `## Package publication verified\n\n[npm ${meta.version}](https://www.npmjs.com/package/jev-devtools/v/${meta.version}) · [GitHub release](${latest.html_url})\n\nCommit: \`${meta.commit}\`\n\nVerification results are recorded in the release notes. **Docs pending:** continue the matching docs publication and live checks under the initial release request unless it excludes docs, then update these release notes. Do not ask for another approval. This workflow does not deploy docs. No receipt-only source PR is required. Do not republish this version.`,
   );
 } else {
   throw new Error(
-    "Usage: node scripts/release.mjs prepare|check-artifact|preflight|verify-npm|github-release [artifact-directory]",
+    "Usage: node scripts/release.mjs check-environment|prepare|check-artifact|preflight|verify-npm|github-release [artifact-directory]",
   );
 }

@@ -9,7 +9,7 @@ on:
         required: true
         type: string
       dry_run:
-        description: Verify and package only; do not request approval or publish
+        description: Verify and package only; do not publish
         type: boolean
         default: true
 
@@ -34,7 +34,7 @@ jobs:
       notes_sha256: ${{ steps.package.outputs.notes_sha256 }}
     env:
       RELEASE_COMMIT: ${{ inputs.release_commit }}
-      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - name: Validate commit input
         # npm provenance records the dispatch SHA. Keep the checkout identical.
@@ -51,9 +51,13 @@ jobs:
           git merge-base --is-ancestor "$RELEASE_COMMIT" origin/main
           gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --commit "$RELEASE_COMMIT" --event push --limit 1 --json status,conclusion > "$RUNNER_TEMP/release-ci.json"
           node -e 'const [run] = JSON.parse(require("fs").readFileSync(process.env.RUNNER_TEMP + "/release-ci.json")); if (run?.status !== "completed" || run?.conclusion !== "success") throw new Error("Release commit needs successful main CI")'
+      - name: Require approval-free, main-only release environment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/release.mjs check-environment
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
       - run: npm install --global npm@11.19.0
       - run: npm ci
       - run: npm run check
@@ -87,7 +91,7 @@ jobs:
   publish:
     if: ${{ !inputs.dry_run }}
     needs: prepare
-    name: Approve npm ${{ needs.prepare.outputs.version }}
+    name: Publish npm ${{ needs.prepare.outputs.version }}
     environment: npm-release
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -98,7 +102,7 @@ jobs:
       RELEASE_COMMIT: ${{ inputs.release_commit }}
       RELEASE_SHA256: ${{ needs.prepare.outputs.sha256 }}
       RELEASE_NOTES_SHA256: ${{ needs.prepare.outputs.notes_sha256 }}
-      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -106,17 +110,17 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
       - run: npm install --global npm@11.19.0
       - uses: actions/download-artifact@v4
         with:
           name: release-candidate
           path: benchmarks/results/release/
-      - name: Recheck approved archive and publication eligibility
+      - name: Recheck inspected archive and publication eligibility
         run: |
           node scripts/release.mjs check-artifact
           node scripts/release.mjs preflight
-      - name: Publish approved bytes with OIDC
+      - name: Publish inspected bytes with OIDC
         env:
           RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
         run: npm publish "benchmarks/results/release/jev-devtools-$RELEASE_VERSION.tgz" --ignore-scripts --access public --tag latest --provenance --registry=https://registry.npmjs.org/
@@ -145,7 +149,7 @@ jobs:
       RELEASE_COMMIT: ${{ inputs.release_commit }}
       RELEASE_SHA256: ${{ needs.prepare.outputs.sha256 }}
       RELEASE_NOTES_SHA256: ${{ needs.prepare.outputs.notes_sha256 }}
-      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -153,7 +157,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
       - run: npm install --global npm@11.19.0
       # Each job has a fresh checkout; consumer type checks use the root TypeScript install.
       - run: npm ci

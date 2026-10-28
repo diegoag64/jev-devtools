@@ -5,7 +5,7 @@ For repository contributions, use the rules and task pointers below. For install
 ## Always apply
 
 - Work on a feature branch and open a PR targeting `main` unless the user explicitly requests otherwise. Never commit or push directly to `main`. Push completed, verified work and leave the PR open for review.
-- Merging, npm publication, and deployment each require an explicit request. CI, a merge, or task completion does not authorize publication or deployment.
+- A request to release a version authorizes the complete [release checklist](docs/releases.md#release-authorization), including its release PR merge and matching docs deployment, without further approval prompts. Otherwise merging, publishing, and deploying require explicit authorization. Preparation, CI, and merging alone do not authorize publication.
 - Keep the package independent of the playground; consumers use public exports. Keep API credentials on the server, distinguish samples from live inference, and follow official TypeSafe semantics. Diagrams must not invent model reasoning or routing policies.
 - Run performance benchmarks locally, never in GitHub Actions. Keep generated results, profiles, screenshots, logs, and reports under ignored `benchmarks/results/`; keep scripts and fixtures tracked.
 
@@ -19,5 +19,5 @@ For repository contributions, use the rules and task pointers below. For install
 - **Package CSS or its consumers, including markup/state changes:** follow the full [CSS review procedure](CONTRIBUTING.md#package-css-review), audit affected rules in the same PR, and run `npm run verify:drawer`.
 - **Docs or public APIs:** keep companion guidance and the shipped setup skill aligned in the same PR; follow [docs maintenance](CONTRIBUTING.md#keep-the-docs-current), including method style and `npm run verify:docs`.
 - **Versions or releases:** follow [version preparation](docs/releases.md#future-releases), including `npm run sync:readme-version`, and the [release checklist and completion rule](docs/releases.md#release-checklist). Publication candidates require full verification; report partial completion explicitly.
-- **Hosted docs:** follow the [manual publishing policy](docs/docs-publishing.md) for the reviewed artifact, authorization, deployment, and receipt.
+- **Hosted docs:** follow the [docs publishing policy](docs/docs-publishing.md) for the reviewed artifact, authorization, deployment, and receipt.
 - **Moving code:** preserve third-party notices and PR-based workflow documentation, as required by [CONTRIBUTING.md](CONTRIBUTING.md).
