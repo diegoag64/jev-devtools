@@ -1,6 +1,6 @@
 # Jev DevTools integration
 
-For an embedded workspace instead of the drawer, this checkout adds the **unreleased** `jev-devtools/viewer` entry. It exports `JevFlowViewer` and the opt-in `useJevInspection` hook. Reuse the same Node adapter and same-origin endpoint. See the [React guide](../apps/docs/content/react.md) for a checked example and display-only controls.
+For an embedded workspace instead of the drawer, version 0.6.0 adds the browser-safe `jev-devtools/viewer` entry. It exports `JevFlowViewer` and the opt-in `useJevInspection` hook. Reuse the same Node adapter and same-origin endpoint. See the [React guide](../apps/docs/content/react.md) for a checked example and display-only controls.
 
 For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/getting-started/). This file describes version 0.6.0; see the [compatibility notes](../CHANGELOG.md#060--prepared-release) and [verified publication status](https://github.com/diegoag64/jev-devtools/releases/tag/v0.6.0).
 

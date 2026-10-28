@@ -1,6 +1,6 @@
 # Define and inspect connected Jev calls
 
-**Unreleased workspace viewer:** `JevFlowViewer` and `useJevInspection` from `jev-devtools/viewer` embed the drawer's diagrams in a React workspace. Supply a definition for an unexecuted graph, or add its captured run and traces. Presentation-only node filters, selection callbacks, highlights, and accents support narrated tutorials. See the [React viewer guide](../apps/docs/content/react.md). The Node runner stays on the server; rendering never executes a flow.
+**Workspace viewer in 0.6.0:** `JevFlowViewer` and `useJevInspection` from `jev-devtools/viewer` embed the drawer's diagrams in a React workspace. Supply a definition for an unexecuted graph, or add its captured run and traces. Presentation-only node filters, selection callbacks, highlights, and accents support narrated tutorials. See the [React viewer guide](../apps/docs/content/react.md). The Node runner stays on the server; rendering never executes a flow.
 
 For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/flow-basics/). This file describes version 0.6.0; see the [compatibility notes](../CHANGELOG.md#060--prepared-release) and [verified publication status](https://github.com/diegoag64/jev-devtools/releases/tag/v0.6.0).
 

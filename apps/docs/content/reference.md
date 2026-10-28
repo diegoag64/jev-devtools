@@ -75,7 +75,7 @@ The drawer injects its own stylesheet into its Shadow DOM; no CSS import is need
 
 ### JevFlowViewer
 
-**Unreleased.** Embed the same diagram and request inspector used by the drawer in an ordinary React layout.
+**Version 0.6.0.** Embed the same diagram and request inspector used by the drawer in an ordinary React layout.
 
 #### Signature
 
@@ -112,7 +112,7 @@ The viewer reuses the drawer's flow cards, request diagrams, details, and pan/zo
 
 ### useJevInspection
 
-**Unreleased.** Subscribe to the validated flow and request capture streams used by the drawer.
+**Version 0.6.0.** Subscribe to the validated flow and request capture streams used by the drawer.
 
 #### Signature
 

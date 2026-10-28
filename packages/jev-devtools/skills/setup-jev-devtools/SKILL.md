@@ -35,7 +35,7 @@ Import application APIs from `jev-devtools` (React and browser-safe capture help
 
 ## Optional connected flow API
 
-For an embedded diagram instead of the drawer, follow the version-gated workspace viewer guidance in [references/flows.md](references/flows.md). This checkout adds the unreleased browser-safe `jev-devtools/viewer` public entry; use it only when the installed export exists.
+For an embedded diagram instead of the drawer, follow the version-gated workspace viewer guidance in [references/flows.md](references/flows.md). Version 0.6.0 adds the browser-safe `jev-devtools/viewer` public entry; use it only when the installed export exists.
 
 When asked to build or inspect connected calls, read [references/flows.md](references/flows.md) after the framework recipe. For 0.6.0 it covers requests, server function tasks, runtime request factories, parallel checks, terminal branches, returning conditionals, bounded collections, stateful loops, captured-answer replay, and fixture comparison. It includes sample verification, scope/execution rules, diagnostic handling, and privacy limits. For an older installation, use its bundled recipe and declarations rather than assuming these operations exist. Preserve existing application policies; do not convert unrelated calls just to install the drawer. Flow execution is server-only and continues even with the inspector disabled.
 
