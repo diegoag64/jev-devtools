@@ -335,6 +335,13 @@ export class JevRecorder {
           let captured: Json;
           let requestFidelity: CaptureFidelity = "modified";
           try {
+            // Getters can replace their own descriptors when the snapshot reads
+            // them. Preserve provenance before spreading or reading properties.
+            const uncertainRequest =
+              types.isProxy(request) ||
+              Object.values(Object.getOwnPropertyDescriptors(request)).some(
+                (field) => field.get || field.set,
+              );
             const result = captureWithFidelity(
               { ...request, model: request.model ?? client.defaultModel },
               warnings,
@@ -342,14 +349,7 @@ export class JevRecorder {
             );
             captured = result.value;
             requestFidelity = result.fidelity;
-            // Spreading the request above resolves root accessors before traversal.
-            if (
-              requestFidelity === "exact" &&
-              (types.isProxy(request) ||
-                Object.values(Object.getOwnPropertyDescriptors(request)).some(
-                  (field) => field.get || field.set,
-                ))
-            )
+            if (requestFidelity === "exact" && uncertainRequest)
               requestFidelity = "unknown";
           } catch {
             captured = null;
