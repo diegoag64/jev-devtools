@@ -1,6 +1,6 @@
 # Build and inspect a Jev flow
 
-For `jev-devtools` **0.6.0**. Check the [release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.6.0) for verified publication status when installing from source. Read the installed package version and `lib/flow/index.d.ts` first; online `main` may describe newer APIs. Use this recipe when the user asks to connect multiple Jev requests, inspect branches, run server function steps, or visualize parallel checks, collections, and loops. Adding the inspector alone does not require converting existing calls to flows.
+For `jev-devtools` **0.6.0**, with **Unreleased** working-tree additions for scope-specific builders and inferred results. The curried definition API, `FlowValueBuilder`, `DefinedJevFlow`, and `FlowResult` below are not in 0.6.0. Check the [release notes](https://github.com/diegoag64/jev-devtools/releases/tag/v0.6.0) for verified publication status when installing from source. Read the installed package version and `lib/flow/index.d.ts` first; online `main` may describe newer APIs. Use this recipe when the user asks to connect multiple Jev requests, inspect branches, run server function steps, or visualize parallel checks, collections, and loops. Adding the inspector alone does not require converting existing calls to flows.
 
 ## Plan the integration
 
@@ -132,7 +132,7 @@ For custom server-derived sessions, use `await inspector.run(request, () => revi
 
 ## Choose builder and result types
 
-Use `defineJevFlow<Input>(name)(build)` when application code needs inferred terminal results with an explicit input type. TypeScript cannot partially infer later generic arguments in the existing `defineJevFlow<Input>(name, build)` call. That form keeps its broad result for compatibility; it needs no migration. Calls without explicit type arguments also infer terminal results. Narrow an inferred result with `result.outcome` before reading a branch-specific value. Nested output templates resolve references in the value type.
+**Unreleased:** Use `defineJevFlow<Input>(name)(build)` when application code needs inferred terminal results with an explicit input type. TypeScript cannot partially infer later generic arguments in the existing `defineJevFlow<Input>(name, build)` call. That form keeps its broad result for compatibility; it needs no migration. Calls without explicit type arguments also infer terminal results. Narrow an inferred result with `result.outcome` before reading a branch-specific value. Nested output templates resolve references in the value type.
 
 Let callback parameter types infer their scope. Value bodies use `FlowValueBuilder` and return an expression. Roots, terminal branch paths, and parallel lanes use `FlowBuilder` and support terminal outputs or branches. Map descendants cannot create maps or loops. Loop descendants can create maps but cannot create loops. These restrictions follow nested if paths, lanes, and lane branches. A lane terminal returns a lane value; it does not terminate the containing flow.
 

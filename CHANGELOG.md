@@ -30,13 +30,13 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 ### Compatibility and upgrade
 
-- **Builder scope types match runtime legality.** Helpers that require a full `FlowBuilder` may need a narrower `FlowValueBuilder` or `Pick` parameter in map, loop, and `if()` bodies. Valid nested lane outputs and branches remain supported. Existing explicit-input two-argument definitions keep their broad result type.
+- **Builder scope types match runtime legality.** Helpers that require a full `FlowBuilder` may need a narrower `FlowValueBuilder` or `Pick` parameter in map, loop, and `if()` bodies. Valid nested lane outputs and branches remain supported. Existing explicit-input two-argument definitions keep their broad result type. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
 
 ### Changes
 
 #### Added
 
-- **Inferred Flow outcomes.** Use `defineJevFlow<Input>(name)(build)` to infer terminal names, branch unions, and resolved output values after specifying the input type. `DefinedJevFlow` and `FlowResult` name executable definitions and application results.
+- **Inferred Flow outcomes.** Use `defineJevFlow<Input>(name)(build)` to infer terminal names, branch unions, and resolved output values after specifying the input type. `DefinedJevFlow` and `FlowResult` name executable definitions and application results. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
 
 #### Changed
 
@@ -46,7 +46,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Fixed
 
-- **Scope-specific Flow builders.** Reject unsupported terminal calls and collection nesting in TypeScript, including nested paths and lanes. Runtime validation and diagnostics remain unchanged.
+- **Scope-specific Flow builders.** Reject unsupported terminal calls and collection nesting in TypeScript, including nested paths and lanes. Runtime validation and diagnostics remain unchanged. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
 
 #### Documentation
 

@@ -24,6 +24,8 @@ Import from `jev-devtools/flow` in Node code. [`defineJevFlow<Input>()`](@/api/r
 
 ## Inferred application results
 
+These result-inference APIs and scope-specific builder types are **Unreleased** working-tree changes. They are not available in 0.6.0. Check the installed package declarations before using them.
+
 Use `defineJevFlow<Input>(name)(build)` to specify the input and infer a discriminated union of terminal names and values. The extra call lets TypeScript infer the result after fixing the input type. The existing `defineJevFlow<Input>(name, build)` form retains its broad `FlowOutcome` result for compatibility. Without explicit type arguments, the two-argument form also infers terminal results.
 
 <!-- example: flow-branch.ts -->

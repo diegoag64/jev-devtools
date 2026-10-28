@@ -2,7 +2,7 @@
 
 **Workspace viewer in 0.6.0:** `JevFlowViewer` and `useJevInspection` from `jev-devtools/viewer` embed the drawer's diagrams in a React workspace. Supply a definition for an unexecuted graph, or add its captured run and traces. Presentation-only node filters, selection callbacks, highlights, and accents support narrated tutorials. See the [React viewer guide](../apps/docs/content/react.md). The Node runner stays on the server; rendering never executes a flow.
 
-For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/flow-basics/). This file describes version 0.6.0; see the [compatibility notes](../CHANGELOG.md#060--prepared-release) and [verified publication status](https://github.com/diegoag64/jev-devtools/releases/tag/v0.6.0).
+For guided documentation, start with [the hosted guide](https://docs.jevtools.dev/guides/flow-basics/). This file covers version 0.6.0 and the working tree's Unreleased builder and result types. The curried definition API and named result types below are not in 0.6.0. See the [Unreleased changes](../CHANGELOG.md#unreleased), [0.6.0 compatibility notes](../CHANGELOG.md#060--prepared-release), and [verified publication status](https://github.com/diegoag64/jev-devtools/releases/tag/v0.6.0).
 
 The flow API includes function steps, runtime requests, collections, returning conditionals, loops, replay, and fixture comparison. Replay and comparison are new in **0.5.0**. Existing single-request integrations remain supported; adopting flows is optional. For publication status, check the [changelog](../CHANGELOG.md).
 
@@ -89,7 +89,7 @@ Definitions are synchronous and make no SDK calls. Plain request/value templates
 
 Question and answer reference types are inferred. Existing `defineJevFlow<Ticket>(name, build)` calls retain `{ runId, outcome: string, value?: unknown }`; narrow their returned values in application code.
 
-For inferred terminal results with an explicit input type, use `defineJevFlow<Ticket>(name)(build)`. TypeScript cannot infer a later generic argument after you explicitly supply the first one. The extra call fixes the input type first, then infers the outcome union from the callback. This additive form needs no migration of existing definitions. Calls without explicit type arguments also infer their terminal results.
+**Unreleased:** For inferred terminal results with an explicit input type, use `defineJevFlow<Ticket>(name)(build)`. TypeScript cannot infer a later generic argument after you explicitly supply the first one. The extra call fixes the input type first, then infers the outcome union from the callback. This additive form needs no migration of existing definitions. Calls without explicit type arguments also infer their terminal results.
 
 ```ts
 const review = defineJevFlow<{ approved: boolean; amount: number }>("review")(
