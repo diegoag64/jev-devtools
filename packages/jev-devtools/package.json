@@ -1,6 +1,6 @@
 {
   "name": "jev-devtools",
-  "version": "0.5.6",
+  "version": "0.6.0",
   "type": "module",
   "engines": {
     "node": ">=22.12"
