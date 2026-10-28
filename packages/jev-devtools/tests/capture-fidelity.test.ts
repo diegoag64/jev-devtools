@@ -119,6 +119,124 @@ for (const mode of ["none", "identity", "replacement", "mutation"] as const) {
   });
 }
 
+test("signed-zero transport normalization downgrades rules, step data, and outcomes", async (t) => {
+  for (const value of [-0, 0]) {
+    const inspector = createJevDevtools({ origin, enabled: true });
+    t.after(() => inspector.dispose());
+    const flow = defineJevFlow("signed-zero", (f) => {
+      const result = f.task("score", { input: null, run: () => value });
+      return f.branch("gate", {
+        when: result.eq(value),
+        then: (p) => p.output("yes", result),
+        else: (p) => p.output("no"),
+      });
+    });
+    const result = await flow.run(null, { client, devtools: inspector });
+    assert.ok(Object.is(result.value, value), "execution preserves the scalar");
+    const { definition, run } = await history(inspector);
+    assert.ok(Object.is(run.value, 0));
+    assert.ok(
+      Object.is((run.steps.score.data as { output: number }).output, 0),
+    );
+    assert.equal(run.steps.gate.decision, true);
+    const fidelity = Object.is(value, -0) ? "modified" : "exact";
+    assert.equal(run.captureFidelity, fidelity);
+    assert.equal(run.steps.score.captureFidelity, fidelity);
+    assert.equal(
+      definition.nodes.find((node) => node.id === "gate")!
+        .conditionCaptureFidelity,
+      fidelity,
+    );
+  }
+});
+
+test("array method overrides cannot rewrite exact captured SDK request values", async (t) => {
+  const inspector = createJevDevtools({ origin, enabled: true });
+  t.after(() => inspector.dispose());
+  const state = [0.9];
+  let sliceCalls = 0;
+  state.slice = () => {
+    sliceCalls++;
+    return [0.6];
+  };
+  let sent: { state: number[] } | undefined;
+  const sdk = inspector.createClient({
+    apiKey: "sample",
+    logLevel: "off",
+    compression: false,
+    fetch: async (_input, init) => {
+      sent = JSON.parse(init!.body as string);
+      return Response.json({
+        model: "sample",
+        answers: { q: { type: "score", score: 0.9 } },
+      });
+    },
+  });
+  await sdk.systemOne({
+    state,
+    questions: { q: score("score", ["low", "high"]) },
+  });
+  await nextTurn();
+  await nextTurn();
+  const stream = await inspector.handle(
+    new Request(`${origin}/api/jev-devtools/events?protocol=2`),
+  );
+  const reader = stream.body!.getReader();
+  try {
+    const first = await reader.read();
+    const payload = JSON.parse(
+      new TextDecoder().decode(first.value).split("data: ")[1],
+    );
+    const [trace] = new TraceStore().apply("snapshot", payload);
+    assert.deepEqual(sent?.state, [0.9]);
+    assert.deepEqual(trace.request.state, sent!.state);
+    assert.equal(trace.captureFidelity?.request, "exact");
+    assert.deepEqual(trace.captureWarnings, []);
+    assert.equal(
+      sliceCalls,
+      0,
+      "capture reads retained indices, not user methods",
+    );
+    assert.equal(state[0], 0.9);
+  } finally {
+    await reader.cancel();
+  }
+});
+
+test("inherited array iterators cannot certify normalized observer and merge values", async (t) => {
+  class Values extends Array<number> {
+    [Symbol.iterator]() {
+      return [0.6][Symbol.iterator]();
+    }
+  }
+  const input = new Values();
+  input.push(0.9);
+  const inspector = createJevDevtools({ origin, enabled: true });
+  t.after(() => inspector.dispose());
+  const flow = defineJevFlow<Values>("array-iterator", (f) => {
+    const selected = f.if("select", {
+      when: f.input.get("length").eq(1),
+      then: (p) => p.input,
+      else: (p) => p.input,
+    });
+    return f.output("done", selected);
+  });
+  const result = await flow.run(input, { client, devtools: inspector });
+  assert.equal(
+    result.value,
+    input,
+    "capture does not replace execution values",
+  );
+  assert.equal(input[0], 0.9);
+  const { run } = await history(inspector);
+  assert.equal(run.captureFidelity, "unknown");
+  const merge = Object.values(run.steps).find(
+    (step) => step.data !== undefined,
+  )!;
+  assert.deepEqual(merge.data, { output: [0.6] });
+  assert.equal(merge.captureFidelity, "unknown");
+});
+
 test("nested captures preserve upstream rule limits, truncation, and unavailable outcomes", async (t) => {
   const inspector = createJevDevtools({ origin, enabled: true });
   t.after(() => inspector.dispose());

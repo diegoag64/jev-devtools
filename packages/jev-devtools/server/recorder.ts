@@ -96,7 +96,11 @@ export function captureWithFidelity(
     }
     if (typeof input === "boolean") return input;
     if (typeof input === "number") {
-      if (Number.isFinite(input)) return input;
+      if (Number.isFinite(input)) {
+        // JSON transport normalizes -0 even though execution retains its sign.
+        if (Object.is(input, -0)) modified = true;
+        return input;
+      }
       modified = true;
       return String(input);
     }
@@ -143,16 +147,24 @@ export function captureWithFidelity(
     if (Array.isArray(input)) {
       // Inspect only retained indices, without enumerating a potentially huge array.
       // Extra array properties are not part of its JSON value.
-      for (let index = 0; index < Math.min(input.length, 150); index++) {
+      const length = Math.min(input.length, 150);
+      const output = new Array<Json>(length);
+      for (let index = 0; index < length; index++) {
         const field = Object.getOwnPropertyDescriptor(input, String(index));
         if (!field) modified = true;
         else if (field.get || field.set) uncertain = true;
+        // Do not invoke user slice/map overrides or array species constructors.
+        // Preserve holes; JSON will normalize them to null with modified fidelity.
+        if (index in input)
+          output[index] = visit(
+            input[index],
+            [...path, String(index)],
+            depth + 1,
+          );
       }
       if (input.length > 150)
         warnings.add("Long collection truncated in capture.");
-      return input
-        .slice(0, 150)
-        .map((v, i) => visit(v, [...path, String(i)], depth + 1));
+      return output;
     }
     if (
       Object.getPrototypeOf(input) !== Object.prototype &&

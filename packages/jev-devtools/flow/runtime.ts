@@ -26,6 +26,10 @@ export function jsonSnapshot(
   if (
     onUncertain &&
     (types.isProxy(value) ||
+      // Array.from can use an inherited custom iterator. Retain execution
+      // normalization semantics, but do not certify its capture as exact.
+      (Array.isArray(value) &&
+        Object.getPrototypeOf(value) !== Array.prototype) ||
       Object.values(Object.getOwnPropertyDescriptors(value)).some(
         (field) => field.get || field.set,
       ))
@@ -78,6 +82,8 @@ export function observerSnapshot(
     if (
       onUncertain &&
       (types.isProxy(input) ||
+        (Array.isArray(input) &&
+          Object.getPrototypeOf(input) !== Array.prototype) ||
         Object.values(Object.getOwnPropertyDescriptors(input)).some(
           (field) => field.get || field.set,
         ))
