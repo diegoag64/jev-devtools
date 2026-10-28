@@ -352,44 +352,60 @@ for (const throws of [false, true]) {
   });
 }
 
-test("custom redaction detaches SDK images, including withAssets, without losing references or previews", async (t) => {
-  const bytes = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
-  const photo = new Image(bytes);
-  const ref = String(photo);
-  const seen: string[] = [];
-  const inspector = createJevDevtools({
-    origin,
-    enabled: true,
-    redact: (path, value, context) => {
-      if (context.kind === "request" && value instanceof Image) {
-        seen.push(String(value));
-        (value.data as Uint8Array)[2] = 0;
-      }
-      return value;
-    },
+for (const storage of ["bytes", "shared", "blob"] as const) {
+  test(`custom redaction detaches SDK images with ${storage} storage and preserves withAssets references`, async (t) => {
+    const bytes = new Uint8Array(
+      storage === "shared" ? new SharedArrayBuffer(8) : new ArrayBuffer(8),
+    );
+    bytes.set([137, 80, 78, 71, 13, 10, 26, 10]);
+    const photo = new Image(
+      storage === "blob" ? new Blob([Uint8Array.from(bytes)]) : bytes,
+    );
+    const ref = String(photo);
+    const seen: string[] = [];
+    const inspector = createJevDevtools({
+      origin,
+      enabled: true,
+      redact: (path, value, context) => {
+        if (context.kind === "request" && value instanceof Image) {
+          seen.push(String(value));
+          if (value.data instanceof Uint8Array) value.data[2] = 0;
+          else Reflect.set(value, "data", new Blob(["changed capture"]));
+        }
+        return value;
+      },
+    });
+    t.after(() => inspector.dispose());
+    const client = inspector.createClient({
+      ...clientOptions,
+      fetch: async (_url, init) => {
+        const form = await new Response(init?.body as BodyInit, {
+          headers: init?.headers,
+        }).formData();
+        const payload = JSON.parse(String(form.get("request")));
+        const image = form.get(payload.assets[ref].part) as Blob;
+        assert.deepEqual(new Uint8Array(await image.arrayBuffer()), bytes);
+        return Response.json(response);
+      },
+    });
+    await client.systemOne({
+      state: { text: withAssets`Look ${photo}` },
+      questions: { ok: noul("OK?") },
+    });
+    await nextTurn();
+    assert.deepEqual(seen, [ref]);
+    assert.equal(bytes[2], 78);
+    const [trace] = (await snapshot(inspector, "/events")).traces;
+    const image = trace.request.state.text.assets[0];
+    assert.equal(image.ref, ref);
+    if (storage === "blob") {
+      assert.equal(image.preview, undefined);
+      assert.equal(image.bytes, "changed capture".length);
+      assert.ok(
+        trace.captureWarnings.includes(
+          "Image preview omitted (Blob, unsupported format, or size limit).",
+        ),
+      );
+    } else assert.match(image.preview, /^data:image\/png;base64,/);
   });
-  t.after(() => inspector.dispose());
-  const client = inspector.createClient({
-    ...clientOptions,
-    fetch: async (_url, init) => {
-      const form = await new Response(init?.body as BodyInit, {
-        headers: init?.headers,
-      }).formData();
-      const payload = JSON.parse(String(form.get("request")));
-      const image = form.get(payload.assets[ref].part) as Blob;
-      assert.deepEqual(new Uint8Array(await image.arrayBuffer()), bytes);
-      return Response.json(response);
-    },
-  });
-  await client.systemOne({
-    state: { text: withAssets`Look ${photo}` },
-    questions: { ok: noul("OK?") },
-  });
-  await nextTurn();
-  assert.deepEqual(seen, [ref]);
-  assert.equal(bytes[2], 78);
-  const [trace] = (await snapshot(inspector, "/events")).traces;
-  const image = trace.request.state.text.assets[0];
-  assert.equal(image.ref, ref);
-  assert.match(image.preview, /^data:image\/png;base64,/);
-});
+}
