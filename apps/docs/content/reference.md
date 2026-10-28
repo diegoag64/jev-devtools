@@ -1,6 +1,6 @@
 Look up an API by name to find its signature, parameters, return type, example, and failure behavior. Each entry has a permanent link. For a first integration, start with [Quick start](@/getting-started/). For a first flow, use [Flows from scratch](@/guides/flow-basics/).
 
-These docs describe **version 0.6.0**. [See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.6.0) Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
+These docs cover **version 0.6.0** and the working tree's **Unreleased** Flow builder and result types. [See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.6.0) Replay, fixture comparison, and display masking require 0.5.0 or later. Check the [changelog](@/changelog/) and your installed version.
 
 <details class="reference-notes">
 <summary>How to read the signatures</summary>
@@ -459,10 +459,13 @@ Import `defineJevFlow` from `jev-devtools/flow` on Node. Builder methods describ
 
 Defines a reusable sequence of tasks, Jev requests, and decisions. The callback builds the recipe synchronously; calling the returned flow’s `run()` executes it.
 
+**Unreleased:** The curried definition form and the `FlowValueBuilder`, `DefinedJevFlow`, and `FlowResult` types below are not available in 0.6.0.
+
 #### Signature
 
 ```ts
-defineJevFlow<Input>(name: string, build: (flow: FlowBuilder<Input>) => Expression<FlowOutcome>): { definition: FlowDefinition; run: /* see below */ }
+defineJevFlow<Input>(name, build): DefinedJevFlow<Input>
+defineJevFlow<Input>(name)(build): DefinedJevFlow<Input, InferredOutcome>
 ```
 
 #### Inputs
@@ -474,14 +477,16 @@ defineJevFlow<Input>(name: string, build: (flow: FlowBuilder<Input>) => Expressi
 
 Use a nonblank name of at most 100 characters. The synchronous `build` callback must return a terminal `output()` or `branch()`.
 
+The curried `defineJevFlow<Input>(name)(build)` form infers the terminal outcome union after fixing the input type. TypeScript cannot partially infer later generic arguments in the existing two-argument form. Existing explicit-input calls keep their broad result; calls without explicit type arguments can infer it. `output()` infers literal names and output-specific value types, and `branch()` unions its path outcomes. Whole-expression outputs stay exact; direct object templates retain original-or-projected possibilities with potentially absent fields. Dynamic string names and broad callback annotations can widen the result. See [inferred application results](@/api/flow/#inferred-application-results).
+
 The returned `{ definition, run }` can be reused for multiple executions. Building it sends no SDK requests. Invalid IDs, scopes, nesting, or terminal structure throw during definition.
 
 #### Returns
 
-| Value / member | Type                                                                                  | Description           |
-| -------------- | ------------------------------------------------------------------------------------- | --------------------- |
-| definition     | `FlowDefinition`                                                                      | Static graph.         |
-| run            | `(input: Input, options: FlowRunOptions) => Promise<FlowOutcome & { runId: string }>` | Executes a fresh run. |
+| Value / member | Type                                                                      | Description           |
+| -------------- | ------------------------------------------------------------------------- | --------------------- |
+| definition     | `FlowDefinition`                                                          | Static graph.         |
+| run            | `(input: Input, options: FlowRunOptions) => Promise<FlowResult<Outcome>>` | Executes a fresh run. |
 
 #### Example
 
@@ -498,7 +503,7 @@ Executes a defined flow with concrete input and a client. Await it to receive th
 #### Signature
 
 ```ts
-program.run(input: Input, options: FlowRunOptions): Promise<{ runId: string; outcome: string; value?: unknown }>
+program.run(input: Input, options: FlowRunOptions): Promise<FlowResult<Outcome>>
 ```
 
 **Inputs:** the typed input promised by `defineJevFlow` and these options:
@@ -511,18 +516,18 @@ program.run(input: Input, options: FlowRunOptions): Promise<{ runId: string; out
 | `devtools?` | Optional `FlowObserver`, usually your server adapter.                      |
 | `signal?`   | Optional `AbortSignal` to cancel the run.                                  |
 
-Each execution gets a fresh `runId` and resolves to the selected outcome and optional value. The public `value` type is `unknown`, so validate or narrow it before use. The result is not an inferred discriminated union.
+Each execution gets a fresh `runId` and resolves to the selected outcome and value. Inferred outcomes preserve the relationship between the name and the value; narrow by `result.outcome` before reading a path-specific value. Existing explicit-input two-argument definitions default to `FlowOutcome`, whose value remains `unknown`. These are application values, independent of captured `FlowRun` data.
 
 Errors and cancellation reject the promise. Tasks must cooperate with their signal. Execution has no rollback or automatic retry.
 
 #### Returns
 
-| Value / member | Type                                       | Description                                                 |
-| -------------- | ------------------------------------------ | ----------------------------------------------------------- |
-| Return         | `Promise<FlowOutcome & { runId: string }>` | Await to receive the fields below.                          |
-| runId          | `string`                                   | Unique execution ID.                                        |
-| outcome        | `string`                                   | Selected terminal outcome name.                             |
-| value?         | `unknown`                                  | Resolved output value; narrow its type in application code. |
+| Value / member | Type                           | Description                                                        |
+| -------------- | ------------------------------ | ------------------------------------------------------------------ |
+| Return         | `Promise<FlowResult<Outcome>>` | Await the application result.                                      |
+| runId          | `string`                       | Unique execution ID.                                               |
+| outcome        | `Outcome["outcome"]`           | Selected terminal outcome name.                                    |
+| value          | Outcome-specific               | Resolved output value; broad definitions retain `value?: unknown`. |
 
 #### Example
 
@@ -569,6 +574,8 @@ console.log(program.definition.name, program.definition.nodes.length);
 #### How it works
 
 Reading `name` and the node count inspects the recipe’s static structure. It does not execute tasks or send requests.
+
+Value bodies use `FlowValueBuilder` and omit `output()` and `branch()`. `FlowBuilder` supports terminals at the root, in terminal paths, and in parallel lanes. Both types carry an enclosing scope: `"flow"` by default, `"map"` without maps or loops, or `"loop"` without loops. The scope follows nested paths and lanes. Use inferred callback parameters or narrower helper parameters when reusing builder code. Runtime checks still enforce ownership, terminal order, nesting depth, and step limits.
 
 ### flow.input
 
@@ -791,13 +798,13 @@ flow.if<A, B>(id, { when, then, else }, display?): Expression<A | B>
 
 #### Inputs
 
-| Parameter / option | Type                                              |
-| ------------------ | ------------------------------------------------- |
-| `id`               | `string`                                          |
-| `paths.when`       | `FlowExpression<boolean>`                         |
-| `paths.then`       | `(path: FlowBuilder<Input>) => FlowExpression<A>` |
-| `paths.else`       | `(path: FlowBuilder<Input>) => FlowExpression<B>` |
-| `display?`         | `FlowDisplay`                                     |
+| Parameter / option | Type                                                          |
+| ------------------ | ------------------------------------------------------------- |
+| `id`               | `string`                                                      |
+| `paths.when`       | `FlowExpression<boolean>`                                     |
+| `paths.then`       | `(path: FlowValueBuilder<Input, Scope>) => FlowExpression<A>` |
+| `paths.else`       | `(path: FlowValueBuilder<Input, Scope>) => FlowExpression<B>` |
+| `display?`         | `FlowDisplay`                                                 |
 
 `when` must be a Boolean expression. Both path callbacks build synchronously using their supplied path builder, but only the selected path executes.
 
@@ -825,17 +832,17 @@ Chooses between two paths that each finish the flow with an outcome. Use it when
 #### Signature
 
 ```ts
-flow.branch(id, { when, then, else }, display?): Expression<FlowOutcome>
+flow.branch(id, { when, then, else }, display?): Expression<A | B>
 ```
 
 #### Inputs
 
-| Parameter / option       | Type                                                        |
-| ------------------------ | ----------------------------------------------------------- |
-| `id`                     | `string`                                                    |
-| `paths.when`             | `FlowExpression<boolean>`                                   |
-| `paths.then, paths.else` | `(path: FlowBuilder<Input>) => FlowExpression<FlowOutcome>` |
-| `display?`               | `FlowDisplay`                                               |
+| Parameter / option       | Type                                                          |
+| ------------------------ | ------------------------------------------------------------- |
+| `id`                     | `string`                                                      |
+| `paths.when`             | `FlowExpression<boolean>`                                     |
+| `paths.then, paths.else` | `(path: FlowBuilder<Input, Scope>) => FlowExpression<A or B>` |
+| `display?`               | `FlowDisplay`                                                 |
 
 `when` must be a Boolean expression. Each path callback must return `output()` or another terminal `branch()`.
 
@@ -843,11 +850,11 @@ Return the branch from the containing flow or path. No steps may follow this ter
 
 #### Returns
 
-| Value / member   | Type                          | Description                                    |
-| ---------------- | ----------------------------- | ---------------------------------------------- |
-| Builder return   | `FlowExpression<FlowOutcome>` | Terminal result reference.                     |
-| Resolved outcome | `string`                      | Name returned by the selected terminal path.   |
-| Resolved value?  | `unknown`                     | Optional resolved value returned by that path. |
+| Value / member   | Type                     | Description                                  |
+| ---------------- | ------------------------ | -------------------------------------------- |
+| Builder return   | `FlowExpression<A \| B>` | Union of terminal path results.              |
+| Resolved outcome | Literal name union       | Name returned by the selected terminal path. |
+| Resolved value   | Path-specific            | Resolved value returned by that path.        |
 
 #### Example
 
@@ -855,7 +862,7 @@ Return the branch from the containing flow or path. No steps may follow this ter
 
 #### How it works
 
-`.eq(true)` checks `needsReview`. The selected path calls `output()` with its own outcome name and message. Returning the branch ends the flow; there is no shared step afterward. Use [`if()`](@/api/reference/#flow-if) when the paths should rejoin. Calling `tryBranch()` awaits `route.run({ needsReview: true }, ...)`, then reads outcome `"manual-review"` and value `"A person should review this"` from the finished run.
+`.eq(true)` checks `needsReview`. The selected path calls `output()` with its own outcome name and value. Returning the branch ends the flow; there is no shared step afterward. Use [`if()`](@/api/reference/#flow-if) when the paths should rejoin. Calling `tryBranch()` awaits `route.run({ needsReview: true }, ...)`, then reads outcome `"manual-review"` and a receipt containing `message: "A person should review this"` from the finished run. The receipt task resolves its input fields before the whole result expression reaches `output()`.
 
 ### flow.parallel
 
@@ -906,16 +913,16 @@ flow.map<Item, Context, Output>(id, { items, input, maxItems, concurrency? }, bu
 
 #### Inputs
 
-| Parameter / option                              | Type                                                                                                                 |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `id`                                            | `string`                                                                                                             |
-| `options.items`                                 | `readonly Item[] \| FlowExpression<readonly Item[]>`                                                                 |
-| `options.input`                                 | `Context`                                                                                                            |
-| `options.maxItems`                              | `number`                                                                                                             |
-| `options.concurrency?`                          | `number`                                                                                                             |
-| `build` (whole-array reference or scalar array) | `(item: FlowBuilder<{ item: Item; index: number; context: Resolved<Context> }>) => FlowExpression<Output>`           |
-| `build` (literal/template)                      | `(item: FlowBuilder<{ item: Resolved<Item>; index: number; context: Resolved<Context> }>) => FlowExpression<Output>` |
-| `display?`                                      | `FlowDisplay`                                                                                                        |
+| Parameter / option                              | Type                                                                                                                             |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                                            | `string`                                                                                                                         |
+| `options.items`                                 | `readonly Item[] \| FlowExpression<readonly Item[]>`                                                                             |
+| `options.input`                                 | `Context`                                                                                                                        |
+| `options.maxItems`                              | `number`                                                                                                                         |
+| `options.concurrency?`                          | `number`                                                                                                                         |
+| `build` (whole-array reference or scalar array) | `(item: FlowValueBuilder<{ item: Item; index: number; context: Resolved<Context> }, "map">) => FlowExpression<Output>`           |
+| `build` (literal/template)                      | `(item: FlowValueBuilder<{ item: Resolved<Item>; index: number; context: Resolved<Context> }, "map">) => FlowExpression<Output>` |
+| `display?`                                      | `FlowDisplay`                                                                                                                    |
 
 `items` accepts a literal array, a whole-array reference, or an array containing nested reference templates. `input` supplies shared context to each item program. Set `maxItems` to an integer from 1–64. `concurrency` is an integer from 1–16 and defaults to 4.
 
@@ -955,17 +962,17 @@ flow.loop<State, Context>(id, { initial, input, while, maxIterations }, build, d
 
 #### Inputs
 
-| Parameter / option                                | Type                                                                                                                                 |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `id`                                              | `string`                                                                                                                             |
-| `options.initial`                                 | `State \| FlowExpression<State>`                                                                                                     |
-| `options.input`                                   | `Context`                                                                                                                            |
-| `options.while` (whole-state reference or scalar) | `(state: FlowExpression<State>) => FlowExpression<boolean>`                                                                          |
-| `options.while` (literal/template)                | `(state: FlowExpression<Resolved<State>>) => FlowExpression<boolean>`                                                                |
-| `options.maxIterations`                           | `number`                                                                                                                             |
-| `build` (whole-state reference or scalar)         | `(iteration: FlowBuilder<{ state: State; index: number; context: Resolved<Context> }>) => FlowExpression<State>`                     |
-| `build` (literal/template)                        | `(iteration: FlowBuilder<{ state: Resolved<State>; index: number; context: Resolved<Context> }>) => FlowExpression<Resolved<State>>` |
-| `display?`                                        | `FlowDisplay`                                                                                                                        |
+| Parameter / option                                | Type                                                                                                                                              |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                                              | `string`                                                                                                                                          |
+| `options.initial`                                 | `State \| FlowExpression<State>`                                                                                                                  |
+| `options.input`                                   | `Context`                                                                                                                                         |
+| `options.while` (whole-state reference or scalar) | `(state: FlowExpression<State>) => FlowExpression<boolean>`                                                                                       |
+| `options.while` (literal/template)                | `(state: FlowExpression<Resolved<State>>) => FlowExpression<boolean>`                                                                             |
+| `options.maxIterations`                           | `number`                                                                                                                                          |
+| `build` (whole-state reference or scalar)         | `(iteration: FlowValueBuilder<{ state: State; index: number; context: Resolved<Context> }, "loop">) => FlowExpression<State>`                     |
+| `build` (literal/template)                        | `(iteration: FlowValueBuilder<{ state: Resolved<State>; index: number; context: Resolved<Context> }, "loop">) => FlowExpression<Resolved<State>>` |
+| `display?`                                        | `FlowDisplay`                                                                                                                                     |
 
 `initial` supplies JSON state as a literal, whole-state reference, or nested object/array template. `input` supplies explicit shared context. The synchronous `while(state)` callback builds a Boolean expression from the state. Set `maxIterations` to an integer from 1–64.
 
@@ -1003,7 +1010,8 @@ Defines the end of a flow or branch with a named outcome and optional result dat
 #### Signature
 
 ```ts
-flow.output(name: string, value?: unknown, display?: FlowDisplay): Expression<FlowOutcome>
+flow.output(name: Name, value: Value, display?: FlowDisplay): Expression<{ outcome: Name; value: FlowOutputValue<Value> }>
+flow.output(name: Name): Expression<{ outcome: Name; value: undefined }>
 ```
 
 #### Inputs
@@ -1014,17 +1022,23 @@ flow.output(name: string, value?: unknown, display?: FlowDisplay): Expression<Fl
 | `value?`           | `unknown`     |
 | `display?`         | `FlowDisplay` |
 
-The outcome `name` is also a node ID, so it must be unique in the definition. The optional `value` can contain literals and nested references, which resolve during execution. `display` supplies static inspection metadata.
+The outcome `name` is also a node ID, so it must be unique in the definition. Execution resolves references in arrays and plain records, and preserves nonplain objects such as class instances, Dates, and SDK assets. `display` supplies static inspection metadata.
 
-Return this terminal expression from the flow or branch path. No steps may follow it. Naming an outcome does not perform a business action.
+The internal `FlowOutputValue` type describes this output boundary; it is not a public export. Whole `FlowExpression<Value>` arguments return exactly `Value`, without recursively transforming its fields. Scalars remain exact. Direct ordinary arrays/tuples resolve positional elements and keep standard array methods, readonly state, and optional/rest positions. Attached string and symbol properties are not promised because array mapping does not copy them. Augmented variadic tuples can widen the rest element union while retaining known positions.
+
+Object templates include either the original opaque value or a projected record whose declared fields may be absent. Structural types encode neither prototypes nor enumerability. Symbols and non-enumerable fields can disappear; a dropped override can expose an inherited `Object.prototype` method instead. Callable signatures remain available, but direct structural objects do not guarantee that methods survive. Check `value instanceof Date` before calling a direct Date output's methods, or use a property-presence guard. Whole-expression outputs preserve exact method usability.
+
+For example, `output("done", { amount: flow.input.get("amount") })` requires presence and value narrowing for `value.amount`: a class can preserve the expression, and a non-enumerable field can disappear. For an exact JSON object result, assemble it in an existing `task()` and output that task's whole expression. Task input inference remains unchanged. This conservative type does not change runtime object identity, asset behavior, or capture policy.
+
+Return this terminal expression from the flow, branch path, or parallel lane. A lane output is a lane value and does not terminate the containing flow. No steps may follow it in its own scope. Naming an outcome does not perform a business action.
 
 #### Returns
 
-| Value / member   | Type                          | Description                                         |
-| ---------------- | ----------------------------- | --------------------------------------------------- |
-| Builder return   | `FlowExpression<FlowOutcome>` | Terminal result reference.                          |
-| Resolved outcome | `string`                      | The supplied name.                                  |
-| Resolved value?  | `unknown`                     | The supplied value with nested references resolved. |
+| Value / member   | Type                                                               | Description                                                  |
+| ---------------- | ------------------------------------------------------------------ | ------------------------------------------------------------ |
+| Builder return   | `FlowExpression<{ outcome: Name; value: FlowOutputValue<Value> }>` | Terminal result reference.                                   |
+| Resolved outcome | `Name`                                                             | The supplied name.                                           |
+| Resolved value   | `FlowOutputValue<Value>`                                           | Exact whole-reference value, or conservative template value. |
 
 Inside a synchronous `defineJevFlow()` callback; these references resolve when you await the flow’s `run()`. See the [complete definition and execution](@/guides/flow-basics/#output-finish-with-a-result).
 

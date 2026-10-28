@@ -203,6 +203,7 @@ test("loop definitions reject foreign state, terminal bodies and invalid bounds 
             while: (s) => s.get("outcome").eq("ok"),
             maxIterations: 2,
           },
+          // @ts-expect-error exercise JavaScript runtime validation
           (r) => r.output("early"),
         );
         return f.output("done");

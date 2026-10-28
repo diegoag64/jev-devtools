@@ -107,7 +107,7 @@ export const typeHelp: Record<string, Help> = {
     title: "FlowOutcome",
     importFrom: "jev-devtools/flow",
     description:
-      "The named result of a completed flow. run() adds a runId. The public value type is unknown; narrow it before using it in application code.",
+      "The broad compatibility shape for a completed flow. Inferred definitions can preserve literal names and resolved values; run() adds a runId.",
     signature: "type FlowOutcome = { outcome: string; value?: unknown }",
     props: {
       outcome: "The name passed to the selected output() step.",
@@ -192,8 +192,8 @@ export const typeHelp: Record<string, Help> = {
     title: "FlowBuilder",
     importFrom: "jev-devtools/flow",
     description:
-      "The object passed to a synchronous flow-building callback. Its input and step methods create references; run() later executes the definition.",
-    signature: "FlowBuilder<Input>",
+      "A terminal-capable root, branch path, or parallel lane. The enclosing scope restricts maps and loops even inside lanes. Its methods describe future work.",
+    signature: 'FlowBuilder<Input, Scope = "flow">',
     props: {
       input: "A reference to this builder's input shape.",
       "task / jev": "Define application work or a model request.",
@@ -201,6 +201,27 @@ export const typeHelp: Record<string, Help> = {
         "Define conditional, concurrent, or repeated work.",
       output: "Return a named terminal outcome and optional value.",
     },
+  },
+  FlowValueBuilder: {
+    title: "FlowValueBuilder",
+    importFrom: "jev-devtools/flow",
+    description:
+      "A map, loop, or if value body without terminal output or branch methods. Map scope also omits map and loop; loop scope omits loop. Restrictions follow nested paths and lanes.",
+    signature: 'FlowValueBuilder<Input, Scope = "flow">',
+  },
+  DefinedJevFlow: {
+    title: "DefinedJevFlow",
+    importFrom: "jev-devtools/flow",
+    description:
+      "An executable definition with typed input and outcome. The default outcome is the broad FlowOutcome for compatible application helpers.",
+    signature: "DefinedJevFlow<Input, Outcome = FlowOutcome>",
+  },
+  FlowResult: {
+    title: "FlowResult",
+    importFrom: "jev-devtools/flow",
+    description:
+      "An application outcome plus runId. This preserves inferred terminal unions independently of redacted or truncated captures.",
+    signature: "FlowResult<Outcome = FlowOutcome>",
   },
   FlowObserver: {
     title: "FlowObserver",
