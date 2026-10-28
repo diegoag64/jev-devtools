@@ -337,8 +337,16 @@ export class JevRecorder {
           try {
             // Getters can replace their own descriptors when the snapshot reads
             // them. Preserve provenance before spreading or reading properties.
+            const requestIsProxy = types.isProxy(request);
+            const requestPrototype = requestIsProxy
+              ? undefined
+              : Object.getPrototypeOf(request);
             const uncertainRequest =
-              types.isProxy(request) ||
+              requestIsProxy ||
+              (requestPrototype !== Object.prototype &&
+                requestPrototype !== null) ||
+              // The model fallback also reads inherited properties, unlike spread.
+              (!Object.hasOwn(request, "model") && "model" in request) ||
               Object.values(Object.getOwnPropertyDescriptors(request)).some(
                 (field) => field.get || field.set,
               );

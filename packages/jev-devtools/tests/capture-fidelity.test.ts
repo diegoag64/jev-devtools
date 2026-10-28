@@ -203,69 +203,86 @@ test("array method overrides cannot rewrite exact captured SDK request values", 
   }
 });
 
-test("self-replacing request getters retain unknown provenance through SDK and SSE", async (t) => {
-  const inspector = createJevDevtools({ origin, enabled: true });
-  t.after(() => inspector.dispose());
-  let sent: { state: number[] } | undefined;
-  const sdk = inspector.createClient({
-    apiKey: "sample",
-    logLevel: "off",
-    compression: false,
-    fetch: async (_input, init) => {
-      sent = JSON.parse(init!.body as string);
-      return Response.json({
-        model: "sample",
-        answers: { q: { type: "score", score: 0.9 } },
-      });
-    },
-  });
-  const request = {
-    state: [0.9],
-    questions: { q: score("score", ["low", "high"]) },
-  };
-  let reads = 0;
-  Object.defineProperty(request, "state", {
-    enumerable: true,
-    configurable: true,
-    get() {
-      reads++;
+for (const location of ["own-state", "inherited-model"] as const) {
+  test(`self-replacing request getters retain unknown provenance through SDK and SSE: ${location}`, async (t) => {
+    const inspector = createJevDevtools({ origin, enabled: true });
+    t.after(() => inspector.dispose());
+    let sent: { state: number[] } | undefined;
+    const sdk = inspector.createClient({
+      apiKey: "sample",
+      logLevel: "off",
+      compression: false,
+      fetch: async (_input, init) => {
+        sent = JSON.parse(init!.body as string);
+        return Response.json({
+          model: "sample",
+          answers: { q: { type: "score", score: 0.9 } },
+        });
+      },
+    });
+    const request = {
+      state: [0.9],
+      questions: { q: score("score", ["low", "high"]) },
+    };
+    let reads = 0;
+    if (location === "own-state")
       Object.defineProperty(request, "state", {
         enumerable: true,
         configurable: true,
-        writable: true,
-        value: [0.6],
+        get() {
+          reads++;
+          Object.defineProperty(request, "state", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: [0.6],
+          });
+          return [0.9];
+        },
       });
-      return [0.9];
-    },
-  });
-  const result = await sdk.systemOne(request);
-  assert.equal(result.answers.q.score, 0.9);
-  assert.equal(reads, 1);
-  assert.equal(
-    Object.getOwnPropertyDescriptor(request, "state")!.get,
-    undefined,
-  );
-  await nextTurn();
-  await nextTurn();
-  const stream = await inspector.handle(
-    new Request(`${origin}/api/jev-devtools/events?protocol=2`),
-  );
-  const reader = stream.body!.getReader();
-  try {
-    const first = await reader.read();
-    const payload = JSON.parse(
-      new TextDecoder().decode(first.value).split("data: ")[1],
+    else
+      Object.setPrototypeOf(request, {
+        get model() {
+          reads++;
+          request.state = [0.6];
+          Object.defineProperty(request, "model", {
+            value: "sample",
+            enumerable: true,
+            configurable: true,
+            writable: true,
+          });
+          return "sample";
+        },
+      });
+    const result = await sdk.systemOne(request);
+    assert.equal(result.answers.q.score, 0.9);
+    assert.equal(reads, 1);
+    assert.equal(
+      Object.getOwnPropertyDescriptor(request, "state")!.get,
+      undefined,
     );
-    const [trace] = new TraceStore().apply("snapshot", payload);
-    assert.deepEqual(sent?.state, [0.6]);
-    assert.deepEqual(trace.request.state, [0.9]);
-    assert.deepEqual(trace.captureWarnings, []);
-    assert.equal(trace.captureFidelity?.request, "unknown");
-    assert.equal(trace.captureFidelity?.result, "exact");
-  } finally {
-    await reader.cancel();
-  }
-});
+    await nextTurn();
+    await nextTurn();
+    const stream = await inspector.handle(
+      new Request(`${origin}/api/jev-devtools/events?protocol=2`),
+    );
+    const reader = stream.body!.getReader();
+    try {
+      const first = await reader.read();
+      const payload = JSON.parse(
+        new TextDecoder().decode(first.value).split("data: ")[1],
+      );
+      const [trace] = new TraceStore().apply("snapshot", payload);
+      assert.deepEqual(sent?.state, [0.6]);
+      assert.deepEqual(trace.request.state, [0.9]);
+      assert.deepEqual(trace.captureWarnings, []);
+      assert.equal(trace.captureFidelity?.request, "unknown");
+      assert.equal(trace.captureFidelity?.result, "exact");
+    } finally {
+      await reader.cancel();
+    }
+  });
+}
 
 test("inherited array iterators cannot certify normalized observer and merge values", async (t) => {
   class Values extends Array<number> {
