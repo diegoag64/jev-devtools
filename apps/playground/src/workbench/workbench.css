@@ -335,7 +335,8 @@ pre:focus-visible {
   min-width: 0;
   overflow: auto;
   scrollbar-width: thin;
-  height: min(100px, 14dvh);
+  /* Keep navigation geometry stable without taking space from request controls. */
+  height: min(56px, 10dvh);
 }
 .wb-narrative-title {
   display: flex;
@@ -910,6 +911,9 @@ button.wb-primary {
     flex: 1;
     width: 0;
   }
+  .wb-runbar .wb-run-status {
+    flex-basis: 100%;
+  }
   .wb-runbar p {
     width: 100%;
     max-width: none;
@@ -952,10 +956,10 @@ button.wb-primary {
 }
 
 /* Reserve navigation feedback independently of cookbook and sample text. */
-.wb-navigation-status {
-  order: 1;
-  height: 26px;
-  flex-shrink: 0;
+.wb-run-status {
+  height: 36px;
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -963,9 +967,12 @@ button.wb-primary {
   font-size: 11px;
   color: #b6c2d8;
   overflow: auto;
-  white-space: nowrap;
 }
-.wb-navigation-status button {
+.wb-run-status > span:not(.wb-opening-indicator) {
+  max-height: 100%;
+  overflow: auto;
+}
+.wb-run-status button {
   background: #191e28;
   border: 1px solid #353b49;
   border-radius: 4px;

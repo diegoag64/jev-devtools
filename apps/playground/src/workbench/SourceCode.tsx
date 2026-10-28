@@ -281,6 +281,7 @@ export function SourceCode({
         ref={ref}
         id="workbench-source"
         className="wb-source"
+        aria-busy={disabled}
         data-cookbook-content
         data-cookbook-fade
         tabIndex={0}

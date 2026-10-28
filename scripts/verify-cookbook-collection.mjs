@@ -213,7 +213,11 @@ try {
   for (const index of [11, 17, 12, 14, 9, 13, 0, 18]) {
     const [slug] = recipes[index];
     await page.locator(`a[href="?cookbook=${slug}"]`).click();
-    await page.getByLabel("Cookbook sample").waitFor();
+    // The sample selector stays mounted while the outgoing cookbook is inert.
+    // Wait for the destination commit before checking its reset execution state.
+    await page
+      .locator(`.wb-recipe[data-cookbook="${slug}"][data-pending="false"]`)
+      .waitFor();
     assert.equal(
       await page.getByText("Application result", { exact: true }).count(),
       0,

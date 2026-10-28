@@ -34,7 +34,7 @@ try {
     page.locator(`.wb-library a[href="?cookbook=${slug}"]`);
   const ready = async (slug) => {
     await page
-      .locator(`.wb-recipe[data-cookbook="${slug}"][aria-busy="false"]`)
+      .locator(`.wb-recipe[data-cookbook="${slug}"][data-pending="false"]`)
       .waitFor();
     await page
       .locator(".wb-diagram-panel .flow-step")
@@ -89,10 +89,7 @@ try {
   const first = hold(a);
   await page.goto(`${base}/?cookbook=${a}`);
   await page.locator(".wb-skeleton-panels").waitFor();
-  await page
-    .locator(".wb-navigation-status")
-    .filter({ hasText: "Opening" })
-    .waitFor();
+  await page.locator(".wb-run-status").filter({ hasText: "Opening" }).waitFor();
   await page.screenshot({ path: new URL("first-load.png", output).pathname });
   first();
   await ready(a);
@@ -153,14 +150,11 @@ try {
     false,
   );
   assert.equal(
-    await page.locator(".wb-navigation-status").innerText(),
-    "",
+    (await page.locator(".wb-run-status").innerText()).includes("Opening"),
+    false,
     "Fast window has no loading copy",
   );
-  await page
-    .locator(".wb-navigation-status")
-    .filter({ hasText: "Opening" })
-    .waitFor();
+  await page.locator(".wb-run-status").filter({ hasText: "Opening" }).waitFor();
   await stableGeometry();
   await page.waitForFunction(
     () =>
@@ -248,19 +242,22 @@ try {
     window.loadingMessages = [];
     window.statusObserver = new MutationObserver(() =>
       window.loadingMessages.push(
-        document.querySelector(".wb-navigation-status").textContent,
+        document.querySelector(".wb-run-status").textContent,
       ),
     );
-    window.statusObserver.observe(
-      document.querySelector(".wb-navigation-status"),
-      { subtree: true, childList: true, characterData: true },
-    );
+    window.statusObserver.observe(document.querySelector(".wb-run-status"), {
+      subtree: true,
+      childList: true,
+      characterData: true,
+    });
   });
   await navigate(a);
   await ready(a);
   await stable();
   assert.deepEqual(
-    await page.evaluate(() => window.loadingMessages.filter(Boolean)),
+    await page.evaluate(() =>
+      window.loadingMessages.filter((text) => text.includes("Opening")),
+    ),
     [],
   );
   await page.evaluate(() => window.statusObserver.disconnect());
@@ -272,7 +269,12 @@ try {
   await ready(c);
   stale(500);
   await ready(c);
-  assert.equal(await page.locator(".wb-navigation-status").innerText(), "");
+  assert.equal(
+    (await page.locator(".wb-run-status").innerText()).includes(
+      "Could not open",
+    ),
+    false,
+  );
   const returning = hold(b);
   await navigate(b);
   await navigate(c);
@@ -354,7 +356,8 @@ try {
   await navigate(b);
   await page.waitForFunction(
     () =>
-      document.querySelector(".wb-recipe").getAttribute("aria-busy") === "true",
+      document.querySelector(".wb-recipe").getAttribute("data-pending") ===
+      "true",
   );
   for (let i = 0; i < 50 && !cancelBody; i++)
     await new Promise((resolve) => setTimeout(resolve, 20));

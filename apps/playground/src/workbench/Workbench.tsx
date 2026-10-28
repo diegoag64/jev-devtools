@@ -6,6 +6,7 @@ import {
   useState,
   type CSSProperties,
   type Dispatch,
+  type ReactNode,
   type SetStateAction,
 } from "react";
 import { createRoot } from "react-dom/client";
@@ -89,6 +90,23 @@ function App() {
     };
   }, [slug, reload]);
   const recipe = cookbookCatalog.find((item) => item.slug === slug);
+  const navigationFeedback =
+    loading.slug === slug &&
+    (loading.error ? (
+      <>
+        <span>
+          Could not open {recipe?.title ?? slug}. {loading.error}
+        </span>
+        <button onClick={() => setReload((value) => value + 1)}>
+          Try again
+        </button>
+      </>
+    ) : loading.slow ? (
+      <>
+        <span className="wb-opening-indicator" aria-hidden="true" />
+        Opening {recipe?.title ?? slug}…
+      </>
+    ) : null);
   return (
     <div className="wb-app" data-library-open={libraryOpen || undefined}>
       <a className="wb-skip" href="#workbench">
@@ -188,32 +206,10 @@ function App() {
             <path d="M9 4v16" />
           </svg>
         </button>
-        <div
-          className="wb-navigation-status"
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {loading.slug === slug &&
-            (loading.error ? (
-              <>
-                <span>
-                  Could not open {recipe?.title ?? slug}. {loading.error}
-                </span>
-                <button onClick={() => setReload((value) => value + 1)}>
-                  Try again
-                </button>
-              </>
-            ) : loading.slow ? (
-              <>
-                <span className="wb-opening-indicator" aria-hidden="true" />
-                Opening {recipe?.title ?? slug}…
-              </>
-            ) : null)}
-        </div>
         {detail ? (
           <Recipe
             detail={detail}
+            navigationFeedback={navigationFeedback}
             blocked={detail.slug !== slug}
             dimmed={
               detail.slug !== slug &&
@@ -229,7 +225,11 @@ function App() {
           >
             <div className="wb-skeleton-toolbar" />
             <div className="wb-skeleton-ribbon" />
-            <div className="wb-skeleton-controls" />
+            <div className="wb-skeleton-controls">
+              <div className="wb-run-status" role="status" aria-live="polite">
+                {navigationFeedback}
+              </div>
+            </div>
             <div className="wb-skeleton-panels">
               <div />
               <div />
@@ -269,10 +269,12 @@ function Recipe({
   detail,
   blocked,
   dimmed,
+  navigationFeedback,
 }: {
   detail: CookbookDetail;
   blocked: boolean;
   dimmed: boolean;
+  navigationFeedback: ReactNode;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const [walkthrough, setWalkthrough] = useState(false);
@@ -533,7 +535,7 @@ function Recipe({
       className="wb-recipe"
       data-cookbook={detail.slug}
       data-dimmed={dimmed || undefined}
-      aria-busy={blocked}
+      data-pending={blocked}
     >
       <div className="wb-toolbar">
         <div className="wb-tabs" aria-label="Workbench view">
@@ -622,8 +624,8 @@ function Recipe({
           {guideControls}
         </section>
       )}
-      <div className="wb-runbar" data-cookbook-content>
-        <label>
+      <div className="wb-runbar">
+        <label data-cookbook-content>
           Sample
           <NativeSelect
             size="sm"
@@ -648,6 +650,7 @@ function Recipe({
         </label>
         <button
           className="wb-primary"
+          data-cookbook-content
           disabled={busy || blocked}
           onClick={() => void start()}
         >
@@ -655,6 +658,7 @@ function Recipe({
         </button>
         <button
           className="wb-cancel"
+          data-cookbook-content
           data-running={busy || undefined}
           disabled={!busy || blocked}
           onClick={() => {
@@ -667,15 +671,24 @@ function Recipe({
         >
           Cancel
         </button>
-        <p role="status">
-          {status ||
-            previewError ||
-            (showingPreview
-              ? currentPreview
-                ? "Synthetic sample preview. Run the full sample to watch it execute."
-                : "Preparing the sample preview…"
-              : "Run the full sample to inspect its requests and results.")}
-        </p>
+        <div
+          className="wb-run-status"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {navigationFeedback || (
+            <p>
+              {status ||
+                previewError ||
+                (showingPreview
+                  ? currentPreview
+                    ? "Synthetic sample preview. Run the full sample to watch it execute."
+                    : "Preparing the sample preview…"
+                  : "Run the full sample to inspect its requests and results.")}
+            </p>
+          )}
+        </div>
       </div>
       <SplitPanels
         expandedGuide={
@@ -738,7 +751,12 @@ function Recipe({
                 {panelActions}
               </div>
             </div>
-            <div className="wb-viewer" data-cookbook-content data-cookbook-fade>
+            <div
+              className="wb-viewer"
+              aria-busy={blocked}
+              data-cookbook-content
+              data-cookbook-fade
+            >
               {showingPreview && !currentPreview && !previewError ? (
                 <p className="wb-preview-loading" role="status">
                   Preparing the sample diagram…
