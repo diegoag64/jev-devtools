@@ -24,15 +24,15 @@ Creating the adapter and client sends no request. Make an [awaited SDK call](@/g
 
 ## Options
 
-| Option and type                                                 | Default              | Purpose                                                   |
-| --------------------------------------------------------------- | -------------------- | --------------------------------------------------------- |
-| `origin: string`                                                | Required             | Exact browser origin, including port.                     |
-| `enabled?: boolean`                                             | `false`              | Enable capture and inspector endpoints.                   |
-| `endpoint?: string`                                             | `/api/jev-devtools`  | Absolute path without query or fragment.                  |
-| `limit?: number`                                                | `50`                 | Global maximum retained request traces, clamped to 1–200. |
-| `redact?: (path: string[], value: unknown) => unknown`          | None                 | Transform captured values before storage or streaming.    |
-| `authorize?: (request: Request) => boolean \| Promise<boolean>` | None                 | Access check. Required for enabled non-loopback origins.  |
-| `getSession?: (request: Request) => string \| Promise<string>`  | Shared `local` scope | Trusted scope, nonempty and at most 200 characters.       |
+| Option and type                                                                 | Default              | Purpose                                                   |
+| ------------------------------------------------------------------------------- | -------------------- | --------------------------------------------------------- |
+| `origin: string`                                                                | Required             | Exact browser origin, including port.                     |
+| `enabled?: boolean`                                                             | `false`              | Enable capture and inspector endpoints.                   |
+| `endpoint?: string`                                                             | `/api/jev-devtools`  | Absolute path without query or fragment.                  |
+| `limit?: number`                                                                | `50`                 | Global maximum retained request traces, clamped to 1–200. |
+| `redact?: (path: string[], value: unknown, context: CaptureContext) => unknown` | None                 | Transform captured values before storage or streaming.    |
+| `authorize?: (request: Request) => boolean \| Promise<boolean>`                 | None                 | Access check. Required for enabled non-loopback origins.  |
+| `getSession?: (request: Request) => string \| Promise<string>`                  | Shared `local` scope | Trusted scope, nonempty and at most 200 characters.       |
 
 These fields make up [`JevDevtoolsServerOptions`](@/api/reference/#type-jevdevtoolsserveroptions). The `limit` and `redact` fields also form [`CaptureOptions`](@/api/reference/#type-captureoptions).
 

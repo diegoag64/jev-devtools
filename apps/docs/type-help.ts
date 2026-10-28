@@ -21,18 +21,26 @@ export const typeHelp: Record<string, Help> = {
     signature:
       "type InspectionSnapshot = { traces: Trace[]; flows: { runs: FlowRun[]; definitions: FlowDefinition[] }; connection: string; }",
   },
+  CaptureContext: {
+    title: "CaptureContext",
+    importFrom: "jev-devtools/server",
+    description:
+      "Unreleased. Frozen capture-kind context passed as the third redactor argument. Distinguishes identical paths without changing existing policies or stored captures.",
+    signature:
+      'type CaptureContext = { readonly kind: "request" | "response" | "step-data" | "condition-rule" | "outcome"; }',
+  },
   CaptureOptions: {
     title: "CaptureOptions",
     importFrom: "jev-devtools/server",
     description:
       "Controls how much request history is kept and how captured values are redacted. Shared by JevRecorder and the server adapter; it does not change the SDK response your application receives.",
     signature:
-      "type CaptureOptions = {\n  limit?: number;\n  redact?: (path: string[], value: unknown) => unknown;\n}",
+      "type CaptureOptions = {\n  limit?: number;\n  redact?: (path: string[], value: unknown, context: CaptureContext) => unknown;\n}",
     props: {
       "limit?":
         "Maximum retained traces across all sessions. Defaults to 50; clamped to 1–200.",
       "redact?":
-        "Called with a field path and value. Return the value to store in the captured copy, for example a masked string. Keep credentials on the server.",
+        "Called with the unchanged field path, bounded detached value, and frozen capture-kind context. Access to omitted content fails closed with capture warnings. Existing two-argument callbacks remain valid. Return the value to store in the captured copy, for example a masked string. Keep credentials on the server.",
     },
   },
   JevDevtoolsProps: {

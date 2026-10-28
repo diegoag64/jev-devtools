@@ -144,6 +144,44 @@ Default history is shared across local development tabs, bounded to 50 requests.
 
 Host and Origin checks reject cross-origin browser requests. Other HTTP clients can set those headers freely, so without `authorize` the middleware also requires a loopback connection and returns 403 to network peers. `handle` and `handleNodeRoute` receive a Web Request without the connection's address: run those servers on `127.0.0.1` (for example `next dev --hostname 127.0.0.1`) or set `authorize`. A proxy or tunnel that is reachable from the network connects over loopback and passes this check, so it also needs `authorize`. An enabled non-loopback origin requires an `authorize(request)` callback. For a private authenticated environment, apply your existing authentication, and optionally provide `getSession(request)` returning a server-derived user/workspace scope. Then wrap the application's inference handler in `inspector.run(request, () => jev.systemOne(input))` so recording uses the same scope as the inspector's SSE and clear requests. Authentication still belongs to your application; the inspector does not create accounts or infer authorization. Do not derive scopes from an untrusted query parameter. With no `getSession`, all authorized users share the local history.
 
+### Capture paths and context
+
+**Unreleased.** `CaptureContext`, exported from `jev-devtools/server`, adds a readonly `kind` to the third argument of `redact(path, value, context)`. The recorder freezes the context object. Existing two-argument callbacks and every existing path remain valid. No wire-format change or migration of stored captures is required.
+
+| Captured value                                         | `context.kind`   | Callback path                                                                             |
+| ------------------------------------------------------ | ---------------- | ----------------------------------------------------------------------------------------- |
+| Request body, including a request inside a map or loop | `request`        | `[]` at the root; `['state', ...field]`, `['questions', ...field]`, and other body fields |
+| Response body                                          | `response`       | `[]` at the root; `['answers', questionId, ...field]` and other body fields               |
+| Task input and output                                  | `step-data`      | `[...P, 'steps', stepId, 'data']`, then `'input'` or `'output'` and field names           |
+| Selected merge value                                   | `step-data`      | `[...P, 'steps', mergeId, 'data', 'output', ...field]`                                    |
+| Loop initial and latest state                          | `step-data`      | `[...P, 'steps', loopId, 'data', 'input' or 'output', ...field]`                          |
+| Condition rule, including branch, if, and loop rules   | `condition-rule` | `['conditions', ...D, stepId, ...ruleField]`; literals end in `'value'`                   |
+| Final outcome value                                    | `outcome`        | `[...P, ...field]`; `[]` for the top-level value                                          |
+
+`P` is empty at the top level. Each nested map item or loop iteration adds `['steps', collectionId, 'items', String(index)]`. `D` is empty at the top level; each nested definition adds `[collectionId, 'items']`, without a runtime index. Array indices are strings. Generated merge IDs remain implementation details.
+
+The paths deliberately overlap. Request state and an outcome's `state` field both use `['state']`; a task-shaped outcome can match a task data path. Use `context.kind` when those values need different policies:
+
+```ts
+const redact: import("jev-devtools/server").CaptureOptions["redact"] = (
+  path,
+  value,
+  context,
+) => (context.kind === "outcome" && path[0] === "state" ? "[redacted]" : value);
+```
+
+Keep existing policies unless you intend to narrow their scope. The built-in credential policy runs before the callback at each visited field and cannot be disabled. Context contains only the capture kind, not execution IDs or credentials. Static definition labels are not callback inputs and must remain public-safe.
+
+Callbacks receive a bounded, detached view, including SDK image handles with their original references. The copy stops at depth 12, 150 entries per collection, or 256 entries for `criteria` and `probabilities`. A separate 96,000-unit copy budget counts eight units plus the key length per visited field and the bytes of copied images. Immutable strings are shared with the copy and retain their full text until the storage visitor applies its text limit. Arrays retain their original length, and retained aliases and cycles remain shared within the detached view. Complete subtrees remain ordinary cloneable objects; objects with omitted members use guards and cannot be passed to `structuredClone`.
+
+Omissions carry capture warnings even when a root policy replaces the value. An identity policy retains usable shallow fields and marks omitted subtrees. A root-replacement policy still runs. Reading an omitted property, inspecting its descriptor/existence, or enumerating a partially copied collection throws inside the callback and makes that capture unavailable. This fails closed even if the callback catches the guard exception: the policy never receives an omitted value disguised as an ordinary missing field. Policies can replace or delete omitted properties without reading them; warnings remain conservative. Callback invocation counts at omitted paths are not guaranteed.
+
+Image byte buffers are copied only below 48,000 bytes and within the remaining copy budget. Otherwise the callback can inspect the image reference but its `data` property is guarded. Identity capture retains the original reference and size, with an omitted-preview warning. Blob-backed images use detached handles over immutable Blob contents. The callback cannot reach the original mutable bytes.
+
+These guards change inspection semantics for policies that previously traversed beyond capture limits: those policies now produce an explicit unavailable capture instead of scanning unbounded source content. Mutation or exceptions cannot change supported SDK requests, application results, or reused source snapshots. Return replacements for reliable change warnings; mutation alone does not establish completeness.
+
+Use deterministic policies based on the path, value, and kind. Definitions are captured once while retained. Unchanged step data and child snapshots reuse captures only at the same path; reading snapshots does not invoke callbacks again. Callback counts and external mutable state are not a policy contract. Request captures inside child runs keep their body-relative paths; only Flow data and outcomes use `P`.
+
 ### Redaction policy
 
 Known credential fields are **always redacted from the inspection copy** before storing or streaming captures. SDK requests/responses and application runtime values are unchanged. Additional personal-data masking is a display-only component prop, on by default:
@@ -161,7 +199,7 @@ Known credential fields are **always redacted from the inspection copy** before 
 
 The prop applies to Context, Raw, Questions, request diagrams and flow data, including nested task/collection/loop captures and outcomes. Changing it immediately updates already-retained data as well as future updates without changing capture history, restarting a run, or reconnecting. Each mounted viewer controls its own display; other viewers and server-derived session isolation are unaffected. There is no drawer checkbox, settings endpoint, or extra Next.js route export.
 
-**Display masking is not removal from captured data.** Supported personal fields remain in server capture memory, SSE payloads and browser memory even while visually masked. Use the server-side `redact(path, value)` callback when a value must never reach the browser. Credentials and values removed by that callback cannot be revealed by setting this prop to `false`; older or truncated captures cannot recover absent data either.
+**Display masking is not removal from captured data.** Supported personal fields remain in server capture memory, SSE payloads and browser memory even while visually masked. Use the server-side `redact(path, value, context)` callback when a value must never reach the browser. Credentials and values removed by that callback cannot be revealed by setting this prop to `false`; older or truncated captures cannot recover absent data either.
 
 Matching uses the complete field name, ignores case, and removes hyphens and underscores. For example, `X-API-Key`, `x_api_key`, and `xApiKey` all match `xapikey`. A matching object's entire value is replaced with `[redacted]`, recursively through arrays and objects. Display masking preserves SDK structure: question IDs, Choice category labels/probabilities, score levels, and asset reference names remain intact even when named `email` or `phone`. Sensitive fields inside their instructions, descriptions, and other content are still masked. This display rule does not undo mandatory credential or custom server redaction.
 
@@ -170,7 +208,7 @@ Matching uses the complete field name, ignores case, and removes hyphens and und
 | Always protected credentials            | `authorization`, `proxyauthorization`, `cookie`, `cookies`, `setcookie`, `apikey`, `xapikey`, `password`, `passwd`, `passphrase`, `secret`, `clientsecret`, `token`, `accesstoken`, `refreshtoken`, `sessiontoken`, `authtoken`, `xauthtoken`, `xaccesstoken`, `idtoken`, `bearertoken`, `privatekey`, `secretkey` |
 | Display-only sensitive data, default on | `email`, `emailaddress`, `phone`, `phonenumber`, `mobile`, `mobilenumber`, `address`, `postaladdress`, `streetaddress`, `mailingaddress`, `ssn`, `socialsecuritynumber`, `creditcard`, `creditcardnumber`, `cardnumber`                                                                                            |
 
-Names such as `tokenCount`, `sessionId`, `apiKeyName`, and `secretary` remain inspectable. This explicit field-name policy does not detect arbitrary secrets in prose, URLs, image pixels, JSON encoded inside strings, unusual names, or structural labels. Actual HTTP request headers/options are never captured; header-like fields supplied inside captured bodies still follow the mandatory credential policy. Add application-specific `redact(path, value)` rules for other sensitive data. This callback remains active regardless of the component prop, and cannot restore fields removed by the built-in policy. It applies to requests, responses, task data, flow outcomes, and condition literals; static definition metadata must remain public-safe.
+Names such as `tokenCount`, `sessionId`, `apiKeyName`, and `secretary` remain inspectable. This explicit field-name policy does not detect arbitrary secrets in prose, URLs, image pixels, JSON encoded inside strings, unusual names, or structural labels. Actual HTTP request headers/options are never captured; header-like fields supplied inside captured bodies still follow the mandatory credential policy. Add application-specific `redact(path, value, context)` rules for other sensitive data. This callback remains active regardless of the component prop, and cannot restore fields removed by the built-in policy. It applies to requests, responses, task data, flow outcomes, and condition literals; static definition metadata must remain public-safe.
 
 Captures have depth, collection, image, and text budgets; omitted/truncated data is marked. Small PNG/JPEG byte arrays have inline previews; unsupported or large images retain references and sizes.
 

@@ -99,7 +99,12 @@ await withTemporaryProject("jev-consumer-", async (temp) => {
     join(root, "scripts/fixtures/packed-resolved-templates.test.mjs"),
     join(types, "packed-resolved-templates.test.mjs"),
   );
-  for (const file of ["packed-capture.ts", "packed-capture.test.mjs"])
+  for (const file of [
+    "packed-capture.ts",
+    "packed-capture.test.mjs",
+    "packed-capture-context.ts",
+    "packed-capture-context.test.mjs",
+  ])
     await cp(join(root, "scripts/fixtures", file), join(types, file));
   await cp(
     join(root, "scripts/fixtures/packed-viewer.ts"),
@@ -139,6 +144,7 @@ await withTemporaryProject("jev-consumer-", async (temp) => {
         "packed-resolved-templates.ts",
         "packed-expression-contracts.ts",
         "packed-capture.ts",
+        "packed-capture-context.ts",
         "packed-viewer.ts",
       ],
     }),
@@ -163,6 +169,7 @@ await withTemporaryProject("jev-consumer-", async (temp) => {
       "--test",
       join(types, "packed-resolved-templates.test.mjs"),
       join(types, "packed-capture.test.mjs"),
+      join(types, "packed-capture-context.test.mjs"),
       join(types, "packed-expression-contracts.test.mjs"),
     ],
     { cwd: consumer, stdio: "inherit" },
