@@ -1,14 +1,16 @@
 # LLM guardrails
 
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=guardrails) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
+
 A TypeScript adaptation of the official [Guardrails for LLMs recipe](https://docs.typesafe.ai/cookbooks/llm_guardrails), using public `jev-devtools/flow` methods available since 0.4.0. The application and fixtures run from this repository; they are not shipped in npm.
 
-## Run locally
+## Explore the cookbook
 
-Run `npm ci` and `npm run dev` at the repository root, then open [the guardrails sample](http://127.0.0.1:4182/?cookbook=guardrails). Select a case and click **Run sample**. No key is required. Context is read-only and the server rejects an edited message or unknown case. Live mode is disabled for this cookbook even if a server key exists.
+Open [the guardrails sample](https://playground.jevtools.dev/?cookbook=guardrails). Select a case and click **Run sample**. No key is required. Context is read-only and the server rejects an edited message or unknown case. Live mode is disabled for this cookbook even if a server key exists.
 
 Each run screens **one selected side**, input or output, in a single SDK request. Output messages are authored fixtures, not LLM-generated replies. This is the source's individual `screen()`/`guard()` pattern, not an end-to-end generation pipeline. Cases cover ordinary input, output refusal, differing policies, exact review/action boundaries, a severity upgrade, high severity without a triggered hazard, and overlapping hazards.
 
-Open **Jev DevTools → Flows** to inspect the battery, assessment-reading task, strict policy, permissive reapplication, and terminal strict route. Select the request to inspect each Noul and the severity Score. Select a function and open **Show details** to inspect its actual inputs and output. The result's policy buttons switch between already-computed decisions without another request; the diagram continues to show the default strict route.
+Use **Flow diagram** to inspect the battery, assessment-reading task, strict policy, permissive reapplication, and terminal strict route. Select the request to inspect each Noul and the severity Score. Select a function and open **Show details** to inspect its actual inputs and output. **Application result** contains both computed policy decisions. The diagram shows the default strict route.
 
 ## Fidelity and boundaries
 
@@ -23,4 +25,4 @@ Open **Jev DevTools → Flows** to inspect the battery, assessment-reading task,
 
 [provenance.json](provenance.json) records the retrieved recipe hash, pinned upstream asset revision, inspected message asset hashes and normalized question hash. The recipe's executable Python was inspected along with upstream `prompts.txt` and `replies.txt`. Local messages replace those assets; neither the upstream jailbreak dataset nor official output measurements are redistributed. TypeSafe-derived questions and routing retain the [MIT notice](LICENSE.typesafe).
 
-The focused tests in [guardrails.test.ts](../../apps/playground/tests/guardrails.test.ts) execute the public flow, pin the question wording, assert one request and its battery/state/model, cover threshold equality and neighboring values, overlapping precedence and severity-only behavior, and reject mismatched fixture inputs. `npm run verify:cookbooks -- --only guardrails` checks policy switching without network dispatch, all sample cases, server rejection, request inspection, the connected diagram and mobile layout. It starts/stops its own server on port 4182 and saves screenshots/video under ignored `benchmarks/results/cookbook-browser/`. The runner owns the shared browser lock and a unique evidence directory. Run the repository's full verification before contributing changes.
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

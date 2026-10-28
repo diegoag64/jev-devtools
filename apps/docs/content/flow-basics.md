@@ -1,5 +1,7 @@
 Build a flow that returns a name, then add a task that turns the name into a greeting. Both runs use ordinary server code and make no network requests. You can follow this tutorial without an API key or the inspector drawer.
 
+To explore complete flows before writing code, open the [Cookbook Playground](https://playground.jevtools.dev/). Its source, diagrams, and step-by-step guides need no local setup or API key.
+
 Use an ESM TypeScript project on Node **22.12+** with `jev-devtools` installed. See the [Quick start prerequisites](@/getting-started/#before-you-begin) if you need to install it. Run the files with your project's TypeScript runner, or compile them to JavaScript before running them with Node.
 
 ## Your first flow

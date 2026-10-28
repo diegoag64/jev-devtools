@@ -1,6 +1,8 @@
 # Twitch chat filter · finite sample feed
 
-A TypeScript adaptation of the [official Twitch chat filter](https://docs.typesafe.ai/cookbooks/twitch_chat_filter), using public `jev-devtools/flow` methods. Run `npm ci` and `npm run dev` from the repository root, then open [the local cookbook](http://127.0.0.1:4182/?cookbook=twitch-chat-filter). Select a **Twitch sample** and **Run sample**. No key is needed; live inference is disabled server-side.
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=twitch-chat-filter) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
+
+A TypeScript adaptation of the [official Twitch chat filter](https://docs.typesafe.ai/cookbooks/twitch_chat_filter), using public `jev-devtools/flow` methods. Open [the cookbook](https://playground.jevtools.dev/?cookbook=twitch-chat-filter). Select a **Sample** and **Run sample**. No key is needed; live inference is disabled server-side.
 
 ## Explore the policy
 
@@ -13,11 +15,11 @@ Each message makes **one request with three questions**: a five-category Choice,
 3. Spoiler Noul **≥ 0.70** → blur (spoiler).
 4. Otherwise apply the category action.
 
-Normal rules highlight questions, show hype and conversation, and hide backseat advice and spam. **Quiet policy** hides hype and dims conversation, preserving the same precedence. Both policies reuse the classified answers; toggling the result view adds **zero requests**. The normal synthetic feed yields 14 show, 6 highlight, 7 hide and 2 blur; quiet changes 14 of those messages. These counts describe this authored fixture, not measured moderation quality.
+Normal rules highlight questions, show hype and conversation, and hide backseat advice and spam. **Quiet policy** hides hype and dims conversation, preserving the same precedence. Both policies reuse the classified answers and appear in **Application result** without additional requests. The normal synthetic feed yields 14 show, 6 highlight, 7 hide and 2 blur; quiet changes 14 of those messages. These counts describe this authored fixture, not measured moderation quality.
 
-The chat preview replaces hidden text with its reason and spoiler text with a placeholder. Explicit **Inspect message … and synthetic answers** disclosures reveal source text for debugging, all category probabilities, API confidence and both Nouls. Category Choice confidence is a distinct synthetic field (0.31), separate from the selected category probability (0.80). Neither drives routing. This recipe has no Score questions or confidence fallback.
+Open **Application result** for each message's source text, policy actions, category probabilities, API confidence, and Nouls. Category Choice confidence is a distinct synthetic field (0.31), separate from the selected category probability (0.80). Neither drives routing. This recipe has no Score questions or confidence fallback.
 
-Open **Jev DevTools → Flows**, select the run, choose a message in **Filter messages · eight at a time**, and click **View Flow**. Inspect its complete three-question Jev request, ordered conditions, chosen action, and quiet-policy function. Request/capture durations in DevTools are local sample execution times, not model benchmarks. Cancel stops queued work through the public flow runner.
+In **Flow diagram**, choose a message in **Filter messages · eight at a time**, and click **View Flow**. Inspect its complete three-question Jev request, ordered conditions, chosen action, and quiet-policy function. Request/capture durations in DevTools are local sample execution times, not model benchmarks. Cancel stops queued work through the public flow runner.
 
 ## Fidelity and adaptations
 
@@ -28,3 +30,5 @@ The source's three exploratory `show()` calls and disk cache are omitted; a run 
 Fixed cases and exact request matching are enforced on the server. Edited messages, stream context, model or question sets receive no unrelated fixture. Adding an API key does not enable live mode. Ongoing Twitch ingestion, browser extensions, moderation side effects, rate-limit/cache integration, progress-aware spoilers and language/quality evaluation are outside this finite port. Source text is untrusted data, not an instruction to the application.
 
 `provenance.json` records source hashes and the reviewed cache blob; `LICENSE.typesafe` retains the upstream MIT notice. Focused tests in `apps/playground/tests/twitch-chat-filter.test.ts` protect the original feed, request count/shape/order, eight-call bound, out-of-order completion, inclusive threshold routing, quiet reuse, invalid-input rejection and cancellation. The cookbook and fixtures run from this repository; they are not shipped as npm APIs.
+
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

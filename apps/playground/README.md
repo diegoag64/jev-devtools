@@ -1,6 +1,10 @@
 # Playground
 
-Run these commands from a terminal to start the local development playground.
+Explore the [Cookbook Playground](https://playground.jevtools.dev/) without downloading the repository or installing the package. Read source beside the diagrams, follow the step-by-step guides, and run synthetic samples without an API key.
+
+## Local development
+
+To edit the playground or its cookbooks, start the local development server.
 
 Requires Node **22.12+** (24 recommended).
 
@@ -21,23 +25,13 @@ The workspace fills the viewport. Drag the divider to resize the code and diagra
 
 **Run sample** is available in both views. It executes the complete cookbook with synthetic answers and streams request diagrams, step details, and the application result without a drawer or API key. Running from the guide keeps the current step selected; it never executes partial code. Use the request controls to explore probabilities and animate the diagram, or open a map or loop item to inspect its captured requests. Opening an item frames its expanded flow, including the item navigation controls. Closing it returns focus to the selected step. Initial previews run the same fixtures through a separate recorder with no artificial delay, so browsing a recipe does not add runs to the drawer history. Switching samples prepares a matching preview. Each recipe links to the original TypeSafe cookbook and describes local adaptations; sample runs do not measure model accuracy, latency, or cost.
 
-The [Request lab](http://127.0.0.1:4182/?legacy=1) retains individual calls, edge cases, optional live mode, the original cookbook result views, and the drawer. Add `legacy=1` to a cookbook URL to use its former interface. Existing recipe browser checks cover that route; the workbench has its own collection-wide interaction check. Sources and tutorial mappings are served only by the local development server, behind the existing same-origin and session checks.
+Sources and tutorial mappings are served by the local development server behind same-origin and session checks. The playground runs fixed synthetic samples only.
 
 ## Cookbook examples
 
-The [cookbook guide](../../cookbooks/README.md) lists runnable examples, their local URLs, and the flow patterns they demonstrate. They use the public flow API. The playground, cookbook code, and fixtures live in this repository and are not bundled in the npm package.
+The [cookbook guide](../../cookbooks/README.md) lists runnable examples, their hosted URLs, and the flow patterns they demonstrate. They use the public flow API. The playground, cookbook code, and fixtures live in this repository and are not bundled in the npm package.
 
 The [LLM guardrails cookbook](../../cookbooks/guardrails/README.md) screens one selected input or output message per run. It reuses one synthetic assessment under strict and permissive policies; no LLM generation or live inference is enabled.
-
-## Manual edge-case sandbox
-
-With `npm run dev` running, open [the Choice sandbox](http://127.0.0.1:4182/?sandbox=1). It starts with **150 choices**. Click **Run sample**, open **Jev DevTools**, then select the latest **Sandbox** request. Expand the drawer for a larger canvas. In Flow, click **Show More** to add three categories at a time, or **Show fewer** to reset the overview. New branches animate in without moving your camera; click **Fit** when you want to reframe the expanded diagram. Use **All probabilities** to open the full distribution; search or page through the exact captured values.
-
-Controls cover 3/6/7/150 choices, tied probabilities, zero-probability alternatives, long labels, roughly 80 KB of context, and a synthetic returned choice outside the top categories. Sandbox requests always use deterministic local responses—even if a server key is configured. No inference calls are made. Other scenarios remain available in the Scenario selector.
-
-## Optional live mode
-
-For optional live mode in the Request lab, copy `apps/playground/.env.example` to `apps/playground/.env.local`, set `TYPESAFE_API_KEY`, and restart. Keys stay on the server. Verification uses sample responses; live inference has not been verified.
 
 ## Development
 
@@ -61,6 +55,10 @@ The [Function calling cookbook](../../cookbooks/function-calling/README.md) open
 
 ### Choice self-consistency
 
-Open `http://127.0.0.1:4182/?cookbook=consistency-choices` for the [Choice self-consistency adaptation](../../cookbooks/consistency-choices/README.md). It keeps the original post, eight Choice questions and 15 sequential requests, with authored varying distributions. Inspect each repeat and its question gates in Flows, or open the Request lab with `legacy=1` and select heatmap cells for raw probabilities and separate confidence. Below 0.60 abstains; exactly 0.60 accepts. Samples do not measure consistency, accuracy, latency or cost; live mode and other-provider comparisons are excluded.
+Open `http://127.0.0.1:4182/?cookbook=consistency-choices` for the [Choice self-consistency adaptation](../../cookbooks/consistency-choices/README.md). It keeps the original post, eight Choice questions and 15 sequential requests, with authored varying distributions. Inspect each repeat and its question gates in **Flow diagram**, then open **Application result** for raw probabilities and separate confidence. Below 0.60 abstains; exactly 0.60 accepts. Samples do not measure consistency, accuracy, latency or cost; live mode and other-provider comparisons are excluded.
 
 The [Noul self-consistency cookbook](../../cookbooks/consistency-nouls/README.md) runs at `/?cookbook=consistency-nouls`. It preserves fifteen sequential fourteen-question requests and the inclusive 0.30–0.70 uncertainty band. Its authored variation and statistics are fixture demonstrations, not measured model consistency or a provider comparison; live mode is rejected.
+
+### Select controls
+
+Use `NativeSelect` and `NativeSelectOption` from `src/components/ui/native-select.tsx` for every playground select. The component owns the chevron, border, surface, focus, disabled, and forced-colors states in plain CSS, for all workbench selects. Use `size="sm"` for compact toolbars and keep width constraints in the consuming layout. The styles match the diagram selects in `packages/jev-devtools/src/inspector.css`; review both when changing the control design. The viewer keeps its styles inside its shadow root.

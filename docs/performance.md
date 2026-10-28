@@ -35,7 +35,7 @@ BENCH_SUITE=choices BENCH_OUTPUT=benchmarks/results/choice-comparison \
   npm run bench:compare -- BASE_COMMIT
 ```
 
-This measures warmed mounts and the same native pan/wheel/Fit sequence in each revision, with separate profiling runs. It records scene size and whether Fit contains it. The manual [playground sandbox](http://127.0.0.1:4182/?sandbox=1) is available with `npm run dev`; it is not a performance measurement environment.
+This measures warmed mounts and the same native pan/wheel/Fit sequence in each revision, with separate profiling runs. It records scene size and whether Fit contains it.
 
 For unchanged-row/detail comparisons while requests arrive:
 

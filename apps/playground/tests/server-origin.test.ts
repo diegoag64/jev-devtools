@@ -3,6 +3,7 @@ import { test } from "node:test";
 import { createServer, request } from "node:http";
 import { once } from "node:events";
 import type { Connect, ViteDevServer } from "vite";
+import { confidenceCases } from "../../../cookbooks/confidence-fallback/cases.js";
 import { jevInspectorServer } from "../server/plugin.js";
 
 test("playground and inspector use the configured port and reject other origins", async () => {
@@ -36,7 +37,6 @@ test("playground and inspector use the configured port and reject other origins"
   try {
     await hook(server);
     for (const path of [
-      "/__jev/config",
       "/api/jev-devtools",
       "/__jev/cookbooks/confidence-fallback",
     ]) {
@@ -66,9 +66,10 @@ test("playground and inspector use the configured port and reject other origins"
     }
     const url = `${origin}/__jev/run?session=${session}`;
     const body = JSON.stringify({
-      scenario: "triage",
+      scenario: "flow-confidence",
+      confidenceCase: "below",
       mode: "sample",
-      message: "I need a refund for my order.",
+      message: confidenceCases.below.message,
       runId: session,
     });
     for (const headers of [

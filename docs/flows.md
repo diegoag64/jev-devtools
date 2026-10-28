@@ -71,9 +71,9 @@ const result = await refundFlow.run(
 
 Mount the existing `<JevDevtools enabled={...} />` and serve the inspector endpoint as in the [integration guide](integration.md). In Next.js, define and run the flow in Node server code; keep the drawer in its existing client component. Do not import `/flow` into the browser.
 
-Try the [entity-alignment cookbook](../cookbooks/entity-alignment/README.md) for an executable one-request example: tasks load an attributed pair and prepare evidence, then `branch()` routes its Score at 0.5 and 1.5. Companion Nouls explain agreement without choosing the outcome. All responses are synthetic and sameAs remains a proposal.
+Try the [entity-alignment cookbook](https://playground.jevtools.dev/?cookbook=entity-alignment) for an executable one-request example: tasks load an attributed pair and prepare evidence, then `branch()` routes its Score at 0.5 and 1.5. Companion Nouls explain agreement without choosing the outcome. All responses are synthetic and sameAs remains a proposal.
 
-For a complete sample of assessment reuse and application routing, run [LLM guardrails](../cookbooks/guardrails/README.md). One input or output battery feeds strict and permissive policy tasks; the diagram exposes the default strict route. Messages and answers are synthetic, with no LLM generation.
+For a complete sample of assessment reuse and application routing, run [LLM guardrails](https://playground.jevtools.dev/?cookbook=guardrails). One input or output battery feeds strict and permissive policy tasks; the diagram exposes the default strict route. Messages and answers are synthetic, with no LLM generation.
 
 ## Operations and references
 
@@ -173,15 +173,17 @@ const evaluation = flow.task(
 - Task input/output capture uses the existing size/depth limits and mandatory credential redaction. The default-on `redactAdditionalSensitiveData` component prop masks supported personal fields only in DevTools views, including existing nested task/collection/loop data, outcomes and linked Jev requests. Those personal values remain in captures and SSE payloads; use custom server redaction to prevent browser delivery. See the [exact policy and limits](integration.md#redaction-policy). Custom redaction stays active in both modes; paths start with `steps`, the step ID, `data`, then `input` or `output`. Capture truncation/redaction never changes the value executed or returned. Capture failures suppress the data and do not fail the task. Only error names are recorded; exception messages/stacks remain server-side.
 - The wire format adds an optional task kind/data to version 1. Existing captures remain readable; use the matching updated drawer for function previews. Dynamic fan-out is provided by the `map()` API below. Stateful iteration is provided by `loop()` below. These APIs do not add persisted jobs, distributed execution, or automatic deployment.
 
-### Try the local sample
+<a id="try-the-local-sample"></a>
 
-From the repository root run `npm run dev`, open `http://127.0.0.1:4182/`, and select **Flow · Functions + dynamic questions (synthetic)**. Run the sample, open **Jev DevTools → Flows**, and select **Keep the top three skills**. Inspect its output, then the next request's three Choice criteria. Both model responses are synthetic fixtures; no API key or remote call is required. This demonstrates the API, not a faithful port of the official cookbook.
+### Try the sample in your browser
 
-For a complete one-request adaptation, try the [line-search cookbook](../cookbooks/line-search/README.md): tagging → runtime Choice + Noul request → ranking/lookup → existence branches. It uses the complete pinned document and synthetic responses; the result UI retains every line beyond bounded capture previews.
+Open the [skill-suggestion cookbook](https://playground.jevtools.dev/?cookbook=skill-suggestion) to follow tasks, dynamic questions, and routing in the workbench. Read the TypeScript beside the diagram and run a synthetic sample without an API key.
 
-The [Date extraction cookbook](../cookbooks/date-extraction/README.md) demonstrates one runtime request per role followed by calendar assembly in a task and a returning conditional for acceptance/review. It preserves the official seven Choice questions and fixed 2026-07-30 reference date. Task outputs are ISO date strings or `null`; the strict `< 0.60` gate uses only consumed Choice confidences, with review for unresolved dates or missing used confidence. All model responses are synthetic.
+For a complete one-request adaptation, try the [line-search cookbook](https://playground.jevtools.dev/?cookbook=line-search): tagging → runtime Choice + Noul request → ranking/lookup → existence branches. It uses the complete pinned document and synthetic responses; the result UI retains every line beyond bounded capture previews.
 
-For a complete adaptation, try [pre-parsed value extraction](../cookbooks/pre-parsed-extraction/README.md). Regex tasks prepare document-order candidates; a sequential map preserves separate Choice helper calls; later amount-dependent Nouls route on strict `> 0.5` before decimal-string parsing. Missing candidates and `none` have explicit bypasses. Samples use authored responses and fixed server inputs, with no live inference.
+The [Date extraction cookbook](https://playground.jevtools.dev/?cookbook=date-extraction) demonstrates one runtime request per role followed by calendar assembly in a task and a returning conditional for acceptance/review. It preserves the official seven Choice questions and fixed 2026-07-30 reference date. Task outputs are ISO date strings or `null`; the strict `< 0.60` gate uses only consumed Choice confidences, with review for unresolved dates or missing used confidence. All model responses are synthetic.
+
+For a complete adaptation, try [pre-parsed value extraction](https://playground.jevtools.dev/?cookbook=pre-parsed-extraction). Regex tasks prepare document-order candidates; a sequential map preserves separate Choice helper calls; later amount-dependent Nouls route on strict `> 0.5` before decimal-string parsing. Missing candidates and `none` have explicit bypasses. Samples use authored responses and fixed server inputs, with no live inference.
 
 ## Capture completeness
 
@@ -347,15 +349,15 @@ The collection card shows progress and an item selector. **View Flow** expands t
 
 Item input/output and result snapshots follow the same capture limits and redaction as other steps. Custom redaction paths are prefixed with `steps`, map ID, `items`, index before child paths. Template conditions are prefixed with `conditions`, map ID, `items`. Inputs never become structural labels. Runtime values stay untruncated; capture failures do not change execution. Clear/eviction still cannot resurrect a run.
 
-The [re-ranking cookbook](../cookbooks/reranking/README.md) scores a fixed 30-candidate retrieval fixture with 12 concurrent requests, then executes a stable sorting task. Its probabilities are synthetic and its retrieval does not run BM25.
+The [re-ranking cookbook](https://playground.jevtools.dev/?cookbook=reranking) scores a fixed 30-candidate retrieval fixture with 12 concurrent requests, then executes a stable sorting task. Its probabilities are synthetic and its retrieval does not run BM25.
 
-Try the [RAG passage cookbook](../cookbooks/rag-passages/README.md) for a twelve-item sample with four concurrent requests and every passage inspectable.
+Try the [RAG passage cookbook](https://playground.jevtools.dev/?cookbook=rag-passages) for a twelve-item sample with four concurrent requests and every passage inspectable.
 
-The [Twitch chat filter cookbook](../cookbooks/twitch-chat-filter/README.md) maps the original finite 29-message feed with concurrency eight, preserving input order. Each item asks one Choice and two Nouls together, then uses returning conditionals for toxic ≥ 0.70 → hide, category hide → hide, spoiler ≥ 0.70 → blur, or the remaining category action. A function reapplies the quiet policy to the same answers with no new requests; fixtures are synthetic.
+The [Twitch chat filter cookbook](https://playground.jevtools.dev/?cookbook=twitch-chat-filter) maps the original finite 29-message feed with concurrency eight, preserving input order. Each item asks one Choice and two Nouls together, then uses returning conditionals for toxic ≥ 0.70 → hide, category hide → hide, spoiler ≥ 0.70 → blur, or the remaining category action. A function reapplies the quiet policy to the same answers with no new requests; fixtures are synthetic.
 
-The [Citation checking cookbook](../cookbooks/citation-checking/README.md) combines a sequential map with deterministic quote matching and nested returning conditionals. Missing quotes bypass Jev with null confidence; claim-only citations use their named source section. Each surviving citation makes one Choice request and routes on API confidence `>= 0.80`, independently of option probabilities. All five cases use synthetic responses.
+The [Citation checking cookbook](https://playground.jevtools.dev/?cookbook=citation-checking) combines a sequential map with deterministic quote matching and nested returning conditionals. Missing quotes bypass Jev with null confidence; claim-only citations use their named source section. Each surviving citation makes one Choice request and routes on API confidence `>= 0.80`, independently of option probabilities. All five cases use synthetic responses.
 
-The [Function calling cookbook](../cookbooks/function-calling/README.md) uses a collection to interpret only the selected tool’s arguments after one batched request. Each item uses `flow.if()` to omit an unstated argument or assemble its closed-set value. Its final `flow.output()` returns a proposed call; it does not invoke a tool.
+The [Function calling cookbook](https://playground.jevtools.dev/?cookbook=function-calling) uses a collection to interpret only the selected tool’s arguments after one batched request. Each item uses `flow.if()` to omit an unstated argument or assemble its closed-set value. Its final `flow.output()` returns a proposed call; it does not invoke a tool.
 
 ## Returning conditionals: `flow.if()`
 
@@ -401,7 +403,7 @@ This snippet belongs inside a definition with `assessment` and `cheapRecord` ref
 - Failure or cancellation prevents the merge and shared continuation. The untaken path stays untaken; no fallback, automatic retry, or error recovery is implied.
 - Numeric expressions now support `.gt(numberOrReference)` for strict greater-than, alongside `.lt()` and `.gte()`. The condition card preserves the actual operator. In the SDE recipe, exactly 0.70 does **not** escalate.
 
-New `if` and `merge` kinds extend the version-1 flow records; use the matching updated server and drawer. Older captured flows remain readable. For four complete no-key samples, see the [SDE cascade cookbook](../cookbooks/sde-cascade/README.md).
+New `if` and `merge` kinds extend the version-1 flow records; use the matching updated server and drawer. Older captured flows remain readable. For four complete no-key samples, see the [SDE cascade cookbook](https://playground.jevtools.dev/?cookbook=sde-cascade).
 
 ## Stateful iteration: `flow.loop()`
 
@@ -440,11 +442,11 @@ An iteration can contain tasks, Jev requests, `if()`, parallel lanes and **one l
 
 In the drawer, a **Loop** card shows completed iterations, the continuation rule and its stop reason. Choose **Iteration → View Flow** to reveal that iteration’s complete connected diagram underneath. Previous/next iteration arrows preserve the parent graph and camera. A collection within the selected iteration can expose its own item flow. Initial/latest states and the condition’s captured incoming values are available in Details; each iteration’s returned state is its captured outcome. Captures remain bounded/redacted, so a large state may be truncated in the inspector even though runtime execution uses the full value. Request links include both iteration and item paths and retain distinct execution IDs. New loop metadata extends version-1 records; use the matching updated drawer and server.
 
-Try the [Parallel Questions cookbook](../cookbooks/parallel-questions/README.md) for two five-repeat loops: batched requests followed by sequential 13-item maps with `concurrency: 1`. Tasks compute answer metrics and sample standard deviations. Every response is synthetic; no live cost or speed savings are claimed.
+Try the [Parallel Questions cookbook](https://playground.jevtools.dev/?cookbook=parallel-questions) for two five-repeat loops: batched requests followed by sequential 13-item maps with `concurrency: 1`. Tasks compute answer metrics and sample standard deviations. Every response is synthetic; no live cost or speed savings are claimed.
 
-Try the [hierarchical classification cookbook](../cookbooks/hierarchical-classification/README.md), including beam recovery, deterministic paths, a zero-iteration leaf, and an intentional iteration-limit failure.
+Try the [hierarchical classification cookbook](https://playground.jevtools.dev/?cookbook=hierarchical-classification), including beam recovery, deterministic paths, a zero-iteration leaf, and an intentional iteration-limit failure.
 
-The [Noul self-consistency cookbook](../cookbooks/consistency-nouls/README.md) uses a collection with concurrency 1 for fifteen sequential fourteen-question requests. Tasks retain every probability, apply the inclusive 0.30–0.70 review band, and compute descriptive fixture statistics; a returning conditional exposes each repeat's review path. Its deterministic UIDs and authored variation are not independent model draws or measured consistency. Other-provider experiments are excluded.
+The [Noul self-consistency cookbook](https://playground.jevtools.dev/?cookbook=consistency-nouls) uses a collection with concurrency 1 for fifteen sequential fourteen-question requests. Tasks retain every probability, apply the inclusive 0.30–0.70 review band, and compute descriptive fixture statistics; a returning conditional exposes each repeat's review path. Its deterministic UIDs and authored variation are not independent model draws or measured consistency. Other-provider experiments are excluded.
 
 ## Replay a run in tests
 
@@ -564,8 +566,8 @@ Save `comparison.liveFixture` to update the case. It is the fixture `flowFixture
 
 ## Confidence fallback cookbook
 
-The [confidence fallback example](../cookbooks/confidence-fallback/README.md) uses a runtime Choice request with the original 75 SIC groups, `flow.if()` on API confidence ≥0.90, and a task that looks up the selected group’s actual parent division below the cutoff. It makes one request per description. Four no-key samples cover below, equal and above the threshold, plus a different parent division; their confidence and class probabilities are explicitly synthetic and independently specified.
+The [confidence fallback example](https://playground.jevtools.dev/?cookbook=confidence-fallback) uses a runtime Choice request with the original 75 SIC groups, `flow.if()` on API confidence ≥0.90, and a task that looks up the selected group’s actual parent division below the cutoff. It makes one request per description. Four no-key samples cover below, equal and above the threshold, plus a different parent division; their confidence and class probabilities are explicitly synthetic and independently specified.
 
 ## Choice self-consistency cookbook
 
-The repository’s [Choice self-consistency example](../cookbooks/consistency-choices/README.md) uses a map with concurrency one for 15 requests over the original eight-question rubric. Tasks compute ordered probability vectors, argmax and aggregate statistics; returning conditionals expose each question’s maximum-probability gate (≥0.60 selects a label; below it abstains). The rubric stays fixed while each state gets a fresh uid. Authored fixtures demonstrate calculations, not measured consistency or identical-input sampling; Choice confidence is retained separately and never used as this threshold. No public API extension or paid inference is required.
+The repository’s [Choice self-consistency example](https://playground.jevtools.dev/?cookbook=consistency-choices) uses a map with concurrency one for 15 requests over the original eight-question rubric. Tasks compute ordered probability vectors, argmax and aggregate statistics; returning conditionals expose each question’s maximum-probability gate (≥0.60 selects a label; below it abstains). The rubric stays fixed while each state gets a fresh uid. Authored fixtures demonstrate calculations, not measured consistency or identical-input sampling; Choice confidence is retained separately and never used as this threshold. No public API extension or paid inference is required.

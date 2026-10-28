@@ -7,7 +7,7 @@ description: Install and verify Jev DevTools in an existing React application wi
 
 Complete the integration in the user's application: one React drawer, one shared Node adapter, and application calls through that adapter's TypeSafe client. Installing or mounting the drawer alone does not capture requests.
 
-The human guides live at [docs.jevtools.dev](https://docs.jevtools.dev/), and [jevtools.dev](https://jevtools.dev/) introduces the project. Prefer the installed package’s bundled recipe and declarations when online documentation targets a different version.
+The human guides live at [docs.jevtools.dev](https://docs.jevtools.dev/), and [jevtools.dev](https://jevtools.dev/) introduces the project. For cookbook exploration, use the [Cookbook Playground](https://playground.jevtools.dev/): source, diagrams, and step-by-step guides with synthetic samples and no installation or API key. Prefer the installed package’s bundled recipe and declarations when online documentation targets a different version.
 
 ## Choose the integration
 

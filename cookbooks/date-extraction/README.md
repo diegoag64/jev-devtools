@@ -1,14 +1,16 @@
 # Date extraction · sample showcase
 
-A community-maintained TypeScript adaptation of the [official TypeSafe Date extraction cookbook](https://docs.typesafe.ai/cookbooks/date_extraction_cookbook). Run `npm ci` and `npm run dev` from the repository root, then open [Date extraction](http://127.0.0.1:4182/?cookbook=date-extraction). Choose a **Date sample** and **Run sample**. No API key is required; live mode is disabled on the server even when a key exists.
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=date-extraction) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
+
+A community-maintained TypeScript adaptation of the [official TypeSafe Date extraction cookbook](https://docs.typesafe.ai/cookbooks/date_extraction_cookbook). Open [Date extraction](https://playground.jevtools.dev/?cookbook=date-extraction). Choose a **Sample** and **Run sample**. No API key is required; live mode is disabled on the server even when a key exists.
 
 The reference date is visibly fixed to **Thursday, 2026-07-30**, matching the source. Each requested role sends one Jev request with the original seven Choice questions: `mode`, `month`, `day`, `year`, `day_anchor`, `weekday`, and `week_offset`. The model only reads text; calendar math happens in the **Assemble the calendar date** task. Outputs are JSON ISO date strings (`YYYY-MM-DD`) or `null`.
 
 ## Inspect the flow
 
-Open **Jev DevTools → Flows**, select the run, and expand the drawer. Select a role in **Extract each requested date**, then **View Flow**. Inspect **Read seven date parts** for all question instructions, criteria and synthetic answers. Select **Assemble the calendar date** for components, used flags, minimum confidence and note. **Does this date need review?** shows the executed accept/review path and the untaken alternative. Review is returned data; nobody is contacted.
+In **Flow diagram**, select a role in **Extract each requested date**, then **View Flow**. Inspect **Read seven date parts** for all question instructions, criteria and synthetic answers. Select **Assemble the calendar date** for components, used flags, minimum confidence and note. **Does this date need review?** shows the executed accept/review path and the untaken alternative. Review is returned data; nobody is contacted.
 
-The result page shows the document, requested role, resolved date and decision. Expand **Date components · used and unused** to see why an unrelated weak or unavailable answer does not affect the gate. The year question lists 1900 through 2050 inclusive, plus `none` and `out_of_range`.
+**Application result** records each document, requested role, resolved date, decision, and used components. Compare those fields to see why an unused weak or unavailable answer does not affect the gate. The year question lists 1900 through 2050 inclusive, plus `none` and `out_of_range`.
 
 | Sample                           | What it protects                                                                                                                                                                           |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -35,3 +37,5 @@ The official document text and role phrases are retained in the first case. Its 
 `provenance.json` pins the reviewed source and question hashes. `LICENSE.typesafe` retains the TypeSafe examples repository's MIT notice; that repository does not contain a date-extraction cache or separate source file at the reviewed commit. The published page's Python cells are the algorithm source. No upstream media, external corpus, or evaluation cache is bundled. This repository's cookbook is not shipped in npm.
 
 Run the focused tests with `npm test -w @jev-devtools/playground`. Tests protect question fidelity, calendar boundaries, missing confidence, request count/order, real public-flow execution, captured branch decisions, fixture rejection and cancellation. To build a live integration later, explicitly replace the server transport and validate returned parts; keep credentials and sample restrictions on the server. This sample does not authorize live inference.
+
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

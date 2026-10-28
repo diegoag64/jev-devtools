@@ -1,72 +1,38 @@
-Choose a sample app to see the integration, a cookbook to explore a complete workflow, or a small API example to learn one operation. The apps and cookbooks run from a repository checkout. Their code and fixtures are not included in the npm package.
+Explore complete workflows in the [Cookbook Playground](https://playground.jevtools.dev/). No download, installation, or API key is needed. The source, step-by-step guides, and connected diagrams show how the Flow API combines Jev requests with application code.
 
-## Run without an API key
-
-The sample apps use the real TypeSafe SDK with fixed responses. They let you check request capture and drawer behavior without calling an inference service.
-
-| Example                                                                                       | Use it to explore                                                                                  |
-| --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| [React + Vite](https://github.com/diegoag64/jev-devtools/tree/main/examples/react-vite)       | A minimal integration using public package exports, a local server plugin, and one sample request. |
-| [Next.js App Router](https://github.com/diegoag64/jev-devtools/tree/main/examples/nextjs-app) | Route Handlers, Server Actions, and Server Components sharing one adapter.                         |
-| [Playground](https://github.com/diegoag64/jev-devtools/tree/main/apps/playground)             | Choice, Score, Noul, Box, retries, failures, cancellation, and connected flows.                    |
-
-To try the React + Vite app, start in a checkout of [this repository](https://github.com/diegoag64/jev-devtools). Use the Node version pinned in `.nvmrc` for repository work. The package supports Node 22.12+.
-
-```sh
-# From the repository root:
-npm ci
-npm run pack:devtools
-cd examples/react-vite
-npm install
-npm run dev
-```
-
-`pack:devtools` creates the package archive that this independent app installs. These checkout commands use the repository's npm lockfile and scripts.
-
-Open [http://127.0.0.1:4183](http://127.0.0.1:4183/), then:
-
-1. Click **Classify a sample ticket**. Expect the status **Captured sample response**.
-2. Open the Jev DevTools launcher and select **Consumer ticket**.
-3. Inspect the `category` question. The fixed response chooses `billing`.
-
-For Next.js, follow the [example's run instructions](https://github.com/diegoag64/jev-devtools/blob/main/examples/nextjs-app/README.md). For the playground, follow its [local setup](https://github.com/diegoag64/jev-devtools/blob/main/apps/playground/README.md). The playground requires its local server; its production build is not a hosted interactive demo.
+<a id="run-without-an-api-key"></a>
 
 ## Explore complete flows
 
-The cookbooks below run inside the playground. Each README explains the sample cases, application policies, source recipe, and limitations.
+Choose a cookbook and a **Sample**. Use **Step-by-step guide** to follow its Flow operations, or **Complete flow** to inspect the whole diagram. Click **Run sample** to watch execution, then compare the application result with the captured steps and requests. Select code to highlight its diagram nodes, or select a node to find its source.
 
-| Cookbook                                                                                                                 | What to inspect                                                                                                                                                         |
-| ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [SDE cascade](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/sde-cascade)                                 | Field verification, conditional escalation, and a shared continuation that returns the final record.                                                                    |
-| [Hierarchical classification](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/hierarchical-classification) | Beam and greedy search through bounded loops, frontier collections, and retained or pruned paths.                                                                       |
-| [Structure recovery](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/structure-recovery)                   | Tasks that join text, requests built from those results, and formatting based on returned labels.                                                                       |
-| [Simple memory](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/simple-memory)                             | Ticket routing with customer-scoped memory that starts fresh for each run.                                                                                              |
-| [RAG passages](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/rag-passages)                               | Passage assessment with bounded concurrency and explicit rules for including, excluding, or flagging evidence.                                                          |
-| [Skill suggestion](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/skill-suggestion)                       | Dynamic questions, shortlist ranking, and a final suggestion or abstention. No skill is executed.                                                                       |
-| [Parallel questions](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/parallel-questions)                   | Five batched repeats versus 65 sequential single requests, with all 13 synthetic answer metrics and computed statistics.                                                |
-| [Twitch chat filter](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/twitch-chat-filter)                   | Original finite 29-message feed, eight concurrent requests, ordered hide/blur policy and quiet reapplication without new calls.                                         |
-| [Citation checking](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/citation-checking)                     | Exact normalized quote matching, inference bypass and API-confidence review routing over RFC 7519.                                                                      |
-| [Confidence fallback](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/confidence-fallback)                 | A 75-group Choice, an inclusive API-confidence cutoff, and a parent-division lookup with no second request.                                                             |
-| [Line-by-line search](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/line-search)                         | A complete pinned document, one Choice + Noul request, ranking and lookup tasks, and exact existence branches that separate answers from near matches.                  |
-| [Re-ranking](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/reranking)                                    | Independent candidate Nouls, bounded requests and stable sorting over an authored retrieval fixture.                                                                    |
-| [Date extraction](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/date-extraction)                         | Seven Choice questions per role, calendar assembly against a fixed date, and acceptance or review from used-component confidence.                                       |
-| [Pre-parsed value extraction](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/pre-parsed-extraction)       | Document-order regex candidates, sequential Choice helpers, missing-value routes and exact normalization.                                                               |
-| [Function calling](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/function-calling)                       | One batched request, selected-argument omit/fill branches, defaults and minimum decision confidence. Proposed calls only.                                               |
-| [LLM guardrails](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/guardrails)                               | Input/output hazard batteries, policy reuse, severity upgrades and precedence. Sample-only; no LLM generation.                                                          |
-| [Choice self-consistency](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/consistency-choices)             | Sequential repeats, per-question probability gates and a synthetic agreement heatmap.                                                                                   |
-| [Noul self-consistency](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/consistency-nouls)                 | Fifteen sequential requests with fourteen Nouls each, inclusive uncertainty routing and descriptive fixture statistics. No measured consistency or provider comparison. |
-| [Entity alignment](https://github.com/diegoag64/jev-devtools/tree/main/cookbooks/entity-alignment)                       | Score-driven unlink, curator review or proposed match, with companion agreement Nouls.                                                                                  |
+| Cookbook                                                                                             | What to inspect                                                                                                                                                         |
+| ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [SDE cascade](https://playground.jevtools.dev/?cookbook=sde-cascade)                                 | Field verification, conditional escalation, and a shared continuation that returns the final record.                                                                    |
+| [Hierarchical classification](https://playground.jevtools.dev/?cookbook=hierarchical-classification) | Beam and greedy search through bounded loops, frontier collections, and retained or pruned paths.                                                                       |
+| [Structure recovery](https://playground.jevtools.dev/?cookbook=structure-recovery)                   | Tasks that join text, requests built from those results, and formatting based on returned labels.                                                                       |
+| [Simple memory](https://playground.jevtools.dev/?cookbook=simple-memory)                             | Ticket routing with customer-scoped memory that starts fresh for each run.                                                                                              |
+| [RAG passages](https://playground.jevtools.dev/?cookbook=rag-passages)                               | Passage assessment with bounded concurrency and explicit rules for including, excluding, or flagging evidence.                                                          |
+| [Skill suggestion](https://playground.jevtools.dev/?cookbook=skill-suggestion)                       | Dynamic questions, shortlist ranking, and a final suggestion or abstention. No skill is executed.                                                                       |
+| [Parallel questions](https://playground.jevtools.dev/?cookbook=parallel-questions)                   | Five batched repeats versus 65 sequential single requests, with all 13 synthetic answer metrics and computed statistics.                                                |
+| [Twitch chat filter](https://playground.jevtools.dev/?cookbook=twitch-chat-filter)                   | Original finite 29-message feed, eight concurrent requests, ordered hide/blur policy and quiet reapplication without new calls.                                         |
+| [Citation checking](https://playground.jevtools.dev/?cookbook=citation-checking)                     | Exact normalized quote matching, inference bypass and API-confidence review routing over RFC 7519.                                                                      |
+| [Confidence fallback](https://playground.jevtools.dev/?cookbook=confidence-fallback)                 | A 75-group Choice, an inclusive API-confidence cutoff, and a parent-division lookup with no second request.                                                             |
+| [Line-by-line search](https://playground.jevtools.dev/?cookbook=line-search)                         | A complete pinned document, one Choice + Noul request, ranking and lookup tasks, and exact existence branches that separate answers from near matches.                  |
+| [Re-ranking](https://playground.jevtools.dev/?cookbook=reranking)                                    | Independent candidate Nouls, bounded requests and stable sorting over an authored retrieval fixture.                                                                    |
+| [Date extraction](https://playground.jevtools.dev/?cookbook=date-extraction)                         | Seven Choice questions per role, calendar assembly against a fixed date, and acceptance or review from used-component confidence.                                       |
+| [Pre-parsed value extraction](https://playground.jevtools.dev/?cookbook=pre-parsed-extraction)       | Document-order regex candidates, sequential Choice helpers, missing-value routes and exact normalization.                                                               |
+| [Function calling](https://playground.jevtools.dev/?cookbook=function-calling)                       | One batched request, selected-argument omit/fill branches, defaults and minimum decision confidence. Proposed calls only.                                               |
+| [LLM guardrails](https://playground.jevtools.dev/?cookbook=guardrails)                               | Input/output hazard batteries, policy reuse, severity upgrades and precedence. Sample-only; no LLM generation.                                                          |
+| [Choice self-consistency](https://playground.jevtools.dev/?cookbook=consistency-choices)             | Sequential repeats, per-question probability gates and a synthetic agreement heatmap.                                                                                   |
+| [Noul self-consistency](https://playground.jevtools.dev/?cookbook=consistency-nouls)                 | Fifteen sequential requests with fourteen Nouls each, inclusive uncertainty routing and descriptive fixture statistics. No measured consistency or provider comparison. |
+| [Entity alignment](https://playground.jevtools.dev/?cookbook=entity-alignment)                       | Score-driven unlink, curator review or proposed match, with companion agreement Nouls.                                                                                  |
 
-From the **repository root**, start the playground:
+Every cookbook uses labeled synthetic responses. Samples demonstrate execution and inspection, not model accuracy, latency, or cost. The [cookbook source and adaptation notes](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/README.md) document the original recipes, application policies, and limitations. Application code and fixtures are not bundled in npm.
 
-```sh
-npm ci
-npm run dev
-```
+## Integrate the inspector into your app
 
-Open [http://127.0.0.1:4182](http://127.0.0.1:4182/), choose a cookbook and sample, then click **Run sample**. Open **Jev DevTools → Flows** and select the latest run. Compare the application's result with the executed steps, linked requests, and routing decisions. The [cookbook index](https://github.com/diegoag64/jev-devtools/blob/main/cookbooks/README.md#choose-an-example) has direct local links to each example.
-
-All have samples that need no API key. Their synthetic responses demonstrate execution and inspection, not model accuracy. Editing an input does not turn a fixed response into live inference. Some examples reject inputs that do not match their fixtures. Live support varies by example, so read its README before configuring a key.
+The independent [React + Vite](https://github.com/diegoag64/jev-devtools/tree/main/examples/react-vite) and [Next.js App Router](https://github.com/diegoag64/jev-devtools/tree/main/examples/nextjs-app) examples show how to connect public package exports to a server. Their READMEs contain local setup instructions for developers adapting an integration. To modify the playground itself, use its [contributor setup](https://github.com/diegoag64/jev-devtools/blob/main/apps/playground/README.md#local-development).
 
 ## Learn one method at a time
 

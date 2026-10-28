@@ -1,6 +1,8 @@
 # Confidence fallback
 
-A runnable TypeScript adaptation of TypeSafe’s [Classification using confidence](https://docs.typesafe.ai/cookbooks/classification_using_confidence). Run `npm ci` and `npm run dev` from the repository root, then open [the sample](http://127.0.0.1:4182/?cookbook=confidence-fallback). No API key is required. Choose a case, run it, and inspect **Jev DevTools → Flows**.
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=confidence-fallback) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
+
+A runnable TypeScript adaptation of TypeSafe’s [Classification using confidence](https://docs.typesafe.ai/cookbooks/classification_using_confidence). Open [the sample](https://playground.jevtools.dev/?cookbook=confidence-fallback). No API key is required. Choose a case, run it, and inspect **Flow diagram**.
 
 The flow validates the selected document, asks one `Choice` over the original **75 SIC major groups**, and checks the returned **API confidence ≥0.90**. At or above the cutoff it reports the two-digit group; below it a task computes the selected group’s actual parent division. Both paths join before the result attaches the group description and complete probability distribution. Every valid case makes exactly one request. The diagram describes application execution, not model reasoning.
 
@@ -25,6 +27,4 @@ See [provenance.json](provenance.json) for the pinned upstream commit, URLs, has
 
 The focused tests in `apps/playground/tests/confidence-fallback.test.ts` run the real SDK through the public flow, pin source data, protect the cutoff and separate confidence/probability semantics, and reject mismatched samples. Full verification follows [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
-For browser verification, build the package and run `npm run verify:cookbooks -- --only confidence-fallback` while holding the shared `/private/tmp/jev-cookbook-verification.lock` (atomic `mkdir`, owner metadata, cleanup in `finally`/shell trap). It owns and stops its temporary Vite server, checks all cases and server restrictions, and writes screenshots under `benchmarks/results/confidence-fallback/`.
-
-Browser verification runs through the shared runner: `npm run verify:cookbooks -- --only confidence-fallback`. It owns the server/lock lifecycle and saves each run’s source-bound evidence under a unique ignored `benchmarks/results/cookbook-browser/` directory.
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

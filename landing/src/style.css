@@ -183,6 +183,11 @@ nav a:hover,
   gap: 12px;
   margin-top: 28px;
 }
+.hero-playground {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
 .button {
   display: inline-flex;
   align-items: center;
@@ -986,6 +991,11 @@ nav a:hover,
   line-height: 1.8;
   color: var(--muted);
   max-width: 500px;
+}
+.product-heading p a {
+  color: #e7b4d6;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .product-heading .text-link {
   margin-top: 19px;

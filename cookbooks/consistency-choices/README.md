@@ -1,8 +1,10 @@
 # Choice self-consistency
 
-A runnable TypeScript adaptation of the [official TypeSafe Choice self-consistency recipe](https://docs.typesafe.ai/cookbooks/consistency_choice_cookbook), using public `jev-devtools/flow` methods. Run `npm ci` and `npm run dev` at the repository root, then open [the cookbook](http://127.0.0.1:4182/?cookbook=consistency-choices).
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=consistency-choices) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
 
-Choose a synthetic case, run it, and select heatmap cells for every label probability, raw Choice label and separate confidence. In **Jev DevTools → Flows**, choose a repeat in the collection and **View Flow** to inspect the request, deterministic argmax task and each question’s gate. All raw answers are retained in the application report. Captured task previews have the normal bounded/redacted inspector limits; inspect individual requests for their answers.
+A runnable TypeScript adaptation of the [official TypeSafe Choice self-consistency recipe](https://docs.typesafe.ai/cookbooks/consistency_choice_cookbook), using public `jev-devtools/flow` methods. Open [the cookbook](https://playground.jevtools.dev/?cookbook=consistency-choices).
+
+Choose a synthetic case, run it, and open **Application result** for every label probability, raw Choice label, and separate confidence. In **Flow diagram**, choose a repeat in the collection and **View Flow** to inspect the request, deterministic argmax task and each question’s gate. All raw answers are retained in the application report. Captured task previews have the normal bounded/redacted inspector limits; inspect individual requests for their answers.
 
 ## What is preserved
 
@@ -30,3 +32,5 @@ External-provider sampling, single-pick comparisons, cost estimates, timing/usag
 `provenance.json` records the reviewed page hash, date and upstream asset audit. The official examples tree at the recorded revision contains no Choice consistency directory/cache; the recipe’s executable source was read from the official documentation. TypeSafe’s MIT notice is retained in `LICENSE.typesafe`; no third-party corpus is introduced.
 
 Focused tests in `apps/playground/tests/consistency-choices.test.ts` run the actual public flow and TypeSafe SDK, protect the source fingerprint and request order, check exact threshold and confidence contrasts, exercise argmax ties and invalid vectors, verify denominators and population deviation, reject malformed numeric strings while preserving Python-compatible forms, retain raw answers, and await transport settlement on cancellation. The result tests protect exact boundary display. Full repository verification and browser evidence are recorded in the PR; generated evidence stays under ignored `benchmarks/results/`.
+
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

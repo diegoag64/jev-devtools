@@ -91,9 +91,10 @@ pre:focus-visible {
   top: 0;
 }
 .wb-brand {
-  font-size: 24px;
+  font-size: 19px;
+  white-space: nowrap;
   font-weight: 750;
-  letter-spacing: -1px;
+  letter-spacing: -0.7px;
   text-decoration: none;
   margin: 0 10px 22px;
 }
@@ -104,23 +105,12 @@ pre:focus-visible {
   color: #9499a6;
 }
 .wb-library-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin: 0 10px 14px;
 }
 .wb-library-title h2 {
   font-size: 13px;
   margin: 0;
   font-weight: 600;
-}
-.wb-library-title button {
-  border: 0;
-  background: none;
-  color: #949dad;
-  font-size: 20px;
-  line-height: 1;
-  padding: 2px 5px;
 }
 .wb-library input {
   width: 100%;
@@ -180,12 +170,9 @@ pre:focus-visible {
   font-size: 12px;
 }
 .wb-library footer a {
+  display: block;
+  margin-top: 8px;
   text-decoration: none;
-}
-.wb-library footer p {
-  font-size: 11px;
-  color: #858c9a;
-  margin: 7px 0 0;
 }
 .wb-main {
   position: relative;
@@ -409,15 +396,9 @@ button.wb-primary {
   font-size: 11px;
   color: #a8b0c1;
 }
-.wb-runbar select {
+.wb-runbar .playground-select {
   max-width: 330px;
   min-width: 180px;
-  background: #191d25;
-  border: 1px solid #363c49;
-  color: #d7dfed;
-  padding: 9px 28px 9px 10px;
-  border-radius: 4px;
-  font-size: 11px;
 }
 .wb-runbar p {
   font-size: 11px;
@@ -863,6 +844,14 @@ button.wb-primary {
     width: 220px;
     box-shadow: 12px 0 36px #0008;
   }
+  /* Keep the single library toggle reachable beside the mobile overlay. */
+  .wb-app[data-library-open] .wb-library-toggle {
+    left: 226px;
+    z-index: 11;
+    background: #191c22;
+    border: 1px solid #30343e;
+    border-radius: 4px;
+  }
   .wb-narrative {
     gap: 10px;
   }
@@ -932,7 +921,7 @@ button.wb-primary {
     flex: 1;
     min-width: 0;
   }
-  .wb-runbar select {
+  .wb-runbar .playground-select {
     max-width: 100%;
     min-width: 0;
     flex: 1;

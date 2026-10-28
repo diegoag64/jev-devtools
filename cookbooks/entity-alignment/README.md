@@ -1,8 +1,10 @@
 # Entity alignment
 
-A runnable TypeScript adaptation of the [official TypeSafe entity-alignment recipe](https://docs.typesafe.ai/cookbooks/entity_alignment), using public `jev-devtools/flow` methods. Run `npm ci && npm run dev` from the repository root, then open [Entity alignment](http://127.0.0.1:4182/?cookbook=entity-alignment).
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=entity-alignment) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
 
-Choose an example or boundary case, run the sample, and open **Jev DevTools → Flows**. Inspect the loaded pair, the single four-question request, the evidence task and the selected route. Expand the Score and each companion answer in the request inspector.
+A runnable TypeScript adaptation of the [official TypeSafe entity-alignment recipe](https://docs.typesafe.ai/cookbooks/entity_alignment), using public `jev-devtools/flow` methods. Open [Entity alignment](https://playground.jevtools.dev/?cookbook=entity-alignment).
+
+Choose an example or boundary case, run the sample, and inspect **Flow diagram**. Inspect the loaded pair, the single four-question request, the evidence task and the selected route. Expand the Score and each companion answer in the request inspector.
 
 ## Source behavior
 
@@ -34,4 +36,4 @@ The diagram exposes the equivalent numeric comparisons. The evidence task comput
 
 `apps/playground/tests/entity-alignment.test.ts` runs the actual flow through a real SDK client with a custom local fetch. It protects exact source prompts/levels, raw request state, reference-label exclusion, one-request execution order, task transformations, all three routes, both sides/equality of both thresholds, independence from companion probabilities/confidence, rejection before dispatch, fixture matching and cancellation. These are new cookbook contracts, not a repair to the Flow API.
 
-Run `npm run verify:cookbooks -- --only entity-alignment` after building the package for the ten-case playground/browser check. The runner takes the shared cookbook verification lock, starts and stops its own server, checks desktop/mobile and request inspection, and saves evidence under ignored `benchmarks/results/cookbook-browser/`.
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

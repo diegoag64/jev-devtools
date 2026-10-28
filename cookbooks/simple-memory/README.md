@@ -1,8 +1,10 @@
 # Simple memory · sample showcase
 
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=simple-memory) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
+
 A local TypeScript adaptation of the [official Simple Memory cookbook](https://docs.typesafe.ai/cookbooks/basic_memory), using the existing `task()`, dynamic `jev()`, `if()` and `loop()` APIs. No new execution primitive or persistence service is introduced.
 
-From the repository root, run `npm ci` and `npm run dev`, then open [Simple Memory locally](http://127.0.0.1:4182/?cookbook=simple-memory). Choose **Memory sample** and click **Run sample**. No key or paid inference is needed. The fixed timelines use synthetic responses; live mode is disabled.
+Open [Simple Memory](https://playground.jevtools.dev/?cookbook=simple-memory). Choose **Sample** and click **Run sample**. No key or paid inference is needed. The fixed timelines use synthetic responses; live mode is disabled.
 
 ## Follow the flow
 
@@ -13,16 +15,16 @@ From the repository root, run `npm ci` and `npm run dev`, then open [Simple Memo
 5. Build a candidate `{ request, jev_answered }`: `request` is the **original** ticket state, before injection; `jev_answered` maps the question's instruction text to the chosen option's **criteria description**, not its identifier or probabilities.
 6. Make a second, sequential Noul request asking whether `request.ticket` explicitly contains a lasting fact. The prompt excludes facts implied only by the routing answer.
 7. `if()` appends the candidate when `remember >= 0.5`. Below that threshold it returns the unchanged dictionary. Either path returns the original routing answer and advances to the next ticket.
-8. Compare later routes with/without memory, inspect saved tickets per customer, and expand each timeline row for its memory before/after, gate decision, confidence and every team probability.
+8. Open **Application result** to compare later routes with and without memory, saved tickets, gate decisions, confidence, and team probabilities.
 
-Open **Jev DevTools → Flows**, select the run, choose an iteration in **Process tickets in order**, and click **View Flow**. This exposes the connected routing and remembering requests, input preparation, conditional save path and continuation. Use the iteration selector/arrows to follow later tickets; request details retain all questions and answers.
+In **Flow diagram**, choose an iteration in **Process tickets in order**, and click **View Flow**. This exposes the connected routing and remembering requests, input preparation, conditional save path and continuation. Use the iteration selector/arrows to follow later tickets; request details retain all questions and answers.
 
-| Sample | Tickets / Jev requests | What to inspect |
-| --- | --- | --- |
-| Full timeline | 11 / 28 | Five earlier tickets, then six comparisons. Windows and Enterprise facts stay with Harbor Logistics; the cloud/self-serve fact stays with Fernwood Studio. Three memories are saved. |
-| Save at exactly 50% | 2 / 5 | Inclusive threshold saves the Windows fact; the later ticket receives it. |
-| Do not save at 49.9% | 2 / 5 | The same fact is not saved; the later ticket has no memory injected. |
-| Transient details | 4 / 10 | Airport and holiday details are not saved. Both customer stores remain empty. |
+| Sample               | Tickets / Jev requests | What to inspect                                                                                                                                                                      |
+| -------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Full timeline        | 11 / 28                | Five earlier tickets, then six comparisons. Windows and Enterprise facts stay with Harbor Logistics; the cloud/self-serve fact stays with Fernwood Studio. Three memories are saved. |
+| Save at exactly 50%  | 2 / 5                  | Inclusive threshold saves the Windows fact; the later ticket receives it.                                                                                                            |
+| Do not save at 49.9% | 2 / 5                  | The same fact is not saved; the later ticket has no memory injected.                                                                                                                 |
+| Transient details    | 4 / 10                 | Airport and holiday details are not saved. Both customer stores remain empty.                                                                                                        |
 
 ## Fidelity and limits
 
@@ -40,4 +42,6 @@ Memory is **run-local application state**: every click starts fresh. It is not p
 - `samples.ts`: server-only synthetic transport with request validation and cancellation.
 - `provenance.json` and `LICENSE.typesafe`: source snapshot hash, adaptations and upstream notice.
 
-This cookbook uses the 0.4.0 flow API. Its application code and sample fixtures run from this repository and are not bundled in npm. See [the flow guide](../../docs/flows.md) for API contracts and limits.
+This cookbook uses the 0.4.0 flow API. Its application code and sample fixtures live in this repository and are not bundled in npm. See [the flow guide](../../docs/flows.md) for API contracts and limits.
+
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

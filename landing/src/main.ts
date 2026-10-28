@@ -9,6 +9,9 @@ import {
 import { flows, type Card, type Edge, type Flow } from "./flows";
 
 const DOCS = "https://docs.jevtools.dev";
+const PLAYGROUND = "https://playground.jevtools.dev/";
+const terminal =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="16" rx="3"/><path d="m6 9 3 3-3 3m7 0h5"/></svg>';
 const GITHUB = "https://github.com/diegoag64/jev-devtools";
 const logo =
   '<svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M7 7h9v9h9v9h-9v-9H7z" stroke="currentColor" stroke-width="1.6"/><circle cx="7" cy="7" r="3" fill="currentColor"/><circle cx="25" cy="25" r="3" fill="currentColor"/></svg>';
@@ -25,6 +28,7 @@ app.innerHTML = `
       <h1 id="hero-title">Visualize your<br /><span>System One flows.</span></h1>
       <p class="hero-description">Inspect System One requests, returned probabilities,<br class="desktop-break" /> and application logic in your app.</p>
       <div class="hero-actions"><a class="button primary" href="${DOCS}">Read the docs</a><a class="button secondary" href="${GITHUB}">${github} View on GitHub</a></div>
+      <div class="hero-playground"><a class="button secondary" href="${PLAYGROUND}">${terminal} Cookbook Playground</a></div>
       <p class="hero-disclaimer">Independent community project. Not affiliated with TypeSafe AI.</p>
     </section>
     <section id="flows" class="flow-stage wrap" aria-label="Animated flow examples" aria-roledescription="carousel">

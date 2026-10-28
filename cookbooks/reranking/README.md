@@ -1,6 +1,8 @@
 # Re-ranking
 
-A runnable TypeScript adaptation of [TypeSafe's re-ranking recipe](https://docs.typesafe.ai/cookbooks/rerank_typesafe), using public `jev-devtools/flow` methods. Run `npm ci` and `npm run dev`, then open [Re-ranking](http://127.0.0.1:4182/?cookbook=reranking). Choose a sample and **Run sample**. No API key is needed.
+Explore [this cookbook in the playground](https://playground.jevtools.dev/?cookbook=reranking) with source, diagrams, and a step-by-step guide. Choose a **Sample** and click **Run sample**. Inspect the inline **Flow diagram** and open **Application result** for the complete JSON output. No installation or API key is needed.
+
+A runnable TypeScript adaptation of [TypeSafe's re-ranking recipe](https://docs.typesafe.ai/cookbooks/rerank_typesafe), using public `jev-devtools/flow` methods. Open [Re-ranking](https://playground.jevtools.dev/?cookbook=reranking). Choose a sample and **Run sample**. No API key is needed.
 
 ## Explore
 
@@ -8,7 +10,7 @@ A runnable TypeScript adaptation of [TypeSafe's re-ranking recipe](https://docs.
 - **All probabilities tied:** the same query and candidates receive 0.5 each. Every candidate retains its original position.
 - **Cancel:** during a run, cancellation aborts active requests and stops queued items. No partial ranking is presented.
 
-The result switches between **Before · retrieval fixture** and **After · stable Noul sort**. Every expandable candidate shows its passage, probability, original rank and final rank. Open **Jev DevTools → Flows → Score the shortlist**, choose a collection item, and **View Flow** to inspect that pair's request and captured result. Collection item numbers follow retrieval order. Inspect **Sort by Noul, highest first** for the executed sorting function.
+Open **Application result** to compare each candidate's passage, probability, original rank, and final rank. In **Flow diagram**, select **Score the shortlist**, choose a collection item, and **View Flow** to inspect that pair's request and captured result. Collection item numbers follow retrieval order. Inspect **Sort by Noul, highest first** for the executed sorting function.
 
 ## Fidelity and adaptations
 
@@ -28,6 +30,6 @@ The source pools 170 CLERC rows, selects 40 queries with seed 0, uses BM25 to sh
 - [cases.ts](cases.ts), [samples.ts](samples.ts), [retrieval-fixture.json](retrieval-fixture.json): authored inputs and synthetic transport, under the [repository MIT license](../../LICENSE).
 - [LICENSE.typesafe](LICENSE.typesafe): TypeSafe MIT attribution for adapted example logic. BM25 and CLERC are references only; their code/data are not bundled.
 
-Run the focused tests with `node --import tsx --test apps/playground/tests/reranking.test.ts` after `npm run build:package`. For browser regression checks, run `npm run verify:cookbooks -- --only reranking` from the repository root. The script starts and closes its own local Vite server and Chromium, and saves screenshots/video under ignored `benchmarks/results/cookbook-browser/`. It checks both cases, candidate inspection, sorting, mobile layout, cancellation and server-side sample restrictions.
-
 The cookbook and fixtures live only in this repository, not in the npm package. This is a community adaptation, not an official TypeSafe product.
+
+For browser coverage, run `npm run verify:cookbooks`. The shared suite checks cookbook switching, complete application results, sample guards, capture consistency, and workbench controls. Recipe runtime tests verify source fidelity and boundary cases. See [contributor verification](../../CONTRIBUTING.md#verification-details).

@@ -13,6 +13,10 @@ import { colors, SourceCode } from "./SourceCode.js";
 import { CookbookOverview, Explanation } from "./CookbookOverview.js";
 import { SplitPanels } from "./SplitPanels.js";
 import { postPlayground, RunError } from "../playground-request.js";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "../components/ui/native-select.js";
 import "./workbench.css";
 
 const session =
@@ -29,7 +33,6 @@ function App() {
   const [detail, setDetail] = useState<CookbookDetail>();
   const [loadError, setLoadError] = useState("");
   const [reload, setReload] = useState(0);
-  const libraryToggle = useRef<HTMLButtonElement>(null);
   const [libraryOpen, setLibraryOpen] = useState(
     () => !matchMedia("(max-width: 1000px)").matches,
   );
@@ -76,20 +79,10 @@ function App() {
       </a>
       <aside id="cookbook-library" className="wb-library" hidden={!libraryOpen}>
         <a className="wb-brand" href="/">
-          jev<span> / playground</span>
+          jevtools<span> playground</span>
         </a>
         <div className="wb-library-title">
           <h2>Cookbooks</h2>
-          <button
-            aria-label="Close cookbook library"
-            title="Close cookbook library"
-            onClick={() => {
-              setLibraryOpen(false);
-              libraryToggle.current?.focus();
-            }}
-          >
-            ×
-          </button>
         </div>
         <input
           aria-label="Find a cookbook"
@@ -147,14 +140,12 @@ function App() {
           ) && <p>No matching cookbooks.</p>}
         </nav>
         <footer>
-          <a href="?legacy=1">Request lab ↗</a>
-          <p>Individual calls & edge cases</p>
+          <a href="https://docs.jevtools.dev/">JevTools docs ↗</a>
         </footer>
       </aside>
       <main id="workbench" className="wb-main">
         <h1 className="wb-sr-only">{recipe?.title ?? "Cookbook not found"}</h1>
         <button
-          ref={libraryToggle}
           className="wb-library-toggle"
           aria-label="Toggle cookbook library"
           title={
@@ -467,7 +458,8 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
       <div className="wb-runbar">
         <label>
           Sample
-          <select
+          <NativeSelect
+            size="sm"
             aria-label="Cookbook sample"
             disabled={busy}
             value={sample}
@@ -481,11 +473,11 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
             }}
           >
             {Object.entries(detail.samples).map(([id, item]) => (
-              <option key={id} value={id}>
+              <NativeSelectOption key={id} value={id}>
                 {item.label}
-              </option>
+              </NativeSelectOption>
             ))}
-          </select>
+          </NativeSelect>
         </label>
         <button
           className="wb-primary"
@@ -672,6 +664,6 @@ function Recipe({ detail }: { detail: CookbookDetail }) {
 }
 
 export function mount() {
-  document.title = "Jev Playground · Flow Workbench";
+  document.title = "jevtools playground";
   createRoot(document.getElementById("root")!).render(<App />);
 }
