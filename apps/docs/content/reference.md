@@ -2092,7 +2092,7 @@ The custom observer delegates to `withFlow()` so the recorder can associate the 
 
 ## Capture fidelity
 
-The browser-safe `CaptureFidelity` type has `exact`, `modified`, and `unknown` states. Missing metadata means unknown. `Trace.captureFidelity` separates request and response fidelity. Flow nodes describe their rules with `conditionCaptureFidelity`; steps and runs describe `data` and `value` with `captureFidelity`. A custom redactor prevents exact certification even when it returns its input. Bounded callback detachment marks omissions as modified, including after root replacement. Display masking downgrades changed sections.
+The browser-safe `CaptureFidelity` type has `exact`, `modified`, and `unknown` states. Missing metadata means unknown. `Trace.captureFidelity` separates request and response fidelity. Flow nodes describe their rules with `conditionCaptureFidelity`; steps and runs describe `data` and `value` with `captureFidelity`. A custom redactor prevents exact certification even when it returns its input. Values with a `toJSON` property are conservatively unknown without reading or invoking the serialization hook. Bounded callback detachment marks omissions as modified, including after root replacement. Display masking downgrades changed sections.
 
 Exact analysis also requires a valid rule and every referenced value to be present and correctly typed. Matching the recorded decision does not prove completeness. Existing fixture export and replay behavior is unchanged. See the [complete consumer contract](https://github.com/diegoag64/jev-devtools/blob/main/docs/stream-protocol.md#capture-fidelity-and-analysis-consumers).
 

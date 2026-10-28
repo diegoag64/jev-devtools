@@ -171,7 +171,9 @@ export function captureWithFidelity(
         );
       return result;
     }
-    if (types.isProxy(input)) uncertain = true;
+    // SDK serialization can read nonenumerable or inherited toJSON hooks.
+    // Check presence without reading the property or invoking the hook again.
+    if (types.isProxy(input) || "toJSON" in input) uncertain = true;
     if (Array.isArray(input)) {
       // Inspect only retained indices, without enumerating a potentially huge array.
       // Extra array properties are not part of its JSON value.

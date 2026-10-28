@@ -38,7 +38,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **Capture fidelity.** Add optional exact, modified, or unknown provenance for captured requests, responses, rules, step data, and outcomes. Legacy captures remain readable; custom callbacks cannot certify exactness, detachment omissions downgrade fidelity even after root replacement, and fixture export semantics stay unchanged. ([#141](https://github.com/diegoag64/jev-devtools/pull/141))
+- **Capture fidelity.** Add optional exact, modified, or unknown provenance for captured requests, responses, rules, step data, and outcomes. Legacy captures remain readable; custom callbacks and values with serialization hooks cannot certify exactness, detachment omissions downgrade fidelity even after root replacement, and fixture export semantics stay unchanged. ([#141](https://github.com/diegoag64/jev-devtools/pull/141))
 
 - **Capture-kind redaction context.** Distinguish requests, responses, step data, condition rules, and outcomes with a frozen third callback argument. Existing `(path, value)` policies and paths remain valid; reused captures respect their path, and custom callbacks receive bounded detached views, including SDK images. Identity policies keep shallow data with omission warnings; policies that read omitted content fail closed. ([#138](https://github.com/diegoag64/jev-devtools/pull/138))
 

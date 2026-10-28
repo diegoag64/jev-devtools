@@ -192,6 +192,105 @@ for (const mode of ["identity", "mutation"] as const) {
   });
 }
 
+// SDK JSON serialization reads nonenumerable/inherited hooks that capture does
+// not execute. Empty warnings cannot certify the pre-serialization value.
+for (const shape of ["array", "object"] as const) {
+  for (const hook of [
+    "none",
+    "method",
+    "accessor",
+    "inherited-method",
+    "inherited-accessor",
+  ] as const) {
+    test(`SDK serialization hook fidelity: ${shape}/${hook}`, async (t) => {
+      const state = shape === "array" ? [0.9] : { score: 0.9 };
+      let calls = 0;
+      let reads = 0;
+      const serialize = () => {
+        calls++;
+        return shape === "array" ? [0.6] : { score: 0.6 };
+      };
+      if (hook !== "none") {
+        const target = hook.startsWith("inherited-")
+          ? Object.create(Object.getPrototypeOf(state))
+          : state;
+        Object.defineProperty(target, "toJSON", {
+          configurable: true,
+          ...(hook.endsWith("accessor")
+            ? {
+                get() {
+                  reads++;
+                  // Retain uncertainty even when serialization erases the hook.
+                  Object.defineProperty(state, "toJSON", { value: undefined });
+                  return serialize;
+                },
+              }
+            : { value: serialize }),
+        });
+        if (target !== state) Object.setPrototypeOf(state, target);
+      }
+      const inspector = createJevDevtools({ origin, enabled: true });
+      t.after(() => inspector.dispose());
+      let sent: unknown;
+      const sdk = inspector.createClient({
+        apiKey: "sample",
+        logLevel: "off",
+        compression: false,
+        fetch: async (_input, init) => {
+          sent = JSON.parse(init!.body as string).state;
+          return Response.json({
+            model: "sample",
+            answers: { q: { type: "score", score: 0.9 } },
+          });
+        },
+      });
+      const result = await sdk.systemOne({
+        state,
+        questions: { q: score("score", ["low", "high"]) },
+      });
+      assert.equal(result.answers.q.score, 0.9);
+      await nextTurn();
+      await nextTurn();
+      const response = await inspector.handle(
+        new Request(`${origin}/api/jev-devtools/events?protocol=2`),
+      );
+      const reader = response.body!.getReader();
+      try {
+        const payload = JSON.parse(
+          new TextDecoder()
+            .decode((await reader.read()).value)
+            .split("data: ")[1],
+        );
+        const [trace] = new TraceStore().apply("snapshot", payload);
+        const sentScore = hook === "none" ? 0.9 : 0.6;
+        assert.deepEqual(
+          sent,
+          shape === "array" ? [sentScore] : { score: sentScore },
+        );
+        assert.deepEqual(
+          trace.request.state,
+          shape === "array" ? [0.9] : { score: 0.9 },
+        );
+        assert.equal(Array.isArray(state) ? state[0] : state.score, 0.9);
+        assert.equal(calls, hook === "none" ? 0 : 1);
+        assert.equal(reads, hook.endsWith("accessor") ? 1 : 0);
+        assert.deepEqual(trace.captureWarnings, []);
+        assert.equal(trace.captureFidelity?.result, "exact");
+        assert.equal(
+          trace.captureFidelity?.request,
+          hook === "none"
+            ? "exact"
+            : shape === "object" && hook.startsWith("inherited-")
+              ? "modified"
+              : "unknown",
+        );
+      } finally {
+        await reader.cancel();
+      }
+    });
+  }
+}
+
 test("signed-zero transport normalization downgrades rules, step data, and outcomes", async (t) => {
   for (const value of [-0, 0]) {
     const inspector = createJevDevtools({ origin, enabled: true });
