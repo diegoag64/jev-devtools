@@ -41,8 +41,8 @@ export function detachForRedaction(value: unknown, warnings: Set<string>) {
     incomplete: () => boolean,
     projection: Projection,
   ) => {
-    // Local writes/deletes are authoritative, including replacement of an
-    // omitted property. They never touch the original object.
+    // Successful local writes/deletes are authoritative, including replacement
+    // of an omitted property. Failed operations must retain its omission guard.
     const written = new Set<PropertyKey>();
     const check = (key: PropertyKey) => {
       if (!written.has(key) && omitted(key)) deny();
@@ -65,16 +65,19 @@ export function detachForRedaction(value: unknown, warnings: Set<string>) {
         return Reflect.ownKeys(target);
       },
       set(target, key, value) {
-        written.add(key);
-        return Reflect.set(target, key, value);
+        const succeeded = Reflect.set(target, key, value);
+        if (succeeded) written.add(key);
+        return succeeded;
       },
       defineProperty(target, key, descriptor) {
-        written.add(key);
-        return Reflect.defineProperty(target, key, descriptor);
+        const succeeded = Reflect.defineProperty(target, key, descriptor);
+        if (succeeded) written.add(key);
+        return succeeded;
       },
       deleteProperty(target, key) {
-        written.add(key);
-        return Reflect.deleteProperty(target, key);
+        const succeeded = Reflect.deleteProperty(target, key);
+        if (succeeded) written.add(key);
+        return succeeded;
       },
     });
     projections.set(proxy, projection);

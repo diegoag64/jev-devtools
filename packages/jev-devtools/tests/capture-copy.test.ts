@@ -216,6 +216,54 @@ test("policies cannot mistake omitted collection members for absent properties",
   );
 });
 
+for (const operation of ["set", "defineProperty"] as const) {
+  for (const writable of [false, true]) {
+    test(`${operation} only replaces omission guards after a successful write: ${writable}`, async (t) => {
+      let succeeded: boolean | undefined;
+      const inspector = createJevDevtools({
+        origin,
+        enabled: true,
+        redact: (path, value, context) => {
+          if (context.kind !== "outcome" || path.length !== 0) return value;
+          const copy = value as Record<string, string>;
+          if (!writable) Object.preventExtensions(copy);
+          succeeded =
+            operation === "set"
+              ? Reflect.set(copy, "k150", "replacement")
+              : Reflect.defineProperty(copy, "k150", {
+                  value: "replacement",
+                  enumerable: true,
+                  configurable: true,
+                  writable: true,
+                });
+          try {
+            return copy.k150 === undefined ? "unsafe fallback" : copy.k150;
+          } catch {
+            // A policy cannot clear the sticky omission failure by catching it.
+            return "unsafe fallback";
+          }
+        },
+      });
+      t.after(() => inspector.dispose());
+      const source = Object.fromEntries(
+        Array.from({ length: 151 }, (_, index) => [`k${index}`, "original"]),
+      );
+      record(inspector, source);
+      const run = (await snapshot(inspector)).upserts[0];
+      assert.equal(succeeded, writable);
+      assert.equal(source.k150, "original");
+      assert.equal(
+        run.value,
+        writable ? "replacement" : "[capture unavailable]",
+      );
+      assert.equal(
+        run.captureWarnings.includes("Capture policy accessed omitted data."),
+        !writable,
+      );
+    });
+  }
+}
+
 test("copy work budget bounds composed shallow content before root replacement", async (t) => {
   let tailReads = 0,
     roots = 0;
