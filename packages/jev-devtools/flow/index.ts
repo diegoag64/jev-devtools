@@ -182,6 +182,40 @@ export type Resolved<T> =
         : T extends object
           ? { [K in keyof T]: Resolved<T[K]> }
           : T;
+// Compare canonical decimal indices with the largest array index. Recursion
+// stops after at most eleven digits, without constructing a huge tuple.
+type FlowOutputIndexWithinBound<
+  Value extends string,
+  Bound extends string = "4294967294",
+  Order extends "eq" | "lt" | "gt" = "eq",
+> = Value extends `${infer Digit}${infer Rest}`
+  ? Bound extends `${infer BoundDigit}${infer BoundRest}`
+    ? FlowOutputIndexWithinBound<
+        Rest,
+        BoundRest,
+        Order extends "eq"
+          ? Digit extends BoundDigit
+            ? "eq"
+            : "0123456789" extends `${string}${Digit}${string}${BoundDigit}${string}`
+              ? "lt"
+              : "gt"
+          : Order
+      >
+    : false
+  : Bound extends ""
+    ? Order extends "gt"
+      ? false
+      : true
+    : true;
+type FlowOutputIndex<Key> = Key extends `${infer Index extends bigint}`
+  ? `${Index}` extends Key
+    ? Key extends `-${string}`
+      ? never
+      : FlowOutputIndexWithinBound<Key> extends true
+        ? Key
+        : never
+    : never
+  : never;
 // Rebuild standard array methods and known positions without promising attached
 // string/symbol properties that array.map() does not copy. Variadic inference
 // keeps ordinary optional/rest tuples; augmented arrays can need the structural
@@ -189,9 +223,9 @@ export type Resolved<T> =
 type FlowOutputArrayShape<T extends readonly unknown[]> = (T extends unknown[]
   ? Array<FlowOutputValue<T[number]>>
   : ReadonlyArray<FlowOutputValue<T[number]>>) & {
-  [K in keyof T as K extends `${number}` | "length"
+  [K in keyof T as K extends "length"
     ? K
-    : never]: K extends "length" ? T[K] : FlowOutputValue<T[K]>;
+    : FlowOutputIndex<K>]: K extends "length" ? T[K] : FlowOutputValue<T[K]>;
 };
 type FlowOutputElements<T extends readonly unknown[]> = {
   [K in keyof T]: FlowOutputValue<T[K]>;

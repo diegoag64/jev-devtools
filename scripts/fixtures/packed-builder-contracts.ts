@@ -352,6 +352,13 @@ const tagged = defineJevFlow<number>("tagged-array")((f) => {
   const items = Object.assign([f.input], {
     label: "amounts",
     [extraKey]: "symbol",
+    "01": "leading zero",
+    "-1": "negative",
+    "1.5": "fraction",
+    "1e0": "exponent",
+    "0x1": "hex",
+    "-0": "negative zero",
+    "4294967295": "outside array indices",
   });
   Object.defineProperty(items, "label", { enumerable: false });
   // Numeric array positions are visited even when non-enumerable.
@@ -366,13 +373,50 @@ assert.deepEqual(
 );
 assert.equal(Reflect.get(taggedResult.value, "label"), undefined);
 assert.equal(Reflect.get(taggedResult.value, extraKey), undefined);
+for (const key of ["01", "-1", "1.5", "1e0", "0x1", "-0", "4294967295"])
+  assert.equal(Reflect.get(taggedResult.value, key), undefined);
 function unsafeArrayProperties() {
   // @ts-expect-error array projection does not promise attached string fields
   taggedResult.value.label.toUpperCase();
   // @ts-expect-error array projection does not promise attached symbol fields
   taggedResult.value[extraKey].toUpperCase();
+  // @ts-expect-error leading-zero properties are not array positions
+  taggedResult.value["01"].toUpperCase();
+  // @ts-expect-error negative indices do not retain attached string values
+  taggedResult.value["-1"].toUpperCase();
+  // @ts-expect-error fractional indices do not retain attached string values
+  taggedResult.value["1.5"].toUpperCase();
+  // @ts-expect-error exponent spelling is not a canonical array index
+  taggedResult.value["1e0"].toUpperCase();
+  // @ts-expect-error hexadecimal spelling is not a canonical array index
+  taggedResult.value["0x1"].toUpperCase();
+  // @ts-expect-error negative-zero spelling is not a canonical array index
+  taggedResult.value["-0"].toUpperCase();
+  // @ts-expect-error 2^32-1 is an attached property, not an array position
+  taggedResult.value["4294967295"].toUpperCase();
 }
 void unsafeArrayProperties;
+
+// Compile only: never create or traverse an array with billions of positions.
+function arrayIndexTypeBoundaries(f: FlowBuilder<number>) {
+  const output = f.output(
+    "index-boundaries",
+    Object.assign([f.input], {
+      "4294967294": "last array index",
+      "4294967295": "first non-index",
+      "9999999999": "ten digits outside the range",
+      "10000000000": "eleven digits",
+    }),
+  );
+  type Value =
+    typeof output extends FlowExpression<{ value: infer V }> ? V : never;
+  const lastIndex: "4294967294" extends keyof Value ? true : false = true;
+  const firstNonIndex: "4294967295" extends keyof Value ? true : false = false;
+  const tooLarge: "9999999999" extends keyof Value ? true : false = false;
+  const tooLong: "10000000000" extends keyof Value ? true : false = false;
+  void [lastIndex, firstNonIndex, tooLarge, tooLong];
+}
+void arrayIndexTypeBoundaries;
 
 const taggedTuple = defineJevFlow<number>("tagged-tuple")((f) =>
   f.output(
