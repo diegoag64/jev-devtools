@@ -52,6 +52,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Documentation
 
+- **Unreleased Flow API reference.** Distinguish the working tree's builder and result types from version 0.6.0 in the API reference and definition signatures. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
+
 - **Explore cookbooks without setup.** Point guides, cookbook READMEs, and bundled agent guidance to playground.jevtools.dev. Add a Cookbook Playground hero button and a Flow API learning link to the landing page. Local contributor setup remains available. ([#137](https://github.com/diegoag64/jev-devtools/pull/137))
 
 #### Maintenance
