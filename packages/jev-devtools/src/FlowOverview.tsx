@@ -1102,10 +1102,12 @@ export const FlowOverview = memo(function FlowOverview({
                             ? "The continuation condition became false. The loop returned its final state."
                             : "Iterations execute sequentially, carrying state forward."}
                       </p>
-                      <DiagramContent
-                        value={step.data ?? null}
-                        label="Loop initial and latest state"
-                      />
+                      {!step.dataOmitted && (
+                        <DiagramContent
+                          value={step.data ?? null}
+                          label="Loop initial and latest state"
+                        />
+                      )}
                     </div>
                   )}
                   {(node.kind === "task" || node.kind === "merge") && (
@@ -1116,9 +1118,9 @@ export const FlowOverview = memo(function FlowOverview({
                           : "Application function · runs on your server."}{" "}
                         Captured values may be redacted or truncated.
                       </p>
-                      {step.data &&
-                      typeof step.data === "object" &&
-                      !Array.isArray(step.data) ? (
+                      {step.dataOmitted ? null : step.data &&
+                        typeof step.data === "object" &&
+                        !Array.isArray(step.data) ? (
                         ["input", "output"]
                           .filter((key) =>
                             Object.hasOwn(step.data as object, key),
@@ -1153,7 +1155,14 @@ export const FlowOverview = memo(function FlowOverview({
                       )}
                     </div>
                   )}
-                  {step.captureWarnings?.map((warning) => (
+                  {[
+                    ...new Set([
+                      ...(step.captureWarnings ?? []),
+                      ...(step.dataOmitted
+                        ? ["Step data omitted by flow capture byte budget."]
+                        : []),
+                    ]),
+                  ].map((warning) => (
                     <p className="warning" key={warning}>
                       {warning}
                     </p>
@@ -1236,20 +1245,27 @@ export const FlowOverview = memo(function FlowOverview({
                   requests show execution dependencies.
                 </p>
               )}
-              {run.value !== undefined && (
+              {(run.value !== undefined || run.valueOmitted) && (
                 <details>
                   <summary>
                     Captured outcome value
-                    {!!run.captureWarnings?.length && (
+                    {(!!run.captureWarnings?.length || run.valueOmitted) && (
                       <span className="warning"> · Capture warnings</span>
                     )}
                   </summary>
-                  {run.captureWarnings?.map((warning) => (
+                  {[
+                    ...new Set([
+                      ...(run.captureWarnings ?? []),
+                      ...(run.valueOmitted
+                        ? ["Outcome value omitted by flow capture byte budget."]
+                        : []),
+                    ]),
+                  ].map((warning) => (
                     <p className="warning" key={warning}>
                       {warning}
                     </p>
                   ))}
-                  <JsonBlock value={run.value} />
+                  {run.value !== undefined && <JsonBlock value={run.value} />}
                 </details>
               )}
             </div>

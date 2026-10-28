@@ -38,6 +38,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
+- **Optional aggregate flow capture budget.** Set `flowCaptureBytes` to cap serialized step data and outcomes across each nested run. Omitted fields carry explicit metadata and viewer warnings; execution records and application results remain intact. The default capture policy is unchanged, and structural metadata, traces, and observer memory remain outside the allowance. ([#145](https://github.com/diegoag64/jev-devtools/pull/145))
+
 - **Capture-kind redaction context.** Distinguish requests, responses, step data, condition rules, and outcomes with a frozen third callback argument. Existing `(path, value)` policies and paths remain valid; reused captures respect their path, and custom callbacks receive bounded detached views, including SDK images. Identity policies keep shallow data with omission warnings; policies that read omitted content fail closed. ([#138](https://github.com/diegoag64/jev-devtools/pull/138))
 
 - **Inferred Flow outcomes.** Use `defineJevFlow<Input>(name)(build)` to infer terminal names, branch unions, and resolved output values after specifying the input type. `DefinedJevFlow` and `FlowResult` name executable definitions and application results. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))

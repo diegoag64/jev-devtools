@@ -29,6 +29,14 @@ const cases = [
 const selected = process.env.BENCH_CASE ? [process.env.BENCH_CASE] : cases;
 assert.ok(selected.every((name) => cases.includes(name)));
 const origin = "http://localhost:5198";
+const flowCaptureBytes =
+  process.env.BENCH_CAPTURE_BYTES === undefined
+    ? undefined
+    : Number(process.env.BENCH_CAPTURE_BYTES);
+assert.ok(
+  flowCaptureBytes === undefined ||
+    (Number.isSafeInteger(flowCaptureBytes) && flowCaptureBytes >= 0),
+);
 const workload = process.env.BENCH_WORKLOAD ?? "map";
 assert.ok(["map", "nested-history"].includes(workload));
 // Resource sampling is a separate diagnostic, not part of timing comparisons.
@@ -97,6 +105,43 @@ const nestedFlow = defineJevFlow("transport-nested", (f) => {
 const flow = workload === "map" ? mapFlow : nestedFlow;
 function validateFinal(final) {
   assert.equal(final.status, "success");
+  let capturedBytes = 0,
+    omittedValues = 0;
+  const count = (run) => {
+    if (run.value !== undefined)
+      capturedBytes += Buffer.byteLength(JSON.stringify(run.value));
+    if (run.valueOmitted) {
+      assert.notEqual(flowCaptureBytes, undefined);
+      assert.equal(run.valueOmitted, "budget");
+      assert.equal(run.value, undefined);
+      assert.ok(
+        run.captureWarnings.includes(
+          "Outcome value omitted by flow capture byte budget.",
+        ),
+      );
+      omittedValues++;
+    }
+    for (const step of Object.values(run.steps)) {
+      if (step.data !== undefined)
+        capturedBytes += Buffer.byteLength(JSON.stringify(step.data));
+      if (step.dataOmitted) {
+        assert.notEqual(flowCaptureBytes, undefined);
+        assert.equal(step.dataOmitted, "budget");
+        assert.equal(step.data, undefined);
+        assert.ok(
+          step.captureWarnings.includes(
+            "Step data omitted by flow capture byte budget.",
+          ),
+        );
+        omittedValues++;
+      }
+      for (const item of step.collection?.items ?? [])
+        if (item.run) count(item.run);
+    }
+  };
+  count(final);
+  if (flowCaptureBytes !== undefined)
+    assert.ok(capturedBytes <= flowCaptureBytes);
   const batches =
     workload === "map"
       ? [final.steps.items.collection]
@@ -109,15 +154,21 @@ function validateFinal(final) {
     assert.equal(batch.items.length, workload === "map" ? 64 : 8);
     for (const item of batch.items) {
       assert.equal(item.run.status, "success");
+      if (item.run.steps.work.dataOmitted === "budget") continue;
       assert.equal(
         item.run.steps.work.data.output,
         workload === "map" ? "x".repeat(16000) : "n".repeat(4000),
       );
     }
   }
+  return { capturedBytes, omittedValues };
 }
 async function measure(name) {
-  const inspector = createJevDevtools({ origin, enabled: name !== "disabled" });
+  const inspector = createJevDevtools({
+    origin,
+    enabled: name !== "disabled",
+    flowCaptureBytes,
+  });
   const seeded = new Set();
   let observerUpdates = 0;
   const observer = {
@@ -196,6 +247,7 @@ async function measure(name) {
           initialBytes,
           initialClientMs,
           finalWarnings: final.captureWarnings,
+          capture: validateFinal(final),
         };
       }
     }
@@ -347,6 +399,7 @@ const report = {
   platform: platform(),
   osRelease: release(),
   workload,
+  capturePolicy: { flowCaptureBytes: flowCaptureBytes ?? null },
   resources,
   method:
     "One warmup per timing case; sequential cases reversed on alternate rounds. Resource diagnostic has no warmup and one case/round, 1ms memory sampling (lower bound on peak), process maxRSS, and post-GC history/clear checkpoints; not a leak test. Public exports; no network/inference. Execution timings exclude history seeding, connection encoding and reconnect. Client time includes decode/JSON parse and map reconstruction but not browser validation/rendering. Completion heap is allocation pressure. Observer case projects snapshots without recorder storage.",

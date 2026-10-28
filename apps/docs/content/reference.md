@@ -168,6 +168,8 @@ Each call creates independent in-memory histories. Use [`getJevDevtools()`](#get
 
 Invalid origin or endpoint configuration throws. Enabling a non-loopback origin without `authorize` also throws. See [Privacy & access](@/guides/privacy/) for authentication, session scopes, and redaction.
 
+Unreleased: `options.flowCaptureBytes` optionally caps aggregate serialized step data and outcomes across each nested flow run. It accepts a nonnegative safe integer, including zero; invalid values throw. Omitted fields retain explicit metadata and warnings. Execution values and structural records remain intact. Metadata, definitions, request traces, and observer memory are excluded. See [server capture configuration](@/api/server/).
+
 #### Returns
 
 | Value / member | Type      | Description                                                                        |
@@ -1663,7 +1665,7 @@ new JevRecorder(options?: CaptureOptions): JevRecorder
 | ------------------ | ---------------- |
 | `options?`         | `CaptureOptions` |
 
-The optional `limit` defaults to 50 and is clamped to 1–200 across all sessions. The optional `redact(path, value, context)` callback transforms captured values. If transformed JSON cannot support a structured request or result view, `Trace.capture` retains it and `captureWarnings` explains the unavailable view. The drawer displays usable fields beside placeholders for incompatible fields. Fixture export still reports an incompatible response as missing.
+`flowCaptureBytes` is used by the server adapter's flow recorder; it has no effect on standalone request recording. The optional `limit` defaults to 50 and is clamped to 1–200 across all sessions. The optional `redact(path, value, context)` callback transforms captured values. If transformed JSON cannot support a structured request or result view, `Trace.capture` retains it and `captureWarnings` explains the unavailable view. The drawer displays usable fields beside placeholders for incompatible fields. Fixture export still reports an incompatible response as missing.
 
 History is bounded process memory, not durable storage. Pair `instrument()` with `transport()` to record both logical SDK calls and their HTTP attempts.
 
