@@ -32,7 +32,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **Capture fidelity.** Add optional exact, modified, or unknown provenance for captured requests, responses, rules, step data, and outcomes. Legacy captures remain readable; custom callbacks cannot certify exactness, and fixture export semantics stay unchanged.
+- **Capture fidelity.** Add optional exact, modified, or unknown provenance for captured requests, responses, rules, step data, and outcomes. Legacy captures remain readable; custom callbacks cannot certify exactness, and fixture export semantics stay unchanged. ([#141](https://github.com/diegoag64/jev-devtools/pull/141))
 
 #### Changed
 
