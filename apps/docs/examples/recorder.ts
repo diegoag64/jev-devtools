@@ -1,7 +1,13 @@
 import { choice, TypeSafeClient } from "@typesafe-ai/sdk";
 import { JevRecorder } from "jev-devtools/server";
 
-export const recorder = new JevRecorder({ limit: 50 });
+export const recorder = new JevRecorder({
+  limit: 50,
+  redact: (path, value, context) =>
+    context.kind === "request" && path.at(-1) === "email"
+      ? "[redacted]"
+      : value,
+});
 export const client = recorder.instrument(
   new TypeSafeClient({
     apiKey: process.env.TYPESAFE_API_KEY,

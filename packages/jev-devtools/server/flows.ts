@@ -13,10 +13,10 @@ export class FlowRecorder {
   private revisions = new Map<string, number>();
   private revision = 0;
   private listeners = new Set<(sessions: Set<string>) => void>();
-  private itemCaptures = new WeakMap<FlowRun, FlowRun>();
+  private itemCaptures = new WeakMap<FlowRun, Map<string, FlowRun>>();
   private taskCaptures = new WeakMap<
     object,
-    { data: Json; warnings: string[] }
+    Map<string, { data: Json; warnings: string[] }>
   >();
   constructor(private options: CaptureOptions) {}
   subscribe(fn: (sessions: Set<string>) => void) {
@@ -49,12 +49,14 @@ export class FlowRecorder {
               node.conditionRule,
               warnings,
               this.options.redact
-                ? (path, value) =>
+                ? (path, value, context) =>
                     this.options.redact!(
                       ["conditions", ...prefix, node.id, ...path],
                       value,
+                      context,
                     )
                 : undefined,
+              { kind: "condition-rule" },
             );
           } catch {
             node.conditionRule = "[rule capture unavailable]";
@@ -80,8 +82,12 @@ export class FlowRecorder {
     this.notify(sessions);
   }
   private captureRun(run: FlowRun, prefix: string[] = []): FlowRun {
-    // Child updates are immutable snapshots; unchanged items need no recapture.
-    const previous = prefix.length ? this.itemCaptures.get(run) : undefined;
+    // Child updates are immutable snapshots. Reuse only at the same callback
+    // prefix: the same producer object can occur at different nested locations.
+    const scope = JSON.stringify(prefix);
+    const previous = prefix.length
+      ? this.itemCaptures.get(run)?.get(scope)
+      : undefined;
     if (previous) return previous;
     const stored = {
       ...run,
@@ -108,9 +114,11 @@ export class FlowRecorder {
             };
           if (step.data === undefined) return [id, { ...step }];
           const key = step.data;
+          // Kind is fixed to step-data in this cache; include the full path.
+          const location = JSON.stringify([...prefix, "steps", id, "data"]);
           let captured =
             key && typeof key === "object"
-              ? this.taskCaptures.get(key)
+              ? this.taskCaptures.get(key)?.get(location)
               : undefined;
           if (!captured) {
             const warnings = new Set<string>();
@@ -121,20 +129,25 @@ export class FlowRecorder {
                   step.data,
                   warnings,
                   this.options.redact
-                    ? (path, value) =>
+                    ? (path, value, context) =>
                         this.options.redact!(
                           [...prefix, "steps", id, "data", ...path],
                           value,
+                          context,
                         )
                     : undefined,
+                  { kind: "step-data" },
                 ) ?? null;
             } catch {
               data = "[capture unavailable]";
               warnings.add("Task capture unavailable.");
             }
             captured = { data, warnings: [...warnings] };
-            if (key && typeof key === "object")
-              this.taskCaptures.set(key, captured);
+            if (key && typeof key === "object") {
+              const captures = this.taskCaptures.get(key) ?? new Map();
+              captures.set(location, captured);
+              this.taskCaptures.set(key, captures);
+            }
           }
           return [
             id,
@@ -159,8 +172,10 @@ export class FlowRecorder {
           stored.value,
           warnings,
           this.options.redact
-            ? (path, value) => this.options.redact!([...prefix, ...path], value)
+            ? (path, value, context) =>
+                this.options.redact!([...prefix, ...path], value, context)
             : undefined,
+          { kind: "outcome" },
         );
       } catch {
         stored.value = "[capture unavailable]";
@@ -168,7 +183,11 @@ export class FlowRecorder {
       }
       stored.captureWarnings = [...warnings];
     }
-    if (prefix.length) this.itemCaptures.set(run, stored);
+    if (prefix.length) {
+      const captures = this.itemCaptures.get(run) ?? new Map();
+      captures.set(scope, stored);
+      this.itemCaptures.set(run, captures);
+    }
     return stored;
   }
   update(run: FlowRun) {

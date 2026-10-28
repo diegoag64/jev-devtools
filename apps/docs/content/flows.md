@@ -38,7 +38,7 @@ Passing `devtools: inspector` records the flow, while the instrumented `jev` cli
 
 [`run()`](@/api/reference/#flow-run) resolves to an object with a unique `runId`, an `outcome` string, and an optional `value`. This example returns an outcome name without a value.
 
-Use `result.outcome` in your application to decide what happens next. If another flow returns a value, its public type is `unknown`. Validate or narrow it before using it. The return type is not inferred as a discriminated union of the terminal paths.
+Use `result.outcome` in your application to decide what happens next. Existing explicit-input two-argument definitions return `value?: unknown`; validate or narrow it before use. Use the [inferred application result form](@/api/flow/#inferred-application-results), `defineJevFlow<Input>(name)(build)`, when the handler needs a discriminated union of terminal paths.
 
 ## Keep decisions explicit
 

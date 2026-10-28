@@ -179,6 +179,12 @@ npm run verify:nextjs
 
 `check:playground` compiles the full interactive development UI into a temporary directory. The regular production build intentionally contains only a local-tool notice; it is not a hosted demo.
 
+`verify:package`, `verify:nextjs`, and `check:playground` remove their temporary projects after success, setup or test failure, and handled SIGINT/SIGTERM cancellation. A supervisor owns each directory from creation through cleanup. It runs synchronous installs and builds in a worker, stops the worker and its descendants, then removes the directory. On POSIX systems, workers use an owned process group. Windows uses `taskkill /T /F`; if the worker exits abruptly before that command can identify its tree, cleanup fails and retains the path for inspection. The full runner requests supervisor shutdown over IPC, including on Windows, where a process kill is not a catchable POSIX signal. It allows 30 seconds for shutdown before force-killing its step. The independent installs, packed declaration checks, and Next.js development and production checks still run.
+
+Fixtures are not retained for debugging. Save standalone output under ignored `benchmarks/results/`, for example `npm run verify:nextjs > benchmarks/results/nextjs.log 2>&1` after creating that directory. Full-suite logs and summaries already go there. Keep the compact evidence you need and remove obsolete local evidence after review.
+
+SIGKILL, forced Windows termination, a host crash, or an exhausted shutdown deadline can prevent cleanup. A cleanup failure fails the command and prints the exact directory alongside the original verification failure. Each run also prints its supervisor and worker PIDs. Before manually removing a leftover directory, confirm it is the exact path printed by that run and that its supervisor, worker, and descendants have stopped. Check process start times as well as PIDs because PIDs can be reused. Remove only that directory. Do not sweep shared temporary directories by prefix or remove another active run's files.
+
 After `npm run pack:devtools`, you can also run `npm install && npm run dev` inside `examples/react-vite` (port 4183, sample-only).
 
 ### Receipt-only verification

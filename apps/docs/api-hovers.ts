@@ -19,6 +19,11 @@ export type ApiHover = {
 };
 const functions: Record<string, Spec> = {
   define: { help: "define", result: "program", callbacks: { 1: "builder" } },
+  defineBuild: {
+    help: "define",
+    result: "program",
+    callbacks: { 0: "builder" },
+  },
   adapterCreate: {
     help: "adapterCreate",
     result: "adapter",
@@ -161,6 +166,11 @@ export function apiHovers(
       const kind = env.get(expression.text);
       return kind?.startsWith("fn:") ? functions[kind.slice(3)] : undefined;
     }
+    if (
+      ts.isCallExpression(expression) &&
+      kindOf(expression, env) === "fn:defineBuild"
+    )
+      return functions.defineBuild;
     if (ts.isPropertyAccessExpression(expression))
       return methods[kindOf(expression.expression, env) ?? ""]?.[
         expression.name.text
@@ -169,8 +179,12 @@ export function apiHovers(
   function kindOf(node: ts.Expression, env: Scope): Kind {
     if (ts.isParenthesizedExpression(node)) return kindOf(node.expression, env);
     if (ts.isIdentifier(node)) return env.get(node.text);
-    if (ts.isCallExpression(node) || ts.isNewExpression(node))
-      return callSpec(node.expression, env)?.result;
+    if (ts.isCallExpression(node) || ts.isNewExpression(node)) {
+      const spec = callSpec(node.expression, env);
+      if (spec === functions.define && node.arguments?.length === 1)
+        return "fn:defineBuild";
+      return spec?.result;
+    }
     if (ts.isPropertyAccessExpression(node)) {
       const owner = kindOf(node.expression, env);
       if (
@@ -256,7 +270,7 @@ export function apiHovers(
     }
     if (ts.isCallExpression(node) || ts.isNewExpression(node)) {
       const spec = callSpec(node.expression, env);
-      if (spec)
+      if (spec && !ts.isCallExpression(node.expression))
         add(
           ts.isPropertyAccessExpression(node.expression)
             ? node.expression.name

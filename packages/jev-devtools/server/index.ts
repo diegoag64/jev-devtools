@@ -7,7 +7,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { TypeSafeClient } from "@typesafe-ai/sdk";
 import { JevRecorder, type CaptureOptions } from "./recorder.js";
 export { JevRecorder } from "./recorder.js";
-export type { CaptureOptions } from "./recorder.js";
+export type { CaptureOptions, CaptureContext } from "./recorder.js";
 export type JevDevtoolsServerOptions = CaptureOptions & {
   /** Explicit opt-in; disabled by default. */
   enabled?: boolean;

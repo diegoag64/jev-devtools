@@ -11,9 +11,10 @@ export type Help = {
 const flowHelp = {
   define: {
     title: "defineJevFlow()",
-    signature: "defineJevFlow<Input>(name, build)",
+    signature:
+      "defineJevFlow<Input>(name, build) or defineJevFlow<Input>(name)(build)",
     description:
-      "Describe a flow once, then run it with different inputs. Defining it does not send requests.",
+      "Describe a flow once, then run it with different inputs. The curried form infers terminal results after the explicit input type. Defining it sends no requests.",
     props: {
       name: "The flow name shown in DevTools.",
       build: "Receives a builder. Return an output or a terminal branch.",
@@ -43,7 +44,7 @@ const flowHelp = {
     title: "flow.branch()",
     signature: "flow.branch(id, { when, then, else }, display?)",
     description:
-      "Finish the flow by choosing one of two paths. Each path must return an output or another branch.",
+      "Finish this terminal scope by choosing one of two paths. The result unions their outcome types. Inside a parallel lane, the outcome is a lane value.",
     props: {
       id: "A unique step ID within this flow.",
       when: "A flow condition evaluated when the branch runs.",
@@ -60,7 +61,7 @@ const flowHelp = {
     props: {
       name: "The outcome string returned by run().",
       "value?":
-        "Optional result data. Narrow its type in your application before using it.",
+        "Whole expressions retain exact values. Direct object fields may be absent or unresolved; narrow before use. Direct arrays preserve elements but do not promise attached properties. Legacy explicit-input definitions return unknown.",
       "display?": "Optional labels and display metadata for DevTools.",
     },
   },
@@ -107,7 +108,7 @@ const capture = {
   limit:
     "Maximum retained request traces across sessions. Defaults to 50; clamped to 1–200.",
   redact:
-    "Transform the captured copy before storage or streaming. Incompatible structured content remains as JSON in Trace.capture with warnings. The drawer keeps usable fields visible beside unavailable placeholders. SDK inputs and application values stay unchanged.",
+    "Transform the captured copy before storage or streaming. Callback values are bounded detached views. Policies that read omitted data fail closed with capture warnings. Unreleased: a frozen third argument identifies the capture kind; existing paths and two-argument policies remain valid. Incompatible structured content remains as JSON in Trace.capture with warnings. The drawer keeps usable fields visible beside unavailable placeholders. SDK inputs and application values stay unchanged.",
 };
 const adapter = {
   enabled:
