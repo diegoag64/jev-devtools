@@ -41,7 +41,9 @@ try {
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
-  await page.goto("http://127.0.0.1:4182/?cookbook=pre-parsed-extraction");
+  await page.goto(
+    "http://127.0.0.1:4182/?legacy=1&cookbook=pre-parsed-extraction",
+  );
   await page
     .getByRole("heading", { name: "Find the spans. Select the value." })
     .waitFor();

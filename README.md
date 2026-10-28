@@ -5,7 +5,7 @@
 A React inspector for TypeSafe Jev requests captured through a Node server adapter.<br />
 Inspect request inputs, returned answers and probabilities, retries, and errors.
 
-[![npm version 0.5.6](https://img.shields.io/badge/npm-v0.5.6-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.5.6)
+[![npm version 0.6.0](https://img.shields.io/badge/npm-v0.6.0-E551BA?labelColor=0D0A0F&logo=npm)](https://www.npmjs.com/package/jev-devtools/v/0.6.0)
 [![CI](https://github.com/diegoag64/jev-devtools/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/diegoag64/jev-devtools/actions/workflows/ci.yml)
 [![React 18 / 19](https://img.shields.io/badge/React-18%20%2F%2019-61DAFB?logo=react&logoColor=61DAFB&labelColor=0D0A0F)](#add-to-your-app)
 [![Next.js App Router](https://img.shields.io/badge/Next.js-App%20Router-white?logo=nextdotjs&labelColor=0D0A0F)](https://docs.jevtools.dev/guides/nextjs/)
@@ -87,7 +87,7 @@ The [repository Next.js guide](docs/nextjs.md) and [runnable example](examples/n
 
 ### Versions and local builds
 
-**Source version: 0.5.6.** [See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.6) Install published releases from npm. APIs remain experimental before 1.0. Check the [changelog](CHANGELOG.md) for compatibility and release status.
+**Source version: 0.6.0.** [See release notes for verified publication status.](https://github.com/diegoag64/jev-devtools/releases/tag/v0.6.0) Install published releases from npm. APIs remain experimental before 1.0. Check the [changelog](CHANGELOG.md) for compatibility and release status.
 
 <details>
 <summary>Install a packed checkout in your own app</summary>
@@ -99,7 +99,7 @@ After installing this repository's dependencies, pack the checkout and install i
 npm run pack:devtools
 
 # In your React application:
-npm install /absolute/path/to/jev-devtools/jev-devtools-0.5.6.tgz
+npm install /absolute/path/to/jev-devtools/jev-devtools-0.6.0.tgz
 ```
 
 The archive includes local code changes and the bundled setup skill. Keep the drawer and server adapter on the same build.

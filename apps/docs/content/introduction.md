@@ -56,7 +56,7 @@ Known credential fields are redacted from captures. The drawer also masks suppor
 
 The inspector uses React and React DOM **18 or 19**, Node **22.12+**, and TypeSafe SDK **0.7.x**. The server adapter and flow runner require Node. Edge runtimes are unsupported. See the [Quick start prerequisites](@/getting-started/#before-you-begin) for the complete setup requirements.
 
-These pages describe **version 0.5.6**. Check your installed version and the [release notes for verified publication status](https://github.com/diegoag64/jev-devtools/releases/tag/v0.5.6). The package is experimental before 1.0. The [changelog](@/changelog/) records changes and compatibility notes.
+These pages describe **version 0.6.0**. Check your installed version and the [release notes for verified publication status](https://github.com/diegoag64/jev-devtools/releases/tag/v0.6.0). The package is experimental before 1.0. The [changelog](@/changelog/) records changes and compatibility notes.
 
 ## Next steps
 

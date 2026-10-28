@@ -30,7 +30,7 @@ try {
     ["function-calling", 1],
     ["line-search", 1],
   ]) {
-    await page.goto("http://127.0.0.1:4182/?cookbook=" + slug);
+    await page.goto("http://127.0.0.1:4182/?legacy=1&cookbook=" + slug);
     await page.locator("#scenario").waitFor();
     await page.evaluate(async () => {
       const response = await fetch("/api/jev-devtools/clear", {

@@ -123,6 +123,33 @@ const adapter = {
 };
 export const apiHelp: Record<string, Help> = {
   ...flowHelp,
+  viewer: entry(
+    "JevFlowViewer",
+    "<JevFlowViewer definition={definition} run={run} traces={traces} />",
+    "Unreleased. Embed the drawer's flow diagram in a Shadow DOM. Without a run it shows the authored structure; rendering never executes the flow.",
+    {
+      definition: "The authored FlowDefinition to render.",
+      run: "Optional captured execution for this definition.",
+      traces: "Captured request details; defaults to an empty array.",
+      selectedNodeId: "Control which top-level node is selected.",
+      onNodeSelect: "Receive the selected node ID.",
+      visibleNodeIds:
+        "Limit the presented top-level nodes without modifying execution.",
+      highlightedNodeIds: "Outline matching nodes.",
+      nodeAccents: "CSS colors indexed by node ID for source-to-diagram cues.",
+    },
+  ),
+  inspection: entry(
+    "useJevInspection()",
+    "useJevInspection({ enabled, endpoint? })",
+    "Unreleased. Subscribe to validated, display-masked flow and trace snapshots from the existing server adapter.",
+    {
+      enabled:
+        "Opt in to connecting. Defaults to false; enable the server separately.",
+      endpoint:
+        "Same-origin inspector path, default /api/jev-devtools. Queries and fragments are rejected.",
+    },
+  ),
   react: entry(
     "JevDevtools",
     "<JevDevtools enabled defaultOpen={false} />",

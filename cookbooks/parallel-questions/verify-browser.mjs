@@ -47,7 +47,9 @@ try {
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("http://127.0.0.1:4182/?cookbook=parallel-questions");
+  await page.goto(
+    "http://127.0.0.1:4182/?legacy=1&cookbook=parallel-questions",
+  );
   await page
     .getByRole("heading", { name: "Ask 13 questions. Compare two strategies." })
     .waitFor();

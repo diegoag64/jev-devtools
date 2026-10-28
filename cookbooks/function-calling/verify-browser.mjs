@@ -43,7 +43,7 @@ try {
     visited = [];
   page.on("pageerror", (error) => errors.push(String(error)));
   const button = (name) => page.getByRole("button", { name, exact: true });
-  await page.goto("http://127.0.0.1:4182/?cookbook=function-calling");
+  await page.goto("http://127.0.0.1:4182/?legacy=1&cookbook=function-calling");
   assert.equal(
     await page.locator("#scenario").inputValue(),
     "flow-function-calling",

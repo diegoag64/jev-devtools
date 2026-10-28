@@ -11,7 +11,17 @@ npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:4182/. Sample mode needs no API key. Run a scenario to see its application result, then open **Jev DevTools** in the bottom-right corner to inspect the call. Samples cover Choice, Score, Noul, Box, retries, errors, and cancellation. Flow samples add approval/review outcomes, parallel checks with a join, and failed/cancelled runs. Fixture responses do not change when you edit context.
+Open http://127.0.0.1:4182/ for the **Flow Workbench**. Choose one of 19 cookbooks and inspect its actual `flow.ts` beside the package's diagram. **Complete flow** opens with a synthetic sample capture, including the same request diagrams and collection item controls as the drawer. **Step-by-step guide** narrates the TypeSafe recipe and reveals one Flow operation at a time while retaining those request details. Timeline colors connect source ranges and diagram nodes. Select code or a line number to highlight the corresponding nodes, or select a node to find its source. Maps and loops also expose their authored item programs.
+
+**Cookbook overview** introduces each recipe and explains how its Flow methods fit together. The walkthrough explains what each step does and why it uses that method, without requiring an external tutorial. **Original Cookbook** in the top-right corner links to the selected TypeSafe recipe. The panel icon at the left of the toolbar shows or hides the cookbook library.
+
+Short step comments explain the purpose of each operation in the source view. Use the comment icon beside **Copy source** to show or hide them; the preference is remembered across cookbooks. Copy includes the notes when they are shown and returns the original source when they are hidden. Line numbers always refer to the original `flow.ts`.
+
+The workspace fills the viewport. Drag the divider to resize the code and diagram, or focus it and use the arrow keys. Press Enter or double-click to restore the default split. Wide and narrow layouts remember their proportions separately. Each panel header has compact controls to expand that pane in a popup or show it alone. In walkthrough mode, the popup keeps Previous and Next controls beside the current step title. Advancing updates the code and diagram together, and closing the popup keeps the reached step. Close the popup with Escape, its close icon, or a click on the backdrop. Drag the divider to either edge to hide a pane, then use Show both panels to restore the split. The mounted code and diagram retain their reading position, comments, selected collection item, and request controls. If the walkthrough advances while code is hidden, restoring code reveals the current step. The cookbook library can be hidden, and the compact guide keeps its controls above the panels. Input, results, and adaptation notes open from the bottom bar without moving the diagram.
+
+**Run sample** is available in both views. It executes the complete cookbook with synthetic answers and streams request diagrams, step details, and the application result without a drawer or API key. Running from the guide keeps the current step selected; it never executes partial code. Use the request controls to explore probabilities and animate the diagram, or open a map or loop item to inspect its captured requests. Opening an item frames its expanded flow, including the item navigation controls. Closing it returns focus to the selected step. Initial previews run the same fixtures through a separate recorder with no artificial delay, so browsing a recipe does not add runs to the drawer history. Switching samples prepares a matching preview. Each recipe links to the original TypeSafe cookbook and describes local adaptations; sample runs do not measure model accuracy, latency, or cost.
+
+The [Request lab](http://127.0.0.1:4182/?legacy=1) retains individual calls, edge cases, optional live mode, the original cookbook result views, and the drawer. Add `legacy=1` to a cookbook URL to use its former interface. Existing recipe browser checks cover that route; the workbench has its own collection-wide interaction check. Sources and tutorial mappings are served only by the local development server, behind the existing same-origin and session checks.
 
 ## Cookbook examples
 
@@ -27,7 +37,7 @@ Controls cover 3/6/7/150 choices, tied probabilities, zero-probability alternati
 
 ## Optional live mode
 
-For optional live mode, copy `apps/playground/.env.example` to `apps/playground/.env.local`, set `TYPESAFE_API_KEY`, and restart. Keys stay on the server. Verification uses sample responses; live inference has not been verified.
+For optional live mode in the Request lab, copy `apps/playground/.env.example` to `apps/playground/.env.local`, set `TYPESAFE_API_KEY`, and restart. Keys stay on the server. Verification uses sample responses; live inference has not been verified.
 
 ## Development
 
@@ -51,6 +61,6 @@ The [Function calling cookbook](../../cookbooks/function-calling/README.md) open
 
 ### Choice self-consistency
 
-Open `http://127.0.0.1:4182/?cookbook=consistency-choices` for the [Choice self-consistency adaptation](../../cookbooks/consistency-choices/README.md). It keeps the original post, eight Choice questions and 15 sequential requests, with authored varying distributions. Inspect each repeat and its question gates in Flows, or select heatmap cells for raw probabilities and separate confidence. Below 0.60 abstains; exactly 0.60 accepts. Samples do not measure consistency, accuracy, latency or cost; live mode and other-provider comparisons are excluded.
+Open `http://127.0.0.1:4182/?cookbook=consistency-choices` for the [Choice self-consistency adaptation](../../cookbooks/consistency-choices/README.md). It keeps the original post, eight Choice questions and 15 sequential requests, with authored varying distributions. Inspect each repeat and its question gates in Flows, or open the Request lab with `legacy=1` and select heatmap cells for raw probabilities and separate confidence. Below 0.60 abstains; exactly 0.60 accepts. Samples do not measure consistency, accuracy, latency or cost; live mode and other-provider comparisons are excluded.
 
 The [Noul self-consistency cookbook](../../cookbooks/consistency-nouls/README.md) runs at `/?cookbook=consistency-nouls`. It preserves fifteen sequential fourteen-question requests and the inclusive 0.30–0.70 uncertainty band. Its authored variation and statistics are fixture demonstrations, not measured model consistency or a provider comparison; live mode is rejected.

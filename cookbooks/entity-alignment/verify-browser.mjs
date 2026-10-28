@@ -48,7 +48,7 @@ try {
   });
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
-  await page.goto(`${origin}/?cookbook=entity-alignment`);
+  await page.goto(`${origin}/?legacy=1&cookbook=entity-alignment`);
   await page
     .getByRole("heading", { name: "Compare records. Inspect the match." })
     .waitFor();

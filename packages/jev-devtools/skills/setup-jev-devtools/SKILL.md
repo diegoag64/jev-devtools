@@ -19,7 +19,7 @@ Inspect the app's package manager/lockfile, React and Node versions, root compon
 
 Install `jev-devtools` using the app's existing package manager (npm: `npm install jev-devtools @typesafe-ai/sdk`; pnpm: `pnpm add jev-devtools @typesafe-ai/sdk`; Yarn: `yarn add jev-devtools @typesafe-ai/sdk`; Bun: `bun add jev-devtools @typesafe-ai/sdk`). `@typesafe-ai/sdk` is a peer dependency: keep the app's existing SDK version when it satisfies the peer range. Install in the workspace(s) that actually import it. It is a regular dependency when application modules import it, even though capture/display are development-only. Do not replace the app's framework or upgrade unrelated dependencies to force compatibility.
 
-### Consumer compatibility (0.5.6)
+### Consumer compatibility (0.6.0)
 
 | Requirement       | Contract                                                                                                                              |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -35,11 +35,13 @@ Import application APIs from `jev-devtools` (React and browser-safe capture help
 
 ## Optional connected flow API
 
-When asked to build or inspect connected calls, read [references/flows.md](references/flows.md) after the framework recipe. For 0.5.6 it covers requests, server function tasks, runtime request factories, parallel checks, terminal branches, returning conditionals, bounded collections, stateful loops, captured-answer replay, and fixture comparison. It includes sample verification, scope/execution rules, diagnostic handling, and privacy limits. For an older installation, use its bundled recipe and declarations rather than assuming these operations exist. Preserve existing application policies; do not convert unrelated calls just to install the drawer. Flow execution is server-only and continues even with the inspector disabled.
+For an embedded diagram instead of the drawer, follow the version-gated workspace viewer guidance in [references/flows.md](references/flows.md). Version 0.6.0 adds the browser-safe `jev-devtools/viewer` public entry; use it only when the installed export exists.
+
+When asked to build or inspect connected calls, read [references/flows.md](references/flows.md) after the framework recipe. For 0.6.0 it covers requests, server function tasks, runtime request factories, parallel checks, terminal branches, returning conditionals, bounded collections, stateful loops, captured-answer replay, and fixture comparison. It includes sample verification, scope/execution rules, diagnostic handling, and privacy limits. For an older installation, use its bundled recipe and declarations rather than assuming these operations exist. Preserve existing application policies; do not convert unrelated calls just to install the drawer. Flow execution is server-only and continues even with the inspector disabled.
 
 ## Integration invariants
 
-- Use only public imports: `jev-devtools` and server-only `jev-devtools/server` and `jev-devtools/flow`. No provider, TanStack DevTools shell, Tailwind, or shadcn setup is needed; TanStack Virtual is an internal dependency.
+- Use only public imports: `jev-devtools`, the version-gated `jev-devtools/viewer` browser entry, and server-only `jev-devtools/server` and `jev-devtools/flow`. No provider, TanStack DevTools shell, Tailwind, or shadcn setup is needed; TanStack Virtual is an internal dependency.
 - Mount `<JevDevtools />` once with an explicit development flag. The drawer injects its own stylesheet into a Shadow DOM host under `document.body`; no CSS import is needed. Do not add global `section`/`main` padding overrides to repair the drawer. Keep document-level transforms/filters on an app wrapper rather than `html`/`body`, which can affect fixed overlays. Server capture must also be explicitly enabled for development; both default to off.
 - Create a shared adapter; the inspector routes and application client must use it in the same Node realm/process. Replace existing `new TypeSafeClient(options)` construction with `inspector.createClient(options)` while preserving keys, transport options, retries, and call semantics. Keep existing `systemOne(...)` inputs and application behavior.
 - Browser and server `endpoint` paths must agree (default `/api/jev-devtools`). Route the base path and its subpaths. The server `origin` must exactly match the browser scheme, hostname, and port. A browser endpoint is a same-origin path, not an absolute backend URL.

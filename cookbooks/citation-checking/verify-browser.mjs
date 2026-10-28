@@ -57,13 +57,13 @@ try {
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
-  await page.goto("http://127.0.0.1:4182/");
+  await page.goto("http://127.0.0.1:4182/?legacy=1");
   await page.getByRole("button", { name: "Run sample", exact: true }).waitFor();
   await page.screenshot({
     path: `${output}/before-general-playground.png`,
     fullPage: true,
   });
-  await page.goto("http://127.0.0.1:4182/?cookbook=citation-checking");
+  await page.goto("http://127.0.0.1:4182/?legacy=1&cookbook=citation-checking");
   assert.equal(await page.locator("#scenario").inputValue(), "flow-citation");
   assert.equal(await page.locator("#context").getAttribute("readonly"), "");
   assert.equal(

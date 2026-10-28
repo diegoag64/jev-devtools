@@ -33,7 +33,7 @@ try {
   page.on("request", (request) => {
     if (request.url().includes("/__jev/run")) runs++;
   });
-  await page.goto("http://127.0.0.1:4182/?cookbook=guardrails");
+  await page.goto("http://127.0.0.1:4182/?legacy=1&cookbook=guardrails");
   await page
     .getByRole("heading", { name: "LLM guardrails", exact: true })
     .waitFor();

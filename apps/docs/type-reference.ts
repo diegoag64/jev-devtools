@@ -33,6 +33,8 @@ const descriptions: Record<string, string> = {
 };
 
 const supportingDescriptions: Record<string, string> = {
+  FlowHistory:
+    "Retained flow runs and their definitions inside an InspectionSnapshot. The validated stream updates both collections together, including removal and reconnection snapshots.",
   Scalar:
     "The value types accepted by flow equality: string, number, boolean, and null. Execution also requires matching types and finite numbers.",
   ExpressionFields:
@@ -63,7 +65,12 @@ export function publicTypeReference(referenceMarkdown: string) {
       ),
     ].map((match) => [match[1], match[2]]),
   );
-  const modules = ["jev-devtools", "jev-devtools/server", "jev-devtools/flow"];
+  const modules = [
+    "jev-devtools",
+    "jev-devtools/server",
+    "jev-devtools/flow",
+    "jev-devtools/viewer",
+  ];
   const roots = modules.map((name) =>
     fileURLToPath(import.meta.resolve(name)).replace(/\.js$/, ".d.ts"),
   );

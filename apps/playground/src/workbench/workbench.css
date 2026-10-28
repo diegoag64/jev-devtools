@@ -1,0 +1,981 @@
+/* The workbench owns its page styles. The public viewer isolates drawer CSS in a shadow root. */
+:root {
+  font-family:
+    Inter,
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  color: #e6e8ed;
+  background: #101216;
+  font-synthesis: none;
+  color-scheme: dark;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button,
+a,
+input,
+select,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+select,
+summary {
+  cursor: pointer;
+}
+a {
+  color: inherit;
+}
+button {
+  color: inherit;
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible,
+pre:focus-visible {
+  outline: 2px solid #9cafff;
+  outline-offset: 4px;
+}
+::selection {
+  background: #53619a;
+  color: #fff;
+}
+.wb-app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  height: 100dvh;
+  overflow: hidden;
+}
+.wb-app[data-library-open] {
+  grid-template-columns: 200px minmax(0, 1fr);
+}
+.wb-library[hidden] {
+  display: none;
+}
+.wb-skip {
+  position: fixed;
+  top: -100px;
+  z-index: 20;
+  background: #232b40;
+  padding: 12px;
+}
+.wb-skip:focus {
+  top: 8px;
+}
+.wb-library {
+  background: #13151a;
+  border-right: 1px solid #282b32;
+  padding: 18px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  position: sticky;
+  top: 0;
+}
+.wb-brand {
+  font-size: 24px;
+  font-weight: 750;
+  letter-spacing: -1px;
+  text-decoration: none;
+  margin: 0 10px 22px;
+}
+.wb-brand span {
+  font-size: 12px;
+  letter-spacing: 0;
+  font-weight: 400;
+  color: #9499a6;
+}
+.wb-library-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 10px 14px;
+}
+.wb-library-title h2 {
+  font-size: 13px;
+  margin: 0;
+  font-weight: 600;
+}
+.wb-library-title button {
+  border: 0;
+  background: none;
+  color: #949dad;
+  font-size: 20px;
+  line-height: 1;
+  padding: 2px 5px;
+}
+.wb-library input {
+  width: 100%;
+  background: #191c22;
+  color: #dfe3eb;
+  border: 1px solid #30343e;
+  border-radius: 5px;
+  padding: 9px 11px;
+  font-size: 12px;
+  margin-bottom: 18px;
+}
+.wb-library nav {
+  overflow: auto;
+  flex: 1;
+  scrollbar-width: thin;
+}
+.wb-category {
+  margin-bottom: 20px;
+}
+.wb-category h3 {
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #848c9b;
+  margin: 0 10px 8px;
+  font-weight: 500;
+}
+.wb-category a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  font-size: 12px;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  border-radius: 0 4px 4px 0;
+  line-height: 1.35;
+}
+.wb-category a > span {
+  opacity: 0;
+  color: #a6b4e9;
+}
+.wb-category a:hover {
+  background: #1c2029;
+}
+.wb-category a[aria-current] {
+  color: #c6d2ff;
+  background: #222838;
+  border-color: #9baeff;
+}
+.wb-category a[aria-current] > span {
+  opacity: 1;
+}
+.wb-library footer {
+  border-top: 1px solid #2a2d36;
+  padding: 18px 10px 0;
+  font-size: 12px;
+}
+.wb-library footer a {
+  text-decoration: none;
+}
+.wb-library footer p {
+  font-size: 11px;
+  color: #858c9a;
+  margin: 7px 0 0;
+}
+.wb-main {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  padding: 0 12px 6px;
+  display: flex;
+  flex-direction: column;
+}
+.wb-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+/* Keep library access in the existing toolbar without reserving a header row.
+   The control remains reachable during loading and cookbook errors. */
+.wb-library-toggle {
+  position: absolute;
+  top: 4px;
+  left: 12px;
+  background: none;
+  border: 0;
+  padding: 5px;
+  display: inline-flex;
+  font-size: 11px;
+  color: #a6afc3;
+}
+.wb-library-toggle:hover,
+.wb-library-toggle[aria-expanded="true"] {
+  color: #ecf0fc;
+}
+.wb-recipe {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.wb-toolbar {
+  padding-left: 36px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #30343d;
+  gap: 16px;
+}
+.wb-tabs {
+  display: flex;
+  gap: 24px;
+}
+.wb-tabs button {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 9px 0;
+  font-size: 12px;
+  color: #949dad;
+}
+.wb-tabs button[aria-pressed="true"] {
+  border-color: #a9baff;
+  color: #ecf0fc;
+}
+.wb-transport {
+  font-size: 10px;
+  color: #939baa;
+}
+.wb-timeline {
+  display: flex;
+  overflow: auto;
+  gap: 3px;
+  padding: 8px 0;
+  flex-shrink: 0;
+  scrollbar-width: thin;
+}
+.wb-timeline button {
+  position: relative;
+  isolation: isolate;
+  background: none;
+  border: 0;
+  text-align: center;
+  padding: 10px 22px 10px 28px;
+  flex: 1 0 170px;
+  min-width: 0;
+  color: #bac1cd;
+  transition: color 180ms;
+}
+/* Clip only the ribbon surface so keyboard focus is not clipped with it. */
+.wb-timeline button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(var(--step-color), var(--step-color)) top / 100% 2px
+      no-repeat,
+    color-mix(in srgb, var(--step-color) 12%, #20252e);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 50%,
+    calc(100% - 14px) 100%,
+    0 100%,
+    14px 50%
+  );
+  transition: background-color 180ms;
+}
+.wb-timeline button:first-child {
+  padding-left: 14px;
+}
+.wb-timeline button:first-child::before {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 50%,
+    calc(100% - 14px) 100%,
+    0 100%
+  );
+}
+.wb-timeline button[data-future] {
+  color: #8e98aa;
+}
+.wb-timeline button:hover::before {
+  background-color: color-mix(in srgb, var(--step-color) 24%, #20252e);
+}
+.wb-timeline button[aria-current] {
+  color: #151920;
+}
+.wb-timeline button[aria-current]::before {
+  background: var(--step-color);
+}
+.wb-timeline button:focus-visible {
+  outline-offset: -2px;
+}
+.wb-timeline strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wb-narrative {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+  border-left: 2px solid var(--step-color);
+  padding: 8px 12px;
+  background: #171b23;
+  margin-bottom: 8px;
+}
+.wb-narrative-content {
+  flex: 1;
+  min-width: 0;
+  max-height: min(140px, 20dvh);
+  overflow: auto;
+  scrollbar-width: thin;
+  animation: wb-reveal 260ms ease;
+}
+.wb-narrative-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-bottom: 4px;
+}
+.wb-narrative h2 {
+  font-size: 13px;
+  font-weight: 550;
+  margin: 0;
+}
+.wb-narrative p {
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+  color: #b9c0cf;
+}
+.wb-narrative .wb-kicker {
+  font-size: 9px;
+  color: var(--step-color);
+  white-space: nowrap;
+}
+.wb-guide-controls {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.wb-guide-controls button,
+.wb-runbar > button,
+.wb-empty button {
+  border: 1px solid #353b49;
+  background: #191e28;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+button.wb-primary {
+  background: #c7d5ff;
+  color: #172342;
+  border-color: #c7d5ff;
+  font-weight: 600;
+}
+.wb-runbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 2px 0 8px;
+}
+.wb-runbar label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: #a8b0c1;
+}
+.wb-runbar select {
+  max-width: 330px;
+  min-width: 180px;
+  background: #191d25;
+  border: 1px solid #363c49;
+  color: #d7dfed;
+  padding: 9px 28px 9px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.wb-runbar p {
+  font-size: 11px;
+  color: #9ca7bb;
+  line-height: 1.6;
+  margin: 0 0 0 5px;
+  max-width: 330px;
+}
+.wb-panels {
+  /* An inline nonmodal dialog becomes a modal without remounting either pane. */
+  position: static;
+  width: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  color: inherit;
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  border: 1px solid #303641;
+  border-radius: 5px;
+  overflow: hidden;
+  background: #151920;
+}
+.wb-panels[data-expanded] {
+  position: fixed;
+  inset: 16px;
+  height: auto;
+  box-shadow: 0 24px 80px #0009;
+}
+/* Keep walkthrough navigation in the modal, outside either scrolling pane. */
+.wb-expanded-guide {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-top: 1px solid #303641;
+  background: #191d25;
+}
+.wb-expanded-guide p {
+  min-width: 0;
+  margin: 0;
+  line-height: 1.5;
+}
+.wb-expanded-guide p span {
+  display: block;
+  font-size: 10px;
+  color: #929eb2;
+}
+.wb-expanded-guide strong {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  font-weight: 500;
+}
+.wb-expanded-guide .wb-guide-controls {
+  flex-direction: row;
+}
+.wb-panels::backdrop {
+  background: #07090dcc;
+}
+.wb-panels[data-pane="code"] > .wb-diagram-panel,
+.wb-panels[data-pane="diagram"] > .wb-code-panel,
+.wb-panels[data-pane] > .wb-divider {
+  display: none;
+}
+.wb-code-panel,
+.wb-diagram-panel {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.wb-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+  background: #20252e;
+  outline-offset: -2px;
+}
+.wb-divider::before {
+  /* Keep the visible rule subtle while giving pointers a wider grab target. */
+  content: "";
+  position: absolute;
+  inset: -4px;
+  z-index: 1;
+}
+.wb-divider-grip {
+  width: 2px;
+  height: 32px;
+  border-radius: 1px;
+  background: #69758c;
+  pointer-events: none;
+}
+.wb-divider:hover,
+.wb-divider:focus-visible,
+.wb-panels[data-resizing] .wb-divider {
+  background: #3c4a65;
+  outline: 1px solid #a5b7ec;
+}
+.wb-panels[data-resizing] {
+  user-select: none;
+}
+.wb-panel-heading {
+  height: 30px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  border-bottom: 1px solid #303641;
+  background: #191d25;
+  gap: 10px;
+}
+.wb-panel-heading h2 {
+  font-size: 11px;
+  font-weight: 500;
+  margin: 0;
+}
+.wb-panel-heading h2 span {
+  color: #8992a6;
+  font-weight: 400;
+}
+.wb-diagram-status {
+  font-size: 10px;
+  color: #929eb2;
+}
+.wb-panel-heading button {
+  border: 0;
+  background: none;
+  color: #a6b6d3;
+  font-size: 10px;
+  padding: 6px;
+}
+.wb-source-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.wb-source-actions .wb-comments-toggle,
+.wb-source-actions .wb-copy-source,
+.wb-source-actions .wb-pane-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #738097;
+}
+.wb-source-actions .wb-comments-toggle[aria-pressed="true"],
+.wb-source-actions .wb-comments-toggle:hover,
+.wb-source-actions .wb-copy-source:hover,
+.wb-source-actions .wb-pane-button:hover {
+  color: #c7d5ff;
+}
+.wb-panel-foot {
+  height: 22px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  border-top: 1px solid #303641;
+  margin: 0;
+  padding: 0 10px;
+  color: #8390a6;
+  font-size: 10px;
+}
+.wb-source {
+  container-type: inline-size;
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  overflow: auto;
+  padding: 12px 0;
+  background: #12161d;
+  tab-size: 2;
+  scrollbar-width: thin;
+  font:
+    11px/1.9 "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  color: #b8c6d9;
+}
+.wb-source code {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+}
+.wb-code-line,
+.wb-source-note {
+  display: flex;
+  border-left: 2px solid transparent;
+  white-space: pre;
+  min-height: 21px;
+  padding-right: 20px;
+}
+/* Notes wrap to the pane even when long source lines make the code scroll. */
+.wb-source-note {
+  width: 100cqw;
+}
+.wb-source-note .wb-comment {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.wb-code-line > .wb-line-number,
+.wb-source-note > .wb-line-number {
+  user-select: none;
+  width: 47px;
+  flex-shrink: 0;
+  color: #657086;
+  padding: 0 12px 0 0;
+  border: 0;
+  background: none;
+  font:
+    10px/1.9 ui-monospace,
+    monospace;
+  text-align: right;
+  opacity: 1;
+}
+.wb-code-line > .wb-line-number:disabled {
+  color: #465063;
+}
+.wb-code-line.is-selected {
+  background: color-mix(in srgb, var(--step-color) 9%, transparent);
+  border-left-color: var(--step-color);
+}
+.wb-code-line.is-new {
+  animation: wb-code-enter 420ms ease;
+}
+.wb-code-gap {
+  display: block;
+  color: #616c81;
+  font-size: 10px;
+  padding: 5px 0 5px 48px;
+  border-block: 1px dashed #252d3b;
+}
+.wb-string {
+  color: #a1c7ad;
+}
+.wb-method {
+  color: #c1b1ee;
+}
+.wb-keyword {
+  color: #8daff1;
+}
+.wb-comment {
+  color: #7f8b9e;
+}
+.wb-viewer {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: #10141a;
+}
+.wb-bottom {
+  display: flex;
+  position: relative;
+  flex-shrink: 0;
+  gap: 20px;
+  align-items: center;
+  min-height: 30px;
+}
+.wb-bottom details {
+  min-width: 0;
+}
+.wb-bottom summary {
+  font-size: 11px;
+  color: #a5b4cd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 7px 0;
+}
+/* Secondary details overlay the workspace only when requested, so opening a
+   result never pushes the diagram or tutorial controls below the viewport. */
+.wb-extra-content {
+  position: absolute;
+  z-index: 5;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  max-height: min(460px, 55dvh);
+  overflow: auto;
+  padding: 16px;
+  background: #181d25;
+  border: 1px solid #414c60;
+  border-radius: 5px;
+  box-shadow: 0 -12px 36px #0006;
+}
+.wb-extra-content p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #a0adbf;
+  margin: 0 0 12px;
+}
+.wb-extra-content pre {
+  font:
+    11px/1.8 ui-monospace,
+    monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+  color: #b6c5dd;
+}
+.wb-nested-viewer {
+  height: 360px;
+}
+.wb-empty {
+  margin: 60px 0;
+  color: #b6c2d8;
+  font-size: 13px;
+}
+
+.wb-toolbar-links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.wb-toolbar-links > a,
+.wb-overview-trigger {
+  font-size: 11px;
+  text-decoration: none;
+  color: #a6afc3;
+  white-space: nowrap;
+}
+.wb-toolbar-links > a:hover,
+.wb-overview-trigger:hover {
+  color: #ecf0fc;
+}
+.wb-overview-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  background: none;
+  border: 0;
+}
+/* Native auto popovers dismiss on Escape or an outside click without moving the workspace. */
+.wb-overview {
+  position: fixed;
+  inset: 42px 12px auto auto;
+  width: min(460px, calc(100vw - 24px));
+  max-height: calc(100dvh - 66px);
+  overflow: auto;
+  margin: 0;
+  padding: 22px;
+  border: 1px solid #353b49;
+  border-radius: 8px;
+  background: #191d25;
+  color: #c4ccda;
+  box-shadow: 0 16px 48px #0006;
+}
+.wb-overview header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.wb-overview h2 {
+  font-size: 17px;
+  font-weight: 550;
+  color: #ecf0fc;
+  margin: 0;
+}
+.wb-overview header button {
+  border: 0;
+  background: none;
+  color: #a6afc3;
+  font-size: 22px;
+  padding: 0 4px;
+}
+.wb-overview h3 {
+  font-size: 12px;
+  font-weight: 550;
+  color: #ecf0fc;
+  margin: 22px 0 8px;
+}
+.wb-overview p {
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 14px 0 0;
+}
+.wb-overview h3 + p {
+  margin-top: 0;
+}
+.wb-overview .wb-overview-sample {
+  font-size: 11px;
+  color: #949dad;
+  margin-top: 20px;
+}
+.wb-prose code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.95em;
+  color: #d8deed;
+}
+
+@media (max-width: 1100px) {
+  .wb-transport {
+    display: none;
+  }
+}
+
+@keyframes wb-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes wb-code-enter {
+  from {
+    background: #2d374d;
+  }
+  to {
+    background: color-mix(in srgb, var(--step-color) 9%, transparent);
+  }
+}
+@media (max-width: 1000px) {
+  .wb-app[data-library-open] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wb-library {
+    position: absolute;
+    z-index: 10;
+    top: 0;
+    bottom: 0;
+    height: auto;
+    width: 220px;
+    box-shadow: 12px 0 36px #0008;
+  }
+  .wb-narrative {
+    gap: 10px;
+  }
+  .wb-guide-controls {
+    flex-direction: column;
+  }
+}
+@media (max-width: 760px) {
+  .wb-panels[data-expanded] {
+    inset: 6px;
+  }
+  .wb-diagram-status {
+    display: none;
+  }
+  .wb-main {
+    padding-inline: 6px;
+  }
+  .wb-toolbar-links {
+    gap: 8px;
+  }
+  .wb-toolbar-links > a {
+    font-size: 10px;
+  }
+  .wb-tabs {
+    gap: 10px;
+  }
+  .wb-library-toggle {
+    left: 6px;
+  }
+  .wb-toolbar {
+    gap: 8px;
+    padding-left: 30px;
+  }
+  .wb-overview-trigger > span {
+    display: none;
+  }
+  .wb-tabs button {
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  .wb-timeline {
+    padding: 6px 0;
+  }
+  .wb-narrative {
+    padding: 6px 8px;
+    gap: 8px;
+  }
+  .wb-narrative-title {
+    gap: 2px;
+    flex-direction: column;
+  }
+  .wb-narrative h2 {
+    font-size: 12px;
+  }
+  .wb-narrative p {
+    font-size: 11px;
+  }
+  .wb-guide-controls button {
+    padding: 7px;
+    font-size: 10px;
+  }
+  .wb-runbar {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .wb-runbar label {
+    flex: 1;
+    min-width: 0;
+  }
+  .wb-runbar select {
+    max-width: 100%;
+    min-width: 0;
+    flex: 1;
+    width: 0;
+  }
+  .wb-runbar p {
+    width: 100%;
+    max-width: none;
+    font-size: 10px;
+  }
+  .wb-divider {
+    cursor: row-resize;
+  }
+  .wb-divider-grip {
+    width: 32px;
+    height: 2px;
+  }
+  .wb-panel-foot {
+    display: none;
+  }
+  .wb-bottom {
+    gap: 12px;
+  }
+  .wb-bottom details {
+    flex: 1;
+  }
+  .wb-bottom summary {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wb-narrative-content,
+  .wb-code-line.is-new {
+    animation: none;
+  }
+  .wb-timeline button,
+  .wb-timeline button::before {
+    transition: none;
+  }
+}
+
+.wb-preview-loading {
+  padding: 24px;
+  font-size: 12px;
+  color: #949dad;
+}
