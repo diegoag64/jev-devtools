@@ -52,6 +52,10 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 - **Scope-specific Flow builders.** Reject unsupported terminal calls and collection nesting in TypeScript, including nested paths and lanes. Runtime validation and diagnostics remain unchanged. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
 
+#### Performance
+
+- **Coalesce complete flow updates.** Batch ready flow readers over a fixed 16 ms window to reduce repeated nested-run cloning, encoding, transfer, and parsing. Initial and reconnect snapshots stay immediate; terminal states use the same window. Capture policy and version-1 records are unchanged, and aggregate run byte/heap bounds remain open in [#46](https://github.com/diegoag64/jev-devtools/issues/46). ([#139](https://github.com/diegoag64/jev-devtools/pull/139))
+
 #### Documentation
 
 - **Unreleased Flow API reference.** Distinguish the working tree's builder and result types from version 0.6.0 in the API reference and definition signatures. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
