@@ -335,6 +335,54 @@ try {
     await page.locator(".wb-panels").evaluate((node) => node.matches(":modal")),
     false,
   );
+  // Failed history navigation must expose feedback and retry inside either
+  // modal. Successful modal navigation alone cannot prove error recovery.
+  for (const [pane, mode] of [
+    ["code", "Step-by-step guide"],
+    ["diagram", "Complete flow"],
+  ]) {
+    await page.getByRole("button", { name: mode, exact: true }).click();
+    await navigate(b);
+    await ready(b);
+    await page
+      .getByRole("button", { name: `Expand ${pane}`, exact: true })
+      .click();
+    const dialog = page.getByRole("dialog", { name: `Expanded ${pane}` });
+    const modalFailure = hold(a);
+    await page.goBack();
+    await dialog.getByRole("status").filter({ hasText: "Opening" }).waitFor();
+    modalFailure(500);
+    const alert = dialog.getByRole("alert");
+    await alert.filter({ hasText: "Could not open" }).waitFor();
+    assert.match(await dialog.ariaSnapshot(), /Try again/);
+    await page.screenshot({
+      path: new URL(`modal-${pane}-retry.png`, output).pathname,
+    });
+    const retryLoad = hold(a);
+    const retry = dialog.getByRole("button", { name: "Try again" });
+    await retry.focus();
+    await retry.press("Enter");
+    await dialog.getByRole("status").filter({ hasText: "Opening" }).waitFor();
+    assert.equal(
+      await dialog
+        .getByRole("button", { name: `Close expanded ${pane}` })
+        .evaluate((node) => node === document.activeElement),
+      true,
+      "Retry keeps keyboard focus on a persistent modal control",
+    );
+    retryLoad();
+    await ready(a);
+    assert.equal(await dialog.getByRole("alert").count(), 0);
+    assert.equal(await dialog.evaluate((node) => node.matches(":modal")), true);
+    await page.keyboard.press("Escape");
+    assert.equal(
+      await page
+        .getByRole("button", { name: `Expand ${pane}`, exact: true })
+        .evaluate((node) => node === document.activeElement),
+      true,
+      "Closing the recovered modal restores its opener",
+    );
+  }
   // Navigation aborts an in-flight POST and posts cancellation, despite retaining visuals.
   let releaseRun;
   const runGate = new Promise((resolve) => {
@@ -419,6 +467,7 @@ try {
           "history",
           "view/layout/comments",
           "modal focus",
+          "modal load failure and keyboard retry in both panes",
           "cancellation",
           "reduced motion",
           "mobile",

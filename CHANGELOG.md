@@ -50,7 +50,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Fixed
 
-- **Stable cookbook transitions.** Keep the workbench shell, guide mode, and panel preferences while loading another cookbook. Cancel outgoing samples, delay loading feedback, commit source and diagram together, and retain retry controls after failures. Respect reduced motion.
+- **Stable cookbook transitions.** Keep the workbench shell, guide mode, and panel preferences while loading another cookbook. Cancel outgoing samples, delay loading feedback, commit source and diagram together, and retain retry controls after failures, including inside expanded panels. Respect reduced motion. ([#146](https://github.com/diegoag64/jev-devtools/pull/146))
 
 - **Scope-specific Flow builders.** Reject unsupported terminal calls and collection nesting in TypeScript, including nested paths and lanes. Runtime validation and diagnostics remain unchanged. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
 

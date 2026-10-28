@@ -98,7 +98,17 @@ function App() {
         <span>
           Could not open {recipe?.title ?? slug}. {loading.error}
         </span>
-        <button onClick={() => setReload((value) => value + 1)}>
+        <button
+          onClick={(event) => {
+            // Retry removes this button. Keep keyboard focus inside the modal
+            // on a control that survives both pending and successful loads.
+            event.currentTarget
+              .closest("dialog")
+              ?.querySelector<HTMLButtonElement>("[data-close-expanded]")
+              ?.focus({ preventScroll: true });
+            setReload((value) => value + 1);
+          }}
+        >
           Try again
         </button>
       </>
@@ -699,6 +709,18 @@ function Recipe({
         </div>
       </div>
       <SplitPanels
+        expandedFeedback={
+          <div className="wb-expanded-feedback">
+            <div
+              className="wb-run-status"
+              role={navigationFailed ? "alert" : "status"}
+              aria-live={navigationFailed ? "assertive" : "polite"}
+              aria-atomic="true"
+            >
+              {navigationFeedback}
+            </div>
+          </div>
+        }
         expandedGuide={
           walkthrough && (
             <div

@@ -429,6 +429,13 @@ button.wb-primary {
   height: auto;
   box-shadow: 0 24px 80px #0009;
 }
+/* A modal makes the outer runbar inert. Reserve its own feedback row so
+   pending/error/retry changes never hide feedback or resize the reading pane. */
+.wb-expanded-feedback {
+  padding: 8px 12px;
+  border-top: 1px solid #303641;
+  background: #191d25;
+}
 /* Keep walkthrough navigation in the modal, outside either scrolling pane. */
 .wb-expanded-guide {
   display: flex;
