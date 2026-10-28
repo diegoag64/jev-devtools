@@ -46,10 +46,20 @@ await save();
 console.log(`Verification evidence: ${output}`);
 let interrupted;
 let activeChild;
+let activeCooperative;
 let killTimer;
 function signalChild(signal) {
   if (!activeChild?.pid) return;
   try {
+    // Fixture supervisors must finish cleanup even on Windows, where kill()
+    // forcibly terminates Node instead of delivering a catchable POSIX signal.
+    if (activeCooperative && signal !== "SIGKILL" && activeChild.connected) {
+      activeChild.send({ interrupt: signal }, (error) => {
+        if (error)
+          console.error(`Could not request fixture shutdown: ${error.message}`);
+      });
+      return;
+    }
     // npm launches nested servers; terminate the whole step's process group.
     if (process.platform === "win32") activeChild.kill(signal);
     else process.kill(-activeChild.pid, signal);
@@ -58,14 +68,22 @@ function signalChild(signal) {
   }
 }
 for (const signal of ["SIGINT", "SIGTERM"]) {
-  process.once(signal, () => {
+  process.on(signal, () => {
+    if (interrupted) return;
     interrupted = signal;
     signalChild(signal);
-    killTimer = setTimeout(() => signalChild("SIGKILL"), 5000);
+    // Allow fixture supervisors to stop workers and remove installed trees.
+    killTimer = setTimeout(() => signalChild("SIGKILL"), 30_000);
     killTimer.unref();
   });
 }
-async function run(name, command, args, env = process.env) {
+async function run(
+  name,
+  command,
+  args,
+  env = process.env,
+  cooperative = false,
+) {
   if (interrupted)
     throw new Error(`Verification interrupted by ${interrupted}`);
   const step = {
@@ -83,10 +101,11 @@ async function run(name, command, args, env = process.env) {
     const child = spawn(command, args, {
       cwd: root,
       env: runtimeEnv(env),
-      stdio: ["ignore", "pipe", "pipe"],
+      stdio: ["ignore", "pipe", "pipe", ...(cooperative ? ["ipc"] : [])],
       detached: process.platform !== "win32",
     });
     activeChild = child;
+    activeCooperative = cooperative;
     child.stdout.pipe(log, { end: false });
     child.stderr.pipe(log, { end: false });
     const [code, signal] = await once(child, "close");
@@ -111,7 +130,19 @@ async function run(name, command, args, env = process.env) {
   }
   console.log(`Passed ${name}`);
 }
-const runNpm = (name, args, env) => run(name, ...npmCommand(args), env);
+const temporaryScripts = {
+  "check:playground": "scripts/check-playground.mjs",
+  "verify:package": "scripts/verify-package.mjs",
+  "verify:nextjs": "scripts/verify-nextjs.mjs",
+};
+const runNpm = (name, args, env) => {
+  const script =
+    args[0] === "run" && args.length === 2 && temporaryScripts[args[1]];
+  // Run the owning supervisor directly so npm cannot exit before its cleanup.
+  return script
+    ? run(name, process.execPath, [script], env, true)
+    : run(name, ...npmCommand(args), env);
+};
 try {
   // Full verification builds and packs this checkout. Release overrides belong to
   // the standalone consumer commands, not this source verification report.
