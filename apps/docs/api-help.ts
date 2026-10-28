@@ -61,7 +61,7 @@ const flowHelp = {
     props: {
       name: "The outcome string returned by run().",
       "value?":
-        "Whole expressions retain their exact value type. Object templates retain original-or-resolved possibilities because opaque objects are preserved. Legacy explicit-input definitions return unknown.",
+        "Whole expressions retain exact values. Direct object fields may be absent or unresolved; narrow before use. Direct arrays preserve elements but do not promise attached properties. Legacy explicit-input definitions return unknown.",
       "display?": "Optional labels and display metadata for DevTools.",
     },
   },

@@ -33,8 +33,14 @@ const descriptions: Record<string, string> = {
 };
 
 const supportingDescriptions: Record<string, string> = {
+  FlowOutputArrayShape:
+    "Structural fallback for augmented arrays/tuples. Rebuilds standard array methods and known positions without attached properties; augmented rest element unions may widen.",
+  FlowOutputElements:
+    "Resolves a reconstructed tuple's positional elements while preserving ordinary optional and rest positions.",
+  FlowOutputArray:
+    "Reconstructs ordinary array and tuple output shapes, preserving readonly and positional types without promising attached properties.",
   FlowOutputValue:
-    "The internal output-boundary value type. Whole references stay exact, arrays resolve elements, and ambiguous object templates retain original-or-resolved possibilities. Callable opaque members keep their signatures.",
+    "The internal output-boundary value type. Whole references stay exact. Direct object fields may be absent or unresolved, and callable methods require appropriate narrowing.",
   FlowScope:
     "The enclosing collection context used to restrict builder methods through nested paths and lanes.",
   FlowBuilderMethods:

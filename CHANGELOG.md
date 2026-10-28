@@ -32,7 +32,7 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 - **Builder scope types match runtime legality.** Helpers that require a full `FlowBuilder` may need a narrower `FlowValueBuilder` or `Pick` parameter in map, loop, and `if()` bodies. Valid nested lane outputs and branches remain supported. Existing explicit-input two-argument definitions keep their broad result type. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
 
-- **Output templates preserve opaque values.** Inferred direct object outputs include original-or-resolved fields because structural types cannot distinguish plain records from classes. Output a task's whole result expression for an exact JSON object type; whole references and callable Date/asset methods remain precise. Runtime identity and input inference are unchanged. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
+- **Output templates preserve opaque values.** Direct object outputs include original-or-projected fields that may be absent because structural types encode neither prototypes nor enumerability. Direct arrays retain positional types but do not promise attached properties. Narrow direct Date/asset values before calling methods, or output a whole expression for exact values and methods. Runtime identity and input inference are unchanged. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
 
 ### Changes
 

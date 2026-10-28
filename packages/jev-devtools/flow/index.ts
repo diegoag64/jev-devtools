@@ -182,11 +182,34 @@ export type Resolved<T> =
         : T extends object
           ? { [K in keyof T]: Resolved<T[K]> }
           : T;
-// Output traverses arrays and plain records but preserves nonplain objects.
-// Structural types cannot prove an object's prototype. Keep both possibilities
-// for object templates, and preserve callable members of opaque values (Date,
-// SDK assets, and application classes). Whole references already name the exact
-// execution value; unlike a template, that value is not recursively resolved.
+// Rebuild standard array methods and known positions without promising attached
+// string/symbol properties that array.map() does not copy. Variadic inference
+// keeps ordinary optional/rest tuples; augmented arrays can need the structural
+// fallback, which retains known positions but may widen a rest element union.
+type FlowOutputArrayShape<T extends readonly unknown[]> = (T extends unknown[]
+  ? Array<FlowOutputValue<T[number]>>
+  : ReadonlyArray<FlowOutputValue<T[number]>>) & {
+  [K in keyof T as K extends `${number}` | "length"
+    ? K
+    : never]: K extends "length" ? T[K] : FlowOutputValue<T[K]>;
+};
+type FlowOutputElements<T extends readonly unknown[]> = {
+  [K in keyof T]: FlowOutputValue<T[K]>;
+};
+type FlowOutputArray<T extends readonly unknown[]> = T extends readonly [
+  ...infer Items,
+]
+  ? Items extends T
+    ? T extends unknown[]
+      ? FlowOutputElements<Items>
+      : Readonly<FlowOutputElements<Items>>
+    : FlowOutputArrayShape<T>
+  : FlowOutputArrayShape<T>;
+// Structural types prove neither prototype nor enumerability. Object.entries()
+// may omit any declared field and discards symbols; fromEntries() also restores
+// Object.prototype methods when a non-enumerable override was omitted. Keep the
+// original opaque value as a possibility, and retain callable signatures for
+// narrowing. Whole references bypass template traversal and stay exact.
 type FlowOutputValue<T> =
   T extends FlowExpression<infer V>
     ? V
@@ -195,9 +218,17 @@ type FlowOutputValue<T> =
       : T extends (...args: never[]) => unknown
         ? T
         : T extends readonly unknown[]
-          ? { [K in keyof T]: FlowOutputValue<T[K]> }
+          ? FlowOutputArray<T>
           : T extends object
-            ? T | { [K in keyof T]: FlowOutputValue<T[K]> }
+            ?
+                | T
+                | {
+                    [K in keyof T]?: K extends symbol
+                      ? never
+                      :
+                          | FlowOutputValue<T[K]>
+                          | (K extends keyof Object ? Object[K] : never);
+                  }
             : T;
 
 export type TaskContext = {
@@ -672,7 +703,7 @@ interface FlowBuilderMethods<T, Scope extends FlowScope> {
   output<Name extends string>(
     name: Name,
   ): FlowExpression<{ outcome: Name; value: undefined }>;
-  /** Object templates retain original-or-resolved possibilities; whole references stay exact. */
+  /** Object fields may be absent or unresolved; array extras are omitted. Whole references stay exact. */
   output<Name extends string, V>(
     name: Name,
     value: V,

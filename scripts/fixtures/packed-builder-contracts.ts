@@ -99,7 +99,11 @@ void invalidOutcomes;
 function lanes<T>(b: FlowValueBuilder<T, "map">) {
   const when = b.task("predicate", { input: true, run: (v) => v });
   return b.parallel("lanes", {
-    direct: (lane) => lane.output("lane-value", { n: 7 }),
+    direct: (lane) =>
+      lane.output(
+        "lane-value",
+        lane.task("lane-record", { input: { n: 7 }, run: (value) => value }),
+      ),
     branch: (lane) =>
       lane.branch("lane-route", {
         when,
@@ -146,7 +150,13 @@ const nested = defineJevFlow<boolean>("nested-capabilities")((f) => {
                             else: (path) =>
                               path.parallel("else-lanes", {
                                 terminal: (lane) =>
-                                  lane.output("other-lane", { n: 9 }),
+                                  lane.output(
+                                    "other-lane",
+                                    lane.task("other-record", {
+                                      input: { n: 9 },
+                                      run: (value) => value,
+                                    }),
+                                  ),
                               }).terminal,
                           });
                           return item.task("item-value", {
@@ -293,6 +303,8 @@ const numericTupleElement: number = opaqueResult.value[0];
 assert.equal(numericTupleElement.toFixed(1), "7.0");
 const [savedDate, savedAsset, savedWrapper, nestedWrapper, savedRecord] =
   opaqueResult.value[1];
+assert.ok(savedDate instanceof Date);
+assert.ok(savedAsset instanceof Blob);
 const usableDate: Date = savedDate;
 const usableAsset: Blob = savedAsset;
 assert.equal(usableDate, date);
@@ -325,10 +337,166 @@ const exactDate = defineJevFlow<Date>("whole-date")((f) =>
 );
 assert.equal((await exactDate.run(date, options)).value.getUTCFullYear(), 2026);
 const directDate = defineJevFlow("direct-date", (f) => f.output("date", date));
-assert.equal(
-  (await directDate.run(null, options)).value.toISOString(),
-  date.toISOString(),
+const directDateResult = await directDate.run(null, options);
+function unsafeDateCall() {
+  // @ts-expect-error structural objects do not prove a retained Date method
+  directDateResult.value.toISOString();
+}
+void unsafeDateCall;
+assert.ok(directDateResult.value instanceof Date);
+assert.equal(directDateResult.value.toISOString(), date.toISOString());
+
+// Array.map drops attached properties; rebuild the returned array interface.
+const extraKey = Symbol("array-extra");
+const tagged = defineJevFlow<number>("tagged-array")((f) => {
+  const items = Object.assign([f.input], {
+    label: "amounts",
+    [extraKey]: "symbol",
+  });
+  Object.defineProperty(items, "label", { enumerable: false });
+  // Numeric array positions are visited even when non-enumerable.
+  Object.defineProperty(items, "0", { enumerable: false });
+  return f.output("tagged", items);
+});
+const taggedResult = await tagged.run(3, options);
+assert.equal(taggedResult.value[0].toFixed(2), "3.00");
+assert.deepEqual(
+  taggedResult.value.map((n) => n * 2),
+  [6],
 );
+assert.equal(Reflect.get(taggedResult.value, "label"), undefined);
+assert.equal(Reflect.get(taggedResult.value, extraKey), undefined);
+function unsafeArrayProperties() {
+  // @ts-expect-error array projection does not promise attached string fields
+  taggedResult.value.label.toUpperCase();
+  // @ts-expect-error array projection does not promise attached symbol fields
+  taggedResult.value[extraKey].toUpperCase();
+}
+void unsafeArrayProperties;
+
+const taggedTuple = defineJevFlow<number>("tagged-tuple")((f) =>
+  f.output(
+    "tuple",
+    Object.assign([f.input, f.input] as const, { label: "pair" }),
+  ),
+);
+const projectedPair = (await taggedTuple.run(4, options)).value;
+const readonlyPair: readonly [number, number] = projectedPair;
+const pairLength: 2 = projectedPair.length;
+assert.deepEqual(readonlyPair, [4, 4]);
+assert.equal(pairLength, 2);
+function unsafeTupleProperties() {
+  // @ts-expect-error attached tuple properties are not copied
+  projectedPair.label;
+  // @ts-expect-error readonly tuple inference remains readonly
+  projectedPair.push(1);
+}
+void unsafeTupleProperties;
+
+const optionalRest = defineJevFlow<{ n: number; label: string }>(
+  "optional-rest",
+)((f) => {
+  const parts: [FlowExpression<number>?, ...FlowExpression<string>[]] = [
+    f.input.get("n"),
+    f.input.get("label"),
+  ];
+  return f.output("rest", parts);
+});
+const restResult = (await optionalRest.run({ n: 5, label: "five" }, options))
+  .value;
+const optionalAndRest: [number?, ...string[]] = restResult;
+assert.deepEqual(optionalAndRest, [5, "five"]);
+const readonlyRest = defineJevFlow<{ n: number; label: string }>(
+  "readonly-rest",
+)((f) => {
+  const parts: readonly [...FlowExpression<string>[], FlowExpression<number>] =
+    [f.input.get("label"), f.input.get("n")];
+  return f.output("rest", parts);
+});
+const readonlyRestResult = (
+  await readonlyRest.run({ n: 6, label: "six" }, options)
+).value;
+const leadingRest: readonly [...string[], number] = readonlyRestResult;
+assert.deepEqual(leadingRest, ["six", 6]);
+
+// Structural record types encode neither enumerability nor a null prototype.
+// Both ordinary and null-prototype inputs become ordinary projected records.
+const recordKey = Symbol("record-field");
+for (const nullPrototype of [false, true]) {
+  for (const enumerable of [false, true]) {
+    const fields = {
+      visible: 3,
+      hidden: "amounts",
+      [recordKey]: "symbol",
+      toString() {
+        return 7;
+      },
+    };
+    if (nullPrototype) Object.setPrototypeOf(fields, null);
+    Object.defineProperty(fields, "hidden", { enumerable });
+    Object.defineProperty(fields, "toString", { enumerable: false });
+    const projected = defineJevFlow("descriptors", (f) =>
+      f.output("record", fields),
+    );
+    const result = await projected.run(null, options);
+    function unsafeRecordProperties() {
+      // @ts-expect-error a declared string field may be non-enumerable and omitted
+      result.value.hidden.toUpperCase();
+      // @ts-expect-error projected symbol fields are omitted
+      result.value[recordKey].toUpperCase();
+      // @ts-expect-error even ordinary declared fields need presence checking
+      result.value.visible.toFixed(0);
+      if (result.value.toString) {
+        const rendered: string | number = result.value.toString();
+        // @ts-expect-error a dropped override can expose Object.prototype.toString
+        const onlyNumber: number = rendered;
+        void onlyNumber;
+      }
+    }
+    void unsafeRecordProperties;
+    assert.equal(result.value.visible, 3);
+    assert.equal(result.value.hidden, enumerable ? "amounts" : undefined);
+    if (typeof result.value.hidden === "string")
+      assert.equal(result.value.hidden.toUpperCase(), "AMOUNTS");
+    assert.equal(result.value[recordKey], undefined);
+    assert.equal(result.value.toString?.(), "[object Object]");
+    assert.equal(Object.getPrototypeOf(result.value), Object.prototype);
+    const wholeRecord = defineJevFlow<typeof fields>("whole-descriptors")((f) =>
+      f.output("whole", f.input),
+    );
+    const exact = (await wholeRecord.run(fields, options)).value;
+    assert.equal(exact, fields);
+    assert.equal(exact.hidden.toUpperCase(), "AMOUNTS");
+    assert.equal(exact[recordKey].toUpperCase(), "SYMBOL");
+    assert.equal(exact.toString().toFixed(0), "7");
+  }
+}
+
+class InheritedRecord {
+  get inherited() {
+    return "prototype field";
+  }
+}
+const inheritedRecord = new InheritedRecord();
+const inherited = defineJevFlow("inherited", (f) =>
+  f.output("object", inheritedRecord),
+);
+const inheritedResult = (await inherited.run(null, options)).value;
+function unsafeInheritedField() {
+  // @ts-expect-error structural type alone does not prove an inherited field survives
+  return inheritedResult.inherited.toUpperCase();
+}
+void unsafeInheritedField;
+assert.ok(inheritedResult instanceof InheritedRecord);
+assert.equal(inheritedResult, inheritedRecord);
+assert.equal(inheritedResult.inherited.toUpperCase(), "PROTOTYPE FIELD");
+const arrayInput = Object.assign([1, 2], { label: "unchanged" });
+const wholeArray = defineJevFlow<typeof arrayInput>("whole-array")((f) =>
+  f.output("whole", f.input),
+);
+const exactArray = (await wholeArray.run(arrayInput, options)).value;
+assert.equal(exactArray, arrayInput);
+assert.equal(exactArray.label.toUpperCase(), "UNCHANGED");
 
 // Never execute these invalid definitions. Unused expect-error directives fail
 // when declarations accidentally grant capabilities the runtime rejects.
