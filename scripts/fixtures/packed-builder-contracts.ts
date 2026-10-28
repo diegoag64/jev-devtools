@@ -418,6 +418,24 @@ function arrayIndexTypeBoundaries(f: FlowBuilder<number>) {
 }
 void arrayIndexTypeBoundaries;
 
+// A broad integer-key pattern includes negatives and out-of-range properties.
+const patternedExtras: Record<`${bigint}`, string> = { "-1": "extra" };
+const patternedArray = defineJevFlow<number>("patterned-array")((f) =>
+  f.output("array", Object.assign([f.input], patternedExtras)),
+);
+const patternedResult = (await patternedArray.run(8, options)).value;
+assert.equal(patternedResult[0].toFixed(0), "8");
+assert.equal(Reflect.get(patternedResult, "-1"), undefined);
+function unsafePatternedProperty() {
+  // @ts-expect-error integer key patterns do not promise attached string values
+  patternedResult["-1"].toUpperCase();
+  const noNegativeKey: "-1" extends keyof typeof patternedResult
+    ? true
+    : false = false;
+  return noNegativeKey;
+}
+void unsafePatternedProperty;
+
 const taggedTuple = defineJevFlow<number>("tagged-tuple")((f) =>
   f.output(
     "tuple",

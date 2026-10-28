@@ -208,13 +208,15 @@ type FlowOutputIndexWithinBound<
       : true
     : true;
 type FlowOutputIndex<Key> = Key extends `${infer Index extends bigint}`
-  ? `${Index}` extends Key
-    ? Key extends `-${string}`
-      ? never
-      : FlowOutputIndexWithinBound<Key> extends true
-        ? Key
-        : never
-    : never
+  ? bigint extends Index
+    ? never // A broad key pattern cannot prove canonical spelling or range.
+    : `${Index}` extends Key
+      ? Key extends `-${string}`
+        ? never
+        : FlowOutputIndexWithinBound<Key> extends true
+          ? Key
+          : never
+      : never
   : never;
 // Rebuild standard array methods and known positions without promising attached
 // string/symbol properties that array.map() does not copy. Variadic inference

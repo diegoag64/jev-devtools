@@ -33,6 +33,10 @@ const descriptions: Record<string, string> = {
 };
 
 const supportingDescriptions: Record<string, string> = {
+  FlowOutputIndexWithinBound:
+    "Checks a canonical decimal index against 4294967294, the largest JavaScript array index, with bounded digit comparison.",
+  FlowOutputIndex:
+    "Retains canonical nonnegative array-index keys. Numeric-looking attached properties are omitted from direct array output shapes.",
   FlowOutputArrayShape:
     "Structural fallback for augmented arrays/tuples. Rebuilds standard array methods and known positions without attached properties; augmented rest element unions may widen.",
   FlowOutputElements:
