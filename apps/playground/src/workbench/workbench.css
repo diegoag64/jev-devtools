@@ -333,10 +333,10 @@ pre:focus-visible {
 .wb-narrative-content {
   flex: 1;
   min-width: 0;
-  max-height: min(140px, 20dvh);
   overflow: auto;
   scrollbar-width: thin;
-  animation: wb-reveal 260ms ease;
+  /* Keep navigation geometry stable without taking space from request controls. */
+  height: min(56px, 10dvh);
 }
 .wb-narrative-title {
   display: flex;
@@ -367,8 +367,7 @@ pre:focus-visible {
   flex-shrink: 0;
 }
 .wb-guide-controls button,
-.wb-runbar > button,
-.wb-empty button {
+.wb-runbar > button {
   border: 1px solid #353b49;
   background: #191e28;
   padding: 8px 10px;
@@ -429,6 +428,13 @@ button.wb-primary {
   inset: 16px;
   height: auto;
   box-shadow: 0 24px 80px #0009;
+}
+/* A modal makes the outer runbar inert. Reserve its own feedback row so
+   pending/error/retry changes never hide feedback or resize the reading pane. */
+.wb-expanded-feedback {
+  padding: 8px 12px;
+  border-top: 1px solid #303641;
+  background: #191d25;
 }
 /* Keep walkthrough navigation in the modal, outside either scrolling pane. */
 .wb-expanded-guide {
@@ -716,11 +722,6 @@ button.wb-primary {
 .wb-nested-viewer {
   height: 360px;
 }
-.wb-empty {
-  margin: 60px 0;
-  color: #b6c2d8;
-  font-size: 13px;
-}
 
 .wb-toolbar-links {
   display: flex;
@@ -813,16 +814,6 @@ button.wb-primary {
   }
 }
 
-@keyframes wb-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 @keyframes wb-code-enter {
   from {
     background: #2d374d;
@@ -927,6 +918,9 @@ button.wb-primary {
     flex: 1;
     width: 0;
   }
+  .wb-runbar .wb-run-status {
+    flex-basis: 100%;
+  }
   .wb-runbar p {
     width: 100%;
     max-width: none;
@@ -953,7 +947,6 @@ button.wb-primary {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .wb-narrative-content,
   .wb-code-line.is-new {
     animation: none;
   }
@@ -967,4 +960,117 @@ button.wb-primary {
   padding: 24px;
   font-size: 12px;
   color: #949dad;
+}
+
+/* Reserve navigation feedback independently of cookbook and sample text. */
+.wb-run-status {
+  height: 36px;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  font-size: 11px;
+  color: #b6c2d8;
+  overflow: auto;
+}
+.wb-run-status > span:not(.wb-opening-indicator) {
+  max-height: 100%;
+  overflow: auto;
+}
+.wb-run-status button {
+  background: #191e28;
+  border: 1px solid #353b49;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.wb-opening-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 25%;
+  height: 1px;
+  background: #9baeff;
+  animation: wb-opening 1200ms ease-in-out infinite alternate;
+}
+@keyframes wb-opening {
+  to {
+    left: 75%;
+  }
+}
+/* Only cookbook contents dim; panel borders, headers and layout controls stay put. */
+.wb-recipe [data-cookbook-fade] {
+  transition: opacity 170ms ease-out;
+}
+.wb-recipe[data-dimmed] [data-cookbook-fade] {
+  opacity: 0.55;
+}
+.wb-runbar .playground-select {
+  width: 230px;
+}
+.wb-runbar > .wb-primary {
+  min-width: 100px;
+}
+.wb-runbar p {
+  height: 36px;
+  overflow: auto;
+}
+.wb-skeleton {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.wb-skeleton-toolbar {
+  height: 35px;
+  margin-left: 36px;
+}
+.wb-skeleton-ribbon {
+  height: 38px;
+}
+.wb-skeleton-controls {
+  height: 40px;
+}
+.wb-skeleton-toolbar,
+.wb-skeleton-ribbon,
+.wb-skeleton-controls {
+  background: #191d25;
+  border-radius: 4px;
+}
+.wb-skeleton-panels {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 40% 1fr;
+  gap: 8px;
+  min-height: 0;
+}
+.wb-skeleton-panels > div {
+  border: 1px solid #303641;
+  border-radius: 5px;
+  background: linear-gradient(#191d25 30px, #12161d 30px);
+}
+@media (max-width: 760px) {
+  .wb-runbar .playground-select {
+    width: 0;
+  }
+  .wb-skeleton-panels {
+    grid-template-columns: 1fr;
+    grid-template-rows: 32% 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wb-opening-indicator {
+    animation: none;
+  }
+  .wb-recipe [data-cookbook-fade] {
+    transition: none;
+  }
+}
+
+/* Cancellation keeps its slot so starting/stopping cannot shift sample status. */
+.wb-cancel:not([data-running]) {
+  visibility: hidden;
 }

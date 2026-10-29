@@ -59,6 +59,7 @@ export function SourceCode({
   onSelect,
   onCopyError,
   panelActions,
+  disabled,
 }: {
   detail: CookbookDetail;
   active: number;
@@ -67,9 +68,14 @@ export function SourceCode({
   onSelect: (ids: string[]) => void;
   onCopyError: () => void;
   panelActions: ReactNode;
+  disabled: boolean;
 }) {
   const ref = useRef<HTMLPreElement>(null);
   const [copied, setCopied] = useState(false);
+  useLayoutEffect(() => {
+    ref.current?.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    setCopied(false);
+  }, [detail.slug]);
   const [showComments, setShowComments] = useState(() => {
     try {
       return localStorage.getItem("jev-workbench-step-comments") !== "hidden";
@@ -164,7 +170,7 @@ export function SourceCode({
     });
     observer.observe(source);
     return () => observer.disconnect();
-  }, [activeRange?.start, walkthrough]);
+  }, [activeRange?.start, walkthrough, detail.slug]);
   const lineNodes = (line: number) => {
     const matches = Object.entries(detail.sourceRanges).filter(([, range]) =>
       contains(range, line),
@@ -234,6 +240,8 @@ export function SourceCode({
           </button>
           <button
             className="wb-copy-source"
+            disabled={disabled}
+            data-cookbook-content
             aria-label={copied ? "Copied" : "Copy source"}
             title={copied ? "Copied" : "Copy source"}
             onClick={() => {
@@ -273,6 +281,9 @@ export function SourceCode({
         ref={ref}
         id="workbench-source"
         className="wb-source"
+        aria-busy={disabled}
+        data-cookbook-content
+        data-cookbook-fade
         tabIndex={0}
         aria-label="Flow API source"
         onMouseUp={walkthrough ? undefined : selectText}
