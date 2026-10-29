@@ -1,4 +1,4 @@
-import { types } from "node:util";
+import { snapshotIsUncertain } from "../server/capture-provenance.js";
 import type { Json } from "../src/protocol.js";
 
 /** Detached JSON snapshot, without capture truncation or lossy JSON.stringify. */
@@ -23,20 +23,7 @@ export function jsonSnapshot(
   if (seen.has(value)) throw new TypeError("Task data cannot contain cycles");
   if (Object.getOwnPropertySymbols(value).length)
     throw new TypeError("Task data cannot contain symbol keys");
-  if (
-    onUncertain &&
-    (types.isProxy(value) ||
-      // Copying omits serialization hooks; preserve provenance without reading them.
-      "toJSON" in value ||
-      // Array.from can use an inherited custom iterator. Retain execution
-      // normalization semantics, but do not certify its capture as exact.
-      (Array.isArray(value) &&
-        Object.getPrototypeOf(value) !== Array.prototype) ||
-      Object.values(Object.getOwnPropertyDescriptors(value)).some(
-        (field) => field.get || field.set,
-      ))
-  )
-    onUncertain?.();
+  if (onUncertain && snapshotIsUncertain(value)) onUncertain();
   seen.add(value);
   try {
     if (Array.isArray(value))
@@ -81,17 +68,7 @@ export function observerSnapshot(
       throw new TypeError("Observer data must be JSON-compatible");
     if (ancestors.has(input))
       throw new TypeError("Observer data cannot contain cycles");
-    if (
-      onUncertain &&
-      (types.isProxy(input) ||
-        "toJSON" in input ||
-        (Array.isArray(input) &&
-          Object.getPrototypeOf(input) !== Array.prototype) ||
-        Object.values(Object.getOwnPropertyDescriptors(input)).some(
-          (field) => field.get || field.set,
-        ))
-    )
-      onUncertain?.();
+    if (onUncertain && snapshotIsUncertain(input)) onUncertain();
     ancestors.add(input);
     try {
       let height = 0;

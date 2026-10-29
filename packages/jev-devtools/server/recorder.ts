@@ -15,6 +15,10 @@ import type {
 } from "@typesafe-ai/sdk";
 import { projectTraceCapture } from "../src/capture-view.js";
 import type { CaptureFidelity, Json, Trace } from "../src/protocol.js";
+import {
+  hasOmittedSdkFields,
+  snapshotIsUncertain,
+} from "./capture-provenance.js";
 
 // Whole field names only: tokenCount, sessionId, apiKeyName, etc. stay useful.
 // Keep the documented lists in docs/integration.md aligned with these policies.
@@ -202,12 +206,13 @@ export function captureWithFidelity(
     )
       modified = true;
     if (Object.getOwnPropertySymbols(input).length) modified = true;
+    // SDK question validation can read fields omitted by JSON enumeration.
     if (
       !uncertain &&
-      Object.keys(input).some((key) => {
-        const field = Object.getOwnPropertyDescriptor(input, key);
-        return field?.get || field?.set;
-      })
+      context.kind === "request" &&
+      path.length === 2 &&
+      path[0] === "questions" &&
+      hasOmittedSdkFields(input, ["type", "criteria", "instructions"])
     )
       uncertain = true;
     const entries: [string, Json][] = [];
@@ -216,6 +221,10 @@ export function captureWithFidelity(
       if (entries.length >= captureEntryLimit(path.at(-1))) {
         warnings.add("Long collection truncated in capture.");
         break;
+      }
+      if (!uncertain && !modified) {
+        const field = Object.getOwnPropertyDescriptor(input, key);
+        if (!field || field.get || field.set) uncertain = true;
       }
       entries.push([
         key,
@@ -367,19 +376,14 @@ export class JevRecorder {
           try {
             // Getters can replace their own descriptors when the snapshot reads
             // them. Preserve provenance before spreading or reading properties.
-            const requestIsProxy = types.isProxy(request);
-            const requestPrototype = requestIsProxy
-              ? undefined
-              : Object.getPrototypeOf(request);
             const uncertainRequest =
-              requestIsProxy ||
-              (requestPrototype !== Object.prototype &&
-                requestPrototype !== null) ||
-              // The model fallback also reads inherited properties, unlike spread.
-              (!Object.hasOwn(request, "model") && "model" in request) ||
-              Object.values(Object.getOwnPropertyDescriptors(request)).some(
-                (field) => field.get || field.set,
-              );
+              snapshotIsUncertain(request) ||
+              hasOmittedSdkFields(request, [
+                "state",
+                "questions",
+                "model",
+                "assets",
+              ]);
             const result = captureWithFidelity(
               { ...request, model: request.model ?? client.defaultModel },
               warnings,
