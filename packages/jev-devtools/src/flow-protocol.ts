@@ -72,6 +72,8 @@ export type FlowStep = {
   data?: Json;
   /** Fidelity of data only, not the step's recorded status or decision. */
   captureFidelity?: CaptureFidelity;
+  /** The entire data field was omitted by the aggregate flow value budget. */
+  dataOmitted?: "budget";
   captureWarnings?: string[];
   loop?: { maxIterations: number; stopReason?: "condition" | "limit" };
   collection?: {
@@ -97,6 +99,8 @@ export type FlowRun = {
   value?: Json;
   /** Fidelity of value only, not the run or its child steps. */
   captureFidelity?: CaptureFidelity;
+  /** The entire outcome value was omitted by the aggregate flow value budget. */
+  valueOmitted?: "budget";
   /** Capture limitations for value, including observer failures; absent in older captures. */
   captureWarnings?: string[];
   error?: string;

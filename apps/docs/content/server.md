@@ -24,19 +24,24 @@ Creating the adapter and client sends no request. Make an [awaited SDK call](@/g
 
 ## Options
 
-| Option and type                                                                 | Default              | Purpose                                                   |
-| ------------------------------------------------------------------------------- | -------------------- | --------------------------------------------------------- |
-| `origin: string`                                                                | Required             | Exact browser origin, including port.                     |
-| `enabled?: boolean`                                                             | `false`              | Enable capture and inspector endpoints.                   |
-| `endpoint?: string`                                                             | `/api/jev-devtools`  | Absolute path without query or fragment.                  |
-| `limit?: number`                                                                | `50`                 | Global maximum retained request traces, clamped to 1–200. |
-| `redact?: (path: string[], value: unknown, context: CaptureContext) => unknown` | None                 | Transform captured values before storage or streaming.    |
-| `authorize?: (request: Request) => boolean \| Promise<boolean>`                 | None                 | Access check. Required for enabled non-loopback origins.  |
-| `getSession?: (request: Request) => string \| Promise<string>`                  | Shared `local` scope | Trusted scope, nonempty and at most 200 characters.       |
+| Option and type                                                                 | Default              | Purpose                                                                               |
+| ------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------- |
+| `origin: string`                                                                | Required             | Exact browser origin, including port.                                                 |
+| `enabled?: boolean`                                                             | `false`              | Enable capture and inspector endpoints.                                               |
+| `endpoint?: string`                                                             | `/api/jev-devtools`  | Absolute path without query or fragment.                                              |
+| `limit?: number`                                                                | `50`                 | Global maximum retained request traces, clamped to 1–200.                             |
+| `flowCaptureBytes?: number`                                                     | None                 | Unreleased: aggregate UTF-8 JSON bytes of step data and outcomes per nested flow run. |
+| `redact?: (path: string[], value: unknown, context: CaptureContext) => unknown` | None                 | Transform captured values before storage or streaming.                                |
+| `authorize?: (request: Request) => boolean \| Promise<boolean>`                 | None                 | Access check. Required for enabled non-loopback origins.                              |
+| `getSession?: (request: Request) => string \| Promise<string>`                  | Shared `local` scope | Trusted scope, nonempty and at most 200 characters.                                   |
 
-These fields make up [`JevDevtoolsServerOptions`](@/api/reference/#type-jevdevtoolsserveroptions). The `limit` and `redact` fields also form [`CaptureOptions`](@/api/reference/#type-captureoptions).
+These fields make up [`JevDevtoolsServerOptions`](@/api/reference/#type-jevdevtoolsserveroptions). The `limit`, `flowCaptureBytes`, and `redact` fields also form [`CaptureOptions`](@/api/reference/#type-captureoptions).
 
 Invalid origin or endpoint configuration throws. An enabled non-loopback origin requires `authorize`. For local Web Request handlers, bind to loopback or provide authorization because the handler cannot inspect the socket address. See [Privacy & access](@/guides/privacy/) before enabling shared or tunneled access.
+
+Unreleased: `flowCaptureBytes` accepts a nonnegative safe integer; zero omits all step data and outcome fields. Omitted fields carry explicit metadata and warnings. The allowance counts each already redacted value's serialized UTF-8 bytes, including repeated nested occurrences. Outcomes have priority, followed by step data and nested items in recorded order. Entire fields that do not fit are omitted; later smaller fields can still fit. Each snapshot receives a fresh allowance, so a final outcome can replace earlier captured detail.
+
+The default is unchanged when the option is absent. Execution results, step/item records, and trace links remain intact. Structural metadata, warnings, definitions, request captures, and observer allocations are excluded, so this is not a process-memory or whole-message bound. See the [protocol policy](https://github.com/diegoag64/jev-devtools/blob/main/docs/stream-protocol.md#aggregate-flow-value-budget).
 
 ## createClient(options, metadata?)
 

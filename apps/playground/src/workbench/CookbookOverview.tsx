@@ -17,14 +17,18 @@ export function Explanation({ text }: { text: string }) {
 export function CookbookOverview({
   detail,
   title,
+  disabled,
 }: {
   detail: CookbookDetail;
   title: string;
+  disabled: boolean;
 }) {
   return (
     <>
       <button
         className="wb-overview-trigger"
+        disabled={disabled}
+        data-cookbook-content
         ref={(button) => {
           button?.setAttribute("popovertarget", "cookbook-overview");
         }}
@@ -47,6 +51,7 @@ export function CookbookOverview({
       </button>
       <section
         id="cookbook-overview"
+        data-cookbook-content
         className="wb-overview wb-prose"
         popover="auto"
         role="dialog"

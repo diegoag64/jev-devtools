@@ -6,6 +6,7 @@ import type {
 import { captureWithFidelity, type CaptureOptions } from "./recorder.js";
 import { combineCaptureFidelity } from "../src/capture-fidelity.js";
 import type { CaptureFidelity, Json } from "../src/protocol.js";
+import { FlowCaptureBudget } from "./flow-budget.js";
 /** Independent bounded run store. Definitions are retained only while referenced. */
 export class FlowRecorder {
   private runs = new Map<string, FlowRun>();
@@ -19,7 +20,11 @@ export class FlowRecorder {
     object,
     Map<string, { data: Json; warnings: string[]; fidelity: CaptureFidelity }>
   >();
-  constructor(private options: CaptureOptions) {}
+  private budget?: FlowCaptureBudget;
+  constructor(private options: CaptureOptions) {
+    if (options.flowCaptureBytes !== undefined)
+      this.budget = new FlowCaptureBudget(options.flowCaptureBytes);
+  }
   subscribe(fn: (sessions: Set<string>) => void) {
     this.listeners.add(fn);
     return () => {
@@ -75,7 +80,10 @@ export class FlowRecorder {
       redactRules(stored);
       this.definitions.set(definition.id, stored);
     }
-    this.runs.set(run.id, run);
+    this.runs.set(
+      run.id,
+      this.budget ? this.budget.apply(this.captureRun(run)) : run,
+    );
     this.sessions.set(run.id, session);
     this.revisions.set(run.id, ++this.revision);
     const sessions = new Set([session]);
@@ -213,7 +221,8 @@ export class FlowRecorder {
   }
   update(run: FlowRun) {
     if (!this.runs.has(run.id)) return; // Clear/eviction cannot resurrect pending runs.
-    this.runs.set(run.id, this.captureRun(run));
+    const captured = this.captureRun(run);
+    this.runs.set(run.id, this.budget?.apply(captured) ?? captured);
     this.revisions.set(run.id, ++this.revision);
     this.notify(new Set([this.sessions.get(run.id)!]));
   }

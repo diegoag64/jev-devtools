@@ -141,6 +141,7 @@ function runCheck(definition: FlowDefinition): Check<FlowRun> {
         status,
         outcome: optional(text),
         value: optional(json),
+        valueOmitted: optional(literal("budget")),
         captureWarnings: optional(strings),
         captureFidelity: optional(literal("exact", "modified", "unknown")),
         error: optional(text),
@@ -161,6 +162,7 @@ function runCheck(definition: FlowDefinition): Check<FlowRun> {
               traceId: optional(id),
               error: optional(text),
               data: optional(json),
+              dataOmitted: optional(literal("budget")),
               captureWarnings: optional(strings),
               captureFidelity: optional(
                 literal("exact", "modified", "unknown"),
@@ -190,6 +192,7 @@ function runCheck(definition: FlowDefinition): Check<FlowRun> {
               ),
             });
             if (!step(item) || executionIds.has(item.executionId)) return false;
+            if (item.dataOmitted && item.data !== undefined) return false;
             executionIds.add(item.executionId);
             if (item.loop && node.kind !== "loop") return false;
             const collection = item.collection;
@@ -211,6 +214,7 @@ function runCheck(definition: FlowDefinition): Check<FlowRun> {
         },
       })(value);
       if (!valid || runIds.has(value.id)) return false;
+      if (value.valueOmitted && value.value !== undefined) return false;
       runIds.add(value.id);
       return true;
     };

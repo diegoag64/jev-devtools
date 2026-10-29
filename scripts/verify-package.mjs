@@ -100,6 +100,7 @@ await withTemporaryProject("jev-consumer-", async (temp) => {
     join(types, "packed-resolved-templates.test.mjs"),
   );
   for (const file of [
+    "packed-flow-budget.ts",
     "packed-capture.ts",
     "packed-capture.test.mjs",
     "packed-capture-context.ts",
@@ -139,6 +140,7 @@ await withTemporaryProject("jev-consumer-", async (temp) => {
       },
       files: [
         "flow.ts",
+        "packed-flow-budget.ts",
         "packed-builder-contracts.ts",
         "packed-flow-diagnostics.ts",
         "packed-resolved-templates.ts",
@@ -155,6 +157,10 @@ await withTemporaryProject("jev-consumer-", async (temp) => {
     { cwd: consumer, stdio: "inherit" },
   );
   console.log("Packed flow types: passed");
+  execFileSync(process.execPath, [join(types, "packed-flow-budget.js")], {
+    cwd: consumer,
+    stdio: "inherit",
+  });
   execFileSync(process.execPath, [join(types, "packed-builder-contracts.js")], {
     cwd: consumer,
     stdio: "inherit",

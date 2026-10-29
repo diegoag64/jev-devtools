@@ -38,7 +38,9 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
-- **Capture fidelity.** Add optional exact, modified, or unknown provenance for captured requests, responses, rules, step data, and outcomes. Legacy captures remain readable; custom callbacks and values with serialization hooks cannot certify exactness, including through Flow snapshots. SDK-consumed hidden fields and incomplete bounded provenance checks remain uncertain; detachment omissions downgrade fidelity even after root replacement. Fixture export semantics stay unchanged. ([#141](https://github.com/diegoag64/jev-devtools/pull/141))
+- **Capture fidelity.** Add optional exact, modified, or unknown provenance for captured requests, responses, rules, step data, and outcomes. Legacy captures remain readable; custom callbacks and values with serialization hooks cannot certify exactness, including through Flow snapshots. SDK-consumed hidden fields and incomplete bounded provenance checks remain uncertain; detachment omissions downgrade fidelity even after root replacement. Aggregate byte-budget omissions also retain modified fidelity. Fixture export semantics stay unchanged. ([#141](https://github.com/diegoag64/jev-devtools/pull/141))
+
+- **Optional aggregate flow capture budget.** Set `flowCaptureBytes` to cap serialized step data and outcomes across each nested run. Omitted fields carry explicit metadata and viewer warnings; execution records and application results remain intact. The default capture policy is unchanged, and structural metadata, traces, and observer memory remain outside the allowance. ([#145](https://github.com/diegoag64/jev-devtools/pull/145))
 
 - **Capture-kind redaction context.** Distinguish requests, responses, step data, condition rules, and outcomes with a frozen third callback argument. Existing `(path, value)` policies and paths remain valid; reused captures respect their path, and custom callbacks receive bounded detached views, including SDK images. Identity policies keep shallow data with omission warnings; policies that read omitted content fail closed. ([#138](https://github.com/diegoag64/jev-devtools/pull/138))
 
@@ -52,6 +54,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Fixed
 
+- **Stable cookbook transitions.** Keep the workbench shell, guide mode, and panel preferences while loading another cookbook. Cancel outgoing samples, delay loading feedback, commit source and diagram together, and retain retry controls after failures, including inside expanded panels. Respect reduced motion. ([#146](https://github.com/diegoag64/jev-devtools/pull/146))
+
 - **Scope-specific Flow builders.** Reject unsupported terminal calls and collection nesting in TypeScript, including nested paths and lanes. Runtime validation and diagnostics remain unchanged. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
 
 #### Performance
@@ -59,6 +63,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 - **Coalesce complete flow updates.** Batch ready flow readers over a fixed 16 ms window to reduce repeated nested-run cloning, encoding, transfer, and parsing. Initial and reconnect snapshots stay immediate; terminal states use the same window. Capture policy and version-1 records are unchanged, and aggregate run byte/heap bounds remain open in [#46](https://github.com/diegoag64/jev-devtools/issues/46). ([#139](https://github.com/diegoag64/jev-devtools/pull/139))
 
 #### Documentation
+
+- **Flow API design decisions.** Record completed builder/result work, defer broader error and adapter APIs with reconsideration criteria, and track lane-outcome wording in [#143](https://github.com/diegoag64/jev-devtools/issues/143). Preserve the existing observer, recorder, and expression contracts. ([#144](https://github.com/diegoag64/jev-devtools/pull/144))
 
 - **Unreleased Flow API reference.** Distinguish the working tree's builder and result types from version 0.6.0 in the API reference and definition signatures. ([#140](https://github.com/diegoag64/jev-devtools/pull/140))
 

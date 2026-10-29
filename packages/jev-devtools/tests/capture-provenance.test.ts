@@ -349,27 +349,34 @@ for (const hidden of [0, 10000]) {
 // The cap must downgrade rather than falsely certify a snapshot whose later
 // fields may contain accessors. Execution normalization still copies full JSON.
 for (const snapshot of [jsonSnapshot, observerSnapshot]) {
-  test(`snapshot preflight cap retains uncertainty: ${snapshot.name}`, () => {
-    const value = Object.fromEntries(
-      Array.from({ length: 1000 }, (_, i) => [`key${i}`, i]),
-    );
-    let uncertain = false;
-    const probe = descriptorProbe(value);
-    let copied;
-    try {
-      copied =
-        snapshot === jsonSnapshot
-          ? jsonSnapshot(value, new Set(), 0, () => {
-              uncertain = true;
-            })
-          : observerSnapshot(value, () => {
-              uncertain = true;
-            });
-    } finally {
-      probe.restore();
+  for (const shape of ["array", "object"]) {
+    for (const width of [255, 256, 257]) {
+      test(`snapshot preflight cap: ${snapshot.name}/${shape}/${width}`, () => {
+        const value =
+          shape === "array"
+            ? Array(width).fill(1)
+            : Object.fromEntries(
+                Array.from({ length: width }, (_, i) => [`key${i}`, i]),
+              );
+        let uncertain = false;
+        const probe = descriptorProbe(value);
+        let copied;
+        try {
+          copied =
+            snapshot === jsonSnapshot
+              ? jsonSnapshot(value, new Set(), 0, () => {
+                  uncertain = true;
+                })
+              : observerSnapshot(value, () => {
+                  uncertain = true;
+                });
+        } finally {
+          probe.restore();
+        }
+        assert.deepEqual(copied, value);
+        assert.equal(uncertain, width > 256);
+        assert.ok(probe.count() <= 256);
+      });
     }
-    assert.deepEqual(copied, value);
-    assert.equal(uncertain, true);
-    assert.ok(probe.count() <= 256);
-  });
+  }
 }

@@ -16,7 +16,7 @@ import {
   flowTransport,
 } from "../apps/playground/server/flows.ts";
 const port = Number(process.env.FLOW_PORT ?? 4230);
-let origin, inspector;
+let origin, inspector, budgetInspector;
 const out = resolve(
   process.env.FLOW_OUT ?? "benchmarks/results/flows-browser-" + process.pid,
 );
@@ -126,7 +126,10 @@ const scales = new Map(
   ]),
 );
 const server = createServer((req, res) => {
-  inspector.middleware(
+  const adapter = req.url?.startsWith("/api/budget")
+    ? budgetInspector
+    : inspector;
+  adapter.middleware(
     req,
     res,
     () =>
@@ -150,6 +153,9 @@ const server = createServer((req, res) => {
             }
             if (url.pathname === "/run") {
               const scenario = url.searchParams.get("scenario");
+              const recorder = url.searchParams.has("budget")
+                ? budgetInspector
+                : inspector;
               const flow =
                 nestedFlowSamples.get(scenario) ??
                 redactedConditions.get(scenario) ??
@@ -170,7 +176,7 @@ const server = createServer((req, res) => {
               const controller = new AbortController();
               running.add(controller);
               try {
-                const client = inspector.createClient(
+                const client = recorder.createClient(
                   {
                     apiKey: "sample-only",
                     compression: false,
@@ -221,7 +227,7 @@ const server = createServer((req, res) => {
                 for (let i = 0; i < count; i++)
                   result = await flow.run(
                     { message: "Sample refund" },
-                    { client, devtools: inspector, signal: controller.signal },
+                    { client, devtools: recorder, signal: controller.signal },
                   );
                 res.setHeader("content-type", "application/json");
                 res.end(
@@ -277,11 +283,18 @@ inspector = createJevDevtools({
   redact: (path, value) =>
     path.join(".") === "conditions.redacted-op.op" ? { toString: null } : value,
 });
+budgetInspector = createJevDevtools({
+  enabled: true,
+  origin,
+  endpoint: "/api/budget",
+  flowCaptureBytes: 0,
+});
 console.log(origin);
 process.send?.({ origin });
 const stop = () => {
   for (const c of running) c.abort();
   inspector.dispose();
+  budgetInspector.dispose();
   server.close();
 };
 process.on("SIGTERM", stop);
