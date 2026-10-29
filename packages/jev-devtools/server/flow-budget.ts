@@ -43,6 +43,7 @@ export class FlowCaptureBudget {
       if (source.value !== undefined && !admit(source.value)) {
         delete run.value;
         run.valueOmitted = "budget";
+        run.captureFidelity = "modified";
         run.captureWarnings = [
           ...new Set([
             ...(source.captureWarnings ?? []),
@@ -55,6 +56,7 @@ export class FlowCaptureBudget {
         if (sourceStep.data !== undefined && !admit(sourceStep.data)) {
           delete step.data;
           step.dataOmitted = "budget";
+          step.captureFidelity = "modified";
           step.captureWarnings = [
             ...new Set([
               ...(sourceStep.captureWarnings ?? []),

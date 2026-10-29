@@ -95,6 +95,12 @@ for (const policy of ["context", "legacy"] as const) {
       policy === "legacy" ? "legacy" : "step-data",
     );
     assert.equal(run.value.state, policy === "legacy" ? "legacy" : "outcome");
+    assert.deepEqual(trace.captureFidelity, {
+      request: "modified",
+      result: "modified",
+    });
+    assert.equal(run.steps.work.captureFidelity, "modified");
+    assert.equal(run.captureFidelity, "modified");
     assert.equal(
       run.value.steps.work.data.output,
       policy === "legacy" ? "legacy" : "outcome",
@@ -268,8 +274,11 @@ test("reused data and child snapshots apply each path policy and keep source sna
   const stored = (await snapshot(inspector)).upserts[0];
   assert.deepEqual(data, { output: "original" });
   assert.equal(stored.value.output, "original!");
-  for (const id of ["first", "second"])
+  for (const id of ["first", "second"]) {
     assert.equal(stored.steps[id].data.output, `steps/${id}/data`);
+    assert.equal(stored.steps[id].captureFidelity, "unknown");
+    assert.deepEqual(stored.steps[id].captureWarnings, []);
+  }
   for (const index of [0, 1]) {
     const item = stored.steps.map.collection.items[index].run;
     assert.equal(
@@ -277,6 +286,8 @@ test("reused data and child snapshots apply each path policy and keep source sna
       `steps/map/items/${index}/steps/work/data`,
     );
     assert.equal(item.value.output, "original!");
+    assert.equal(item.steps.work.captureFidelity, "unknown");
+    assert.equal(item.captureFidelity, "unknown");
     assert.equal(
       calls.filter(
         (p) => p === `step-data:steps/map/items/${index}/steps/work/data`,

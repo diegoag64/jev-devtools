@@ -114,4 +114,49 @@ Structured condition rules also have a 128-node projection budget. Exceeding it 
 
 Warning text is descriptive, not a stable machine-readable enum. A nonempty array means a capture limitation was observed for that field; absence on old captures means unknown, not complete. An empty array means no warning was recorded, not a guarantee of lossless replay. Credential removal and custom redactors returning a changed value produce a redaction warning. Return a replacement from custom redactors rather than mutating objects in place: in-place changes cannot reliably be detected. Display-only personal-data masking is separate from these server warnings.
 
-Consumers must consult metadata rather than interpret user strings such as `[truncated]`, `[redacted]`, or `[capture unavailable]` as control signals. This change does not version or redesign the protocol. Existing captures remain readable; updating both server and drawer enables warning display beside rules and outcome values. The drawer also shows warnings for step data. `flowFixture()` only exports linked Jev response bodies and their trace warnings; it does not export outcome or rule data, so those warnings do not change the fixture format. Replays execute the authored rules again. A future evaluator of recorded rules (such as PR #31) must account for the corresponding rule and value warnings before trusting them.
+Consumers must consult metadata rather than interpret user strings such as `[truncated]`, `[redacted]`, or `[capture unavailable]` as control signals. This change does not version or redesign the protocol. Existing captures remain readable; updating both server and drawer enables warning display beside rules and outcome values. The drawer also shows warnings for step data. `flowFixture()` only exports linked Jev response bodies and their trace warnings; it does not export outcome or rule data, so those warnings do not change the fixture format. Replays execute the authored rules again. An evaluator of recorded rules must follow the [capture fidelity consumer rules](#capture-fidelity-and-analysis-consumers) before trusting corresponding rules and values.
+
+## Capture fidelity and analysis consumers
+
+`CaptureFidelity`, exported from `jev-devtools`, is optional version-1 metadata. It describes one captured JSON section, not an entire run, a recorded decision, or object identity.
+
+| Field                               | Captured section |
+| ----------------------------------- | ---------------- |
+| `Trace.captureFidelity.request`     | Request content  |
+| `Trace.captureFidelity.result`      | Response content |
+| `FlowNode.conditionCaptureFidelity` | `conditionRule`  |
+| `FlowStep.captureFidelity`          | `data`           |
+| `FlowRun.captureFidelity`           | `value`          |
+
+Each field has three possible values:
+
+- `exact`: the producer preserved the section's JSON values through every capture stage. This does not certify SDK validity, reference availability, or replay equivalence.
+- `modified`: a stage observed a rewrite, truncation, unsupported-value conversion, repeated-reference substitution, unavailable snapshot, or display projection. This status covers the whole section; it does not identify which descendant changed.
+- `unknown`: exactness is not established. Every custom-redactor invocation makes its section at least unknown, including identity callbacks and in-place mutations. Accessor-based snapshots, proxies, and values with a `toJSON` property are also unknown unless another stage establishes modification. The producer checks serialization-hook presence without reading or invoking the hook, including nonenumerable and inherited properties. Flow observer and merge snapshots retain this uncertainty before copying discards the hook. SDK-consumed request and question fields omitted by enumeration also prevent exact certification, including hidden assets, criteria, and instructions. Missing fidelity metadata has this same interpretation.
+
+Snapshot provenance preflights inspect at most 256 enumerable properties or array indices per object, before copying reads them. A preflight that cannot finish within its cap retains `unknown`; it does not change execution normalization or truncate the snapshot. Array-backed request roots remain unknown because request spreading reads named enumerable properties, while JSON array snapshots inspect indices. This does not change fidelity for ordinary arrays nested in request fields or Flow values. Unused hidden properties do not require descriptor inspection. Storage checks descriptors only for retained fields. These bounds cover added provenance inspection, not JavaScript engine key enumeration or existing full runtime snapshots.
+
+A later stage never upgrades `unknown` or `modified` to `exact`. The Flow runner supplies provenance before observer delivery; storage cannot certify an old or custom observer's unannotated snapshot. Nested definitions and item runs carry their own section metadata. Request and response fidelity are independent: a redacted request does not invalidate an unchanged response. Display masking and incompatible structured-view projections downgrade affected sections without changing stored captures or application values. Bounded callback detachment marks omissions as `modified`, including when a root-replacement policy returns a complete scalar. Omission guards and frozen context apply to the shared traversal used by both recorders. Unsupported values can have `modified` fidelity even when older warning behavior emits no warning.
+
+### Consumer rules
+
+Inspection can display any available captured JSON and the actual recorded status or decision, with existing warnings and unavailable-field views. Marker-like user strings remain ordinary data, even with `exact` fidelity.
+
+Analysis that claims an original value or a counterfactual requires all of the following:
+
+1. The rule exists, has `conditionCaptureFidelity === "exact"`, and passes the consumer's operator, arity, and literal validation.
+2. Every referenced source exists in the correct run or nested item. Its section has `captureFidelity === "exact"`, or `captureFidelity.result === "exact"` for a Jev response. Missing or evicted traces, uncaptured flow inputs, and uncaptured aggregate references make that decision unavailable.
+3. Every path resolves through the source's own captured properties. The resulting operands satisfy the runtime operator's type and finite-number requirements. Neither an exact rule nor an exact parent section makes a missing path available.
+4. The consumer follows the runtime evaluation semantics and reproduces the recorded decision before applying an override. This consistency check is necessary but does not replace the first three checks.
+
+Treat `modified`, `unknown`, and absent metadata as unavailable for that analysis. Do not replace missing values with `null`, parse warning text as an enum, or detect loss by matching marker strings. Warnings remain descriptive; empty arrays cannot establish exactness. Fidelity is producer metadata, not authentication for arbitrary imported records.
+
+For example, a task's actual `0.9` can be captured as `0.6`. Both satisfy `>= 0.5`, so agreement with the recorded decision proves little. Changing the threshold to `0.8` would falsely predict a route flip from the capture. Replacement callbacks produce `modified`; undetected in-place changes remain `unknown`. Neither is eligible for counterfactual analysis.
+
+`flowFixture()` retains its existing contract: it exports structurally usable captured Jev response bodies and trace warnings. It does not require `exact`, and it does not export this metadata into fixture version 1. `replayClient()` and `compareWithFixture()` run authored application logic with fixture answers; they do not promise reconstruction of the original execution. This change does not tighten fixture matching or export eligibility.
+
+### Compatibility and remaining scope
+
+Current parsers accept old version-1 captures without fidelity metadata and retain their display behavior. Old captures remain unknown for exact analysis even if warning arrays are empty. Existing version-1 parsers retain compatible extra JSON fields, but older consumers do not enforce this policy. Keep server and viewer builds matched; no new mixed-version execution or analysis guarantee is introduced. The trace and flow envelope versions are unchanged, and no capture migration is required.
+
+Draft [PR #31](https://github.com/diegoag64/jev-devtools/pull/31) still needs to implement the consumer rules above. Adding producer metadata does not repair that draft evaluator. Finer per-path provenance, proof of unchanged custom-redactor output, capture of currently unavailable aggregate inputs, protocol negotiation, and incompatible record redesign remain separate design work under [#53](https://github.com/diegoag64/jev-devtools/issues/53). The optional `flowCaptureBytes` projection preserves its existing `valueOmitted`/`dataOmitted` markers and downgrades each omitted section to `modified`, including nested runs. Fidelity does not change that budget policy.

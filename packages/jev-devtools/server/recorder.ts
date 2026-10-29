@@ -1,5 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "node:crypto";
+import { types } from "node:util";
 import { Image, TypeSafeClient } from "@typesafe-ai/sdk";
 import {
   detachForRedaction,
@@ -13,7 +14,11 @@ import type {
   RequestOptions,
 } from "@typesafe-ai/sdk";
 import { projectTraceCapture } from "../src/capture-view.js";
-import type { Json, Trace } from "../src/protocol.js";
+import type { CaptureFidelity, Json, Trace } from "../src/protocol.js";
+import {
+  hasOmittedSdkFields,
+  snapshotIsUncertain,
+} from "./capture-provenance.js";
 
 // Whole field names only: tokenCount, sessionId, apiKeyName, etc. stay useful.
 // Keep the documented lists in docs/integration.md aligned with these policies.
@@ -70,6 +75,18 @@ export function capture(
   redact?: CaptureOptions["redact"],
   context: CaptureContext = { kind: "request" },
 ): Json {
+  return captureWithFidelity(value, warnings, redact, context).value;
+}
+
+/** Internal capture result. Fidelity covers this traversal, not an upstream snapshot. */
+export function captureWithFidelity(
+  value: unknown,
+  warnings: Set<string>,
+  redact?: CaptureOptions["redact"],
+  context: CaptureContext = { kind: "request" },
+): { value: Json; fidelity: CaptureFidelity } {
+  let modified = false;
+  let uncertain = !!redact;
   const detachedContext = Object.freeze({ kind: context.kind });
   const detached = redact ? detachForRedaction(value, warnings) : undefined;
   const seen = new WeakSet<object>();
@@ -97,7 +114,11 @@ export function capture(
       warnings.add("Capture size/depth limit reached.");
       return "[truncated]";
     }
-    if (input === null || input === undefined) return null;
+    if (input === undefined) {
+      modified = true;
+      return null;
+    }
+    if (input === null) return null;
     if (typeof input === "string") {
       const text = input.slice(0, Math.min(budget, captureLimits.text));
       budget -= text.length;
@@ -106,12 +127,26 @@ export function capture(
       return text;
     }
     if (typeof input === "boolean") return input;
-    if (typeof input === "number")
-      return Number.isFinite(input) ? input : String(input);
-    if (typeof input !== "object") return String(input);
-    if (seen.has(input)) return "[circular/repeated reference]";
+    if (typeof input === "number") {
+      if (Number.isFinite(input)) {
+        // JSON transport normalizes -0 even though execution retains its sign.
+        if (Object.is(input, -0)) modified = true;
+        return input;
+      }
+      modified = true;
+      return String(input);
+    }
+    if (typeof input !== "object") {
+      modified = true;
+      return String(input);
+    }
+    if (seen.has(input)) {
+      modified = true;
+      return "[circular/repeated reference]";
+    }
     seen.add(input);
     if (input instanceof Image) {
+      modified = true;
       const omitted = projection?.image?.();
       if (omitted) return { kind: "image", ...omitted };
       const bytes = input.data,
@@ -142,19 +177,56 @@ export function capture(
         );
       return result;
     }
+    // SDK serialization can read nonenumerable or inherited toJSON hooks.
+    // Check presence without reading the property or invoking the hook again.
+    if (types.isProxy(input) || "toJSON" in input) uncertain = true;
     if (Array.isArray(input)) {
+      // Inspect only retained indices, without enumerating a potentially huge array.
+      // Extra array properties are not part of its JSON value.
+      const length = Math.min(input.length, captureLimits.entries);
+      const output = new Array<Json>(length);
+      for (let index = 0; index < length; index++) {
+        const field = Object.getOwnPropertyDescriptor(input, String(index));
+        if (!field) modified = true;
+        else if (field.get || field.set) uncertain = true;
+        // Do not invoke user slice/map overrides or array species constructors.
+        // Preserve holes; JSON will normalize them to null with modified fidelity.
+        if (index in input)
+          output[index] = visit(
+            input[index],
+            [...path, String(index)],
+            depth + 1,
+          );
+      }
       if (input.length > captureLimits.entries)
         warnings.add("Long collection truncated in capture.");
-      return input
-        .slice(0, captureLimits.entries)
-        .map((v, i) => visit(v, [...path, String(i)], depth + 1));
+      return output;
     }
+    if (
+      Object.getPrototypeOf(input) !== Object.prototype &&
+      Object.getPrototypeOf(input) !== null
+    )
+      modified = true;
+    if (Object.getOwnPropertySymbols(input).length) modified = true;
+    // SDK question validation can read fields omitted by JSON enumeration.
+    if (
+      !uncertain &&
+      context.kind === "request" &&
+      path.length === 2 &&
+      path[0] === "questions" &&
+      hasOmittedSdkFields(input, ["type", "criteria", "instructions"])
+    )
+      uncertain = true;
     const entries: [string, Json][] = [];
     for (const key in input) {
       if (!Object.hasOwn(input, key)) continue;
       if (entries.length >= captureEntryLimit(path.at(-1))) {
         warnings.add("Long collection truncated in capture.");
         break;
+      }
+      if (!uncertain && !modified) {
+        const field = Object.getOwnPropertyDescriptor(input, key);
+        if (!field || field.get || field.set) uncertain = true;
       }
       entries.push([
         key,
@@ -163,7 +235,12 @@ export function capture(
     }
     return Object.fromEntries(entries);
   };
-  return visit(detached ? detached.value : value, [], 0);
+  const captured = visit(detached ? detached.value : value, [], 0);
+  return {
+    value: captured,
+    fidelity:
+      modified || warnings.size ? "modified" : uncertain ? "unknown" : "exact",
+  };
 }
 
 export class JevRecorder {
@@ -297,13 +374,31 @@ export class JevRecorder {
             started = performance.now(),
             warnings = new Set<string>();
           let captured: Json;
+          let requestFidelity: CaptureFidelity = "modified";
           try {
-            captured = capture(
+            // Getters can replace their own descriptors when the snapshot reads
+            // them. Preserve provenance before spreading or reading properties.
+            const uncertainRequest =
+              // Request spreading reads named array properties, unlike the
+              // JSON snapshot preflight that inspects only array indices.
+              Array.isArray(request) ||
+              snapshotIsUncertain(request) ||
+              hasOmittedSdkFields(request, [
+                "state",
+                "questions",
+                "model",
+                "assets",
+              ]);
+            const result = captureWithFidelity(
               { ...request, model: request.model ?? client.defaultModel },
               warnings,
               this.options.redact,
               { kind: "request" },
             );
+            captured = result.value;
+            requestFidelity = result.fidelity;
+            if (requestFidelity === "exact" && uncertainRequest)
+              requestFidelity = "unknown";
           } catch {
             captured = null;
             warnings.add("Input snapshot failed; request continues normally.");
@@ -318,6 +413,7 @@ export class JevRecorder {
               startedAt: Date.now(),
               status: "pending",
               request: captured,
+              captureFidelity: { request: requestFidelity },
               attempts: [],
               captureWarnings: [...warnings],
             }),
@@ -361,15 +457,24 @@ export class JevRecorder {
               .asResponse()
               .then(async (response) => {
                 let result: Json | undefined;
+                let resultFidelity: CaptureFidelity = "modified";
+                const resultWarnings = new Set<string>();
                 try {
                   const data = await response.clone().json();
-                  result = capture(data, warnings, this.options.redact, {
-                    kind: "response",
-                  });
+                  const captured = captureWithFidelity(
+                    data,
+                    resultWarnings,
+                    this.options.redact,
+                    { kind: "response" },
+                  );
+                  result = captured.value;
+                  resultFidelity = captured.fidelity;
                 } catch {
                   // Capture failures are not SDK failures, and redactor errors
                   // may contain the sensitive values they were meant to hide.
-                  warnings.add("Response snapshot failed; result unavailable.");
+                  resultWarnings.add(
+                    "Response snapshot failed; result unavailable.",
+                  );
                 }
                 this.update(id, (t) => {
                   t.status = "success";
@@ -381,8 +486,12 @@ export class JevRecorder {
                     projectTraceCapture({
                       ...t,
                       result,
+                      captureFidelity: {
+                        ...t.captureFidelity,
+                        result: resultFidelity,
+                      },
                       captureWarnings: [
-                        ...new Set([...t.captureWarnings, ...warnings]),
+                        ...new Set([...t.captureWarnings, ...resultWarnings]),
                       ],
                     }),
                   );

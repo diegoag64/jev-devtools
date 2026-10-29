@@ -70,6 +70,30 @@ async function walkthroughInPopup(page, size) {
   const total = await steps.count();
   for (const pane of ["code", "diagram"]) {
     await steps.first().click();
+    // Expansion preserves the current reading position. Finish the initial
+    // step scroll first; restoring a mid-animation offset cancels that scroll.
+    await page.locator(".wb-source").evaluate(async (source) => {
+      const deadline = performance.now() + 5000;
+      let previous = source.scrollTop,
+        stable = 0;
+      while (performance.now() < deadline) {
+        await new Promise(requestAnimationFrame);
+        const current = source.scrollTop;
+        stable = current === previous ? stable + 1 : 0;
+        previous = current;
+        const bounds = source.getBoundingClientRect();
+        const selected = source
+          .querySelector(".is-selected")
+          ?.getBoundingClientRect();
+        if (
+          stable >= 4 &&
+          selected?.top >= bounds.top &&
+          selected.top < bounds.bottom
+        )
+          return;
+      }
+      throw new Error("Initial walkthrough step did not scroll into view");
+    });
     await page
       .getByRole("button", { name: `Expand ${pane}`, exact: true })
       .click();

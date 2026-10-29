@@ -1,4 +1,4 @@
-import type { AnswerView, Json, Trace } from "jev-devtools";
+import type { AnswerView, CaptureFidelity, Json, Trace } from "jev-devtools";
 import { JevRecorder } from "jev-devtools/server";
 import { score, TypeSafeClient } from "@typesafe-ai/sdk";
 
@@ -11,6 +11,15 @@ export const replacements: NonNullable<Trace["capture"]>[] = [
   { request: false, result: [42, "ordinary user text"] },
 ];
 const valid: AnswerView = { type: "score", score: 1 };
+const fidelity: CaptureFidelity = "unknown";
+const provenance: Trace["captureFidelity"] = {
+  request: "exact",
+  result: fidelity,
+};
+// @ts-expect-error Warning text and invented statuses are not fidelity metadata.
+const invalidFidelity: CaptureFidelity = "lossless";
+void provenance;
+void invalidFidelity;
 // @ts-expect-error Raw transformed content is not a structured numeric answer.
 const invalid: AnswerView = { type: "score", score: "[redacted]" };
 function raw(value: Json) {

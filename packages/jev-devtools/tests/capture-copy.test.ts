@@ -96,6 +96,8 @@ for (const boundary of ["request", "outcome"] as const) {
         await nextTurn();
         const trace = (await snapshot(inspector, "/events")).traces[0];
         assert.equal(trace.status, "success");
+        assert.equal(trace.captureFidelity.request, "modified");
+        assert.equal(trace.captureFidelity.result, "unknown");
         warnings = trace.captureWarnings;
         value = trace.capture?.request ?? trace.request;
         if (policy === "identity") {
@@ -109,6 +111,7 @@ for (const boundary of ["request", "outcome"] as const) {
       } else {
         record(inspector, input);
         const run = (await snapshot(inspector)).upserts[0];
+        assert.equal(run.captureFidelity, "modified");
         value = run.value;
         warnings = run.captureWarnings;
         if (policy === "read-omission")
@@ -321,6 +324,7 @@ for (const size of [47999, 48000, 48001]) {
     const trace = (await snapshot(inspector, "/events")).traces[0];
     assert.equal(trace.request.state.photo.ref, String(photo));
     assert.equal(trace.request.state.photo.bytes, size);
+    assert.equal(trace.captureFidelity.request, "modified");
     assert.equal(
       typeof trace.request.state.photo.preview,
       size < 48000 ? "string" : "undefined",
@@ -347,6 +351,7 @@ for (const depth of [11, 12, 13]) {
     let leaf = run.value.deep;
     for (let i = 0; i < depth - 2; i++) leaf = leaf.next;
     assert.equal(leaf.leaf, depth <= 12 ? "original" : "[truncated]");
+    assert.equal(run.captureFidelity, depth <= 12 ? "unknown" : "modified");
     assert.deepEqual(
       run.captureWarnings,
       depth <= 12 ? [] : ["Capture size/depth limit reached."],

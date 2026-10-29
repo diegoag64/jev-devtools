@@ -2092,6 +2092,12 @@ request<T>(link: Link, onTrace: (id: string) => void, callback: () => T): T {
 
 The custom observer delegates to `withFlow()` so the recorder can associate the SDK request with its run, step, and execution ID. Returning the callback result preserves the runner’s request behavior.
 
+## Capture fidelity
+
+The browser-safe `CaptureFidelity` type has `exact`, `modified`, and `unknown` states. Missing metadata means unknown. `Trace.captureFidelity` separates request and response fidelity. Flow nodes describe their rules with `conditionCaptureFidelity`; steps and runs describe `data` and `value` with `captureFidelity`. A custom redactor prevents exact certification even when it returns its input. Values with a `toJSON` property are conservatively unknown without reading or invoking the serialization hook. Bounded callback detachment marks omissions as modified, including after root replacement. Array-backed request roots and SDK-consumed fields omitted by capture also prevent exactness. Snapshot descriptor preflights are bounded and retain unknown if they cannot establish provenance within the cap. Display masking downgrades changed sections.
+
+Exact analysis also requires a valid rule and every referenced value to be present and correctly typed. Matching the recorded decision does not prove completeness. Existing fixture export and replay behavior is unchanged. See the [complete consumer contract](https://github.com/diegoag64/jev-devtools/blob/main/docs/stream-protocol.md#capture-fidelity-and-analysis-consumers).
+
 ## Public types
 
 Use `import type` for these contracts. The expandable declarations below are read from the actual public package exports at docs build time, including their supporting structural types. They supplement the method explanations above and make exact fields and unions available without a browser TypeScript runtime. A type's declaration is not a promise that the same API exists in an older installed package.

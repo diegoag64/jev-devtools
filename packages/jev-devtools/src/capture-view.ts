@@ -96,6 +96,13 @@ export function projectTraceCapture(trace: CapturedTrace): Trace {
     ...trace,
     request: requestView ?? { model: "", state: null, questions: {} },
     result: resultView,
+    captureFidelity: {
+      ...trace.captureFidelity,
+      ...(!requestView ? { request: "modified" as const } : {}),
+      ...(trace.result !== undefined && !resultView
+        ? { result: "modified" as const }
+        : {}),
+    },
     ...(Object.keys(capture).length ? { capture } : {}),
     captureWarnings: [...warnings],
   };
@@ -278,6 +285,15 @@ function partialCaptureView(trace: Trace): Trace {
     ...trace,
     request: trace.capture?.request === undefined ? trace.request : requestView,
     result: trace.capture?.result === undefined ? trace.result : resultView,
+    captureFidelity: {
+      ...trace.captureFidelity,
+      ...(trace.capture?.request !== undefined
+        ? { request: "modified" as const }
+        : {}),
+      ...(trace.capture?.result !== undefined
+        ? { result: "modified" as const }
+        : {}),
+    },
     captureWarnings: trace.captureWarnings.map((warning) =>
       warning ===
         "Request structured view unavailable; see redacted capture in Raw." ||

@@ -3,8 +3,9 @@ import type {
   FlowRun,
   FlowUpdate,
 } from "../src/flow-protocol.js";
-import { capture, type CaptureOptions } from "./recorder.js";
-import type { Json } from "../src/protocol.js";
+import { captureWithFidelity, type CaptureOptions } from "./recorder.js";
+import { combineCaptureFidelity } from "../src/capture-fidelity.js";
+import type { CaptureFidelity, Json } from "../src/protocol.js";
 import { FlowCaptureBudget } from "./flow-budget.js";
 /** Independent bounded run store. Definitions are retained only while referenced. */
 export class FlowRecorder {
@@ -17,7 +18,7 @@ export class FlowRecorder {
   private itemCaptures = new WeakMap<FlowRun, Map<string, FlowRun>>();
   private taskCaptures = new WeakMap<
     object,
-    Map<string, { data: Json; warnings: string[] }>
+    Map<string, { data: Json; warnings: string[]; fidelity: CaptureFidelity }>
   >();
   private budget?: FlowCaptureBudget;
   constructor(private options: CaptureOptions) {
@@ -50,7 +51,7 @@ export class FlowRecorder {
           if (node.conditionRule === undefined) continue;
           const warnings = new Set(node.conditionCaptureWarnings);
           try {
-            node.conditionRule = capture(
+            const captured = captureWithFidelity(
               node.conditionRule,
               warnings,
               this.options.redact
@@ -63,8 +64,14 @@ export class FlowRecorder {
                 : undefined,
               { kind: "condition-rule" },
             );
+            node.conditionRule = captured.value;
+            node.conditionCaptureFidelity = combineCaptureFidelity(
+              node.conditionCaptureFidelity,
+              captured.fidelity,
+            );
           } catch {
             node.conditionRule = "[rule capture unavailable]";
+            node.conditionCaptureFidelity = "modified";
             warnings.add("Rule capture unavailable.");
           }
           node.conditionCaptureWarnings = [...warnings];
@@ -131,26 +138,28 @@ export class FlowRecorder {
           if (!captured) {
             const warnings = new Set<string>();
             let data: Json;
+            let fidelity: CaptureFidelity = "modified";
             try {
-              data =
-                capture(
-                  step.data,
-                  warnings,
-                  this.options.redact
-                    ? (path, value, context) =>
-                        this.options.redact!(
-                          [...prefix, "steps", id, "data", ...path],
-                          value,
-                          context,
-                        )
-                    : undefined,
-                  { kind: "step-data" },
-                ) ?? null;
+              const result = captureWithFidelity(
+                step.data,
+                warnings,
+                this.options.redact
+                  ? (path, value, context) =>
+                      this.options.redact!(
+                        [...prefix, "steps", id, "data", ...path],
+                        value,
+                        context,
+                      )
+                  : undefined,
+                { kind: "step-data" },
+              );
+              data = result.value;
+              fidelity = result.fidelity;
             } catch {
               data = "[capture unavailable]";
               warnings.add("Task capture unavailable.");
             }
-            captured = { data, warnings: [...warnings] };
+            captured = { data, warnings: [...warnings], fidelity };
             if (key && typeof key === "object") {
               const captures = this.taskCaptures.get(key) ?? new Map();
               captures.set(location, captured);
@@ -162,6 +171,12 @@ export class FlowRecorder {
             {
               ...step,
               data: captured.data,
+              captureFidelity: combineCaptureFidelity(
+                step.captureWarnings?.length
+                  ? "modified"
+                  : step.captureFidelity,
+                captured.fidelity,
+              ),
               captureWarnings: [
                 ...new Set([
                   ...(step.captureWarnings ?? []),
@@ -176,7 +191,7 @@ export class FlowRecorder {
     if ("value" in stored) {
       const warnings = new Set(run.captureWarnings);
       try {
-        stored.value = capture(
+        const captured = captureWithFidelity(
           stored.value,
           warnings,
           this.options.redact
@@ -185,8 +200,14 @@ export class FlowRecorder {
             : undefined,
           { kind: "outcome" },
         );
+        stored.value = captured.value;
+        stored.captureFidelity = combineCaptureFidelity(
+          run.captureFidelity,
+          captured.fidelity,
+        );
       } catch {
         stored.value = "[capture unavailable]";
+        stored.captureFidelity = "modified";
         warnings.add("Outcome capture unavailable.");
       }
       stored.captureWarnings = [...warnings];

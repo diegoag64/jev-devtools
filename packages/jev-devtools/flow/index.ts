@@ -1,3 +1,5 @@
+import { combineCaptureFidelity } from "../src/capture-fidelity.js";
+import type { CaptureFidelity } from "../src/protocol.js";
 import { randomUUID } from "node:crypto";
 import type {
   Questions,
@@ -443,7 +445,10 @@ function conditionRule(
   ast: Ast,
   requests: Set<string>,
   tasks: Set<string>,
-): Pick<FlowNode, "conditionRule" | "conditionCaptureWarnings"> {
+): Pick<
+  FlowNode,
+  "conditionRule" | "conditionCaptureWarnings" | "conditionCaptureFidelity"
+> {
   let remaining = 128;
   const warnings = new Set<string>();
   const visit = (node: Ast): FlowCondition => {
@@ -519,7 +524,11 @@ function conditionRule(
     return { op: node.op, args };
   };
   const rule = visit(ast);
-  return { conditionRule: rule, conditionCaptureWarnings: [...warnings] };
+  return {
+    conditionRule: rule,
+    conditionCaptureWarnings: [...warnings],
+    conditionCaptureFidelity: warnings.size ? "modified" : "exact",
+  };
 }
 function evaluate(
   ast: Ast,
@@ -1358,21 +1367,25 @@ export function defineJevFlow<T, O extends FlowOutcome = FlowOutcome>(
       // copies stable so the recorder can reuse its captures on unrelated updates.
       const observerData = new WeakMap<
         object,
-        { data: Json; warnings: string[] }
+        { data: Json; warnings: string[]; fidelity: CaptureFidelity }
       >();
       const snapshotData = (value: unknown) => {
         if (value && typeof value === "object" && observerData.has(value))
           return observerData.get(value)!;
         let snapshot: Json;
+        let fidelity: CaptureFidelity = "exact";
         const warnings: string[] = [];
         try {
-          snapshot = observerSnapshot(value);
+          snapshot = observerSnapshot(value, () => {
+            fidelity = "unknown";
+          });
         } catch {
           // Direct flow outputs may be non-JSON; only their capture is unavailable.
           snapshot = "[capture unavailable]";
+          fidelity = "modified";
           warnings.push("Observer capture unavailable.");
         }
-        const captured = { data: snapshot, warnings };
+        const captured = { data: snapshot, warnings, fidelity };
         if (value && typeof value === "object")
           observerData.set(value, captured);
         return captured;
@@ -1395,7 +1408,17 @@ export function defineJevFlow<T, O extends FlowOutcome = FlowOutcome>(
                     id,
                     {
                       ...step,
-                      ...(data ? { data: data.data } : {}),
+                      ...(data
+                        ? {
+                            data: data.data,
+                            captureFidelity: combineCaptureFidelity(
+                              data.fidelity,
+                              step.captureWarnings?.length
+                                ? "modified"
+                                : (step.captureFidelity ?? "exact"),
+                            ),
+                          }
+                        : {}),
                       ...(step.loop ? { loop: { ...step.loop } } : {}),
                       ...(data || step.captureWarnings
                         ? {
@@ -1426,6 +1449,12 @@ export function defineJevFlow<T, O extends FlowOutcome = FlowOutcome>(
               ...(outcome
                 ? {
                     value: outcome.data,
+                    captureFidelity: combineCaptureFidelity(
+                      outcome.fidelity,
+                      run.captureWarnings?.length
+                        ? "modified"
+                        : (run.captureFidelity ?? "exact"),
+                    ),
                     captureWarnings: [
                       ...new Set([
                         ...(run.captureWarnings ?? []),
@@ -1791,7 +1820,11 @@ export function defineJevFlow<T, O extends FlowOutcome = FlowOutcome>(
               // Capture is observational; a direct input/reference can contain
               // a non-JSON value even though task boundaries require JSON.
               try {
-                state.data = { output: jsonSnapshot(value) };
+                state.data = {
+                  output: jsonSnapshot(value, new Set(), 0, () => {
+                    state.captureFidelity = "unknown";
+                  }),
+                };
               } catch {
                 state.data = "Selected value could not be captured as JSON.";
                 state.captureWarnings = ["Selected value capture unavailable."];

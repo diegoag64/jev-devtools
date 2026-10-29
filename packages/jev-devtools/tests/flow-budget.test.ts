@@ -45,6 +45,7 @@ function values(run: FlowRun) {
       bytes += Buffer.byteLength(JSON.stringify(run.value));
     if (run.valueOmitted) {
       assert.equal(run.value, undefined);
+      assert.equal(run.captureFidelity, "modified");
       assert.ok(
         run.captureWarnings?.includes(
           "Outcome value omitted by flow capture byte budget.",
@@ -57,6 +58,7 @@ function values(run: FlowRun) {
         bytes += Buffer.byteLength(JSON.stringify(step.data));
       if (step.dataOmitted) {
         assert.equal(step.data, undefined);
+        assert.equal(step.captureFidelity, "modified");
         assert.ok(
           step.captureWarnings?.includes(
             "Step data omitted by flow capture byte budget.",
@@ -97,8 +99,10 @@ for (const input of [
       if (budget < bytes) {
         assert.equal(run.valueOmitted, "budget");
         assert.equal(run.value, undefined);
+        assert.equal(run.captureFidelity, "modified");
       } else {
         assert.equal(run.valueOmitted, undefined);
+        assert.equal(run.captureFidelity, "exact");
         assert.deepEqual(run.value, input);
       }
       assert.ok(values(run).bytes <= budget);

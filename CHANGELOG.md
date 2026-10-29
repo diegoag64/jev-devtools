@@ -38,6 +38,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 
 #### Added
 
+- **Capture fidelity.** Add optional exact, modified, or unknown provenance for captured requests, responses, rules, step data, and outcomes. Legacy captures remain readable; custom callbacks and values with serialization hooks cannot certify exactness, including through Flow snapshots. Array-backed request roots, SDK-consumed hidden fields, and incomplete bounded provenance checks remain uncertain; detachment omissions downgrade fidelity even after root replacement. Aggregate byte-budget omissions also retain modified fidelity. Fixture export semantics stay unchanged. ([#141](https://github.com/diegoag64/jev-devtools/pull/141))
+
 - **Optional aggregate flow capture budget.** Set `flowCaptureBytes` to cap serialized step data and outcomes across each nested run. Omitted fields carry explicit metadata and viewer warnings; execution records and application results remain intact. The default capture policy is unchanged, and structural metadata, traces, and observer memory remain outside the allowance. ([#145](https://github.com/diegoag64/jev-devtools/pull/145))
 
 - **Capture-kind redaction context.** Distinguish requests, responses, step data, condition rules, and outcomes with a frozen third callback argument. Existing `(path, value)` policies and paths remain valid; reused captures respect their path, and custom callbacks receive bounded detached views, including SDK images. Identity policies keep shallow data with omission warnings; policies that read omitted content fail closed. ([#138](https://github.com/diegoag64/jev-devtools/pull/138))
@@ -69,6 +71,8 @@ Dates below use UTC and were checked against npm's publication history. The hist
 - **Explore cookbooks without setup.** Point guides, cookbook READMEs, and bundled agent guidance to playground.jevtools.dev. Add a Cookbook Playground hero button and a Flow API learning link to the landing page. Local contributor setup remains available. ([#137](https://github.com/diegoag64/jev-devtools/pull/137))
 
 #### Maintenance
+
+- **Deterministic expanded-guide verification.** Wait for the initial step scroll before opening a panel that preserves its reading position. Keep viewport and navigation assertions intact; application scrolling behavior is unchanged. ([#141](https://github.com/diegoag64/jev-devtools/pull/141))
 
 - **Verification fixture cleanup.** Remove independent React and Next.js test installations and temporary playground builds after success, failure, and handled cancellation. Stop owned workers before deletion, report cleanup failures, and keep full-suite logs under ignored `benchmarks/results/`. ([#142](https://github.com/diegoag64/jev-devtools/pull/142))
 

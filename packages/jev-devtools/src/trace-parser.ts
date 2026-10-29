@@ -33,6 +33,12 @@ const trace = shape<WireTrace>({
   request: json,
   result: optional(json),
   capture: optional(shape({ request: optional(json), result: optional(json) })),
+  captureFidelity: optional(
+    shape({
+      request: optional(literal("exact", "modified", "unknown")),
+      result: optional(literal("exact", "modified", "unknown")),
+    }),
+  ),
   flow: optional(shape({ runId: id, stepId: id, executionId: id })),
   requestId: optional(text),
   error: optional(

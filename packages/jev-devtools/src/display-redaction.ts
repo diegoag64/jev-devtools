@@ -96,7 +96,23 @@ export function createDisplayRedactor() {
       maskedResult === value.result &&
       capture === value.capture
       ? value
-      : { ...value, request: maskedRequest, result: maskedResult, capture };
+      : {
+          ...value,
+          request: maskedRequest,
+          result: maskedResult,
+          capture,
+          captureFidelity: {
+            ...value.captureFidelity,
+            ...(maskedRequest !== value.request ||
+            capture?.request !== value.capture?.request
+              ? { request: "modified" as const }
+              : {}),
+            ...(maskedResult !== value.result ||
+            capture?.result !== value.capture?.result
+              ? { result: "modified" as const }
+              : {}),
+          },
+        };
   });
   const run: (value: FlowRun) => FlowRun = memoize<FlowRun>((value) => {
     let changed = false;
@@ -116,14 +132,28 @@ export function createDisplayRedactor() {
         const next =
           captured === step.data && collection === step.collection
             ? step
-            : { ...step, data: captured, collection };
+            : {
+                ...step,
+                data: captured,
+                collection,
+                ...(captured !== step.data
+                  ? { captureFidelity: "modified" as const }
+                  : {}),
+              };
         changed ||= next !== step;
         return [id, next];
       }),
     );
     const output = data(value.value);
     return changed || output !== value.value
-      ? { ...value, steps, value: output }
+      ? {
+          ...value,
+          steps,
+          value: output,
+          ...(output !== value.value
+            ? { captureFidelity: "modified" as const }
+            : {}),
+        }
       : value;
   });
   const definition: (value: FlowDefinition) => FlowDefinition =
@@ -133,7 +163,14 @@ export function createDisplayRedactor() {
         const item = node.itemDefinition && definition(node.itemDefinition);
         return rule === node.conditionRule && item === node.itemDefinition
           ? node
-          : { ...node, conditionRule: rule, itemDefinition: item };
+          : {
+              ...node,
+              conditionRule: rule,
+              itemDefinition: item,
+              ...(rule !== node.conditionRule
+                ? { conditionCaptureFidelity: "modified" as const }
+                : {}),
+            };
       });
       return nodes.some((node, i) => node !== value.nodes[i])
         ? { ...value, nodes }
