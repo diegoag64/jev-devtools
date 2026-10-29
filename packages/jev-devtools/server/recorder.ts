@@ -379,6 +379,9 @@ export class JevRecorder {
             // Getters can replace their own descriptors when the snapshot reads
             // them. Preserve provenance before spreading or reading properties.
             const uncertainRequest =
+              // Request spreading reads named array properties, unlike the
+              // JSON snapshot preflight that inspects only array indices.
+              Array.isArray(request) ||
               snapshotIsUncertain(request) ||
               hasOmittedSdkFields(request, [
                 "state",

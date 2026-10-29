@@ -208,6 +208,82 @@ for (const kind of [
   });
 }
 
+// Request spreading reads named enumerable properties even on array roots;
+// the JSON array preflight checks indices instead. Retain this distinction
+// before a getter can replace its own descriptor during capture.
+for (const array of [false, true]) {
+  for (const accessor of [false, true]) {
+    test(`request root provenance: array=${array}, accessor=${accessor}`, async () => {
+      for (const observed of [false, true]) {
+        const inspector = observed
+          ? createJevDevtools({ origin, enabled: true })
+          : undefined;
+        const request = Object.assign(array ? [] : {}, {
+          state: [0.9],
+          questions: { q: score("q", ["lo", "hi"]) },
+        });
+        let reads = 0;
+        let sent: unknown;
+        if (accessor)
+          Object.defineProperty(request, "state", {
+            enumerable: true,
+            configurable: true,
+            get() {
+              reads++;
+              Object.defineProperty(request, "state", {
+                value: [0.6],
+                enumerable: true,
+                configurable: true,
+                writable: true,
+              });
+              return [0.9];
+            },
+          });
+        const fetch: Fetch = async (_url, init) => {
+          sent = JSON.parse(String(init?.body));
+          return Response.json({
+            model: "sample",
+            answers: { q: { type: "score", score: 0.9 } },
+          });
+        };
+        const options = {
+          apiKey: "sample",
+          logLevel: "off" as const,
+          compression: false as const,
+          fetch,
+        };
+        const sdk = inspector
+          ? inspector.createClient(options)
+          : new TypeSafeClient(options);
+        try {
+          const result = await sdk.systemOne(request);
+          assert.equal(result.answers.q.score, 0.9);
+          assert.ok(sent && typeof sent === "object" && "state" in sent);
+          assert.deepEqual(sent.state, accessor ? [0.6] : [0.9]);
+          assert.equal(reads, accessor ? 1 : 0);
+          if (inspector) {
+            await nextTurn();
+            await nextTurn();
+            const [trace] = new TraceStore().apply(
+              "snapshot",
+              await event(inspector, "/api/jev-devtools/events"),
+            );
+            assert.deepEqual(trace.request.state, [0.9]);
+            assert.equal(trace.captureFidelity?.result, "exact");
+            assert.deepEqual(trace.captureWarnings, []);
+            assert.equal(
+              trace.captureFidelity?.request,
+              array || accessor ? "unknown" : "exact",
+            );
+          }
+        } finally {
+          inspector?.dispose();
+        }
+      }
+    });
+  }
+}
+
 for (const width of [150, 151, 10000]) {
   test(`recorder descriptor work is bounded by retained fields: ${width}`, async (t) => {
     const inspector = createJevDevtools({ origin, enabled: true });
